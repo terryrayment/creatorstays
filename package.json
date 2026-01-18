@@ -17,6 +17,7 @@
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/webhooks/stripe"
   },
   "dependencies": {
+    "@auth/core": "^0.37.2",
     "@auth/prisma-adapter": "^2.7.4",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "^6.1.0",
