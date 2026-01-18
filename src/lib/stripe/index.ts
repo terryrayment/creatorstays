@@ -3,14 +3,22 @@ import { createLogger } from '@/lib/logger';
 
 const logger = createLogger('stripe');
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
-}
+// Lazy initialization to avoid build-time errors when env vars aren't set
+let _stripe: Stripe | null = null;
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
-  typescript: true,
-});
+function getStripeClient(): Stripe {
+  if (!_stripe) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not set');
+    }
+    _stripe = new Stripe(secretKey, {
+      apiVersion: '2024-12-18.acacia',
+      typescript: true,
+    });
+  }
+  return _stripe;
+}
 
 // ============================================================================
 // Customer Management
@@ -18,7 +26,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export async function createCustomer(email: string, name?: string, metadata?: Record<string, string>) {
   try {
-    const customer = await stripe.customers.create({
+    const customer = await getStripeClient().customers.create({
       email,
       name,
       metadata: {
@@ -41,7 +49,7 @@ export async function getOrCreateCustomer(
 ): Promise<Stripe.Customer> {
   if (existingCustomerId) {
     try {
-      const customer = await stripe.customers.retrieve(existingCustomerId);
+      const customer = await getStripeClient().customers.retrieve(existingCustomerId);
       if (!customer.deleted) {
         return customer as Stripe.Customer;
       }
@@ -69,7 +77,7 @@ export async function createListingFeeCheckout(
   }
 
   try {
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripeClient().checkout.sessions.create({
       customer: customerId,
       mode: 'payment',
       payment_method_types: ['card'],
@@ -105,7 +113,7 @@ export async function createConnectAccount(
   returnUrl: string
 ): Promise<{ accountId: string; onboardingUrl: string }> {
   try {
-    const account = await stripe.accounts.create({
+    const account = await getStripeClient().accounts.create({
       type: 'express',
       email,
       capabilities: {
@@ -117,7 +125,7 @@ export async function createConnectAccount(
       },
     });
 
-    const accountLink = await stripe.accountLinks.create({
+    const accountLink = await getStripeClient().accountLinks.create({
       account: account.id,
       refresh_url: refreshUrl,
       return_url: returnUrl,
@@ -138,7 +146,7 @@ export async function createConnectAccount(
 
 export async function createConnectLoginLink(accountId: string): Promise<string> {
   try {
-    const loginLink = await stripe.accounts.createLoginLink(accountId);
+    const loginLink = await getStripeClient().accounts.createLoginLink(accountId);
     return loginLink.url;
   } catch (error) {
     logger.error({ accountId, error }, 'Failed to create Connect login link');
@@ -152,7 +160,7 @@ export async function getConnectAccountStatus(accountId: string): Promise<{
   detailsSubmitted: boolean;
 }> {
   try {
-    const account = await stripe.accounts.retrieve(accountId);
+    const account = await getStripeClient().accounts.retrieve(accountId);
     return {
       chargesEnabled: account.charges_enabled,
       payoutsEnabled: account.payouts_enabled,
@@ -177,7 +185,7 @@ export async function createTransfer(
     // Convert to cents
     const amountInCents = Math.round(amount * 100);
 
-    const transfer = await stripe.transfers.create({
+    const transfer = await getStripeClient().transfers.create({
       amount: amountInCents,
       currency: 'usd',
       destination: destinationAccountId,
@@ -205,7 +213,7 @@ export function constructWebhookEvent(
     throw new Error('STRIPE_WEBHOOK_SECRET is not set');
   }
 
-  return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+  return getStripeClient().webhooks.constructEvent(payload, signature, webhookSecret);
 }
 
 // ============================================================================
@@ -220,7 +228,7 @@ export async function createPaymentIntent(
   try {
     const amountInCents = Math.round(amount * 100);
 
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent = await getStripeClient().paymentIntents.create({
       amount: amountInCents,
       currency: 'usd',
       customer: customerId,
