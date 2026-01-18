@@ -1,48 +1,34 @@
-import NextAuth, { type DefaultSession } from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import Google from 'next-auth/providers/google';
-import Resend from 'next-auth/providers/resend';
+import GoogleProvider from 'next-auth/providers/google';
+import EmailProvider from 'next-auth/providers/email';
 import prisma from '@/lib/prisma';
 import { createLogger } from '@/lib/logger';
+import type { Adapter } from 'next-auth/adapters';
 
 const logger = createLogger('auth');
 
-// Type augmentation for next-auth v5
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string;
-      role?: 'HOST' | 'CREATOR' | 'ADMIN';
-    } & DefaultSession['user'];
-  }
-
-  interface User {
-    role?: 'HOST' | 'CREATOR' | 'ADMIN';
-  }
-}
-
-// Augment the JWT type from @auth/core
-declare module '@auth/core/jwt' {
-  interface JWT {
-    id?: string;
-    role?: 'HOST' | 'CREATOR' | 'ADMIN';
-  }
-}
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma) as Adapter,
   session: {
     strategy: 'jwt',
   },
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       allowDangerousEmailAccountLinking: true,
     }),
-    Resend({
-      apiKey: process.env.RESEND_API_KEY,
-      from: 'CreatorStays <noreply@creatorstays.com>',
+    EmailProvider({
+      server: {
+        host: process.env.EMAIL_SERVER_HOST || 'smtp.resend.com',
+        port: Number(process.env.EMAIL_SERVER_PORT) || 465,
+        auth: {
+          user: process.env.EMAIL_SERVER_USER || 'resend',
+          pass: process.env.RESEND_API_KEY || '',
+        },
+      },
+      from: process.env.EMAIL_FROM || 'CreatorStays <noreply@creatorstays.com>',
     }),
   ],
   pages: {
@@ -92,4 +78,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   debug: process.env.NODE_ENV === 'development',
-});
+};
