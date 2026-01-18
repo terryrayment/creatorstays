@@ -50,18 +50,18 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        // Custom CreatorStays colors
+        // Custom CreatorStays colors - warm coral/terracotta palette
         coral: {
-          50: '#fef2f2',
-          100: '#ffe1e1',
-          200: '#ffc9c9',
-          300: '#ffa3a3',
-          400: '#ff6b6b',
-          500: '#ff4757',
-          600: '#ed2939',
-          700: '#c81e2b',
-          800: '#a51c28',
-          900: '#881e27',
+          50: '#fef7f6',
+          100: '#feeceb',
+          200: '#fdd8d6',
+          300: '#fab8b3',
+          400: '#f58d85',
+          500: '#e86f64',  // Primary brand - warm terracotta coral
+          600: '#d4524a',
+          700: '#b2413b',
+          800: '#943936',
+          900: '#7b3433',
         },
         sand: {
           50: '#faf9f7',
