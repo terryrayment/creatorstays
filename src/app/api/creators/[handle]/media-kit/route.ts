@@ -226,7 +226,7 @@ export async function GET(
   
   const pdfBytes = await pdfDoc.save()
   
-  return new NextResponse(pdfBytes, {
+  return new Response(Buffer.from(pdfBytes), {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="CreatorStays-MediaKit-@${creator.handle}.pdf"`,
