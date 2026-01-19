@@ -477,6 +477,26 @@ export function HostDashboard() {
                   <p className="text-[10px] text-muted-foreground">Link clicks</p>
                 </div>
               </div>
+              <div className="mt-4 border-t border-foreground/5 pt-4">
+                <Link 
+                  href="/dashboard/host/pay" 
+                  className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2.5 text-xs font-medium transition-colors hover:bg-foreground/[0.04]"
+                >
+                  <span>Approve & pay a creator</span>
+                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </Link>
+                <Link 
+                  href="/dashboard/analytics" 
+                  className="mt-2 flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2.5 text-xs font-medium transition-colors hover:bg-foreground/[0.04]"
+                >
+                  <span>View link analytics</span>
+                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
