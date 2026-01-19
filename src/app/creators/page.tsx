@@ -2,6 +2,18 @@
 
 import Link from "next/link"
 import { RevealStack } from "@/components/marketing/reveal-stack"
+import { ImageBlock, MARKETING_IMAGES } from "@/components/marketing/image-block"
+
+// Select images for this page (seed based on page name)
+const pageImages = (() => {
+  const seed = 13 // unique seed for creators page
+  const shuffled = [...MARKETING_IMAGES]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = (seed * (i + 1) * 11) % (i + 1)
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled.slice(0, 2)
+})()
 
 // 3D Sticker: Money/Coin
 function CoinSticker() {
@@ -65,7 +77,7 @@ function HeroSection() {
                 </svg>
               </Link>
               <Link
-                href="/dev-login?role=creator"
+                href="/demo-login?role=creator"
                 className="inline-flex h-10 items-center gap-2 rounded-full border-[3px] border-black bg-white px-5 text-[10px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
               >
                 View Dashboard Demo
@@ -181,6 +193,16 @@ function ProcessSection() {
             <LinkSticker />
           </div>
         </div>
+      </div>
+    </section>
+  )
+}
+
+function ImageSection() {
+  return (
+    <section className="bg-black px-3 py-2 lg:px-4">
+      <div className="mx-auto max-w-7xl">
+        <ImageBlock src={pageImages[0]} aspectRatio="aspect-[21/9]" />
       </div>
     </section>
   )
@@ -335,6 +357,7 @@ export default function CreatorsPage() {
       <RevealStack baseDelay={80} stagger={100} duration={480}>
         <HeroSection />
         <ProcessSection />
+        <ImageSection />
         <ControlSection />
         <CTASection />
         <FooterMarquee />

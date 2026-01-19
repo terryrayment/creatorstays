@@ -1,4 +1,16 @@
 import Link from "next/link"
+import { ImageBlock, MARKETING_IMAGES } from "@/components/marketing/image-block"
+
+// Select images for this page (seed based on page name)
+const pageImages = (() => {
+  const seed = 19 // unique seed for how-it-works page
+  const shuffled = [...MARKETING_IMAGES]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = (seed * (i + 1) * 17) % (i + 1)
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled.slice(0, 2)
+})()
 
 const steps = [
   {
@@ -117,6 +129,11 @@ export default function HowItWorksPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Image Block */}
+        <div className="mt-8">
+          <ImageBlock src={pageImages[0]} aspectRatio="aspect-[21/9]" />
         </div>
 
         {/* Bottom CTA */}

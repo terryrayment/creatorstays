@@ -2,6 +2,18 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { ImageBlock, MARKETING_IMAGES } from "@/components/marketing/image-block"
+
+// Select images for this page (seed based on page name)
+const pageImages = (() => {
+  const seed = 23 // unique seed for help page
+  const shuffled = [...MARKETING_IMAGES]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = (seed * (i + 1) * 19) % (i + 1)
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled.slice(0, 2)
+})()
 
 // Expanded help topics with detailed content
 const helpTopics = [
@@ -599,6 +611,11 @@ export default function HelpPage() {
             </span>
             <span className="text-black">→</span>
           </a>
+        </div>
+
+        {/* Image Block */}
+        <div className="mt-6">
+          <ImageBlock src={pageImages[0]} aspectRatio="aspect-[21/9]" />
         </div>
 
         {/* Search Block */}

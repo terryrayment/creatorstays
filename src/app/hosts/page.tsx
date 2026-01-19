@@ -3,6 +3,18 @@
 import Link from "next/link"
 import { HostSignupForm } from "@/components/hosts/host-signup-form"
 import { RevealStack } from "@/components/marketing/reveal-stack"
+import { ImageBlock, MARKETING_IMAGES } from "@/components/marketing/image-block"
+
+// Select images for this page (seed based on page name)
+const pageImages = (() => {
+  const seed = 7 // unique seed for hosts page
+  const shuffled = [...MARKETING_IMAGES]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = (seed * (i + 1) * 13) % (i + 1)
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled.slice(0, 2)
+})()
 
 function HeroSection() {
   return (
@@ -135,6 +147,19 @@ function ProcessSection() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ImageSection() {
+  return (
+    <section className="bg-black px-3 py-2 lg:px-4">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-2 md:grid-cols-2">
+          <ImageBlock src={pageImages[0]} aspectRatio="aspect-[16/9]" />
+          <ImageBlock src={pageImages[1]} aspectRatio="aspect-[16/9]" />
         </div>
       </div>
     </section>
@@ -280,6 +305,7 @@ export default function HostsPage() {
       <RevealStack baseDelay={80} stagger={100} duration={480}>
         <HeroSection />
         <ProcessSection />
+        <ImageSection />
         <BenefitsSection />
         <SignupSection />
         <FooterMarquee />

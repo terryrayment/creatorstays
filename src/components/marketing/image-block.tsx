@@ -5,8 +5,11 @@ export const MARKETING_IMAGES = [
   "/images/house-wifi-1.png",
   "/images/house-wifi-2.png", 
   "/images/house-wifi-3.png",
+  "/images/house-wifi-4.png",
   "/images/luggage-1.png",
   "/images/luggage-2.png",
+  "/images/luggage-3.png",
+  "/images/dropdown-ui.png",
 ] as const
 
 // Full-frame image block matching card styling
