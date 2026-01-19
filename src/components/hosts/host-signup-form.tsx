@@ -107,9 +107,20 @@ function CityAutocomplete({
   )
 }
 
+function normalizeUrl(url: string): string {
+  if (!url) return url
+  let normalized = url.trim()
+  // If doesn't start with http:// or https://, prepend https://
+  if (!/^https?:\/\//i.test(normalized)) {
+    normalized = 'https://' + normalized
+  }
+  return normalized
+}
+
 function isValidAirbnbUrl(url: string): boolean {
   if (!url) return true // Empty is valid (required handled separately)
-  return url.includes("airbnb.com")
+  const normalized = normalizeUrl(url)
+  return normalized.includes("airbnb.com")
 }
 
 export function HostSignupForm() {
@@ -128,6 +139,12 @@ export function HostSignupForm() {
 
   const listingUrlError = form.listingUrl && !isValidAirbnbUrl(form.listingUrl)
   const canSubmit = !listingUrlError
+
+  const handleListingUrlBlur = () => {
+    if (form.listingUrl) {
+      setForm({ ...form, listingUrl: normalizeUrl(form.listingUrl) })
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -210,10 +227,11 @@ export function HostSignupForm() {
         <label className="mb-1.5 block text-sm font-medium">Airbnb listing URL *</label>
         <Input
           required
-          type="url"
-          placeholder="https://airbnb.com/rooms/..."
+          type="text"
+          placeholder="airbnb.com/rooms/..."
           value={form.listingUrl}
           onChange={e => setForm({ ...form, listingUrl: e.target.value })}
+          onBlur={handleListingUrlBlur}
           className={listingUrlError ? "border-red-300 focus-visible:ring-red-500" : ""}
         />
         {listingUrlError ? (
