@@ -84,7 +84,6 @@ export default function PricingPage() {
                 <ul className="space-y-1 text-[13px] text-muted-foreground ml-4">
                   <li>• Host pays: $500 + $75 (15% fee) = <span className="font-medium text-foreground">$575</span></li>
                   <li>• Creator receives: $500 - $75 (15% fee) = <span className="font-medium text-foreground">$425</span></li>
-                  <li>• Platform earns: $150 total</li>
                 </ul>
               </div>
             </Panel>
