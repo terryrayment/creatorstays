@@ -1,118 +1,133 @@
 import { Container } from "@/components/layout/container"
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
-function HeroCollage() {
+function HeroGraphics() {
   return (
-    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      {/* Gradient base */}
-      <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-violet-50/50" />
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {/* Strong color field - left side */}
+      <div className="absolute left-0 top-0 h-full w-[45%] bg-[#0066FF]" />
       
-      {/* Large floating gradient orbs - 3D feel */}
-      <div className="hero-float-1 absolute -left-32 top-0 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-cyan-400/40 to-blue-600/30 blur-3xl" />
-      <div className="hero-float-2 absolute -right-20 top-20 h-[400px] w-[400px] rounded-full bg-gradient-to-br from-pink-400/35 to-rose-500/25 blur-3xl" />
-      <div className="hero-float-3 absolute bottom-0 left-1/3 h-[350px] w-[350px] rounded-full bg-gradient-to-br from-amber-300/30 to-orange-500/20 blur-3xl" />
-      <div className="hero-float-4 absolute -bottom-20 right-1/4 h-[300px] w-[300px] rounded-full bg-gradient-to-br from-violet-400/35 to-purple-600/25 blur-3xl" />
+      {/* Subtle atmosphere on right */}
+      <div className="absolute right-0 top-0 h-full w-[55%] bg-[#FAFAFA]" />
       
-      {/* Floating 3D cards */}
-      <div className="hero-card-float absolute left-[5%] top-[20%] h-24 w-32 rounded-2xl bg-white/80 shadow-2xl shadow-cyan-500/20 backdrop-blur-sm" style={{ animationDelay: '0.2s' }}>
-        <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500" />
-      </div>
-      <div className="hero-card-float absolute right-[8%] top-[15%] h-20 w-28 rounded-2xl bg-white/80 shadow-2xl shadow-pink-500/20 backdrop-blur-sm" style={{ animationDelay: '0.4s' }}>
-        <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-pink-400 to-rose-500" />
-      </div>
-      <div className="hero-card-float absolute left-[8%] bottom-[25%] h-16 w-24 rounded-2xl bg-white/80 shadow-2xl shadow-amber-500/20 backdrop-blur-sm" style={{ animationDelay: '0.6s' }}>
-        <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500" />
-      </div>
-      <div className="hero-card-float absolute right-[12%] bottom-[30%] h-20 w-20 rounded-2xl bg-white/80 shadow-2xl shadow-violet-500/20 backdrop-blur-sm" style={{ animationDelay: '0.8s' }}>
-        <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500" />
-      </div>
+      {/* Floating abstract shapes */}
+      <div className="hero-drift absolute left-[8%] top-[15%] h-32 w-32 border-[3px] border-white/40" style={{ animationDelay: '0s' }} />
+      <div className="hero-drift absolute left-[25%] bottom-[20%] h-24 w-24 rounded-full border-[3px] border-white/30" style={{ animationDelay: '2s' }} />
+      <div className="hero-drift absolute left-[5%] bottom-[35%] h-16 w-40 bg-white/10" style={{ animationDelay: '4s' }} />
       
-      {/* Floating icons with 3D depth */}
-      <div className="hero-icon-pop absolute left-[15%] top-[40%]" style={{ animationDelay: '0.5s' }}>
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-xl shadow-blue-500/30">
-          <svg className="h-7 w-7 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-          </svg>
-        </div>
-      </div>
-      <div className="hero-icon-pop absolute right-[18%] top-[35%]" style={{ animationDelay: '0.7s' }}>
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-xl shadow-pink-500/30">
-          <svg className="h-6 w-6 text-pink-500" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6L12 2z"/>
-          </svg>
-        </div>
-      </div>
-      <div className="hero-icon-pop absolute left-[75%] bottom-[40%]" style={{ animationDelay: '0.9s' }}>
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-xl shadow-amber-500/30">
-          <svg className="h-5 w-5 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2v11z"/>
-            <circle cx="12" cy="13" r="4"/>
-          </svg>
-        </div>
-      </div>
+      {/* Line illustrations */}
+      <svg className="hero-drift absolute left-[30%] top-[30%] h-40 w-40 text-white/20" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2" style={{ animationDelay: '1s' }}>
+        <path d="M10 50 L50 10 L90 50 L50 90 Z" />
+        <circle cx="50" cy="50" r="15" />
+      </svg>
       
-      {/* Decorative rings */}
-      <div className="hero-ring absolute left-[20%] bottom-[15%] h-20 w-20 rounded-full border-4 border-cyan-400/30" style={{ animationDelay: '1s' }} />
-      <div className="hero-ring absolute right-[25%] top-[60%] h-16 w-16 rounded-full border-4 border-pink-400/30" style={{ animationDelay: '1.2s' }} />
+      <svg className="hero-drift absolute left-[15%] top-[60%] h-24 w-24 text-white/15" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2" style={{ animationDelay: '3s' }}>
+        <path d="M20 80 L50 20 L80 80 Z" />
+      </svg>
       
-      {/* Sparkle dots */}
-      <div className="hero-sparkle absolute left-[30%] top-[25%] h-2 w-2 rounded-full bg-cyan-400" style={{ animationDelay: '0.3s' }} />
-      <div className="hero-sparkle absolute right-[30%] top-[20%] h-3 w-3 rounded-full bg-pink-400" style={{ animationDelay: '0.5s' }} />
-      <div className="hero-sparkle absolute left-[60%] bottom-[25%] h-2 w-2 rounded-full bg-amber-400" style={{ animationDelay: '0.7s' }} />
-      <div className="hero-sparkle absolute right-[40%] bottom-[35%] h-2.5 w-2.5 rounded-full bg-violet-400" style={{ animationDelay: '0.9s' }} />
+      {/* Right side subtle shapes */}
+      <div className="hero-drift absolute right-[10%] top-[20%] h-48 w-48 rounded-full border border-[#0066FF]/10" style={{ animationDelay: '1.5s' }} />
+      <div className="hero-drift absolute right-[25%] bottom-[25%] h-20 w-20 bg-[#0066FF]/5" style={{ animationDelay: '2.5s' }} />
     </div>
   )
 }
 
 function HeroSection() {
   return (
-    <section className="relative min-h-[85vh] overflow-hidden flex items-center">
-      <HeroCollage />
-      <Container>
-        <div className="relative flex flex-col items-center text-center">
-          {/* Badge - slides down */}
-          <span className="hero-slide-down text-label mb-4 inline-block rounded-full border border-primary/20 bg-white/80 px-4 py-1.5 text-sm font-medium text-primary shadow-lg shadow-primary/10 backdrop-blur-sm">
-            ✨ Influencer marketing for vacation rentals
-          </span>
-          
-          {/* Main headline - fades up with scale */}
-          <h1 className="hero-fade-up font-heading text-[2.75rem] font-bold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl lg:text-[5rem]" style={{ animationDelay: '0.15s' }}>
-            <span className="block">Get more bookings</span>
-            <span className="block mt-1 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-x">
-              with creator marketing
-            </span>
+    <section className="relative min-h-[90vh] overflow-hidden">
+      <HeroGraphics />
+      
+      {/* Content grid */}
+      <div className="relative grid min-h-[90vh] grid-cols-1 lg:grid-cols-2">
+        {/* Left - headline on blue */}
+        <div className="flex flex-col justify-center px-6 py-20 lg:px-12 xl:px-20">
+          <h1 className="font-heading text-[3.5rem] font-black uppercase leading-[0.85] tracking-[-0.03em] text-white sm:text-[4.5rem] md:text-[5.5rem] lg:text-[4rem] xl:text-[5.5rem]">
+            <span className="block">Creator</span>
+            <span className="block">Marketing</span>
+            <span className="block opacity-60">For Rentals</span>
           </h1>
           
-          {/* Subheadline - fades up */}
-          <p className="hero-fade-up mt-6 max-w-xl text-lg text-muted-foreground md:text-xl" style={{ animationDelay: '0.3s' }}>
-            Hire vetted creators to showcase your property. They post, you get clicks and stunning content.
+          <p className="mt-8 max-w-md text-[15px] leading-relaxed text-white/70">
+            Hire vetted creators to showcase your vacation property. They post, you get traffic and content.
           </p>
-          
-          {/* CTAs - pop in */}
-          <div className="hero-fade-up mt-8 flex flex-col gap-4 sm:flex-row" style={{ animationDelay: '0.45s' }}>
-            <Button size="lg" asChild className="hero-btn px-10 py-6 text-base font-semibold shadow-2xl shadow-primary/30 hover:shadow-primary/40 hover:scale-105 transition-all duration-300">
-              <Link href="/hosts">Start as Host</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="hero-btn px-10 py-6 text-base font-semibold bg-white/90 backdrop-blur-sm border-2 hover:bg-white hover:scale-105 transition-all duration-300">
-              <Link href="/waitlist">Join as Creator</Link>
-            </Button>
+        </div>
+        
+        {/* Right - CTA area */}
+        <div className="flex flex-col justify-center px-6 py-20 lg:px-12 xl:px-20">
+          <div className="max-w-md">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#0066FF]">
+              Now in beta
+            </p>
+            
+            <h2 className="mt-4 text-[2rem] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[2.5rem]">
+              Get more bookings through authentic content
+            </h2>
+            
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+              <Link 
+                href="/hosts" 
+                className="inline-flex h-14 items-center justify-center bg-[#0066FF] px-8 text-[14px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#0052CC]"
+              >
+                Start as Host
+              </Link>
+              <Link 
+                href="/waitlist" 
+                className="inline-flex h-14 items-center justify-center border-2 border-foreground/20 px-8 text-[14px] font-semibold uppercase tracking-wide text-foreground transition-colors hover:border-foreground/40"
+              >
+                Join as Creator
+              </Link>
+            </div>
+            
+            <div className="mt-12 flex gap-8 text-[12px] text-muted-foreground">
+              <span>Free to start</span>
+              <span>No contracts</span>
+              <span>Pay per result</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ValuePropsSection() {
+  return (
+    <section className="relative bg-foreground py-24 text-white">
+      {/* Floating shape */}
+      <div className="hero-drift pointer-events-none absolute right-[10%] top-[20%] h-32 w-32 rounded-full border border-white/10" style={{ animationDelay: '0.5s' }} />
+      
+      <Container>
+        <div className="grid gap-16 lg:grid-cols-2 lg:gap-20">
+          {/* Left - section title */}
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
+              Why CreatorStays
+            </p>
+            <h2 className="mt-4 font-heading text-[2.5rem] font-bold uppercase leading-[0.9] tracking-tight sm:text-[3rem] md:text-[3.5rem]">
+              Real traffic.<br />Real content.
+            </h2>
           </div>
           
-          {/* Trust indicators - fade in last */}
-          <div className="hero-fade-up mt-12 flex items-center gap-6 text-sm text-muted-foreground" style={{ animationDelay: '0.6s' }}>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              Free to start
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              No contracts
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              Pay per result
-            </span>
+          {/* Right - value list */}
+          <div className="space-y-10">
+            <div>
+              <h3 className="text-[18px] font-semibold">More clicks to your listing</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-white/60">
+                Creators drive real visitors to your Airbnb. Every click tracked and attributed.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-[18px] font-semibold">Professional content you own</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-white/60">
+                Photos and videos created for your property. Use them anywhere, forever.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-[18px] font-semibold">Targeted travel audience</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-white/60">
+                Reach real travelers who actually book, not random followers.
+              </p>
+            </div>
           </div>
         </div>
       </Container>
@@ -129,57 +144,6 @@ function EdgeBlur({ className = "" }: { className?: string }) {
       <div className="absolute -top-1/4 right-0 h-[500px] w-[600px] rounded-full bg-accent/[0.04] blur-[120px]" />
       <div className="absolute -bottom-1/4 left-0 h-[400px] w-[500px] rounded-full bg-primary/[0.03] blur-[100px]" />
     </div>
-  )
-}
-
-const hostReasons = [
-  {
-    title: "More Traffic",
-    description: "Creators drive real clicks to your listing. Track every visit.",
-  },
-  {
-    title: "Professional Content",
-    description: "Scroll-stopping photos and videos. Yours to keep forever.",
-  },
-  {
-    title: "Targeted Reach",
-    description: "Real travelers who actually book, not random followers.",
-  }
-]
-
-function WhyHostsSection() {
-  return (
-    <section className="py-10">
-      <Container>
-        <div className="mb-6 opacity-0 reveal">
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-            Why hosts use CreatorStays
-          </h2>
-        </div>
-        <div className="relative">
-          {/* Edge blur behind pills */}
-          <div className="pointer-events-none absolute -inset-20 -z-10" aria-hidden="true">
-            <div className="absolute left-1/4 top-0 h-[400px] w-[500px] rounded-full bg-[hsl(199,89%,48%)]/[0.08] blur-[180px]" />
-            <div className="absolute bottom-0 right-1/4 h-[350px] w-[450px] rounded-full bg-[hsl(213,94%,45%)]/[0.06] blur-[160px]" />
-          </div>
-          <div className="focus-group flex flex-col gap-3">
-            {hostReasons.map((reason, i) => (
-              <div 
-                key={reason.title}
-                className="marketing-pill focus-card opacity-0 reveal"
-                style={{ animationDelay: `${(i + 1) * 100}ms` }}
-              >
-                <div className="marketing-pill-glow" aria-hidden="true" />
-                <div className="relative z-10 flex flex-1 items-center justify-between gap-4">
-                  <h3 className="text-[15px] font-semibold tracking-tight md:text-base">{reason.title}</h3>
-                  <p className="text-[12px] text-muted-foreground/70 md:text-[13px]">{reason.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Container>
-    </section>
   )
 }
 
@@ -362,7 +326,7 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
-      <WhyHostsSection />
+      <ValuePropsSection />
       <HowItWorksSection />
       <BetaSection />
       <FinalCTASection />
