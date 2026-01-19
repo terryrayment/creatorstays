@@ -11,13 +11,13 @@ export default function HostPayPage() {
   return (
     <div className="min-h-screen">
       {/* Top bar */}
-      <div className="border-b border-foreground/5 bg-white/50 backdrop-blur-sm">
+      <div className="border-b border-black/5 bg-white/50 backdrop-blur-sm">
         <div className="mx-auto flex h-11 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
             <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">BETA</span>
-            <span className="text-xs text-muted-foreground">Approve & Pay</span>
+            <span className="text-xs text-black/60">Approve & Pay</span>
           </div>
-          <Link href="/dashboard/host" className="text-xs text-muted-foreground hover:text-foreground">← Back to Dashboard</Link>
+          <Link href="/dashboard/host" className="text-xs text-black/60 hover:text-black">← Back to Dashboard</Link>
         </div>
       </div>
 
@@ -25,7 +25,7 @@ export default function HostPayPage() {
         <div className="mx-auto max-w-lg">
           <div className="mb-6">
             <h1 className="font-heading text-2xl font-normal tracking-tight">Approve & Pay Creator</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-black/60">
               Review the fee breakdown and complete payment for this collaboration.
             </p>
           </div>
@@ -33,8 +33,8 @@ export default function HostPayPage() {
           <HostApprovePay />
 
           {/* Info footer */}
-          <div className="mt-8 rounded-lg border border-foreground/5 bg-foreground/[0.02] p-4 text-xs text-muted-foreground">
-            <p className="font-medium text-foreground">How payments work:</p>
+          <div className="mt-8 rounded-lg border border-black/5 bg-black/[0.02] p-4 text-xs text-black/60">
+            <p className="font-medium text-black">How payments work:</p>
             <ul className="mt-2 list-inside list-disc space-y-1">
               <li>You pay the agreed amount plus a 15% platform fee</li>
               <li>The creator receives 85% of the agreed amount (after their 15% fee)</li>

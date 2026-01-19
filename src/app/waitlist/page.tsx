@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { ImageBlock, MARKETING_IMAGES } from "@/components/marketing/image-block"
+import { Select } from "@/components/ui/select"
 
 // Select image for this page
 const pageImage = MARKETING_IMAGES[3]
@@ -187,31 +188,23 @@ export default function WaitlistPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-[11px] font-bold text-black">Primary Platform *</label>
-                  <select
+                  <Select
                     required
+                    placeholder="Select platform"
+                    options={platformOptions}
                     value={form.platform}
                     onChange={e => setForm({ ...form, platform: e.target.value })}
-                    className="w-full rounded-lg border-2 border-black px-3 py-2 text-[13px] font-medium text-black focus:outline-none"
-                  >
-                    <option value="">Select platform</option>
-                    {platformOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-[11px] font-bold text-black">Content Niche *</label>
-                  <select
+                  <Select
                     required
+                    placeholder="Select niche"
+                    options={creatorNicheOptions}
                     value={form.niche}
                     onChange={e => setForm({ ...form, niche: e.target.value })}
-                    className="w-full rounded-lg border-2 border-black px-3 py-2 text-[13px] font-medium text-black focus:outline-none"
-                  >
-                    <option value="">Select niche</option>
-                    {creatorNicheOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
               </div>
 
@@ -219,17 +212,13 @@ export default function WaitlistPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-[11px] font-bold text-black">Audience Size *</label>
-                  <select
+                  <Select
                     required
+                    placeholder="Select size"
+                    options={audienceSizeOptions}
                     value={form.audienceSize}
                     onChange={e => setForm({ ...form, audienceSize: e.target.value })}
-                    className="w-full rounded-lg border-2 border-black px-3 py-2 text-[13px] font-medium text-black focus:outline-none"
-                  >
-                    <option value="">Select size</option>
-                    {audienceSizeOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-[11px] font-bold text-black">Primary Handle</label>

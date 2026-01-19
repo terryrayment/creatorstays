@@ -48,7 +48,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
-      <div className="rounded-lg border border-foreground/10 bg-white px-4 py-3 shadow-lg">
+      <div className="rounded-lg border border-black/10 bg-white px-4 py-3 shadow-lg">
         <div className="flex items-center gap-2">
           <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -81,10 +81,10 @@ function CompletenessBar({ percent }: { percent: number }) {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-[10px]">
-        <span className="text-muted-foreground">Profile complete</span>
+        <span className="text-black/60">Profile complete</span>
         <span className="font-semibold">{percent}%</span>
       </div>
-      <div className="h-1 w-full overflow-hidden rounded-full bg-foreground/5">
+      <div className="h-1 w-full overflow-hidden rounded-full bg-black/5">
         <div 
           className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
           style={{ width: `${percent}%` }}
@@ -106,12 +106,12 @@ function CopyLinkButton({ handle, onCopy }: { handle: string; onCopy: () => void
   return (
     <button 
       onClick={copy}
-      className="flex w-full items-center gap-2 rounded-lg border border-foreground/5 bg-foreground/[0.02] px-3 py-2 text-left transition-colors hover:bg-foreground/[0.04]"
+      className="flex w-full items-center gap-2 rounded-lg border border-black/5 bg-black/[0.02] px-3 py-2 text-left transition-colors hover:bg-black/[0.04]"
     >
-      <svg className="h-3.5 w-3.5 shrink-0 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <svg className="h-3.5 w-3.5 shrink-0 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
       </svg>
-      <span className="flex-1 truncate text-xs text-muted-foreground">{link}</span>
+      <span className="flex-1 truncate text-xs text-black/60">{link}</span>
       <span className="text-[10px] font-medium text-primary">Copy</span>
     </button>
   )
@@ -167,13 +167,13 @@ function CampaignTimeline() {
       <PanelHeader 
         title="Campaign timeline" 
         actions={
-          <div className="flex rounded-full border border-foreground/10 bg-foreground/[0.02] p-0.5">
+          <div className="flex rounded-full border border-black/10 bg-black/[0.02] p-0.5">
             <button
               onClick={() => setTimeRange('14')}
               className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
                 timeRange === '14' 
-                  ? 'bg-white text-foreground shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-black/60 hover:text-black'
               }`}
             >
               Last 14 days
@@ -182,8 +182,8 @@ function CampaignTimeline() {
               onClick={() => setTimeRange('30')}
               className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
                 timeRange === '30' 
-                  ? 'bg-white text-foreground shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-black/60 hover:text-black'
               }`}
             >
               Last 30 days
@@ -207,21 +207,21 @@ function CampaignTimeline() {
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium leading-tight">{campaign.property}</p>
-                  <p className="text-[10px] text-muted-foreground">{campaign.host} · /{campaign.linkLabel}</p>
-                  <p className="text-[10px] text-muted-foreground/60">{campaign.dateRange}</p>
+                  <p className="text-[10px] text-black/60">{campaign.host} · /{campaign.linkLabel}</p>
+                  <p className="text-[10px] text-black/60/60">{campaign.dateRange}</p>
                 </div>
                 <div className="flex gap-4 text-right">
                   <div>
                     <p className="text-sm font-semibold">{campaign.totalClicks}</p>
-                    <p className="text-[9px] text-muted-foreground">clicks</p>
+                    <p className="text-[9px] text-black/60">clicks</p>
                   </div>
                   <div>
                     <p className="text-sm font-semibold">{campaign.uniqueClicks}</p>
-                    <p className="text-[9px] text-muted-foreground">unique</p>
+                    <p className="text-[9px] text-black/60">unique</p>
                   </div>
                   <div>
                     <p className="text-sm font-semibold">{campaign.revisitRate}%</p>
-                    <p className="text-[9px] text-muted-foreground">revisit</p>
+                    <p className="text-[9px] text-black/60">revisit</p>
                   </div>
                 </div>
               </div>
@@ -234,7 +234,7 @@ function CampaignTimeline() {
                         ? 'bg-primary' 
                         : hoveredId === campaign.id 
                           ? 'bg-primary/40' 
-                          : 'bg-foreground/10'
+                          : 'bg-black/10'
                     }`}
                     style={{ 
                       height: `${Math.max(level * 10, 4)}%`,
@@ -243,7 +243,7 @@ function CampaignTimeline() {
                   />
                 ))}
               </div>
-              <div className="mt-1 flex justify-between text-[8px] text-muted-foreground/40">
+              <div className="mt-1 flex justify-between text-[8px] text-black/60/40">
                 <span>Start</span>
                 <span>Post ↑</span>
                 <span>End</span>
@@ -284,11 +284,11 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
       <PanelContent className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg bg-white/60 p-2.5">
-            <p className="text-[10px] text-muted-foreground">Net Paid Out</p>
+            <p className="text-[10px] text-black/60">Net Paid Out</p>
             <p className="text-base font-semibold text-emerald-600">${mockTaxData.netPaidOut.toFixed(2)}</p>
           </div>
           <div className="rounded-lg bg-white/60 p-2.5">
-            <p className="text-[10px] text-muted-foreground">Pending</p>
+            <p className="text-[10px] text-black/60">Pending</p>
             <p className="text-base font-semibold text-amber-600">${mockTaxData.pendingBalance.toFixed(2)}</p>
           </div>
         </div>
@@ -301,27 +301,27 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
         </button>
         
         {showBreakdown && (
-          <div className="rounded-lg bg-foreground/[0.02] p-2.5 text-xs space-y-1">
+          <div className="rounded-lg bg-black/[0.02] p-2.5 text-xs space-y-1">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Gross earnings</span>
+              <span className="text-black/60">Gross earnings</span>
               <span>${mockTaxData.ytdGross.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Platform fees (15%)</span>
+              <span className="text-black/60">Platform fees (15%)</span>
               <span>-${mockTaxData.platformFees.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between border-t border-foreground/5 pt-1">
+            <div className="flex justify-between border-t border-black/5 pt-1">
               <span className="font-medium">Net</span>
               <span className="font-medium">${mockTaxData.netPaidOut.toFixed(2)}</span>
             </div>
           </div>
         )}
 
-        <div className="rounded-lg border border-dashed border-foreground/10 bg-white/40 p-3">
+        <div className="rounded-lg border border-dashed border-black/10 bg-white/40 p-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium">Payout account</p>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-[10px] text-black/60">
                 {mockTaxData.stripeConnected ? 'Bank account connected' : 'Payouts are deposited to your bank account.'}
               </p>
             </div>
@@ -334,10 +334,10 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
               {mockTaxData.stripeConnected ? 'Manage' : 'Connect bank'}
             </Button>
           </div>
-          <p className="mt-2 text-[9px] text-muted-foreground/60">Bank connection powered by Stripe</p>
+          <p className="mt-2 text-[9px] text-black/60/60">Bank connection powered by Stripe</p>
         </div>
 
-        <div className="text-[10px] text-muted-foreground leading-relaxed">
+        <div className="text-[10px] text-black/60 leading-relaxed">
           <p>Tax forms are issued automatically for eligible US creators.</p>
           <button 
             onClick={() => onComingSoon('Tax documentation')}
@@ -348,7 +348,7 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
         </div>
 
         <div className="space-y-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Setup checklist</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-black/60">Setup checklist</p>
           {[
             { key: 'legalName', label: 'Add legal name', done: mockTaxData.checklist.legalName },
             { key: 'address', label: 'Add address', done: mockTaxData.checklist.address },
@@ -358,12 +358,12 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
             <button 
               key={item.key} 
               onClick={() => !item.done && onComingSoon(item.label)}
-              className="flex w-full items-center gap-2 text-xs hover:bg-foreground/[0.02] rounded p-1 -ml-1"
+              className="flex w-full items-center gap-2 text-xs hover:bg-black/[0.02] rounded p-1 -ml-1"
             >
               <div className={`flex h-4 w-4 items-center justify-center rounded-full ${
                 item.done 
                   ? 'bg-emerald-500 text-white' 
-                  : 'border border-foreground/20 bg-white'
+                  : 'border border-black/20 bg-white'
               }`}>
                 {item.done && (
                   <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
@@ -371,7 +371,7 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
                   </svg>
                 )}
               </div>
-              <span className={item.done ? 'text-muted-foreground line-through' : ''}>{item.label}</span>
+              <span className={item.done ? 'text-black/60 line-through' : ''}>{item.label}</span>
             </button>
           ))}
         </div>
@@ -658,17 +658,17 @@ export function CreatorDashboardProfile() {
           <h3 className="text-lg font-semibold">Edit About</h3>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="text-xs font-medium text-muted-foreground">Bio</label>
+              <label className="text-xs font-medium text-black/60">Bio</label>
               <textarea
                 value={editBio}
                 onChange={(e) => setEditBio(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-foreground/10 p-3 text-sm"
+                className="mt-1 w-full rounded-lg border border-black/10 p-3 text-sm"
                 rows={3}
                 placeholder="Tell hosts about your content style..."
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground">Niches</label>
+              <label className="text-xs font-medium text-black/60">Niches</label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {AVAILABLE_NICHES.map(niche => (
                   <button
@@ -677,7 +677,7 @@ export function CreatorDashboardProfile() {
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       editNiches.includes(niche)
                         ? 'bg-primary text-white'
-                        : 'border border-foreground/10 bg-white hover:bg-foreground/5'
+                        : 'border border-black/10 bg-white hover:bg-black/5'
                     }`}
                   >
                     {niche}
@@ -699,7 +699,7 @@ export function CreatorDashboardProfile() {
           <h3 className="text-lg font-semibold">Edit Rates</h3>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="text-xs font-medium text-muted-foreground">Base rate per post ($)</label>
+              <label className="text-xs font-medium text-black/60">Base rate per post ($)</label>
               <Input
                 type="number"
                 value={editMinFlat}
@@ -709,7 +709,7 @@ export function CreatorDashboardProfile() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground">Traffic bonus (%)</label>
+              <label className="text-xs font-medium text-black/60">Traffic bonus (%)</label>
               <Input
                 type="number"
                 value={editMinPercent}
@@ -717,14 +717,14 @@ export function CreatorDashboardProfile() {
                 placeholder="e.g. 10"
                 className="mt-1"
               />
-              <p className="mt-1 text-[10px] text-muted-foreground">Optional bonus based on tracked link traffic</p>
+              <p className="mt-1 text-[10px] text-black/60">Optional bonus based on tracked link traffic</p>
             </div>
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Open to post-for-stay</label>
               <button
                 onClick={() => setEditPostForStay(!editPostForStay)}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  editPostForStay ? 'bg-primary' : 'bg-foreground/20'
+                  editPostForStay ? 'bg-primary' : 'bg-black/20'
                 }`}
               >
                 <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
@@ -744,7 +744,7 @@ export function CreatorDashboardProfile() {
       {editDeliverablesOpen && (
         <Modal onClose={() => setEditDeliverablesOpen(false)}>
           <h3 className="text-lg font-semibold">Edit Deliverables</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Select the content types you offer.</p>
+          <p className="mt-1 text-sm text-black/60">Select the content types you offer.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {AVAILABLE_DELIVERABLES.map(d => (
               <button
@@ -753,7 +753,7 @@ export function CreatorDashboardProfile() {
                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   editDeliverables.includes(d)
                     ? 'bg-primary text-white'
-                    : 'border border-foreground/10 bg-white hover:bg-foreground/5'
+                    : 'border border-black/10 bg-white hover:bg-black/5'
                 }`}
               >
                 {d}
@@ -773,7 +773,7 @@ export function CreatorDashboardProfile() {
           <h3 className="text-lg font-semibold">Edit Profile</h3>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="text-xs font-medium text-muted-foreground">Display Name</label>
+              <label className="text-xs font-medium text-black/60">Display Name</label>
               <Input
                 value={editDisplayName}
                 onChange={(e) => setEditDisplayName(e.target.value)}
@@ -781,9 +781,9 @@ export function CreatorDashboardProfile() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground">Handle</label>
+              <label className="text-xs font-medium text-black/60">Handle</label>
               <div className="mt-1 flex items-center gap-1">
-                <span className="text-sm text-muted-foreground">@</span>
+                <span className="text-sm text-black/60">@</span>
                 <Input
                   value={editHandle}
                   onChange={(e) => setEditHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
@@ -802,7 +802,7 @@ export function CreatorDashboardProfile() {
       {comingSoonModal && (
         <Modal onClose={() => setComingSoonModal(null)}>
           <h3 className="text-lg font-semibold">Coming Soon</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-black/60">
             {comingSoonModal} is not available yet. We're working on it!
           </p>
           <div className="mt-6">
@@ -815,18 +815,18 @@ export function CreatorDashboardProfile() {
       {oauthNotConfigured && (
         <Modal onClose={() => setOauthNotConfigured(null)}>
           <h3 className="text-lg font-semibold">Instagram Connect Not Configured</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-black/60">
             Instagram OAuth requires environment variables to be set up.
           </p>
-          <div className="mt-3 rounded-lg bg-foreground/5 p-3">
-            <p className="text-xs font-medium text-foreground">Required:</p>
-            <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground font-mono">
+          <div className="mt-3 rounded-lg bg-black/5 p-3">
+            <p className="text-xs font-medium text-black">Required:</p>
+            <ul className="mt-1 space-y-0.5 text-xs text-black/60 font-mono">
               <li>META_APP_ID</li>
               <li>META_APP_SECRET</li>
               <li>META_REDIRECT_URI</li>
             </ul>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
+          <p className="mt-3 text-xs text-black/60">
             Create a Meta App at developers.facebook.com and add the Instagram Basic Display product.
           </p>
           <div className="mt-6 flex gap-2">
@@ -886,7 +886,7 @@ export function CreatorDashboardProfile() {
               </>
             ) : (
               <>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-black/60">
                   Enter your {connectingPlatform} profile URL to connect.
                 </p>
                 <Input
@@ -945,7 +945,7 @@ export function CreatorDashboardProfile() {
             <Panel variant="elevated" className="overflow-hidden">
               <div className="flex flex-col md:flex-row">
                 {/* Left: Avatar + actions */}
-                <div className="border-b border-foreground/5 bg-foreground/[0.01] p-5 md:w-56 md:border-b-0 md:border-r">
+                <div className="border-b border-black/5 bg-black/[0.01] p-5 md:w-56 md:border-b-0 md:border-r">
                   <div className="flex items-center gap-3 md:flex-col md:items-start md:gap-0">
                     <div className="relative">
                       <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 md:h-20 md:w-20" />
@@ -953,7 +953,7 @@ export function CreatorDashboardProfile() {
                     </div>
                     <div className="md:mt-3">
                       <p className="text-lg font-semibold">{profile.displayName}</p>
-                      <p className="text-xs text-muted-foreground">@{profile.handle}</p>
+                      <p className="text-xs text-black/60">@{profile.handle}</p>
                     </div>
                   </div>
 
@@ -969,7 +969,7 @@ export function CreatorDashboardProfile() {
                   </div>
 
                   {/* Status indicators */}
-                  <div className="mt-4 flex flex-col gap-2 border-t border-foreground/5 pt-4">
+                  <div className="mt-4 flex flex-col gap-2 border-t border-black/5 pt-4">
                     <div className="flex items-center gap-2 text-xs">
                       <StatusDot active color="bg-amber-500" />
                       <span>Beta access</span>
@@ -978,7 +978,7 @@ export function CreatorDashboardProfile() {
                       <StatusDot active color="bg-emerald-500" />
                       <span>Open to offers</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground/50">
+                    <div className="flex items-center gap-2 text-xs text-black/60/50">
                       <StatusDot active={false} color="bg-gray-300" />
                       <span>Verified</span>
                     </div>
@@ -1003,7 +1003,7 @@ export function CreatorDashboardProfile() {
                       {/* Bio */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">About</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black/60">About</span>
                           <button 
                             onClick={() => {
                               setEditBio(profile.bio)
@@ -1015,7 +1015,7 @@ export function CreatorDashboardProfile() {
                             Edit
                           </button>
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{profile.bio}</p>
+                        <p className="text-xs text-black/60 leading-relaxed">{profile.bio}</p>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {profile.niches.map(n => (
                             <span key={n} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">{n}</span>
@@ -1026,7 +1026,7 @@ export function CreatorDashboardProfile() {
                       {/* Platforms */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Platforms</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black/60">Platforms</span>
                         </div>
                         <div className="space-y-2 text-xs">
                           {(["instagram", "tiktok", "youtube"] as Platform[]).map(p => {
@@ -1058,19 +1058,19 @@ export function CreatorDashboardProfile() {
                             }
                             
                             return (
-                              <div key={p} className="rounded-lg bg-foreground/[0.02] p-2">
+                              <div key={p} className="rounded-lg bg-black/[0.02] p-2">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-1.5">
                                     {isConnected && (
                                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                                     )}
-                                    <span className={isConnected ? "font-medium" : "text-muted-foreground"}>{label}</span>
+                                    <span className={isConnected ? "font-medium" : "text-black/60"}>{label}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     {isConnected && (
                                       <button 
                                         onClick={() => handleSyncPlatform(p)}
-                                        className="text-[9px] text-muted-foreground hover:text-primary"
+                                        className="text-[9px] text-black/60 hover:text-primary"
                                       >
                                         Sync
                                       </button>
@@ -1109,10 +1109,10 @@ export function CreatorDashboardProfile() {
                                   </div>
                                 </div>
                                 <div className="mt-1 flex items-center justify-between text-[10px]">
-                                  <span className={isConnected ? "font-medium" : "text-muted-foreground/50"}>
+                                  <span className={isConnected ? "font-medium" : "text-black/60/50"}>
                                     {followerCount ? formatCount(followerCount) : "—"} {countLabel}
                                   </span>
-                                  <span className="text-muted-foreground/50">
+                                  <span className="text-black/60/50">
                                     {isConnected && lastSynced ? `Synced ${formatSyncTime(lastSynced)}` : isConnected ? "Not synced" : "Not connected"}
                                   </span>
                                 </div>
@@ -1125,7 +1125,7 @@ export function CreatorDashboardProfile() {
                       {/* Deal prefs */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Rates</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black/60">Rates</span>
                           <button 
                             onClick={() => {
                               setEditMinFlat(profile.dealPrefs.minFlat?.toString() || '')
@@ -1140,15 +1140,15 @@ export function CreatorDashboardProfile() {
                         </div>
                         <div className="space-y-1 text-xs">
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Base rate</span>
+                            <span className="text-black/60">Base rate</span>
                             <span>{profile.dealPrefs.minFlat ? `$${profile.dealPrefs.minFlat}` : '—'}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Traffic bonus</span>
+                            <span className="text-black/60">Traffic bonus</span>
                             <span>{profile.dealPrefs.minPercent ? `${profile.dealPrefs.minPercent}%` : '—'}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Post-for-stay</span>
+                            <span className="text-black/60">Post-for-stay</span>
                             <span>{profile.dealPrefs.postForStay ? 'Open' : 'Closed'}</span>
                           </div>
                         </div>
@@ -1157,7 +1157,7 @@ export function CreatorDashboardProfile() {
                       {/* Deliverables */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Deliverables</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black/60">Deliverables</span>
                           <button 
                             onClick={() => {
                               setEditDeliverables(profile.deliverables)
@@ -1170,7 +1170,7 @@ export function CreatorDashboardProfile() {
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {profile.deliverables.map(d => (
-                            <span key={d} className="rounded-full border border-foreground/10 bg-white px-2 py-0.5 text-[10px]">{d}</span>
+                            <span key={d} className="rounded-full border border-black/10 bg-white px-2 py-0.5 text-[10px]">{d}</span>
                           ))}
                         </div>
                       </div>
@@ -1204,13 +1204,13 @@ export function CreatorDashboardProfile() {
             <Panel>
               <PanelHeader title="Pending Offers" actions={<span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">2 new</span>} />
               <PanelContent className="p-0">
-                <Link href="/dashboard/creator/offers" className="block px-4 py-3 transition-colors hover:bg-foreground/[0.02]">
+                <Link href="/dashboard/creator/offers" className="block px-4 py-3 transition-colors hover:bg-black/[0.02]">
                   <p className="text-sm font-medium">Mountain View Retreats</p>
-                  <p className="text-xs text-muted-foreground">$400/post + bonus · Cozy A-Frame Cabin</p>
+                  <p className="text-xs text-black/60">$400/post + bonus · Cozy A-Frame Cabin</p>
                 </Link>
-                <Link href="/dashboard/creator/offers" className="block border-t border-foreground/5 px-4 py-3 transition-colors hover:bg-foreground/[0.02]">
+                <Link href="/dashboard/creator/offers" className="block border-t border-black/5 px-4 py-3 transition-colors hover:bg-black/[0.02]">
                   <p className="text-sm font-medium">Coastal Getaways</p>
-                  <p className="text-xs text-muted-foreground">$500/post · Modern Beach House</p>
+                  <p className="text-xs text-black/60">$500/post · Modern Beach House</p>
                 </Link>
               </PanelContent>
             </Panel>
@@ -1218,21 +1218,21 @@ export function CreatorDashboardProfile() {
             {/* Quick links */}
             <Panel>
               <PanelContent className="space-y-1.5 py-3">
-                <Link href="/dashboard/creator/offers" className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2 text-xs transition-colors hover:bg-foreground/[0.04]">
+                <Link href="/dashboard/creator/offers" className="flex items-center justify-between rounded-lg bg-black/[0.02] px-3 py-2 text-xs transition-colors hover:bg-black/[0.04]">
                   View all offers
-                  <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-3.5 w-3.5 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </Link>
-                <Link href="/dashboard/analytics" className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2 text-xs transition-colors hover:bg-foreground/[0.04]">
+                <Link href="/dashboard/analytics" className="flex items-center justify-between rounded-lg bg-black/[0.02] px-3 py-2 text-xs transition-colors hover:bg-black/[0.04]">
                   Link analytics
-                  <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-3.5 w-3.5 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </Link>
-                <Link href="/how-to/creators" className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2 text-xs transition-colors hover:bg-foreground/[0.04]">
+                <Link href="/how-to/creators" className="flex items-center justify-between rounded-lg bg-black/[0.02] px-3 py-2 text-xs transition-colors hover:bg-black/[0.04]">
                   How it works
-                  <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-3.5 w-3.5 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </Link>

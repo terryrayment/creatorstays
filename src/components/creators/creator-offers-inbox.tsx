@@ -98,7 +98,7 @@ export function CreatorOffersInbox() {
         />
         <PanelContent className="p-0">
           {offers.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
+            <div className="py-8 text-center text-sm text-black/60">
               No pending offers. When hosts reach out, they&apos;ll appear here.
             </div>
           ) : (
@@ -107,15 +107,15 @@ export function CreatorOffersInbox() {
                 <button
                   key={offer.id}
                   onClick={() => setSelectedOffer(offer)}
-                  className={`w-full px-5 py-4 text-left transition-colors hover:bg-foreground/[0.02] ${
+                  className={`w-full px-5 py-4 text-left transition-colors hover:bg-black/[0.02] ${
                     selectedOffer?.id === offer.id ? 'bg-primary/5' : ''
                   }`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <p className="font-medium">{offer.hostName}</p>
-                      <p className="text-sm text-muted-foreground">{offer.propertyTitle}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
+                      <p className="text-sm text-black/60">{offer.propertyTitle}</p>
+                      <p className="mt-1 text-xs text-black/60">
                         {offer.proposedType === 'affiliate' && `${offer.proposedPercent}% traffic bonus`}
                         {offer.proposedType === 'flat' && `$${offer.proposedFlatFee} flat fee`}
                         {offer.proposedType === 'post-for-stay' && 'Post-for-stay'}
@@ -144,8 +144,8 @@ export function CreatorOffersInbox() {
           />
           <PanelContent>
             {/* Offer terms */}
-            <div className="mb-4 rounded-lg bg-foreground/[0.02] p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Proposed Terms</p>
+            <div className="mb-4 rounded-lg bg-black/[0.02] p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-black/60">Proposed Terms</p>
               <div className="mt-2 space-y-1 text-sm">
                 {selectedOffer.proposedType === 'affiliate' && (
                   <p><strong>{selectedOffer.proposedPercent}%</strong> traffic bonus (based on link clicks)</p>
@@ -158,7 +158,7 @@ export function CreatorOffersInbox() {
                 )}
               </div>
               <div className="mt-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Deliverables</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-black/60">Deliverables</p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {selectedOffer.deliverables.map(d => (
                     <span key={d} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{d}</span>
@@ -169,8 +169,8 @@ export function CreatorOffersInbox() {
 
             {/* Message */}
             <div className="mb-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Message</p>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{selectedOffer.message}</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-black/60">Message</p>
+              <p className="mt-1 text-sm leading-relaxed text-black/60">{selectedOffer.message}</p>
             </div>
 
             {/* Response actions */}
@@ -182,7 +182,7 @@ export function CreatorOffersInbox() {
                 <Button variant="outline" onClick={() => setResponding('counter')} className="flex-1">
                   Counter
                 </Button>
-                <Button variant="ghost" onClick={() => handleRespond('decline')} className="text-muted-foreground">
+                <Button variant="ghost" onClick={() => handleRespond('decline')} className="text-black/60">
                   Decline
                 </Button>
               </div>
@@ -190,10 +190,10 @@ export function CreatorOffersInbox() {
 
             {/* Counter form */}
             {responding === 'counter' && (
-              <div className="space-y-3 rounded-lg border border-foreground/10 p-4">
+              <div className="space-y-3 rounded-lg border border-black/10 p-4">
                 <p className="text-sm font-medium">Make a counter offer</p>
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Your traffic bonus %</label>
+                  <label className="mb-1 block text-xs text-black/60">Your traffic bonus %</label>
                   <Input
                     type="number"
                     placeholder="e.g., 15"
@@ -202,7 +202,7 @@ export function CreatorOffersInbox() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Message (optional)</label>
+                  <label className="mb-1 block text-xs text-black/60">Message (optional)</label>
                   <textarea
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     rows={2}

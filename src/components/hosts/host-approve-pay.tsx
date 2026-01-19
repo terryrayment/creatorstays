@@ -53,17 +53,17 @@ export function HostApprovePay() {
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold">{mockCollaboration.creator.name}</h3>
-              <p className="text-sm text-muted-foreground">{mockCollaboration.creator.handle}</p>
+              <p className="text-sm text-black/60">{mockCollaboration.creator.handle}</p>
               <div className="mt-2">
-                <p className="text-xs text-muted-foreground">Property</p>
+                <p className="text-xs text-black/60">Property</p>
                 <p className="text-sm">{mockCollaboration.property.title}</p>
-                <p className="text-xs text-muted-foreground">{mockCollaboration.property.location}</p>
+                <p className="text-xs text-black/60">{mockCollaboration.property.location}</p>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 border-t border-foreground/5 pt-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Deliverables</p>
+          <div className="mt-4 border-t border-black/5 pt-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-black/60">Deliverables</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {mockCollaboration.deliverables.map((d) => (
                 <span
@@ -86,7 +86,7 @@ export function HostApprovePay() {
         />
         <PanelContent>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-medium text-muted-foreground">$</span>
+            <span className="text-lg font-medium text-black/60">$</span>
             <Input
               type="number"
               min="1"
@@ -95,7 +95,7 @@ export function HostApprovePay() {
               onChange={(e) => setAgreedAmount(Math.max(0, Number(e.target.value)))}
               className="max-w-[150px] text-lg font-semibold"
             />
-            <span className="text-sm text-muted-foreground">USD</span>
+            <span className="text-sm text-black/60">USD</span>
           </div>
         </PanelContent>
       </Panel>
@@ -108,18 +108,18 @@ export function HostApprovePay() {
         />
         <PanelContent className="space-y-4">
           {/* Host side */}
-          <div className="rounded-lg bg-foreground/[0.02] p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">You pay</p>
+          <div className="rounded-lg bg-black/[0.02] p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-black/60">You pay</p>
             <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Creator payout (gross)</span>
+                <span className="text-black/60">Creator payout (gross)</span>
                 <span>{formatCurrency(agreedAmount)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Host platform fee (15%)</span>
+                <span className="text-black/60">Host platform fee (15%)</span>
                 <span>+ {formatCurrency(hostPlatformFee)}</span>
               </div>
-              <div className="border-t border-foreground/10 pt-2">
+              <div className="border-t border-black/10 pt-2">
                 <div className="flex items-center justify-between font-semibold">
                   <span>Your total</span>
                   <span className="text-lg">{formatCurrency(hostTotalCharged)}</span>
@@ -129,18 +129,18 @@ export function HostApprovePay() {
           </div>
 
           {/* Creator side */}
-          <div className="rounded-lg bg-foreground/[0.02] p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Creator receives</p>
+          <div className="rounded-lg bg-black/[0.02] p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-black/60">Creator receives</p>
             <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Creator payout (gross)</span>
+                <span className="text-black/60">Creator payout (gross)</span>
                 <span>{formatCurrency(agreedAmount)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Creator platform fee (15%)</span>
+                <span className="text-black/60">Creator platform fee (15%)</span>
                 <span className="text-red-600">- {formatCurrency(creatorPlatformFee)}</span>
               </div>
-              <div className="border-t border-foreground/10 pt-2">
+              <div className="border-t border-black/10 pt-2">
                 <div className="flex items-center justify-between font-semibold">
                   <span>Creator net payout</span>
                   <span className="text-lg text-emerald-600">{formatCurrency(creatorNetPayout)}</span>
@@ -150,10 +150,10 @@ export function HostApprovePay() {
           </div>
 
           {/* Platform summary */}
-          <div className="rounded-lg border border-dashed border-foreground/10 p-3 text-center">
-            <p className="text-xs text-muted-foreground">
-              Platform earns: <span className="font-semibold text-foreground">{formatCurrency(platformEarnsTotal)}</span>
-              <span className="text-muted-foreground/60"> (15% + 15% = 30%)</span>
+          <div className="rounded-lg border border-dashed border-black/10 p-3 text-center">
+            <p className="text-xs text-black/60">
+              Platform earns: <span className="font-semibold text-black">{formatCurrency(platformEarnsTotal)}</span>
+              <span className="text-black/60/60"> (15% + 15% = 30%)</span>
             </p>
           </div>
         </PanelContent>
@@ -168,7 +168,7 @@ export function HostApprovePay() {
         Pay {formatCurrency(hostTotalCharged)} now (test)
       </Button>
 
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-center text-xs text-black/60">
         You&apos;ll be redirected to Stripe for secure payment processing.
       </p>
 
@@ -182,10 +182,10 @@ export function HostApprovePay() {
               </svg>
             </div>
             <h3 className="text-lg font-semibold">Stripe checkout coming soon</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-black/60">
               This is a preview of the payment flow. Stripe Connect integration will enable secure payments to creators.
             </p>
-            <div className="mt-4 rounded-lg bg-foreground/[0.02] p-3 text-sm">
+            <div className="mt-4 rounded-lg bg-black/[0.02] p-3 text-sm">
               <p className="font-medium">You would be charged:</p>
               <p className="text-xl font-bold text-primary">{formatCurrency(hostTotalCharged)}</p>
             </div>

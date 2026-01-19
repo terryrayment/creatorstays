@@ -11,7 +11,7 @@ function DashboardLoading() {
     <div className="dashboard min-h-screen bg-[hsl(210,20%,98%)] flex items-center justify-center">
       <div className="text-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto" />
-        <p className="mt-2 text-sm text-muted-foreground">Loading dashboard...</p>
+        <p className="mt-2 text-sm text-black/60">Loading dashboard...</p>
       </div>
     </div>
   )

@@ -79,10 +79,10 @@ function ChipSelector({ options, selected, onChange, label }: { options: string[
   const toggle = (opt: string) => onChange(selected.includes(opt) ? selected.filter(s => s !== opt) : [...selected, opt])
   return (
     <div>
-      <label className="mb-2 block text-[11px] font-medium text-muted-foreground">{label}</label>
+      <label className="mb-2 block text-[11px] font-medium text-black/60">{label}</label>
       <div className="flex flex-wrap gap-1.5">
         {options.map(opt => (
-          <button key={opt} type="button" onClick={() => toggle(opt)} className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${selected.includes(opt) ? 'border-primary bg-primary/10 text-primary' : 'border-foreground/10 bg-white hover:bg-foreground/[0.02]'}`}>{opt}</button>
+          <button key={opt} type="button" onClick={() => toggle(opt)} className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${selected.includes(opt) ? 'border-black bg-black/10 text-black' : 'border-black/10 bg-white hover:bg-black/[0.02]'}`}>{opt}</button>
         ))}
       </div>
     </div>
@@ -132,12 +132,12 @@ function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: Ed
   const canPublish = checklistComplete >= 7
 
   return (
-    <div className="rounded-xl border border-foreground/5 bg-white/60 p-5">
+    <div className="rounded-xl border border-black/5 bg-white/60 p-5">
       {toast && <div className="mb-4 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">{toast}</div>}
 
-      <div className="mb-5 flex gap-1 rounded-lg bg-foreground/[0.03] p-1">
+      <div className="mb-5 flex gap-1 rounded-lg bg-black/[0.03] p-1">
         {[1, 2, 3].map(s => (
-          <button key={s} onClick={() => setStep(s as 1 | 2 | 3)} className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${step === s ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+          <button key={s} onClick={() => setStep(s as 1 | 2 | 3)} className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${step === s ? 'bg-white text-black shadow-sm' : 'text-black/60 hover:text-black'}`}>
             {s === 1 ? '1. Import' : s === 2 ? '2. Confirm' : '3. Brief'}
           </button>
         ))}
@@ -146,7 +146,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: Ed
       {step === 1 && (
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Airbnb URL</label>
+            <label className="mb-1.5 block text-[11px] font-medium text-black/60">Airbnb URL</label>
             <div className="flex gap-2">
               <Input value={form.airbnbUrl || ''} onChange={e => setForm({ ...form, airbnbUrl: e.target.value })} placeholder="https://airbnb.com/rooms/123456" className="flex-1" />
               <Button onClick={handleImport} disabled={!form.airbnbUrl || isImporting}>{isImporting ? 'Importing...' : 'Import'}</Button>
@@ -154,13 +154,13 @@ function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: Ed
             {importError && <p className="mt-1.5 text-[11px] text-amber-600">{importError}</p>}
           </div>
           {form.heroImageUrl && (
-            <div className="rounded-lg border border-foreground/5 bg-foreground/[0.02] p-3">
+            <div className="rounded-lg border border-black/5 bg-black/[0.02] p-3">
               <div className="flex gap-4">
-                <div className="h-24 w-36 shrink-0 overflow-hidden rounded-lg bg-foreground/5"><img src={form.heroImageUrl} alt="" className="h-full w-full object-cover" /></div>
+                <div className="h-24 w-36 shrink-0 overflow-hidden rounded-lg bg-black/5"><img src={form.heroImageUrl} alt="" className="h-full w-full object-cover" /></div>
                 <div>
                   <p className="text-sm font-medium">{form.title || 'Untitled'}</p>
-                  <p className="text-[11px] text-muted-foreground">{form.cityRegion || 'No location'}</p>
-                  {form.lastImportedAt && <p className="mt-2 text-[10px] text-muted-foreground">Last imported: {formatDate(form.lastImportedAt)}</p>}
+                  <p className="text-[11px] text-black/60">{form.cityRegion || 'No location'}</p>
+                  {form.lastImportedAt && <p className="mt-2 text-[10px] text-black/60">Last imported: {formatDate(form.lastImportedAt)}</p>}
                   <Button size="sm" variant="outline" className="mt-2 h-7 text-[10px]" onClick={handleImport} disabled={isImporting}>Refresh from Airbnb</Button>
                 </div>
               </div>
@@ -173,25 +173,25 @@ function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: Ed
       {step === 2 && (
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Title *</label><Input value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Cozy Mountain Cabin" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">City / Region *</label><Input value={form.cityRegion || ''} onChange={e => setForm({ ...form, cityRegion: e.target.value })} placeholder="Aspen, Colorado" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">Title *</label><Input value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Cozy Mountain Cabin" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">City / Region *</label><Input value={form.cityRegion || ''} onChange={e => setForm({ ...form, cityRegion: e.target.value })} placeholder="Aspen, Colorado" /></div>
           </div>
           <div className="grid gap-4 sm:grid-cols-4">
-            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Price/night</label><Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="$150-$250" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Guests</label><Input type="number" value={form.guests || ''} onChange={e => setForm({ ...form, guests: parseInt(e.target.value) || undefined })} placeholder="4" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Beds</label><Input type="number" value={form.beds || ''} onChange={e => setForm({ ...form, beds: parseInt(e.target.value) || undefined })} placeholder="2" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Baths</label><Input type="number" value={form.baths || ''} onChange={e => setForm({ ...form, baths: parseInt(e.target.value) || undefined })} placeholder="1" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">Price/night</label><Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="$150-$250" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">Guests</label><Input type="number" value={form.guests || ''} onChange={e => setForm({ ...form, guests: parseInt(e.target.value) || undefined })} placeholder="4" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">Beds</label><Input type="number" value={form.beds || ''} onChange={e => setForm({ ...form, beds: parseInt(e.target.value) || undefined })} placeholder="2" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">Baths</label><Input type="number" value={form.baths || ''} onChange={e => setForm({ ...form, baths: parseInt(e.target.value) || undefined })} placeholder="1" /></div>
           </div>
           <ChipSelector options={COMMON_AMENITIES} selected={form.amenities || []} onChange={v => setForm({ ...form, amenities: v })} label="Amenities (select 5+)" />
           <ChipSelector options={COMMON_VIBE_TAGS} selected={form.vibeTags || []} onChange={v => setForm({ ...form, vibeTags: v })} label="Vibe Tags" />
           <div>
-            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Photo URLs (one per line, 3+ recommended)</label>
-            <textarea value={(form.photos || []).join('\n')} onChange={e => setForm({ ...form, photos: e.target.value.split('\n').filter(Boolean) })} placeholder="https://example.com/photo1.jpg" rows={3} className="w-full resize-none rounded-lg border border-foreground/10 bg-white px-3 py-2 text-xs focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+            <label className="mb-1.5 block text-[11px] font-medium text-black/60">Photo URLs (one per line, 3+ recommended)</label>
+            <textarea value={(form.photos || []).join('\n')} onChange={e => setForm({ ...form, photos: e.target.value.split('\n').filter(Boolean) })} placeholder="https://example.com/photo1.jpg" rows={3} className="w-full resize-none rounded-lg border border-black/10 bg-white px-3 py-2 text-xs focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20" />
           </div>
-          <div className="rounded-lg bg-foreground/[0.02] p-3">
-            <p className="mb-2 text-[11px] font-semibold text-muted-foreground">Checklist ({checklistComplete}/{checklist.length})</p>
+          <div className="rounded-lg bg-black/[0.02] p-3">
+            <p className="mb-2 text-[11px] font-semibold text-black/60">Checklist ({checklistComplete}/{checklist.length})</p>
             <div className="grid gap-1 sm:grid-cols-3">
-              {checklist.map(item => (<div key={item.label} className="flex items-center gap-1.5 text-[11px]"><span className={item.done ? 'text-emerald-500' : 'text-muted-foreground/40'}>{item.done ? '✓' : '○'}</span><span className={item.done ? 'text-foreground' : 'text-muted-foreground'}>{item.label}</span></div>))}
+              {checklist.map(item => (<div key={item.label} className="flex items-center gap-1.5 text-[11px]"><span className={item.done ? 'text-emerald-500' : 'text-black/60/40'}>{item.done ? '✓' : '○'}</span><span className={item.done ? 'text-black' : 'text-black/60'}>{item.label}</span></div>))}
             </div>
           </div>
           <div className="flex justify-between pt-2"><Button variant="outline" onClick={() => setStep(1)}>← Back</Button><Button onClick={() => setStep(3)}>Next: Creator Brief →</Button></div>
@@ -201,11 +201,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: Ed
       {step === 3 && (
         <div className="space-y-4">
           <div>
-            <div className="mb-1.5 flex items-center justify-between"><label className="text-[11px] font-medium text-muted-foreground">Creator Brief</label><Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={generateBrief}>Generate from tags</Button></div>
-            <textarea value={form.creatorBrief || ''} onChange={e => setForm({ ...form, creatorBrief: e.target.value })} placeholder="Describe what makes your property special for content creators..." rows={6} className="w-full resize-none rounded-lg border border-foreground/10 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
-            <p className="mt-1 text-[10px] text-muted-foreground">This helps creators understand your property.</p>
+            <div className="mb-1.5 flex items-center justify-between"><label className="text-[11px] font-medium text-black/60">Creator Brief</label><Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={generateBrief}>Generate from tags</Button></div>
+            <textarea value={form.creatorBrief || ''} onChange={e => setForm({ ...form, creatorBrief: e.target.value })} placeholder="Describe what makes your property special for content creators..." rows={6} className="w-full resize-none rounded-lg border border-black/10 bg-white px-3 py-2 text-sm focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20" />
+            <p className="mt-1 text-[10px] text-black/60">This helps creators understand your property.</p>
           </div>
-          <div className="flex items-center justify-between border-t border-foreground/5 pt-4">
+          <div className="flex items-center justify-between border-t border-black/5 pt-4">
             <div className="flex gap-2"><Button variant="outline" onClick={() => setStep(2)}>← Back</Button>{onDelete && <Button variant="ghost" className="text-red-600 hover:bg-red-50" onClick={onDelete}>Delete</Button>}</div>
             <div className="flex gap-2"><Button variant="outline" onClick={() => handleSave(true)} disabled={isSaving}>Save Draft</Button><Button onClick={() => handleSave(false)} disabled={isSaving || !canPublish}>{isSaving ? 'Saving...' : 'Save Property'}</Button></div>
           </div>
