@@ -36,10 +36,10 @@ function getCardColors(): { hero: [CardColor, CardColor]; cta: [CardColor, CardC
   ]
   
   // Footer: avoid whatever color is most prominent in CTA row
-  const footerOptions: CardColor[] = ["green", "purple", "orange"].filter(
+  const footerOptions: CardColor[] = ["green", "purple", "orange"]
+  const footerColor: CardColor = footerOptions.find(
     c => c !== ctaColors[0] && c !== ctaColors[1]
-  )
-  const footerColor: CardColor = footerOptions[0] || "green"
+  ) ?? "green"
   
   return { hero: heroColors, cta: ctaColors, footer: footerColor }
 }
