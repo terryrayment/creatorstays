@@ -830,3 +830,16 @@
   animation: marquee 25s linear infinite;
   will-change: transform;
 }
+
+/* ============================================================================
+   Scrollbar Hide Utility
+   ============================================================================ */
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
