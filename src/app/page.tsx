@@ -2,32 +2,70 @@ import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
-function HeroBackground() {
+function HeroCollage() {
+  // Photo cards with different positions, sizes, rotations
+  const cards = [
+    { left: '5%', top: '15%', w: 80, h: 100, rotate: -8, delay: 0 },
+    { left: '85%', top: '10%', w: 70, h: 90, rotate: 12, delay: 1.5 },
+    { left: '10%', top: '60%', w: 90, h: 70, rotate: 6, delay: 3 },
+    { left: '80%', top: '55%', w: 75, h: 95, rotate: -10, delay: 0.8 },
+    { left: '25%', top: '5%', w: 65, h: 85, rotate: 4, delay: 2.2 },
+    { left: '70%', top: '75%', w: 85, h: 65, rotate: -5, delay: 4 },
+    { left: '2%', top: '40%', w: 60, h: 80, rotate: 15, delay: 2.8 },
+    { left: '92%', top: '35%', w: 70, h: 55, rotate: -12, delay: 1.2 },
+  ]
+
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      {/* Base gradient wash - top right, warm sky */}
-      <div 
-        className="absolute -top-1/4 -right-1/4 h-[120%] w-[80%]"
-        style={{
-          background: "radial-gradient(ellipse at 70% 20%, hsl(199 89% 48% / 0.06) 0%, transparent 60%)",
-        }}
-      />
-      {/* Counter gradient - bottom left, deep blue */}
-      <div 
-        className="absolute -bottom-1/4 -left-1/4 h-[100%] w-[70%]"
-        style={{
-          background: "radial-gradient(ellipse at 30% 80%, hsl(213 94% 45% / 0.04) 0%, transparent 50%)",
-        }}
-      />
-      {/* Soft atmospheric layer */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: "linear-gradient(165deg, hsl(210 20% 99%) 0%, hsl(210 30% 97%) 50%, hsl(210 20% 99%) 100%)",
-        }}
-      />
-      {/* Single large soft cloud */}
-      <div className="absolute top-1/4 right-1/4 h-[500px] w-[700px] rounded-full bg-accent/[0.03] blur-[150px]" />
+      {/* Base gradient layer */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(165deg, hsl(210 20% 99%) 0%, hsl(210 30% 97.5%) 50%, hsl(210 20% 99%) 100%)" }} />
+      
+      {/* Soft glow accents */}
+      <div className="absolute -top-1/4 -right-1/4 h-[120%] w-[80%]" style={{ background: "radial-gradient(ellipse at 70% 20%, hsl(199 89% 48% / 0.05) 0%, transparent 60%)" }} />
+      <div className="absolute -bottom-1/4 -left-1/4 h-[100%] w-[70%]" style={{ background: "radial-gradient(ellipse at 30% 80%, hsl(213 94% 45% / 0.03) 0%, transparent 50%)" }} />
+      
+      {/* Animated photo cards */}
+      {cards.map((card, i) => (
+        <div
+          key={i}
+          className="hero-card absolute rounded-lg border border-foreground/[0.06] bg-gradient-to-br from-white/80 to-foreground/[0.02] shadow-sm"
+          style={{
+            left: card.left,
+            top: card.top,
+            width: card.w,
+            height: card.h,
+            transform: `rotate(${card.rotate}deg)`,
+            animationDelay: `${card.delay}s`,
+          }}
+        >
+          {/* Inner "photo" placeholder with gradient */}
+          <div className="absolute inset-2 rounded bg-gradient-to-br from-primary/[0.08] via-accent/[0.05] to-transparent" />
+          <div className="absolute bottom-2 left-2 right-2 h-2 rounded-full bg-foreground/[0.04]" />
+        </div>
+      ))}
+      
+      {/* Home icon sticker */}
+      <div className="hero-sticker absolute left-[15%] top-[25%] opacity-[0.12]" style={{ animationDelay: '0.5s' }}>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M9 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      
+      {/* Spark/star sticker */}
+      <div className="hero-sticker absolute right-[18%] top-[30%] opacity-[0.15]" style={{ animationDelay: '1.2s' }}>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent">
+          <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6L12 2z" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      
+      {/* Camera sticker */}
+      <div className="hero-sticker absolute left-[78%] top-[65%] opacity-[0.1]" style={{ animationDelay: '2s' }}>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary">
+          <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2v11z" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="12" cy="13" r="4" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
     </div>
   )
 }
@@ -35,20 +73,23 @@ function HeroBackground() {
 function HeroSection() {
   return (
     <section className="relative overflow-hidden py-16 md:py-20">
-      <HeroBackground />
+      <HeroCollage />
       <Container>
-        <div className="flex flex-col items-center text-center opacity-0 reveal">
-          <span className="text-label mb-3 inline-block rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-primary">
+        <div className="relative flex flex-col items-center text-center opacity-0 reveal">
+          {/* Subtle backdrop for text readability */}
+          <div className="absolute inset-0 -mx-8 -my-4 rounded-3xl bg-white/40 backdrop-blur-[2px]" />
+          
+          <span className="relative text-label mb-3 inline-block rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-primary">
             Influencer marketing for vacation rentals
           </span>
-          <h1 className="font-heading text-[2.5rem] font-normal leading-[1.05] tracking-tight drop-shadow-sm sm:text-5xl md:text-6xl lg:text-[4.25rem]">
+          <h1 className="relative font-heading text-[2.5rem] font-normal leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-[4.25rem]">
             <span className="whitespace-nowrap">Get more bookings with</span>{" "}
             <span className="whitespace-nowrap bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">creator marketing</span>
           </h1>
-          <p className="mt-4 max-w-xl text-base text-muted-foreground drop-shadow-sm md:text-lg">
+          <p className="relative mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
             Hire vetted creators to showcase your property. They post, you get clicks and stunning content.
           </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <div className="relative mt-6 flex flex-col gap-3 sm:flex-row">
             <Button size="lg" asChild className="px-8 shadow-lg shadow-primary/20">
               <Link href="/hosts">Host Signup</Link>
             </Button>
