@@ -23,15 +23,14 @@ function HeroSection() {
               Now in beta
             </p>
             
-            {/* Headline - thicker, no italic */}
-            <h1 className="mt-2 font-heading text-[3rem] leading-[0.85] tracking-[-0.03em] text-black sm:text-[4rem] md:text-[5rem] lg:text-[4.5rem] xl:text-[5.5rem]">
-              GET MORE
-              <br />
-              <span className="text-black/35">BOOKINGS</span>
+            {/* Headline - heaviest weight, pure black */}
+            <h1 className="mt-2 font-heading text-[3.5rem] leading-[0.82] tracking-[-0.04em] sm:text-[4.5rem] md:text-[5.5rem] lg:text-[5rem] xl:text-[6.5rem]" style={{ fontWeight: 900 }}>
+              <span className="block text-black">GET MORE</span>
+              <span className="block text-black" style={{ fontWeight: 400 }}>BOOKINGS</span>
             </h1>
             
-            {/* Subhead */}
-            <p className="mt-3 max-w-sm text-[13px] font-medium leading-snug text-black/60">
+            {/* Subhead - pure black */}
+            <p className="mt-3 max-w-sm text-[13px] font-medium leading-snug text-black">
               Hire creators to showcase your vacation rental. They post, you get clicks and content.
             </p>
             
@@ -58,12 +57,11 @@ function HeroSection() {
           {/* SECONDARY BLOCK - Blue */}
           <div className="block-hover flex flex-col justify-between rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-5">
             <div>
-              <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] text-black sm:text-[2.5rem]">
-                GET
-                <br />
-                <span className="text-black/35">STARTED</span>
+              <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] sm:text-[2.5rem]" style={{ fontWeight: 900 }}>
+                <span className="block text-black">GET</span>
+                <span className="block text-black" style={{ fontWeight: 400 }}>STARTED</span>
               </h2>
-              <p className="mt-2 text-[12px] font-medium text-black/60">
+              <p className="mt-2 text-[12px] font-medium text-black">
                 Sign up in 2 minutes. No contracts.
               </p>
             </div>
@@ -81,12 +79,12 @@ function HeroSection() {
                   className="flex items-center justify-between border-b-2 border-black/10 py-2 text-[10px] font-bold uppercase tracking-wider text-black transition-colors hover:border-black"
                 >
                   {link.label}
-                  <span className="text-black/40">→</span>
+                  <span className="text-black">→</span>
                 </Link>
               ))}
             </div>
 
-            <p className="mt-2 text-[9px] font-bold text-black/40">
+            <p className="mt-2 text-[9px] font-bold text-black">
               Free to start • Pay per result • Track links
             </p>
           </div>
