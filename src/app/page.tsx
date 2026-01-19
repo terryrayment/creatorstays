@@ -247,7 +247,7 @@ function FooterMarquee() {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black -mt-20 pt-20">
       <RevealStack baseDelay={80} stagger={100} duration={480}>
         <HeroSection />
         <FeatureScroller />

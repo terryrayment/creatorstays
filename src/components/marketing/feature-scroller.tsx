@@ -153,16 +153,14 @@ export function FeatureScroller() {
     if (!container) return
     
     const wrappedIndex = ((index % steps.length) + steps.length) % steps.length
-    const cards = container.querySelectorAll(".feature-card")
+    const cardWidth = 360 + 8 // card width + gap
+    const scrollTarget = wrappedIndex * cardWidth
     
-    if (cards[wrappedIndex]) {
-      cards[wrappedIndex].scrollIntoView({ 
-        behavior: smooth && !prefersReducedMotion ? "smooth" : "auto", 
-        inline: "center", 
-        block: "nearest" 
-      })
-      setActiveIndex(wrappedIndex)
-    }
+    container.scrollTo({
+      left: scrollTarget,
+      behavior: smooth && !prefersReducedMotion ? "smooth" : "auto"
+    })
+    setActiveIndex(wrappedIndex)
   }, [prefersReducedMotion])
 
   useEffect(() => {
@@ -237,11 +235,15 @@ export function FeatureScroller() {
         </button>
       </div>
 
-      {/* Scroll container */}
+      {/* Scroll container - fixed height to prevent layout shift */}
       <div
         ref={scrollRef}
-        className="scrollbar-hide flex snap-x snap-mandatory gap-2 overflow-x-auto px-2 pb-3"
-        style={{ scrollPaddingInline: "8px" }}
+        className="scrollbar-hide flex snap-x snap-mandatory gap-2 overflow-x-auto overflow-y-hidden px-2"
+        style={{ 
+          scrollPaddingInline: "8px",
+          height: "min(440px, 78vh)",
+          willChange: "scroll-position"
+        }}
       >
         {steps.map((step) => (
           <div
@@ -251,6 +253,7 @@ export function FeatureScroller() {
               backgroundColor: step.color,
               width: "min(360px, 82vw)",
               height: "min(420px, 75vh)",
+              willChange: "transform"
             }}
           >
             <div className="flex h-full flex-col justify-between">
