@@ -544,7 +544,9 @@ export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [openTopic, setOpenTopic] = useState<string | null>("01")
   const [openFaqs, setOpenFaqs] = useState<Record<string, number | null>>({})
-
+  const [showContactModal, setShowContactModal] = useState(false)
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" })
+  const [contactStatus, setContactStatus] = useState<"idle" | "sending" | "sent" | "error">("idle")
   // Filter topics based on search
   const filteredTopics = helpTopics.filter(topic => 
     topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -565,6 +567,23 @@ export default function HelpPage() {
       ...prev,
       [categoryName]: prev[categoryName] === index ? null : index
     }))
+  }
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setContactStatus("sending")
+    
+    // Create mailto link with form data
+    const subject = encodeURIComponent(`Help Request from ${contactForm.name}`)
+    const body = encodeURIComponent(`Name: ${contactForm.name}\nEmail: ${contactForm.email}\n\nMessage:\n${contactForm.message}`)
+    window.location.href = `mailto:hello@creatorstays.com?subject=${subject}&body=${body}`
+    
+    setContactStatus("sent")
+    setTimeout(() => {
+      setShowContactModal(false)
+      setContactStatus("idle")
+      setContactForm({ name: "", email: "", message: "" })
+    }, 2000)
   }
 
   return (
@@ -602,23 +621,26 @@ export default function HelpPage() {
             </span>
             <span className="text-black">→</span>
           </Link>
-          <a 
-            href="mailto:support@creatorstays.com"
-            className="block-hover flex items-center justify-between rounded-xl border-[3px] border-black bg-[#28D17C] p-4 transition-transform duration-200"
+          <button 
+            onClick={() => setShowContactModal(true)}
+            className="block-hover flex items-center justify-between rounded-xl border-[3px] border-black bg-[#28D17C] p-4 transition-transform duration-200 w-full"
           >
             <span className="text-[12px] font-black uppercase tracking-wider text-black">
               Message Support
             </span>
             <span className="text-black">→</span>
-          </a>
+          </button>
         </div>
 
-        {/* Hero Image - Support Illustration */}
+        {/* Hero Video - Support Illustration */}
         <div className="mt-6">
-          <div className="block-hover overflow-hidden rounded-2xl border-[3px] border-black bg-[#F5F0E6]">
-            <img 
-              src="/images/help-support.png" 
-              alt="CreatorStays Support" 
+          <div className="block-hover overflow-hidden rounded-2xl border-[3px] border-black">
+            <video 
+              src="/images/help-support.mp4" 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
               className="w-full h-auto"
             />
           </div>
@@ -696,13 +718,13 @@ export default function HelpPage() {
             <p className="mt-2 text-[13px] font-medium text-black">
               We respond to every message within 24 hours.
             </p>
-            <a 
-              href="mailto:support@creatorstays.com"
+            <button 
+              onClick={() => setShowContactModal(true)}
               className="mt-4 inline-flex h-9 items-center gap-2 rounded-full bg-black px-4 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
             >
               Email Support
               <span>→</span>
-            </a>
+            </button>
           </div>
           <div className="block-hover rounded-2xl border-[3px] border-black bg-white p-5">
             <h3 className="font-heading text-[1.25rem] text-black" style={{ fontWeight: 900 }}>
@@ -722,6 +744,107 @@ export default function HelpPage() {
         </div>
 
       </div>
+
+      {/* Contact Modal */}
+      {showContactModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowContactModal(false)}
+          />
+          
+          {/* Modal */}
+          <div className="relative w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6">
+            {/* Close button */}
+            <button
+              onClick={() => setShowContactModal(false)}
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border-2 border-black text-black transition-colors hover:bg-black hover:text-white"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {contactStatus === "sent" ? (
+              <div className="text-center py-8">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-black bg-[#28D17C]">
+                  <svg className="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <h3 className="font-heading text-[1.5rem] text-black" style={{ fontWeight: 900 }}>
+                  MESSAGE SENT!
+                </h3>
+                <p className="mt-2 text-[13px] font-medium text-black">
+                  We'll get back to you within 24 hours.
+                </p>
+              </div>
+            ) : (
+              <>
+                <h3 className="font-heading text-[1.5rem] text-black" style={{ fontWeight: 900 }}>
+                  CONTACT US
+                </h3>
+                <p className="mt-1 text-[13px] font-medium text-black/60">
+                  We typically respond within 24 hours.
+                </p>
+
+                <form onSubmit={handleContactSubmit} className="mt-5 space-y-4">
+                  <div>
+                    <label className="mb-1.5 block text-[11px] font-black uppercase tracking-wider text-black">
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                      placeholder="Full name"
+                      className="w-full rounded-lg border-[2px] border-black px-3 py-2.5 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-[11px] font-black uppercase tracking-wider text-black">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                      placeholder="you@example.com"
+                      className="w-full rounded-lg border-[2px] border-black px-3 py-2.5 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-[11px] font-black uppercase tracking-wider text-black">
+                      Message
+                    </label>
+                    <textarea
+                      required
+                      rows={4}
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                      placeholder="How can we help?"
+                      className="w-full resize-none rounded-lg border-[2px] border-black px-3 py-2.5 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={contactStatus === "sending"}
+                    className="w-full rounded-full border-[3px] border-black bg-black py-3 text-[11px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+                  >
+                    {contactStatus === "sending" ? "Opening email..." : "Send Message"}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
