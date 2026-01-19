@@ -2,10 +2,8 @@
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 
-// Mock city data - replace with real API later (Google Places, Mapbox, etc.)
+// Mock city data
 const MOCK_CITIES = [
   "Lake Arrowhead, CA",
   "Lake Tahoe, CA",
@@ -16,31 +14,14 @@ const MOCK_CITIES = [
   "Palm Springs, CA",
   "Joshua Tree, CA",
   "Malibu, CA",
-  "Santa Barbara, CA",
-  "Napa Valley, CA",
-  "Carmel-by-the-Sea, CA",
   "Austin, TX",
-  "Dallas, TX",
-  "Houston, TX",
   "Denver, CO",
-  "Aspen, CO",
   "Miami, FL",
-  "Orlando, FL",
   "Nashville, TN",
   "Scottsdale, AZ",
-  "Sedona, AZ",
   "Seattle, WA",
-  "Portland, OR",
   "New York, NY",
-  "Brooklyn, NY",
   "Chicago, IL",
-  "Boston, MA",
-  "Savannah, GA",
-  "Charleston, SC",
-  "New Orleans, LA",
-  "Park City, UT",
-  "Maui, HI",
-  "Honolulu, HI",
 ]
 
 function CityAutocomplete({ 
@@ -79,26 +60,27 @@ function CityAutocomplete({
 
   return (
     <div ref={wrapperRef} className="relative">
-      <Input
+      <input
         required
         placeholder="Start typing a city..."
         value={value}
         onChange={e => onChange(e.target.value)}
         onFocus={() => suggestions.length > 0 && setOpen(true)}
+        className="h-10 w-full rounded-lg border-[2px] border-black bg-white px-3 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-2 focus:ring-black/20"
       />
       {open && suggestions.length > 0 && (
-        <div className="absolute z-20 mt-1 w-full rounded-lg border border-foreground/10 bg-white/95 py-1 shadow-lg backdrop-blur-sm">
+        <div className="absolute z-20 mt-1 w-full rounded-lg border-[2px] border-black bg-white py-1">
           {suggestions.map((city, i) => (
             <button
               key={i}
               type="button"
-              className="w-full px-3 py-2 text-left text-sm transition-colors hover:bg-primary/5"
+              className="w-full px-3 py-2 text-left text-[12px] font-medium text-black transition-colors hover:bg-[#FFD84A]"
               onClick={() => {
                 onChange(city)
                 setOpen(false)
               }}
             >
-              <span className="text-foreground">{city}</span>
+              {city}
             </button>
           ))}
         </div>
@@ -110,7 +92,6 @@ function CityAutocomplete({
 function normalizeUrl(url: string): string {
   if (!url) return url
   let normalized = url.trim()
-  // If doesn't start with http:// or https://, prepend https://
   if (!/^https?:\/\//i.test(normalized)) {
     normalized = 'https://' + normalized
   }
@@ -118,7 +99,7 @@ function normalizeUrl(url: string): string {
 }
 
 function isValidAirbnbUrl(url: string): boolean {
-  if (!url) return true // Empty is valid (required handled separately)
+  if (!url) return true
   const normalized = normalizeUrl(url)
   return normalized.includes("airbnb.com")
 }
@@ -146,10 +127,8 @@ export function HostSignupForm() {
     agreeTerms: false,
   })
   
-  // Prefill state
   const [prefill, setPrefill] = useState<ListingPrefill | null>(null)
   const [prefillStatus, setPrefillStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [manuallyEdited, setManuallyEdited] = useState(false)
   const [prefillAttempted, setPrefillAttempted] = useState(false)
 
@@ -162,7 +141,6 @@ export function HostSignupForm() {
       const normalized = normalizeUrl(form.listingUrl)
       setForm({ ...form, listingUrl: normalized })
       
-      // Auto-trigger prefill if valid and not manually edited
       if (isValidAirbnbUrl(normalized) && normalized.includes("airbnb.com") && !manuallyEdited && !prefillAttempted) {
         fetchPrefill(normalized)
       }
@@ -180,9 +158,7 @@ export function HostSignupForm() {
       if (data.ok) {
         setPrefill(data)
         setPrefillStatus("success")
-        setLastUpdated(new Date())
         
-        // Auto-fill city if not already set
         if (data.city && !form.cityRegion) {
           setForm(prev => ({ ...prev, cityRegion: data.city }))
         }
@@ -199,191 +175,204 @@ export function HostSignupForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!canSubmit) return
-    // Demo only - no backend call
     console.log("Host signup:", form, prefill)
     setSubmitted(true)
   }
 
+  const inputClass = "h-10 w-full rounded-lg border-[2px] border-black bg-white px-3 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
+
   if (submitted) {
     return (
-      <div className="text-center py-8">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-          <svg className="h-7 w-7 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+      <div className="text-center py-6">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border-[2px] border-black bg-[#28D17C]">
+          <svg className="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
-        <h2 className="text-xl font-semibold">Account created (demo)</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Next: build your profile and add your listing details.</p>
-        <Button className="mt-6" asChild>
-          <Link href="/dashboard/host">Go to Host Dashboard</Link>
-        </Button>
+        <h2 className="text-[16px] font-black uppercase tracking-wide text-black">Account Created</h2>
+        <p className="mt-2 text-[12px] font-medium text-black">Next: build your profile and add listing details.</p>
+        <Link 
+          href="/dashboard/host"
+          className="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-black px-5 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
+        >
+          Go to Dashboard
+          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <path d="M7 17L17 7M17 7H7M17 7V17" />
+          </svg>
+        </Link>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Full name *</label>
-          <Input
-            required
-            placeholder="Your name"
-            value={form.fullName}
-            onChange={e => setForm({ ...form, fullName: e.target.value })}
-          />
+    <div>
+      <p className="text-[9px] font-black uppercase tracking-wider text-black mb-3">Start as Host</p>
+      
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Full Name *</label>
+            <input
+              required
+              placeholder="Your name"
+              value={form.fullName}
+              onChange={e => setForm({ ...form, fullName: e.target.value })}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Email *</label>
+            <input
+              required
+              type="email"
+              placeholder="you@example.com"
+              value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })}
+              className={inputClass}
+            />
+          </div>
         </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Email *</label>
-          <Input
-            required
-            type="email"
-            placeholder="you@example.com"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-          />
-        </div>
-      </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Phone</label>
+            <input
+              type="tel"
+              placeholder="+1 (555) 000-0000"
+              value={form.phone}
+              onChange={e => setForm({ ...form, phone: e.target.value })}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Company</label>
+            <input
+              placeholder="Your company or brand"
+              value={form.companyName}
+              onChange={e => setForm({ ...form, companyName: e.target.value })}
+              className={inputClass}
+            />
+          </div>
+        </div>
+
         <div>
-          <label className="mb-1.5 block text-sm font-medium">Phone <span className="text-muted-foreground font-normal">(optional)</span></label>
-          <Input
-            type="tel"
-            placeholder="+1 (555) 000-0000"
-            value={form.phone}
-            onChange={e => setForm({ ...form, phone: e.target.value })}
+          <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">City / Region *</label>
+          <CityAutocomplete
+            value={form.cityRegion}
+            onChange={(value) => { 
+              setForm({ ...form, cityRegion: value })
+              setManuallyEdited(true)
+            }}
           />
         </div>
+
         <div>
-          <label className="mb-1.5 block text-sm font-medium">Company/Brand <span className="text-muted-foreground font-normal">(optional)</span></label>
-          <Input
-            placeholder="Your company or brand"
-            value={form.companyName}
-            onChange={e => setForm({ ...form, companyName: e.target.value })}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">City / Region *</label>
-        <CityAutocomplete
-          value={form.cityRegion}
-          onChange={(value) => { 
-            setForm({ ...form, cityRegion: value })
-            setManuallyEdited(true)
-          }}
-        />
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-sm font-medium">Airbnb listing URL (required)</label>
-        <div className="flex gap-2">
-          <Input
-            required
-            type="text"
-            placeholder="airbnb.com/rooms/..."
-            value={form.listingUrl}
-            onChange={e => setForm({ ...form, listingUrl: e.target.value })}
-            onBlur={handleListingUrlBlur}
-            className={`flex-1 ${listingUrlError ? "border-red-300 focus-visible:ring-red-500" : ""}`}
-          />
-          {showPrefillButton && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={prefillStatus === "loading"}
-              onClick={() => fetchPrefill(form.listingUrl)}
-              className="shrink-0 text-xs"
-            >
-              {prefillStatus === "loading" ? "Fetching…" : "Pull details"}
-            </Button>
-          )}
-        </div>
-        {listingUrlError ? (
-          <p className="mt-1 text-xs text-red-600">Only Airbnb listings are supported during beta.</p>
-        ) : prefillStatus === "error" ? (
-          <p className="mt-1 text-xs text-amber-600">Couldn&apos;t pull details. Enter manually below.</p>
-        ) : (
-          <p className="mt-1 text-xs text-muted-foreground">VRBO and other platforms coming soon. Best-effort auto-fill.</p>
-        )}
-      </div>
-
-      {/* Listing preview (after prefill) */}
-      {prefillStatus === "success" && prefill && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              {prefill.title && (
-                <h4 className="font-medium text-sm leading-tight">{prefill.title}</h4>
-              )}
-              {prefill.city && (
-                <p className="text-xs text-muted-foreground mt-0.5">{prefill.city}</p>
-              )}
-              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                {prefill.rating && (
-                  <span>★ {prefill.rating}{prefill.reviewCount && ` (${prefill.reviewCount} reviews)`}</span>
-                )}
-                {prefill.price && <span>{prefill.price}/night</span>}
-              </div>
-            </div>
-            {prefill.photos && prefill.photos[0] && (
-              <img 
-                src={prefill.photos[0]} 
-                alt="Listing" 
-                className="h-16 w-20 rounded-md object-cover shrink-0"
-              />
+          <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Airbnb Listing URL *</label>
+          <div className="flex gap-2">
+            <input
+              required
+              type="text"
+              placeholder="airbnb.com/rooms/..."
+              value={form.listingUrl}
+              onChange={e => setForm({ ...form, listingUrl: e.target.value })}
+              onBlur={handleListingUrlBlur}
+              className={`flex-1 ${inputClass} ${listingUrlError ? "border-[#FF6B6B]" : ""}`}
+            />
+            {showPrefillButton && (
+              <button
+                type="button"
+                disabled={prefillStatus === "loading"}
+                onClick={() => fetchPrefill(form.listingUrl)}
+                className="shrink-0 rounded-lg border-[2px] border-black bg-white px-3 text-[10px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+              >
+                {prefillStatus === "loading" ? "..." : "Pull"}
+              </button>
             )}
           </div>
-          {lastUpdated && (
-            <p className="mt-2 text-[10px] text-muted-foreground/70">
-              Last updated: {lastUpdated.toLocaleTimeString()}
-            </p>
+          {listingUrlError && (
+            <p className="mt-1 text-[10px] font-medium text-[#FF6B6B]">Only Airbnb listings supported during beta.</p>
+          )}
+          {prefillStatus === "error" && (
+            <p className="mt-1 text-[10px] font-medium text-[#FF6B6B]">Couldn&apos;t pull details. Enter manually.</p>
           )}
         </div>
-      )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Password *</label>
-          <Input
-            required
-            type="password"
-            placeholder="Create a password"
-            value={form.password}
-            onChange={e => setForm({ ...form, password: e.target.value })}
-          />
+        {/* Listing preview */}
+        {prefillStatus === "success" && prefill && (
+          <div className="rounded-lg border-[2px] border-black bg-[#28D17C]/20 p-3">
+            <div className="flex items-start gap-3">
+              <div className="min-w-0 flex-1">
+                {prefill.title && (
+                  <h4 className="font-bold text-[12px] text-black leading-tight">{prefill.title}</h4>
+                )}
+                {prefill.city && (
+                  <p className="text-[10px] font-medium text-black mt-0.5">{prefill.city}</p>
+                )}
+                <div className="flex items-center gap-3 mt-1 text-[10px] font-medium text-black">
+                  {prefill.rating && (
+                    <span>★ {prefill.rating}{prefill.reviewCount && ` (${prefill.reviewCount})`}</span>
+                  )}
+                  {prefill.price && <span>{prefill.price}/night</span>}
+                </div>
+              </div>
+              {prefill.photos && prefill.photos[0] && (
+                <img 
+                  src={prefill.photos[0]} 
+                  alt="Listing" 
+                  className="h-14 w-18 rounded-md border-[2px] border-black object-cover shrink-0"
+                />
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Password *</label>
+            <input
+              required
+              type="password"
+              placeholder="Create a password"
+              value={form.password}
+              onChange={e => setForm({ ...form, password: e.target.value })}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Confirm *</label>
+            <input
+              required
+              type="password"
+              placeholder="Confirm password"
+              value={form.confirmPassword}
+              onChange={e => setForm({ ...form, confirmPassword: e.target.value })}
+              className={inputClass}
+            />
+          </div>
         </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">Confirm password *</label>
-          <Input
+
+        <div className="flex items-start gap-2 pt-1">
+          <input
+            type="checkbox"
+            id="terms"
             required
-            type="password"
-            placeholder="Confirm password"
-            value={form.confirmPassword}
-            onChange={e => setForm({ ...form, confirmPassword: e.target.value })}
+            checked={form.agreeTerms}
+            onChange={e => setForm({ ...form, agreeTerms: e.target.checked })}
+            className="mt-0.5 h-4 w-4 rounded border-[2px] border-black accent-black"
           />
+          <label htmlFor="terms" className="text-[10px] font-medium text-black">
+            I agree to the <a href="#" className="font-bold underline">Terms</a> and <a href="#" className="font-bold underline">Privacy Policy</a>
+          </label>
         </div>
-      </div>
 
-      <div className="flex items-start gap-2 pt-2">
-        <input
-          type="checkbox"
-          id="terms"
-          required
-          checked={form.agreeTerms}
-          onChange={e => setForm({ ...form, agreeTerms: e.target.checked })}
-          className="mt-1 h-4 w-4 rounded border-gray-300"
-        />
-        <label htmlFor="terms" className="text-sm text-muted-foreground">
-          I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a> and <a href="#" className="text-primary hover:underline">Privacy Policy</a>
-        </label>
-      </div>
-
-      <Button type="submit" size="lg" className="w-full mt-2" disabled={!canSubmit}>
-        Create host account
-      </Button>
-    </form>
+        <button 
+          type="submit" 
+          disabled={!canSubmit}
+          className="w-full h-11 rounded-full bg-black text-[11px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+        >
+          Create Host Account
+        </button>
+      </form>
+    </div>
   )
 }
