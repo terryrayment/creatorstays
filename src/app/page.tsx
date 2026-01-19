@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { FeatureScroller } from "@/components/marketing/feature-scroller"
+import { RevealStack } from "@/components/marketing/reveal-stack"
 
 // Simple icon tiles
 function IconTile({ children }: { children: React.ReactNode }) {
@@ -234,11 +235,13 @@ function FooterMarquee() {
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-black">
-      <HeroSection />
-      <FeatureScroller />
-      <HowItWorksSection />
-      <CTASection />
-      <FooterMarquee />
+      <RevealStack baseDelay={80} stagger={100} duration={480}>
+        <HeroSection />
+        <FeatureScroller />
+        <HowItWorksSection />
+        <CTASection />
+        <FooterMarquee />
+      </RevealStack>
     </div>
   )
 }

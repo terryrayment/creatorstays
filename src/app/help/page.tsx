@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { RevealStack } from "@/components/marketing/reveal-stack"
 
 // Guide items - simplified list
 const guideItems = [
@@ -76,6 +77,92 @@ function FAQRow({ item, isOpen, onToggle }: { item: typeof faqItems[0], isOpen: 
   )
 }
 
+function HeaderSection() {
+  return (
+    <div>
+      <h1 className="text-2xl font-semibold tracking-tight">Help Center</h1>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link href="/hosts" className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-white px-3 py-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
+          Host signup
+        </Link>
+        <Link href="/waitlist" className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-white px-3 py-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
+          Creator waitlist
+        </Link>
+        <Link href="/creators" className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-white px-3 py-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
+          Browse creators
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function GuidesSection() {
+  return (
+    <div className="mt-10">
+      <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">Guides</h2>
+      <div className="space-y-0">
+        {guideItems.map(item => (
+          <GuideRow key={item.id} item={item} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function FAQSection({ openFaq, setOpenFaq }: { openFaq: number | null, setOpenFaq: (v: number | null) => void }) {
+  return (
+    <div className="mt-12">
+      <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">Frequently Asked</h2>
+      <div className="rounded-xl border border-foreground/5 bg-white/50 px-4">
+        {faqItems.map((item, i) => (
+          <FAQRow key={i} item={item} isOpen={openFaq === i} onToggle={() => setOpenFaq(openFaq === i ? null : i)} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function UtilitySection({ email, setEmail, subscribed, handleSubscribe }: { 
+  email: string
+  setEmail: (v: string) => void
+  subscribed: boolean
+  handleSubscribe: (e: React.FormEvent) => void 
+}) {
+  return (
+    <div className="mt-16 grid gap-4 sm:grid-cols-2">
+      {/* Subscribe block */}
+      <div className="rounded-xl border border-foreground/5 bg-white/50 p-5">
+        <h3 className="text-[13px] font-semibold">Stay updated</h3>
+        <p className="mt-1 text-[12px] text-muted-foreground">Get product updates and tips.</p>
+        {subscribed ? (
+          <p className="mt-4 text-[12px] text-emerald-600 font-medium">✓ You&apos;re subscribed!</p>
+        ) : (
+          <form onSubmit={handleSubscribe} className="mt-4 flex gap-2">
+            <Input 
+              type="email" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
+              placeholder="you@email.com" 
+              className="flex-1 text-[13px] h-9 bg-white" 
+              required 
+            />
+            <Button type="submit" size="sm" className="h-9 px-4 text-[12px]">Subscribe</Button>
+          </form>
+        )}
+      </div>
+
+      {/* Support block */}
+      <div className="rounded-xl border border-foreground/5 bg-gradient-to-br from-primary/5 to-accent/5 p-5">
+        <h3 className="text-[13px] font-semibold">Always here to help</h3>
+        <p className="mt-1 text-[12px] text-muted-foreground">Can&apos;t find your answer? We respond within 24 hours.</p>
+        <Button size="sm" className="mt-4 h-9 px-4 text-[12px]" asChild>
+          <a href="mailto:support@creatorstays.com">Get support</a>
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 export default function HelpPage() {
   const [email, setEmail] = useState("")
   const [subscribed, setSubscribed] = useState(false)
@@ -90,74 +177,12 @@ export default function HelpPage() {
     <section className="py-12 md:py-16">
       <Container>
         <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <h1 className="text-2xl font-semibold tracking-tight">Help Center</h1>
-          
-          {/* Quick links pill row */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/hosts" className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-white px-3 py-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
-              Host signup
-            </Link>
-            <Link href="/waitlist" className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-white px-3 py-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
-              Creator waitlist
-            </Link>
-            <Link href="/creators" className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-white px-3 py-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
-              Browse creators
-            </Link>
-          </div>
-
-          {/* Guide list */}
-          <div className="mt-10">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">Guides</h2>
-            <div className="space-y-0">
-              {guideItems.map(item => (
-                <GuideRow key={item.id} item={item} />
-              ))}
-            </div>
-          </div>
-
-          {/* FAQ section */}
-          <div className="mt-12">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">Frequently Asked</h2>
-            <div className="rounded-xl border border-foreground/5 bg-white/50 px-4">
-              {faqItems.map((item, i) => (
-                <FAQRow key={i} item={item} isOpen={openFaq === i} onToggle={() => setOpenFaq(openFaq === i ? null : i)} />
-              ))}
-            </div>
-          </div>
-
-          {/* Utility blocks */}
-          <div className="mt-16 grid gap-4 sm:grid-cols-2">
-            {/* Subscribe block */}
-            <div className="rounded-xl border border-foreground/5 bg-white/50 p-5">
-              <h3 className="text-[13px] font-semibold">Stay updated</h3>
-              <p className="mt-1 text-[12px] text-muted-foreground">Get product updates and tips.</p>
-              {subscribed ? (
-                <p className="mt-4 text-[12px] text-emerald-600 font-medium">✓ You&apos;re subscribed!</p>
-              ) : (
-                <form onSubmit={handleSubscribe} className="mt-4 flex gap-2">
-                  <Input 
-                    type="email" 
-                    value={email} 
-                    onChange={e => setEmail(e.target.value)} 
-                    placeholder="you@email.com" 
-                    className="flex-1 text-[13px] h-9 bg-white" 
-                    required 
-                  />
-                  <Button type="submit" size="sm" className="h-9 px-4 text-[12px]">Subscribe</Button>
-                </form>
-              )}
-            </div>
-
-            {/* Support block */}
-            <div className="rounded-xl border border-foreground/5 bg-gradient-to-br from-primary/5 to-accent/5 p-5">
-              <h3 className="text-[13px] font-semibold">Always here to help</h3>
-              <p className="mt-1 text-[12px] text-muted-foreground">Can&apos;t find your answer? We respond within 24 hours.</p>
-              <Button size="sm" className="mt-4 h-9 px-4 text-[12px]" asChild>
-                <a href="mailto:support@creatorstays.com">Get support</a>
-              </Button>
-            </div>
-          </div>
+          <RevealStack baseDelay={50} stagger={80} duration={450}>
+            <HeaderSection />
+            <GuidesSection />
+            <FAQSection openFaq={openFaq} setOpenFaq={setOpenFaq} />
+            <UtilitySection email={email} setEmail={setEmail} subscribed={subscribed} handleSubscribe={handleSubscribe} />
+          </RevealStack>
         </div>
       </Container>
     </section>
