@@ -8,7 +8,7 @@ export const metadata = {
 
 function DashboardLoading() {
   return (
-    <div className="min-h-screen bg-[hsl(210,20%,99%)] flex items-center justify-center">
+    <div className="dashboard min-h-screen bg-[hsl(210,20%,98%)] flex items-center justify-center">
       <div className="text-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto" />
         <p className="mt-2 text-sm text-muted-foreground">Loading dashboard...</p>
@@ -19,8 +19,10 @@ function DashboardLoading() {
 
 export default function CreatorDashboardPage() {
   return (
-    <Suspense fallback={<DashboardLoading />}>
-      <CreatorDashboardProfile />
-    </Suspense>
+    <div className="dashboard">
+      <Suspense fallback={<DashboardLoading />}>
+        <CreatorDashboardProfile />
+      </Suspense>
+    </div>
   )
 }

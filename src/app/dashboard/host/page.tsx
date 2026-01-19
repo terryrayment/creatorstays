@@ -6,5 +6,9 @@ export const metadata = {
 }
 
 export default function HostDashboardPage() {
-  return <HostDashboard />
+  return (
+    <div className="dashboard">
+      <HostDashboard />
+    </div>
+  )
 }

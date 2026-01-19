@@ -885,3 +885,77 @@
     transform: rotate(3deg);
   }
 }
+
+/* ============================================================================
+   Dashboard Design Tokens (subtle marketing parity)
+   ============================================================================ */
+
+.dashboard {
+  /* Slightly stronger borders */
+  --dashboard-border: hsl(210, 10%, 85%);
+  --dashboard-border-hover: hsl(210, 10%, 75%);
+  --dashboard-radius: 0.75rem;
+  --dashboard-radius-lg: 1rem;
+}
+
+/* Dashboard panels - slightly rounder, thicker borders */
+.dashboard .rounded-xl {
+  border-radius: var(--dashboard-radius-lg);
+}
+
+.dashboard .border {
+  border-color: var(--dashboard-border);
+}
+
+.dashboard .border-foreground\/5 {
+  border-color: var(--dashboard-border);
+}
+
+/* Dashboard section titles - heavier weight */
+.dashboard h1,
+.dashboard h2,
+.dashboard h3 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.dashboard .text-sm.font-semibold.uppercase {
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+/* Dashboard buttons - pill style aligned with marketing */
+.dashboard button,
+.dashboard [role="button"] {
+  border-radius: 9999px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Dashboard primary buttons - stronger presence */
+.dashboard .bg-primary {
+  font-weight: 700;
+}
+
+/* Dashboard cards hover - subtle lift */
+.dashboard .rounded-xl.border {
+  transition: transform 150ms ease-out, border-color 150ms ease-out;
+}
+
+.dashboard .rounded-xl.border:hover {
+  border-color: var(--dashboard-border-hover);
+}
+
+/* Dashboard input fields - rounder */
+.dashboard input,
+.dashboard textarea,
+.dashboard select {
+  border-radius: 0.5rem;
+  border-color: var(--dashboard-border);
+}
+
+.dashboard input:focus,
+.dashboard textarea:focus,
+.dashboard select:focus {
+  border-color: var(--dashboard-border-hover);
+}
