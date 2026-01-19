@@ -97,6 +97,241 @@ function EmptyState({ title, description }: { title: string; description: string
   )
 }
 
+// Mock campaign data
+const mockCampaigns = [
+  {
+    id: 1,
+    property: "Cozy A-Frame Cabin",
+    host: "Mountain View Retreats",
+    linkLabel: "cabin-winter-stay",
+    dateRange: "Jan 5 – Jan 19",
+    postDate: 3, // day index when content was posted
+    totalClicks: 127,
+    uniqueClicks: 98,
+    revisitRate: 23,
+    // Activity pattern (0-10 scale per day)
+    activity: [1, 2, 8, 10, 9, 7, 5, 4, 3, 3, 2, 2, 1, 1],
+  },
+  {
+    id: 2,
+    property: "Modern Beach House",
+    host: "Coastal Getaways",
+    linkLabel: "beach-escape-2024",
+    dateRange: "Dec 20 – Jan 3",
+    postDate: 2,
+    totalClicks: 89,
+    uniqueClicks: 71,
+    revisitRate: 18,
+    activity: [1, 7, 10, 8, 6, 4, 3, 2, 2, 2, 1, 1, 1, 1],
+  },
+  {
+    id: 3,
+    property: "Downtown Loft",
+    host: "Urban Stays Co",
+    linkLabel: "city-vibes",
+    dateRange: "Dec 10 – Dec 24",
+    postDate: 4,
+    totalClicks: 31,
+    uniqueClicks: 28,
+    revisitRate: 10,
+    activity: [0, 1, 1, 2, 6, 8, 5, 3, 2, 1, 1, 1, 0, 0],
+  },
+]
+
+// Campaign Timeline Component
+function CampaignTimeline() {
+  const [timeRange, setTimeRange] = useState<'14' | '30'>('14')
+  const [hoveredId, setHoveredId] = useState<number | null>(null)
+
+  return (
+    <Panel variant="elevated">
+      <PanelHeader 
+        title="Campaign timeline" 
+        actions={
+          <div className="flex rounded-full border border-foreground/10 bg-foreground/[0.02] p-0.5">
+            <button
+              onClick={() => setTimeRange('14')}
+              className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
+                timeRange === '14' 
+                  ? 'bg-white text-foreground shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Last 14 days
+            </button>
+            <button
+              onClick={() => setTimeRange('30')}
+              className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
+                timeRange === '30' 
+                  ? 'bg-white text-foreground shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Last 30 days
+            </button>
+          </div>
+        }
+      />
+      <PanelContent className="p-0">
+        <div className="divide-y divide-foreground/5">
+          {mockCampaigns.map((campaign) => (
+            <div
+              key={campaign.id}
+              onMouseEnter={() => setHoveredId(campaign.id)}
+              onMouseLeave={() => setHoveredId(null)}
+              className={`px-4 py-3 transition-all duration-200 ${
+                hoveredId !== null && hoveredId !== campaign.id 
+                  ? 'opacity-40' 
+                  : 'opacity-100'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium leading-tight">{campaign.property}</p>
+                  <p className="text-[10px] text-muted-foreground">{campaign.host} · /{campaign.linkLabel}</p>
+                  <p className="text-[10px] text-muted-foreground/60">{campaign.dateRange}</p>
+                </div>
+                <div className="flex gap-4 text-right">
+                  <div>
+                    <p className="text-sm font-semibold">{campaign.totalClicks}</p>
+                    <p className="text-[9px] text-muted-foreground">clicks</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{campaign.uniqueClicks}</p>
+                    <p className="text-[9px] text-muted-foreground">unique</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{campaign.revisitRate}%</p>
+                    <p className="text-[9px] text-muted-foreground">revisit</p>
+                  </div>
+                </div>
+              </div>
+              {/* Activity timeline */}
+              <div className="mt-2 flex h-6 items-end gap-px">
+                {campaign.activity.map((level, i) => (
+                  <div
+                    key={i}
+                    className={`flex-1 rounded-sm transition-all ${
+                      i === campaign.postDate 
+                        ? 'bg-primary' 
+                        : hoveredId === campaign.id 
+                          ? 'bg-primary/40' 
+                          : 'bg-foreground/10'
+                    }`}
+                    style={{ 
+                      height: `${Math.max(level * 10, 4)}%`,
+                      opacity: hoveredId === campaign.id ? 1 : 0.6
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="mt-1 flex justify-between text-[8px] text-muted-foreground/40">
+                <span>Start</span>
+                <span>Post ↑</span>
+                <span>End</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </PanelContent>
+    </Panel>
+  )
+}
+
+// Mock tax data
+const mockTaxData = {
+  ytdGross: 2450.00,
+  platformFees: 367.50,
+  netPaidOut: 1870.00,
+  pendingBalance: 212.50,
+  stripeConnected: false,
+  checklist: {
+    legalName: false,
+    address: false,
+    stripeConnected: false,
+    payoutSchedule: false,
+  }
+}
+
+// Tax Readiness Panel Component
+function TaxReadinessPanel() {
+  return (
+    <Panel className="border-emerald-200/50 bg-gradient-to-b from-emerald-50/30 to-transparent">
+      <PanelHeader 
+        title="Tax readiness" 
+        actions={<span className="text-[10px] text-emerald-600">2025</span>}
+      />
+      <PanelContent className="space-y-4">
+        {/* Earnings summary */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg bg-white/60 p-2.5">
+            <p className="text-[10px] text-muted-foreground">YTD Gross</p>
+            <p className="text-base font-semibold text-emerald-600">${mockTaxData.ytdGross.toFixed(2)}</p>
+          </div>
+          <div className="rounded-lg bg-white/60 p-2.5">
+            <p className="text-[10px] text-muted-foreground">Platform Fees (15%)</p>
+            <p className="text-base font-semibold">-${mockTaxData.platformFees.toFixed(2)}</p>
+          </div>
+          <div className="rounded-lg bg-white/60 p-2.5">
+            <p className="text-[10px] text-muted-foreground">Net Paid Out</p>
+            <p className="text-base font-semibold">${mockTaxData.netPaidOut.toFixed(2)}</p>
+          </div>
+          <div className="rounded-lg bg-white/60 p-2.5">
+            <p className="text-[10px] text-muted-foreground">Pending</p>
+            <p className="text-base font-semibold text-amber-600">${mockTaxData.pendingBalance.toFixed(2)}</p>
+          </div>
+        </div>
+
+        {/* Stripe status */}
+        <div className="rounded-lg border border-dashed border-foreground/10 bg-white/40 p-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium">Payout account</p>
+              <p className="text-[10px] text-muted-foreground">
+                {mockTaxData.stripeConnected ? 'Connected via Stripe' : 'Not connected'}
+              </p>
+            </div>
+            <Button size="sm" variant={mockTaxData.stripeConnected ? "outline" : "default"} className="text-[10px]">
+              {mockTaxData.stripeConnected ? 'Manage' : 'Connect Stripe'}
+            </Button>
+          </div>
+        </div>
+
+        {/* 1099 note */}
+        <p className="text-[10px] text-muted-foreground leading-relaxed">
+          1099-NEC will be issued via Stripe for US creators earning $600+ in a calendar year.
+        </p>
+
+        {/* Checklist */}
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Setup checklist</p>
+          {[
+            { key: 'legalName', label: 'Add legal name', done: mockTaxData.checklist.legalName },
+            { key: 'address', label: 'Add address', done: mockTaxData.checklist.address },
+            { key: 'stripeConnected', label: 'Connect Stripe', done: mockTaxData.checklist.stripeConnected },
+            { key: 'payoutSchedule', label: 'Choose payout schedule', done: mockTaxData.checklist.payoutSchedule },
+          ].map((item) => (
+            <div key={item.key} className="flex items-center gap-2 text-xs">
+              <div className={`flex h-4 w-4 items-center justify-center rounded-full ${
+                item.done 
+                  ? 'bg-emerald-500 text-white' 
+                  : 'border border-foreground/20 bg-white'
+              }`}>
+                {item.done && (
+                  <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                )}
+              </div>
+              <span className={item.done ? 'text-muted-foreground line-through' : ''}>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </PanelContent>
+    </Panel>
+  )
+}
+
 // Mock data
 const creator = {
   displayName: "Your Profile",
@@ -538,10 +773,16 @@ export function CreatorDashboardProfile() {
               <Metric value="2" label="Active Collabs" size="md" />
               <Metric value="12%" label="Avg Commission" size="md" />
             </div>
+
+            {/* Campaign Timeline */}
+            <CampaignTimeline />
           </div>
 
           {/* Right sidebar */}
           <div className="space-y-4">
+            {/* Tax Readiness */}
+            <TaxReadinessPanel />
+
             {/* Offers */}
             <Panel>
               <PanelHeader title="Pending Offers" actions={<span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">2 new</span>} />

@@ -183,57 +183,89 @@ const creatorTypes = [
 
 function BetaSection() {
   return (
-    <section className="py-24">
+    <section className="py-16">
       <Container>
         <div className="text-center opacity-0 reveal">
           <span className="inline-block rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5 text-sm font-medium text-accent">
             Now in Beta
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">
             CreatorStays is launching soon
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            We&apos;re building the marketplace to connect vacation rental hosts with content creators. Get early access.
+          <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
+            The marketplace connecting vacation rental hosts with content creators.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-2">
-          <div className="rounded-2xl border border-border/50 bg-card p-8 opacity-0 reveal" style={{ animationDelay: '100ms' }}>
-            <h3 className="text-xl font-semibold">For Hosts</h3>
-            <p className="mt-2 text-muted-foreground">
-              Sign up to list your property and connect with creators who can drive bookings through authentic content.
-            </p>
-            <Button className="mt-6" asChild>
-              <Link href="/hosts">Host Signup</Link>
-            </Button>
+        {/* Staggered For Hosts / For Creators panels */}
+        <div className="relative mt-10">
+          <div className="pointer-events-none absolute -inset-20 -z-10" aria-hidden="true">
+            <div className="absolute left-1/3 top-0 h-[300px] w-[400px] rounded-full bg-[hsl(213,94%,45%)]/[0.06] blur-[140px]" />
+            <div className="absolute bottom-0 right-1/3 h-[250px] w-[350px] rounded-full bg-[hsl(199,89%,48%)]/[0.05] blur-[120px]" />
           </div>
+          <div className="focus-group grid gap-3 md:grid-cols-[1.2fr_1fr] md:items-start">
+            {/* Hosts - Primary, taller */}
+            <div 
+              className="marketing-pill focus-card flex-col items-start gap-1 rounded-3xl p-6 opacity-0 reveal md:min-h-[180px]"
+              style={{ animationDelay: '100ms' }}
+            >
+              <div className="marketing-pill-glow" aria-hidden="true" />
+              <div className="relative z-10 flex h-full flex-col">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Primary</span>
+                <h3 className="mt-1 text-xl font-semibold tracking-tight">For Hosts</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground/80">
+                  List your property and connect with creators who drive traffic through authentic content.
+                </p>
+                <div className="mt-auto pt-4">
+                  <Button size="sm" className="text-xs" asChild>
+                    <Link href="/hosts">Host Signup</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
 
-          <div className="rounded-2xl border border-border/50 bg-card p-8 opacity-0 reveal" style={{ animationDelay: '200ms' }}>
-            <h3 className="text-xl font-semibold">For Creators</h3>
-            <p className="mt-2 text-muted-foreground">
-              Join the waitlist to get early access. Be first to browse properties and receive offers from hosts.
-            </p>
-            <Button variant="outline" className="mt-6" asChild>
-              <Link href="/waitlist">Join Waitlist</Link>
-            </Button>
+            {/* Creators - Secondary, shorter */}
+            <div 
+              className="marketing-pill focus-card flex-col items-start gap-1 rounded-2xl p-5 opacity-0 reveal"
+              style={{ animationDelay: '200ms' }}
+            >
+              <div className="marketing-pill-glow" aria-hidden="true" />
+              <div className="relative z-10">
+                <h3 className="text-lg font-semibold tracking-tight">For Creators</h3>
+                <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground/70">
+                  Join the waitlist for early access to browse properties and receive offers.
+                </p>
+                <div className="mt-4">
+                  <Button size="sm" variant="outline" className="text-xs" asChild>
+                    <Link href="/waitlist">Join Creator Waitlist</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-16">
-          <p className="mb-6 text-center text-sm font-medium text-muted-foreground">Creator categories we&apos;re recruiting</p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Creator categories - horizontal pill list */}
+        <div className="mt-12">
+          <p className="mb-4 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+            Creator categories we&apos;re recruiting
+          </p>
+          <div className="focus-group flex flex-wrap justify-center gap-2">
             {creatorTypes.map((type, i) => (
               <div 
                 key={type.category}
-                className="flex items-center gap-4 rounded-xl border border-border/50 bg-muted/30 p-4 opacity-0 reveal"
-                style={{ animationDelay: `${(i % 3 + 1) * 100}ms` }}
+                className="marketing-pill focus-card gap-3 rounded-full px-4 py-2.5 opacity-0 reveal"
+                style={{ animationDelay: `${(i + 1) * 60}ms` }}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/20">
-                  <span className="text-lg font-semibold text-primary">{type.category[0]}</span>
-                </div>
-                <div>
-                  <p className="font-medium">{type.category}</p>
-                  <p className="text-sm text-muted-foreground">{type.description}</p>
+                <div className="marketing-pill-glow" aria-hidden="true" />
+                <div className="relative z-10 flex items-center gap-2.5">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-primary/15 to-accent/15 text-[10px] font-bold text-primary">
+                    {type.category[0]}
+                  </span>
+                  <div>
+                    <p className="text-[13px] font-medium leading-tight">{type.category}</p>
+                    <p className="text-[10px] text-muted-foreground/60">{type.description}</p>
+                  </div>
                 </div>
               </div>
             ))}
