@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Container } from "@/components/layout/container"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Select } from "@/components/ui/select"
 
 function EdgeBlur() {
   return (
@@ -14,9 +15,38 @@ function EdgeBlur() {
   )
 }
 
-const creatorNiches = ["Travel", "Lifestyle", "Photography", "Vlog", "Food", "Adventure", "Fashion", "Wellness"]
-const platforms = ["Instagram", "TikTok", "YouTube", "Twitter/X", "Other"]
-const audienceSizes = ["Under 10K", "10K - 50K", "50K - 100K", "100K - 500K", "500K+"]
+const creatorNicheOptions = [
+  { value: "Travel", label: "Travel" },
+  { value: "Lifestyle", label: "Lifestyle" },
+  { value: "Photography", label: "Photography" },
+  { value: "Vlog", label: "Vlog" },
+  { value: "Food", label: "Food" },
+  { value: "Adventure", label: "Adventure" },
+  { value: "Fashion", label: "Fashion" },
+  { value: "Wellness", label: "Wellness" },
+]
+const platformOptions = [
+  { value: "Instagram", label: "Instagram" },
+  { value: "TikTok", label: "TikTok" },
+  { value: "YouTube", label: "YouTube" },
+  { value: "Twitter/X", label: "Twitter/X" },
+  { value: "Other", label: "Other" },
+]
+const audienceSizeOptions = [
+  { value: "Under 10K", label: "Under 10K" },
+  { value: "10K - 50K", label: "10K - 50K" },
+  { value: "50K - 100K", label: "50K - 100K" },
+  { value: "100K - 500K", label: "100K - 500K" },
+  { value: "500K+", label: "500K+" },
+]
+const propertyTypeOptions = [
+  { value: "entire-home", label: "Entire Home" },
+  { value: "apartment", label: "Apartment" },
+  { value: "cabin", label: "Cabin" },
+  { value: "villa", label: "Villa" },
+  { value: "unique", label: "Unique Stay" },
+  { value: "other", label: "Other" },
+]
 
 export default function WaitlistPage() {
   const [userType, setUserType] = useState<"creator" | "host">("creator")
@@ -123,42 +153,36 @@ export default function WaitlistPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="mb-1.5 block text-sm font-medium">Primary Platform</label>
-                      <select
+                      <Select
                         required
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        placeholder="Select platform"
+                        options={platformOptions}
                         value={form.platform}
                         onChange={e => setForm({ ...form, platform: e.target.value })}
-                      >
-                        <option value="">Select platform</option>
-                        {platforms.map(p => <option key={p} value={p}>{p}</option>)}
-                      </select>
+                      />
                     </div>
                     <div>
                       <label className="mb-1.5 block text-sm font-medium">Content Niche</label>
-                      <select
+                      <Select
                         required
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        placeholder="Select niche"
+                        options={creatorNicheOptions}
                         value={form.niche}
                         onChange={e => setForm({ ...form, niche: e.target.value })}
-                      >
-                        <option value="">Select niche</option>
-                        {creatorNiches.map(n => <option key={n} value={n}>{n}</option>)}
-                      </select>
+                      />
                     </div>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="mb-1.5 block text-sm font-medium">Audience Size</label>
-                      <select
+                      <Select
                         required
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        placeholder="Select size"
+                        options={audienceSizeOptions}
                         value={form.audienceSize}
                         onChange={e => setForm({ ...form, audienceSize: e.target.value })}
-                      >
-                        <option value="">Select size</option>
-                        {audienceSizes.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                      />
                     </div>
                     <div>
                       <label className="mb-1.5 block text-sm font-medium">Primary Handle</label>
@@ -212,20 +236,13 @@ export default function WaitlistPage() {
                     </div>
                     <div>
                       <label className="mb-1.5 block text-sm font-medium">Property Type</label>
-                      <select
+                      <Select
                         required
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        placeholder="Select type"
+                        options={propertyTypeOptions}
                         value={form.propertyType}
                         onChange={e => setForm({ ...form, propertyType: e.target.value })}
-                      >
-                        <option value="">Select type</option>
-                        <option value="entire-home">Entire Home</option>
-                        <option value="apartment">Apartment</option>
-                        <option value="cabin">Cabin</option>
-                        <option value="villa">Villa</option>
-                        <option value="unique">Unique Stay</option>
-                        <option value="other">Other</option>
-                      </select>
+                      />
                     </div>
                   </div>
 
