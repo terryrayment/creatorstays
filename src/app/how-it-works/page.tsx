@@ -64,12 +64,15 @@ export default function HowItWorksPage() {
         
         {/* Hero Block */}
         <div className="block-hover rounded-2xl border-[3px] border-black bg-[#FFD84A] p-6">
-          <h1 className="font-heading text-[2.5rem] leading-[0.85] tracking-[-0.03em] sm:text-[3.5rem] md:text-[4.5rem]" style={{ fontWeight: 900 }}>
+          <p className="text-[10px] font-black uppercase tracking-wider text-black">
+            The first creator marketplace for short-term rentals
+          </p>
+          <h1 className="mt-2 font-heading text-[2.5rem] leading-[0.85] tracking-[-0.03em] sm:text-[3.5rem] md:text-[4.5rem]" style={{ fontWeight: 900 }}>
             <span className="block text-black">HOW IT</span>
             <span className="block text-black" style={{ fontWeight: 400 }}>WORKS</span>
           </h1>
           <p className="mt-4 max-w-lg text-[15px] font-medium leading-snug text-black">
-            Pay creators per post, then add traffic bonuses when tracked links perform. We handle payouts and paperwork.
+            A huge opportunity for both hosts and creators. Pay creators per post, add traffic bonuses when links perform. We handle payouts and paperwork.
           </p>
         </div>
 

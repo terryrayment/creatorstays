@@ -24,7 +24,7 @@ function HeroSection() {
           {/* PRIMARY BLOCK - Yellow */}
           <div className="block-hover rounded-2xl border-[3px] border-black bg-[#FFD84A] p-5 lg:p-6">
             <p className="text-[10px] font-black uppercase tracking-wider text-black">
-              For property owners
+              The first creator marketplace for STRs
             </p>
             
             <h1 className="mt-2 font-heading text-[3rem] leading-[0.82] tracking-[-0.04em] sm:text-[4rem] md:text-[5rem] lg:text-[4.5rem] xl:text-[5.5rem]" style={{ fontWeight: 900 }}>
@@ -34,7 +34,7 @@ function HeroSection() {
             </h1>
             
             <p className="mt-3 max-w-md text-[13px] font-medium leading-snug text-black">
-              Pay creators per post. They create content and drive traffic. You get professional photos and tracked link analytics.
+              A massive untapped opportunity. Be among the first hosts to leverage creator marketing for your vacation rental. Pay per post, track every click, own the content forever.
             </p>
             
             <div className="mt-5 flex flex-wrap gap-2">
@@ -67,14 +67,14 @@ function HeroSection() {
               </div>
               
               <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] sm:text-[2.5rem]" style={{ fontWeight: 900 }}>
-                <span className="block text-black">WHY</span>
-                <span className="block text-black" style={{ fontWeight: 400 }}>HOSTS LOVE US</span>
+                <span className="block text-black">FIRST MOVER</span>
+                <span className="block text-black" style={{ fontWeight: 400 }}>ADVANTAGE</span>
               </h2>
             </div>
 
             <div className="mt-3 space-y-0 border-t-2 border-black">
               {[
-                { label: "Pay per post", desc: "Simple flat rates" },
+                { label: "Untapped market", desc: "No competition yet" },
                 { label: "Track traffic", desc: "Real analytics" },
                 { label: "Own the content", desc: "Forever yours" },
               ].map((item, i) => (

@@ -90,8 +90,8 @@ export default function WaitlistPage() {
           {/* Left: Hero Block */}
           <div className="block-hover rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-6">
             <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border-[2px] border-black bg-white px-3 py-1">
-              <span className="text-sm">🔒</span>
-              <span className="text-[10px] font-black uppercase tracking-wider text-black">Invite Only Beta</span>
+              <span className="text-sm">🚀</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-black">First of its kind</span>
             </div>
             
             <h1 className="font-heading text-[2.5rem] leading-[0.85] tracking-[-0.03em] sm:text-[3.5rem] md:text-[4rem]" style={{ fontWeight: 900 }}>
@@ -100,7 +100,7 @@ export default function WaitlistPage() {
             </h1>
             
             <p className="mt-4 max-w-md text-[14px] font-medium leading-snug text-black">
-              Get paid to create content for vacation rentals. Join the waitlist for early access to CreatorStays.
+              The first creator marketplace for short-term rentals. A huge opportunity to get paid creating content for vacation properties. Join the waitlist for early access.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">

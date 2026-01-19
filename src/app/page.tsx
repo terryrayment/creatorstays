@@ -72,7 +72,7 @@ function HeroSection() {
           >
             {/* Label */}
             <p className="text-[10px] font-black uppercase tracking-wider text-black">
-              Now in beta
+              The first marketplace of its kind
             </p>
             
             {/* Headline - heaviest weight, pure black */}
@@ -83,7 +83,7 @@ function HeroSection() {
             
             {/* Subhead - pure black */}
             <p className="mt-3 max-w-sm text-[13px] font-medium leading-snug text-black">
-              Hire creators to showcase your vacation rental. They post, you get clicks and content.
+              The first creator marketplace built for short-term rentals. Hire creators to showcase your property. They post, you get clicks and content.
             </p>
             
             {/* CTAs */}
@@ -113,11 +113,11 @@ function HeroSection() {
           >
             <div>
               <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] sm:text-[2.5rem]" style={{ fontWeight: 900 }}>
-                <span className="block text-black">GET</span>
-                <span className="block text-black" style={{ fontWeight: 400 }}>STARTED</span>
+                <span className="block text-black">HUGE</span>
+                <span className="block text-black" style={{ fontWeight: 400 }}>OPPORTUNITY</span>
               </h2>
               <p className="mt-2 text-[12px] font-medium text-black">
-                Sign up in 2 minutes. No contracts.
+                Untapped market. First-mover advantage for hosts and creators alike.
               </p>
             </div>
 
@@ -223,11 +223,11 @@ function CTASection() {
               For property owners
             </p>
             <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]" style={{ fontWeight: 900 }}>
-              <span className="block text-black">LIST YOUR</span>
-              <span className="block text-black" style={{ fontWeight: 400 }}>PROPERTY</span>
+              <span className="block text-black">BE AMONG</span>
+              <span className="block text-black" style={{ fontWeight: 400 }}>THE FIRST</span>
             </h3>
             <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
-              Join hosts using creator marketing.
+              First-mover advantage. Get creator content before your competitors.
             </p>
             <Link
               href="/hosts"
@@ -256,11 +256,11 @@ function CTASection() {
               For content creators
             </p>
             <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]" style={{ fontWeight: 900 }}>
-              <span className="block text-black">ALWAYS</span>
-              <span className="block text-black" style={{ fontWeight: 400 }}>HERE</span>
+              <span className="block text-black">NEW REVENUE</span>
+              <span className="block text-black" style={{ fontWeight: 400 }}>STREAM</span>
             </h3>
             <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
-              Questions? We have you covered.
+              Untapped niche. Get paid to stay at amazing properties.
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               <Link
