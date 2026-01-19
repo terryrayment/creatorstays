@@ -796,23 +796,20 @@
 }
 
 /* ============================================================================
-   Slush-style Sticker Float Animation
+   Slush-style Sticker Float Animation - Slower, subtler
    ============================================================================ */
 
 @keyframes sticker-float {
   0%, 100% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0);
   }
-  25% {
-    transform: translateY(-8px) rotate(2deg);
-  }
-  75% {
-    transform: translateY(-4px) rotate(-1deg);
+  50% {
+    transform: translateY(-6px);
   }
 }
 
 .sticker-float {
-  animation: sticker-float 6s ease-in-out infinite;
+  animation: sticker-float 8s ease-in-out infinite;
   will-change: transform;
 }
 
@@ -830,6 +827,6 @@
 }
 
 .marquee-track {
-  animation: marquee 20s linear infinite;
+  animation: marquee 25s linear infinite;
   will-change: transform;
 }
