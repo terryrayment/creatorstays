@@ -24,14 +24,14 @@ const steps = [
     num: "02",
     title: "HIRE",
     subtitle: "CREATORS",
-    content: "Browse our directory by niche, platform, and audience size. View portfolios and rates. Pay per post—simple flat pricing.",
+    content: "Browse our directory by niche, platform, and audience size. View portfolios and rates. Pay creators per post—simple flat pricing.",
     color: "#4AA3FF",
   },
   {
     num: "03",
     title: "SEND",
     subtitle: "OFFERS",
-    content: "Set your budget per deliverable. Creators can accept, counter, or decline. No cold DMs or awkward negotiations.",
+    content: "Set your base pay per deliverable. Optionally add traffic bonuses when tracked links perform. Creators can accept, counter, or decline.",
     color: "#D7B6FF",
   },
   {
@@ -45,14 +45,14 @@ const steps = [
     num: "05",
     title: "TRACK",
     subtitle: "TRAFFIC",
-    content: "See clicks, unique visitors, and referral sources in real time. Links track traffic, not bookings. Hosts decide bonuses based on performance.",
+    content: "See clicks, unique visitors, and referral sources in real time. We track link clicks—not Airbnb bookings. You approve bonuses when thresholds are hit.",
     color: "#FF5A1F",
   },
   {
     num: "06",
     title: "PAY VIA",
     subtitle: "PLATFORM",
-    content: "We handle payouts and 1099 tax forms. You pay for content. Traffic is tracked. Clean paperwork, every time.",
+    content: "We handle payouts and 1099 tax forms. You pay for content. Traffic bonuses are optional add-ons. Clean paperwork, every time.",
     color: "#E8D5E8",
   },
 ]
@@ -69,8 +69,24 @@ export default function HowItWorksPage() {
             <span className="block text-black" style={{ fontWeight: 400 }}>WORKS</span>
           </h1>
           <p className="mt-4 max-w-lg text-[15px] font-medium leading-snug text-black">
-            CreatorStays connects vacation rental hosts with content creators. You pay for content. Traffic is tracked. Payouts are handled.
+            Pay creators per post, then add traffic bonuses when tracked links perform. We handle payouts and paperwork.
           </p>
+        </div>
+
+        {/* Pay Model Explainer */}
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="block-hover rounded-xl border-[3px] border-black bg-white p-4">
+            <p className="text-[10px] font-black uppercase tracking-wider text-black">Base Pay</p>
+            <p className="mt-1 text-[13px] font-medium text-black">
+              Pay a flat rate per deliverable set (posts, reels, stories). Simple, predictable pricing.
+            </p>
+          </div>
+          <div className="block-hover rounded-xl border-[3px] border-black bg-[#28D17C] p-4">
+            <p className="text-[10px] font-black uppercase tracking-wider text-black">Traffic Bonus (Optional)</p>
+            <p className="mt-1 text-[13px] font-medium text-black">
+              Add bonuses when links hit click thresholds. You approve payouts after reviewing analytics.
+            </p>
+          </div>
         </div>
 
         {/* Quick Links */}

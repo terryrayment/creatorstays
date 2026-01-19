@@ -187,7 +187,13 @@ export function HostDashboard() {
   
   // Message composer state
   const [composing, setComposing] = useState<typeof mockCreators[0] | null>(null)
-  const [message, setMessage] = useState({ offerType: "flat", amount: "", text: "" })
+  const [message, setMessage] = useState({ 
+    basePay: "", 
+    text: "",
+    trafficBonusEnabled: false,
+    trafficBonusAmount: "50",
+    trafficBonusThreshold: "1000",
+  })
   
   // Toast
   const [toast, setToast] = useState("")
@@ -215,14 +221,23 @@ export function HostDashboard() {
   // Open composer
   const openComposer = (creator: typeof mockCreators[0]) => {
     setComposing(creator)
-    setMessage({ offerType: "flat", amount: "", text: generateBrief() })
+    setMessage({ 
+      basePay: "", 
+      text: generateBrief(),
+      trafficBonusEnabled: false,
+      trafficBonusAmount: "50",
+      trafficBonusThreshold: "1000",
+    })
   }
 
   // Send message
   const sendMessage = () => {
-    setToast(`Message sent to @${composing?.handle}!`)
+    const bonusText = message.trafficBonusEnabled 
+      ? ` + $${message.trafficBonusAmount} bonus at ${parseInt(message.trafficBonusThreshold).toLocaleString()} clicks`
+      : ""
+    setToast(`Offer sent to @${composing?.handle}: $${message.basePay}${bonusText}`)
     setComposing(null)
-    setTimeout(() => setToast(""), 3000)
+    setTimeout(() => setToast(""), 4000)
   }
 
   return (
@@ -516,55 +531,144 @@ export function HostDashboard() {
       {/* Message Composer Modal */}
       {composing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl border-2 border-black bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Message @{composing.handle}</h3>
-              <button onClick={() => setComposing(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <h3 className="text-lg font-bold text-black">Send Offer to @{composing.handle}</h3>
+              <button onClick={() => setComposing(null)} className="text-black/60 hover:text-black">✕</button>
             </div>
             
             <div className="space-y-4">
+              {/* Base Pay */}
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-600">Offer Type</label>
-                <select 
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
-                  value={message.offerType}
-                  onChange={e => setMessage({...message, offerType: e.target.value})}
-                >
-                  <option value="flat">Flat Fee (per post)</option>
-                  <option value="bonus">Flat Fee + Traffic Bonus</option>
-                  <option value="stay">Post-for-Stay</option>
-                </select>
+                <label className="mb-1.5 block text-xs font-bold text-black">Base Pay (per deliverable set) *</label>
+                <Input 
+                  placeholder="e.g., 400"
+                  value={message.basePay}
+                  onChange={e => setMessage({...message, basePay: e.target.value})}
+                  type="number"
+                />
+                <p className="mt-1 text-[10px] text-black/60">Flat rate for posts, reels, stories as agreed.</p>
+              </div>
+
+              {/* Traffic Bonus Toggle */}
+              <div className="rounded-lg border-2 border-black p-3">
+                <label className="flex cursor-pointer items-center gap-3">
+                  <input 
+                    type="checkbox"
+                    checked={message.trafficBonusEnabled}
+                    onChange={e => setMessage({...message, trafficBonusEnabled: e.target.checked})}
+                    className="h-4 w-4 rounded border-2 border-black accent-black"
+                  />
+                  <span className="text-sm font-bold text-black">Add Traffic Bonus (optional)</span>
+                </label>
+
+                {message.trafficBonusEnabled && (
+                  <div className="mt-3 space-y-3 border-t border-black/10 pt-3">
+                    {/* Metric */}
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold text-black">Metric</label>
+                      <div className="flex gap-2">
+                        <button className="flex-1 rounded-lg border-2 border-black bg-[#FFD84A] px-3 py-1.5 text-xs font-bold text-black">
+                          Clicks
+                        </button>
+                        <button disabled className="flex-1 rounded-lg border-2 border-black/30 bg-white px-3 py-1.5 text-xs font-bold text-black/40">
+                          Views (coming soon)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Threshold */}
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold text-black">Threshold</label>
+                      <div className="flex gap-1.5">
+                        {["250", "500", "1000", "2500"].map(t => (
+                          <button 
+                            key={t}
+                            onClick={() => setMessage({...message, trafficBonusThreshold: t})}
+                            className={`flex-1 rounded-lg border-2 px-2 py-1.5 text-xs font-bold transition-colors ${
+                              message.trafficBonusThreshold === t 
+                                ? "border-black bg-black text-white" 
+                                : "border-black bg-white text-black hover:bg-black/5"
+                            }`}
+                          >
+                            {parseInt(t).toLocaleString()}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Bonus Amount */}
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold text-black">Bonus Amount ($)</label>
+                      <div className="flex gap-1.5">
+                        {["25", "50", "100"].map(a => (
+                          <button 
+                            key={a}
+                            onClick={() => setMessage({...message, trafficBonusAmount: a})}
+                            className={`rounded-lg border-2 px-3 py-1.5 text-xs font-bold transition-colors ${
+                              message.trafficBonusAmount === a 
+                                ? "border-black bg-black text-white" 
+                                : "border-black bg-white text-black hover:bg-black/5"
+                            }`}
+                          >
+                            ${a}
+                          </button>
+                        ))}
+                        <Input 
+                          placeholder="Custom"
+                          value={!["25", "50", "100"].includes(message.trafficBonusAmount) ? message.trafficBonusAmount : ""}
+                          onChange={e => setMessage({...message, trafficBonusAmount: e.target.value})}
+                          className="w-20 text-xs"
+                          type="number"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Payout Mode */}
+                    <div className="rounded-lg bg-black/5 p-2">
+                      <p className="text-[10px] font-bold text-black">Payout Mode: Manual Approve (Beta)</p>
+                      <p className="mt-0.5 text-[9px] text-black/60">
+                        You approve bonuses after the dashboard shows the threshold was reached.
+                      </p>
+                    </div>
+
+                    {/* Summary */}
+                    <div className="rounded-lg border-2 border-black bg-[#28D17C] p-2">
+                      <p className="text-xs font-bold text-black">
+                        Bonus: ${message.trafficBonusAmount} when link hits {parseInt(message.trafficBonusThreshold).toLocaleString()} clicks.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
               
-              {message.offerType !== "stay" && (
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-600">
-                    {message.offerType === "bonus" ? "Flat Fee + Bonus %" : "Flat Fee Amount"}
-                  </label>
-                  <Input 
-                    placeholder={message.offerType === "bonus" ? "$400 + 10%" : "$500"}
-                    value={message.amount}
-                    onChange={e => setMessage({...message, amount: e.target.value})}
-                  />
-                </div>
-              )}
-              
+              {/* Message */}
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-600">Message</label>
+                <label className="mb-1.5 block text-xs font-bold text-black">Message</label>
                 <textarea 
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border-2 border-black px-3 py-2 text-sm text-black focus:outline-none"
                   rows={4}
                   value={message.text}
                   onChange={e => setMessage({...message, text: e.target.value})}
                 />
               </div>
+
+              {/* Total Summary */}
+              {message.basePay && (
+                <div className="rounded-lg border-2 border-black bg-[#FFD84A] p-3">
+                  <p className="text-xs font-bold text-black">
+                    Offer: ${message.basePay} base
+                    {message.trafficBonusEnabled && ` + $${message.trafficBonusAmount} at ${parseInt(message.trafficBonusThreshold).toLocaleString()} clicks`}
+                  </p>
+                </div>
+              )}
               
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => setComposing(null)}>
                   Cancel
                 </Button>
-                <Button className="flex-1" onClick={sendMessage}>
-                  Send Message
+                <Button className="flex-1" onClick={sendMessage} disabled={!message.basePay}>
+                  Send Offer
                 </Button>
               </div>
             </div>
