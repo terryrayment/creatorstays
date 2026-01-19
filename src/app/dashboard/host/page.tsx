@@ -17,7 +17,7 @@ function NextStepStrip() {
             Add / Manage Properties
           </Link>
           <Link 
-            href="/creators"
+            href="/dashboard/host/search-creators"
             className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
           >
             Find Creators
@@ -37,7 +37,7 @@ function NextStepStrip() {
 function SetupChecklist() {
   const [checklist] = useState([
     { label: "Save 1 property", done: false, href: "/dashboard/host/properties" },
-    { label: "Invite 1 creator", done: false, href: "/creators" },
+    { label: "Invite 1 creator", done: false, href: "/dashboard/host/search-creators" },
     { label: "Create 1 tracked link", done: false, href: "/dashboard/host/collaborations" },
     { label: "Pay 1 creator", done: false, href: "/dashboard/host/pay" },
   ])

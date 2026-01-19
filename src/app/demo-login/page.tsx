@@ -25,6 +25,9 @@ function DemoLoginContent() {
     expires.setDate(expires.getDate() + 7)
     document.cookie = `cs_demo_role=${role.toUpperCase()}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`
     
+    // Set localStorage for navbar state
+    localStorage.setItem('creatorstays_role', role)
+    
     // Redirect to appropriate dashboard
     setTimeout(() => {
       if (role === 'host') {

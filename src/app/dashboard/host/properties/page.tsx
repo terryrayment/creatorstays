@@ -37,6 +37,48 @@ type EditingProperty = Partial<Property> & { isNew?: boolean }
 const COMMON_AMENITIES = ["WiFi", "Pool", "Hot Tub", "Kitchen", "Washer", "Dryer", "AC", "Heating", "Workspace", "TV", "Fireplace", "Gym", "Parking", "EV Charger", "BBQ", "Patio", "Beach Access", "Ski-in/Ski-out", "Pet Friendly", "Kid Friendly"]
 const COMMON_VIBE_TAGS = ["Cozy", "Modern", "Rustic", "Luxury", "Minimal", "Bohemian", "Romantic", "Family", "Remote", "Urban", "Beachfront", "Mountain", "Lakeside", "Historic", "Eco-Friendly", "Unique", "Instagrammable", "Quiet", "Social", "Adventure"]
 
+// Location suggestions for autocomplete
+const LOCATION_SUGGESTIONS = [
+  "Lake Arrowhead, CA",
+  "Lake Tahoe, CA",
+  "Big Bear Lake, CA",
+  "Palm Springs, CA",
+  "Joshua Tree, CA",
+  "Malibu, CA",
+  "Santa Barbara, CA",
+  "San Diego, CA",
+  "Los Angeles, CA",
+  "San Francisco, CA",
+  "Napa Valley, CA",
+  "Aspen, CO",
+  "Denver, CO",
+  "Vail, CO",
+  "Telluride, CO",
+  "Austin, TX",
+  "Scottsdale, AZ",
+  "Sedona, AZ",
+  "Miami Beach, FL",
+  "Key West, FL",
+  "Nashville, TN",
+  "Gatlinburg, TN",
+  "Savannah, GA",
+  "Charleston, SC",
+  "New Orleans, LA",
+  "Portland, OR",
+  "Seattle, WA",
+  "Maui, HI",
+  "Oahu, HI",
+  "Park City, UT",
+  "Moab, UT",
+  "Jackson Hole, WY",
+  "Bozeman, MT",
+  "Bend, OR",
+  "Carmel, CA",
+  "Monterey, CA",
+  "Laguna Beach, CA",
+  "Newport Beach, CA",
+]
+
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
@@ -95,8 +137,55 @@ function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: Ed
   const [isImporting, setIsImporting] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   useEffect(() => { setForm(property); setStep(1) }, [property])
+
+  // Handle photo upload
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    
+    setIsUploading(true)
+    const newPhotos: string[] = []
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      // Convert to base64 data URL for demo (in production, upload to cloud storage)
+      const reader = new FileReader()
+      await new Promise<void>((resolve) => {
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            newPhotos.push(reader.result)
+          }
+          resolve()
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+    
+    setForm(prev => ({
+      ...prev,
+      photos: [...(prev.photos || []), ...newPhotos],
+      heroImageUrl: prev.heroImageUrl || newPhotos[0]
+    }))
+    setIsUploading(false)
+    e.target.value = '' // Reset input
+  }
+
+  // Remove photo
+  const removePhoto = (index: number) => {
+    setForm(prev => {
+      const newPhotos = [...(prev.photos || [])]
+      const removed = newPhotos.splice(index, 1)[0]
+      return {
+        ...prev,
+        photos: newPhotos,
+        heroImageUrl: prev.heroImageUrl === removed ? newPhotos[0] : prev.heroImageUrl
+      }
+    })
+  }
 
   const handleImport = async () => {
     if (!form.airbnbUrl) return
@@ -173,25 +262,106 @@ function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: Ed
       {step === 2 && (
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">Title *</label><Input value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Cozy Mountain Cabin" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">City / Region *</label><Input value={form.cityRegion || ''} onChange={e => setForm({ ...form, cityRegion: e.target.value })} placeholder="Aspen, Colorado" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Title *</label><Input value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Cozy Mountain Cabin" /></div>
+            <div className="relative">
+              <label className="mb-1.5 block text-[11px] font-bold text-black">City / Region *</label>
+              <Input 
+                value={form.cityRegion || ''} 
+                onChange={e => {
+                  setForm({ ...form, cityRegion: e.target.value })
+                  setShowLocationSuggestions(e.target.value.length > 1)
+                }}
+                onFocus={() => setShowLocationSuggestions((form.cityRegion?.length || 0) > 1)}
+                placeholder="Start typing..." 
+              />
+              {showLocationSuggestions && (
+                <div className="absolute z-50 mt-1 w-full rounded-lg border-2 border-black bg-white py-1 shadow-lg max-h-48 overflow-y-auto">
+                  {LOCATION_SUGGESTIONS
+                    .filter(loc => loc.toLowerCase().includes((form.cityRegion || '').toLowerCase()))
+                    .slice(0, 6)
+                    .map(loc => (
+                      <button
+                        key={loc}
+                        type="button"
+                        onClick={() => {
+                          setForm({ ...form, cityRegion: loc })
+                          setShowLocationSuggestions(false)
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm font-medium text-black hover:bg-[#FFD84A]"
+                      >
+                        {loc}
+                      </button>
+                    ))
+                  }
+                  {LOCATION_SUGGESTIONS.filter(loc => loc.toLowerCase().includes((form.cityRegion || '').toLowerCase())).length === 0 && (
+                    <div className="px-3 py-2 text-sm text-black">No suggestions - you can enter a custom location</div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-4">
-            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">Price/night</label><Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="$150-$250" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">Guests</label><Input type="number" value={form.guests || ''} onChange={e => setForm({ ...form, guests: parseInt(e.target.value) || undefined })} placeholder="4" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">Beds</label><Input type="number" value={form.beds || ''} onChange={e => setForm({ ...form, beds: parseInt(e.target.value) || undefined })} placeholder="2" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-medium text-black/60">Baths</label><Input type="number" value={form.baths || ''} onChange={e => setForm({ ...form, baths: parseInt(e.target.value) || undefined })} placeholder="1" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Price/night</label><Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="$150-$250" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Guests</label><Input type="number" value={form.guests || ''} onChange={e => setForm({ ...form, guests: parseInt(e.target.value) || undefined })} placeholder="4" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Beds</label><Input type="number" value={form.beds || ''} onChange={e => setForm({ ...form, beds: parseInt(e.target.value) || undefined })} placeholder="2" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Baths</label><Input type="number" value={form.baths || ''} onChange={e => setForm({ ...form, baths: parseInt(e.target.value) || undefined })} placeholder="1" /></div>
           </div>
           <ChipSelector options={COMMON_AMENITIES} selected={form.amenities || []} onChange={v => setForm({ ...form, amenities: v })} label="Amenities (select 5+)" />
           <ChipSelector options={COMMON_VIBE_TAGS} selected={form.vibeTags || []} onChange={v => setForm({ ...form, vibeTags: v })} label="Vibe Tags" />
+          
+          {/* Photo Upload Section */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-medium text-black/60">Photo URLs (one per line, 3+ recommended)</label>
-            <textarea value={(form.photos || []).join('\n')} onChange={e => setForm({ ...form, photos: e.target.value.split('\n').filter(Boolean) })} placeholder="https://example.com/photo1.jpg" rows={3} className="w-full resize-none rounded-lg border border-black/10 bg-white px-3 py-2 text-xs focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20" />
+            <label className="mb-1.5 block text-[11px] font-bold text-black">Photos (3+ recommended)</label>
+            
+            {/* Photo Grid */}
+            {(form.photos?.length || 0) > 0 && (
+              <div className="mb-3 grid grid-cols-4 gap-2">
+                {form.photos?.map((photo, idx) => (
+                  <div key={idx} className="relative aspect-square overflow-hidden rounded-lg border-2 border-black">
+                    <img src={photo} alt="" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(idx)}
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-black bg-white text-[10px] font-bold text-black hover:bg-red-100"
+                    >
+                      ✕
+                    </button>
+                    {idx === 0 && (
+                      <span className="absolute bottom-1 left-1 rounded-full border border-black bg-[#FFD84A] px-1.5 py-0.5 text-[8px] font-bold text-black">
+                        Cover
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Upload Button */}
+            <label className="flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-black bg-white p-4 transition-colors hover:bg-black/5">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+              <div className="text-center">
+                {isUploading ? (
+                  <p className="text-sm font-bold text-black">Uploading...</p>
+                ) : (
+                  <>
+                    <p className="text-sm font-bold text-black">Click to upload photos</p>
+                    <p className="mt-1 text-[10px] text-black">PNG, JPG up to 10MB each</p>
+                  </>
+                )}
+              </div>
+            </label>
           </div>
-          <div className="rounded-lg bg-black/[0.02] p-3">
-            <p className="mb-2 text-[11px] font-semibold text-black/60">Checklist ({checklistComplete}/{checklist.length})</p>
+          
+          <div className="rounded-lg border-2 border-black bg-white p-3">
+            <p className="mb-2 text-[11px] font-bold text-black">Checklist ({checklistComplete}/{checklist.length})</p>
             <div className="grid gap-1 sm:grid-cols-3">
-              {checklist.map(item => (<div key={item.label} className="flex items-center gap-1.5 text-[11px]"><span className={item.done ? 'text-emerald-500' : 'text-black/60/40'}>{item.done ? '✓' : '○'}</span><span className={item.done ? 'text-black' : 'text-black/60'}>{item.label}</span></div>))}
+              {checklist.map(item => (<div key={item.label} className="flex items-center gap-1.5 text-[11px]"><span className={item.done ? 'text-emerald-600 font-bold' : 'text-black'}>{item.done ? '✓' : '○'}</span><span className="text-black">{item.label}</span></div>))}
             </div>
           </div>
           <div className="flex justify-between pt-2"><Button variant="outline" onClick={() => setStep(1)}>← Back</Button><Button onClick={() => setStep(3)}>Next: Creator Brief →</Button></div>

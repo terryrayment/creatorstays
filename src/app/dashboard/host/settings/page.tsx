@@ -264,23 +264,6 @@ export default function HostSettingsPage() {
             </div>
           )}
         </div>
-
-        {/* Danger zone */}
-        <div className="mt-4 rounded-2xl border-[3px] border-[#FF6B6B] bg-white p-5">
-          <p className="text-[10px] font-black uppercase tracking-wider text-[#FF6B6B]">Danger Zone</p>
-          <div className="mt-3 flex items-center justify-between">
-            <div>
-              <p className="text-[12px] font-bold text-black">Sign out</p>
-              <p className="text-[10px] font-medium text-black/60">Log out of your account</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="h-9 rounded-full border-[2px] border-[#FF6B6B] px-4 text-[10px] font-black uppercase tracking-wider text-[#FF6B6B] transition-transform duration-200 hover:-translate-y-0.5"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   )
