@@ -197,26 +197,25 @@ function BetaSection() {
           </p>
         </div>
 
-        {/* Staggered For Hosts / For Creators panels */}
-        <div className="relative mt-10">
-          <div className="pointer-events-none absolute -inset-20 -z-10" aria-hidden="true">
-            <div className="absolute left-1/3 top-0 h-[300px] w-[400px] rounded-full bg-[hsl(213,94%,45%)]/[0.06] blur-[140px]" />
-            <div className="absolute bottom-0 right-1/3 h-[250px] w-[350px] rounded-full bg-[hsl(199,89%,48%)]/[0.05] blur-[120px]" />
+        {/* For Hosts / For Creators - Clean two-column layout */}
+        <div className="relative mt-12">
+          {/* Background blur */}
+          <div className="pointer-events-none absolute -inset-10 -z-10" aria-hidden="true">
+            <div className="absolute left-1/4 top-1/2 h-[200px] w-[300px] -translate-y-1/2 rounded-full bg-[hsl(213,94%,45%)]/[0.05] blur-[100px]" />
+            <div className="absolute right-1/4 top-1/2 h-[180px] w-[280px] -translate-y-1/2 rounded-full bg-[hsl(199,89%,48%)]/[0.04] blur-[90px]" />
           </div>
-          <div className="focus-group grid gap-3 md:grid-cols-[1.2fr_1fr] md:items-start">
-            {/* Hosts - Primary, taller */}
-            <div 
-              className="marketing-pill focus-card flex-col items-start gap-1 rounded-3xl p-6 opacity-0 reveal md:min-h-[180px]"
-              style={{ animationDelay: '100ms' }}
-            >
-              <div className="marketing-pill-glow" aria-hidden="true" />
-              <div className="relative z-10 flex h-full flex-col">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Primary</span>
-                <h3 className="mt-1 text-xl font-semibold tracking-tight">For Hosts</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground/80">
-                  List your property and connect with creators who drive traffic through authentic content.
+          
+          <div className="beta-card-group grid gap-px overflow-hidden rounded-2xl border border-foreground/[0.04] bg-foreground/[0.02] md:grid-cols-2">
+            {/* Hosts - Primary */}
+            <div className="beta-card group relative p-8 opacity-0 reveal" style={{ animationDelay: '100ms' }}>
+              <div className="beta-card-glow" aria-hidden="true" />
+              <div className="relative z-10">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary/70">For property owners</span>
+                <h3 className="mt-2 text-xl font-semibold tracking-tight">Hosts</h3>
+                <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground/70">
+                  List your property and connect with creators who drive real traffic through authentic content.
                 </p>
-                <div className="mt-auto pt-4">
+                <div className="mt-6">
                   <Button size="sm" className="text-xs" asChild>
                     <Link href="/hosts">Host Signup</Link>
                   </Button>
@@ -224,18 +223,16 @@ function BetaSection() {
               </div>
             </div>
 
-            {/* Creators - Secondary, shorter */}
-            <div 
-              className="marketing-pill focus-card flex-col items-start gap-1 rounded-2xl p-5 opacity-0 reveal"
-              style={{ animationDelay: '200ms' }}
-            >
-              <div className="marketing-pill-glow" aria-hidden="true" />
+            {/* Creators - Secondary */}
+            <div className="beta-card group relative border-t border-foreground/[0.04] p-8 opacity-0 reveal md:border-l md:border-t-0" style={{ animationDelay: '200ms' }}>
+              <div className="beta-card-glow" aria-hidden="true" />
               <div className="relative z-10">
-                <h3 className="text-lg font-semibold tracking-tight">For Creators</h3>
-                <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground/70">
-                  Join the waitlist for early access to browse properties and receive offers.
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-accent/70">For content creators</span>
+                <h3 className="mt-2 text-xl font-semibold tracking-tight">Creators</h3>
+                <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground/70">
+                  Get early access to browse properties and receive collaboration offers from hosts.
                 </p>
-                <div className="mt-4">
+                <div className="mt-6">
                   <Button size="sm" variant="outline" className="text-xs" asChild>
                     <Link href="/waitlist">Join Creator Waitlist</Link>
                   </Button>
@@ -245,26 +242,26 @@ function BetaSection() {
           </div>
         </div>
 
-        {/* Creator categories - horizontal pill list */}
-        <div className="mt-12">
-          <p className="mb-4 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+        {/* Creator categories - Clean grid */}
+        <div className="mt-14">
+          <p className="mb-6 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
             Creator categories we&apos;re recruiting
           </p>
-          <div className="focus-group flex flex-wrap justify-center gap-2">
+          <div className="category-grid grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {creatorTypes.map((type, i) => (
               <div 
                 key={type.category}
-                className="marketing-pill focus-card gap-3 rounded-full px-4 py-2.5 opacity-0 reveal"
-                style={{ animationDelay: `${(i + 1) * 60}ms` }}
+                className="category-item group relative rounded-xl p-4 opacity-0 reveal"
+                style={{ animationDelay: `${(i + 1) * 50}ms` }}
               >
-                <div className="marketing-pill-glow" aria-hidden="true" />
-                <div className="relative z-10 flex items-center gap-2.5">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-primary/15 to-accent/15 text-[10px] font-bold text-primary">
+                <div className="category-item-glow" aria-hidden="true" />
+                <div className="relative z-10 flex items-start gap-3">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-accent/10 text-[9px] font-bold text-primary/70">
                     {type.category[0]}
                   </span>
-                  <div>
-                    <p className="text-[13px] font-medium leading-tight">{type.category}</p>
-                    <p className="text-[10px] text-muted-foreground/60">{type.description}</p>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-medium leading-tight text-foreground/90">{type.category}</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground/50">{type.description}</p>
                   </div>
                 </div>
               </div>

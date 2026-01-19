@@ -463,3 +463,101 @@
     opacity: 1;
   }
 }
+
+/* ============================================================================
+   Beta Section Cards - Clean layout with micro blur animations
+   ============================================================================ */
+
+.beta-card {
+  background: rgba(255, 255, 255, 0.4);
+  transition: 
+    background 280ms ease-out,
+    filter 280ms ease-out,
+    opacity 280ms ease-out;
+}
+
+.beta-card-glow {
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(213 94% 45% / 0.08) 0%,
+    hsl(199 89% 48% / 0.04) 50%,
+    transparent 70%
+  );
+  filter: blur(60px);
+  opacity: 0;
+  transition: opacity 320ms ease-out, filter 320ms ease-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (min-width: 768px) {
+  .beta-card-group:hover .beta-card {
+    filter: blur(1px);
+    opacity: 0.7;
+  }
+  
+  .beta-card-group:hover .beta-card:hover {
+    filter: blur(0);
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.65);
+  }
+  
+  .beta-card:hover .beta-card-glow {
+    opacity: 1;
+    filter: blur(80px);
+  }
+}
+
+/* ============================================================================
+   Category Items - Soft rows with micro blur on hover
+   ============================================================================ */
+
+.category-item {
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  transition: 
+    background 260ms ease-out,
+    filter 260ms ease-out,
+    opacity 260ms ease-out,
+    transform 260ms ease-out,
+    box-shadow 260ms ease-out;
+}
+
+.category-item-glow {
+  position: absolute;
+  inset: -30px;
+  border-radius: 20px;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(199 89% 48% / 0.1) 0%,
+    hsl(213 94% 45% / 0.05) 50%,
+    transparent 70%
+  );
+  filter: blur(40px);
+  opacity: 0;
+  transition: opacity 280ms ease-out, filter 280ms ease-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (min-width: 768px) {
+  .category-grid:hover .category-item {
+    filter: blur(2px);
+    opacity: 0.5;
+  }
+  
+  .category-grid:hover .category-item:hover {
+    filter: blur(0);
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px hsl(213 94% 45% / 0.06);
+  }
+  
+  .category-item:hover .category-item-glow {
+    opacity: 1;
+    filter: blur(60px);
+  }
+}

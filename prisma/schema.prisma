@@ -217,6 +217,84 @@ model Property {
 // TRACKING & ATTRIBUTION
 // ============================================================================
 
+model AffiliateLink {
+  id                    String   @id @default(cuid())
+  token                 String   @unique @default(cuid())
+  
+  // Parties
+  creatorId             String
+  hostId                String
+  propertyId            String?
+  campaignId            String?
+  campaignName          String?
+  
+  // Destination
+  destinationUrl        String
+  
+  // Attribution settings
+  attributionWindowDays Int      @default(30)
+  
+  // Stats (denormalized for quick reads)
+  clickCount            Int      @default(0)
+  uniqueClickCount      Int      @default(0)
+  
+  // Status
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  expiresAt             DateTime?
+
+  // Relations
+  clicks                LinkClick[]
+
+  @@index([creatorId])
+  @@index([hostId])
+  @@index([token])
+  @@map("affiliate_links")
+}
+
+model LinkClick {
+  id              String   @id @default(cuid())
+  linkId          String
+  link            AffiliateLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  
+  // Visitor tracking
+  visitorId       String?
+  visitor         LinkVisitor? @relation(fields: [visitorId], references: [id])
+  
+  // Click metadata (privacy-safe)
+  referer         String?
+  userAgentHash   String?
+  ipHash          String?
+  
+  // Flags
+  isUnique        Boolean  @default(true)
+  isRevisit       Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+
+  @@index([linkId, createdAt])
+  @@index([visitorId])
+  @@map("link_clicks")
+}
+
+model LinkVisitor {
+  id            String   @id // This is the cookie ID (cs_vid)
+  
+  firstSeenAt   DateTime @default(now())
+  lastSeenAt    DateTime @default(now())
+  
+  // Last attribution
+  lastLinkId    String?
+  lastClickAt   DateTime?
+  
+  // Relations
+  clicks        LinkClick[]
+
+  @@map("link_visitors")
+}
+
+// Legacy tracking (keep for backwards compatibility)
 model TrackingLink {
   id            String   @id @default(cuid())
   token         String   @unique @default(cuid())
