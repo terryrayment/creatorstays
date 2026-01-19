@@ -25,6 +25,46 @@ const mockStats = {
     approved: 3,
     completed: 1,
   },
+  financials: {
+    // Gross Merchandise Value (total deal values)
+    gmv: {
+      total: 4250,
+      thisMonth: 1850,
+      lastMonth: 2400,
+    },
+    // Platform revenue (15% from host + 15% from creator = 30% of deal)
+    revenue: {
+      total: 1275,
+      thisMonth: 555,
+      lastMonth: 720,
+    },
+    // Payouts to creators (85% of deal value)
+    creatorPayouts: {
+      total: 3612.50,
+      pending: 850,
+      completed: 2762.50,
+    },
+    // Host charges (deal + 15% fee)
+    hostCharges: {
+      total: 4887.50,
+      pending: 977.50,
+      collected: 3910,
+    },
+    // Average deal metrics
+    averages: {
+      dealSize: 425,
+      platformFee: 127.50,
+      creatorPayout: 361.25,
+    },
+    // Recent transactions
+    transactions: [
+      { type: "payout", creator: "Amy C.", amount: 425, status: "completed", date: "Jan 15" },
+      { type: "charge", host: "Mountain Retreats", amount: 575, status: "completed", date: "Jan 14" },
+      { type: "payout", creator: "Marcus W.", amount: 340, status: "pending", date: "Jan 13" },
+      { type: "charge", host: "Coastal Getaways", amount: 460, status: "completed", date: "Jan 12" },
+      { type: "payout", creator: "Sarah P.", amount: 510, status: "completed", date: "Jan 10" },
+    ],
+  },
   recentActivity: [
     { type: "waitlist", who: "creator", email: "amy@***", at: "2 min ago" },
     { type: "signup", who: "host", email: "john@***", at: "15 min ago" },
@@ -37,12 +77,30 @@ const mockStats = {
   ],
 }
 
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
+}
+
 function StatCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
   return (
     <div className="rounded-xl border border-foreground/5 bg-white/70 p-4 backdrop-blur-sm">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold">{value}</p>
       {sub && <p className="mt-0.5 text-[10px] text-muted-foreground">{sub}</p>}
+    </div>
+  )
+}
+
+function MoneyCard({ label, value, sub, trend }: { label: string; value: number; sub?: string; trend?: "up" | "down" | "neutral" }) {
+  return (
+    <div className="rounded-xl border border-foreground/5 bg-white/70 p-4 backdrop-blur-sm">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-emerald-600">{formatCurrency(value)}</p>
+      {sub && (
+        <p className={`mt-0.5 text-[10px] ${trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-red-500' : 'text-muted-foreground'}`}>
+          {trend === 'up' && '↑ '}{trend === 'down' && '↓ '}{sub}
+        </p>
+      )}
     </div>
   )
 }
@@ -128,6 +186,92 @@ function AdminDashboard() {
           <StatCard label="Pending" value={mockStats.collaborations.pending} />
           <StatCard label="Approved" value={mockStats.collaborations.approved} />
           <StatCard label="Completed" value={mockStats.collaborations.completed} />
+        </div>
+      </div>
+
+      {/* Financials Section */}
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50/30 p-5">
+        <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-emerald-700">
+          <span>💰</span> Financials
+        </h2>
+        
+        {/* Key Metrics */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <MoneyCard 
+            label="GMV (Total Deal Value)" 
+            value={mockStats.financials.gmv.total} 
+            sub={`${formatCurrency(mockStats.financials.gmv.thisMonth)} this month`}
+          />
+          <MoneyCard 
+            label="Platform Revenue (30%)" 
+            value={mockStats.financials.revenue.total} 
+            sub={`${formatCurrency(mockStats.financials.revenue.thisMonth)} this month`}
+            trend="up"
+          />
+          <MoneyCard 
+            label="Creator Payouts (85%)" 
+            value={mockStats.financials.creatorPayouts.total} 
+            sub={`${formatCurrency(mockStats.financials.creatorPayouts.pending)} pending`}
+          />
+          <MoneyCard 
+            label="Host Charges (115%)" 
+            value={mockStats.financials.hostCharges.total} 
+            sub={`${formatCurrency(mockStats.financials.hostCharges.collected)} collected`}
+          />
+        </div>
+
+        {/* Averages */}
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-lg bg-white/60 p-3">
+            <p className="text-[10px] font-medium text-muted-foreground">Avg Deal Size</p>
+            <p className="text-lg font-semibold">{formatCurrency(mockStats.financials.averages.dealSize)}</p>
+          </div>
+          <div className="rounded-lg bg-white/60 p-3">
+            <p className="text-[10px] font-medium text-muted-foreground">Avg Platform Fee</p>
+            <p className="text-lg font-semibold">{formatCurrency(mockStats.financials.averages.platformFee)}</p>
+          </div>
+          <div className="rounded-lg bg-white/60 p-3">
+            <p className="text-[10px] font-medium text-muted-foreground">Avg Creator Payout</p>
+            <p className="text-lg font-semibold">{formatCurrency(mockStats.financials.averages.creatorPayout)}</p>
+          </div>
+        </div>
+
+        {/* Recent Transactions */}
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Recent Transactions</p>
+          <div className="rounded-lg bg-white/60 p-3">
+            <div className="divide-y divide-foreground/5">
+              {mockStats.financials.transactions.map((tx, i) => (
+                <div key={i} className="flex items-center justify-between py-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className={tx.type === 'payout' ? 'text-amber-500' : 'text-emerald-500'}>
+                      {tx.type === 'payout' ? '↑' : '↓'}
+                    </span>
+                    <span>
+                      {tx.type === 'payout' ? `Payout to ${tx.creator}` : `Charge from ${tx.host}`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                      tx.status === 'completed' 
+                        ? 'bg-emerald-100 text-emerald-700' 
+                        : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {tx.status}
+                    </span>
+                    <span className="font-medium">{formatCurrency(tx.amount)}</span>
+                    <span className="text-xs text-muted-foreground">{tx.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Fee Breakdown Note */}
+        <div className="mt-4 rounded-lg border border-dashed border-emerald-300 bg-white/40 p-3 text-xs text-muted-foreground">
+          <p className="font-medium text-emerald-700">Fee Structure Reminder:</p>
+          <p className="mt-1">Host pays: Deal + 15% fee → Creator receives: Deal - 15% fee → Platform keeps: 30% total</p>
         </div>
       </div>
 
