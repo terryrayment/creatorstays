@@ -9,12 +9,24 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} CreatorStays. All rights reserved.
           </p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link
               href="/how-it-works"
               className="text-sm text-muted-foreground hover:text-foreground"
             >
               How It Works
+            </Link>
+            <Link
+              href="/how-to/hosts"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              How To (Hosts)
+            </Link>
+            <Link
+              href="/how-to/creators"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              How To (Creators)
             </Link>
             <Link
               href="/creators"
