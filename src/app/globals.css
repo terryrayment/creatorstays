@@ -205,6 +205,7 @@
 
 /* Hero atmosphere - warm grey/pink gradient matching reference */
 .hero-atmosphere {
+  background-attachment: fixed;
   background: 
     /* Main warm center - pinkish grey */
     radial-gradient(1400px 900px at 50% 40%, 

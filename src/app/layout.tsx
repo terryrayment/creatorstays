@@ -28,7 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${dmSans.variable} ${fraunces.variable}`}>
-      <body className="flex min-h-screen flex-col bg-background font-body text-foreground antialiased">
+      <body className="hero-atmosphere flex min-h-screen flex-col font-body text-foreground antialiased">
         <Navbar />
         <main className="flex-1 pt-20">{children}</main>
         <Footer />
