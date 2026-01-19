@@ -8,6 +8,7 @@ import { Navbar } from "@/components/navigation/navbar"
 import { Footer } from "@/components/navigation/footer"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Select } from "@/components/ui/select"
 
 // Mock approved creators database
 const APPROVED_CREATORS = [
@@ -94,6 +95,7 @@ const APPROVED_CREATORS = [
 const PLATFORM_OPTIONS = ["All Platforms", "Instagram", "TikTok", "YouTube"]
 const NICHE_OPTIONS = ["All Niches", "Travel", "Lifestyle", "Photography", "Vlog", "Food", "Adventure", "Luxury", "Design", "Family", "Minimal"]
 const AUDIENCE_OPTIONS = ["All Sizes", "Under 50K", "50K-100K", "100K-250K", "250K+"]
+const LOCATION_OPTIONS = ["All Locations", "Los Angeles, CA", "Austin, TX", "Miami, FL", "Denver, CO", "Portland, OR", "Seattle, WA"]
 
 export default function SearchCreatorsPage() {
   const router = useRouter()
@@ -105,11 +107,7 @@ export default function SearchCreatorsPage() {
   const [platform, setPlatform] = useState("All Platforms")
   const [niche, setNiche] = useState("All Niches")
   const [audienceSize, setAudienceSize] = useState("All Sizes")
-  
-  // Dropdowns
-  const [showPlatform, setShowPlatform] = useState(false)
-  const [showNiche, setShowNiche] = useState(false)
-  const [showAudience, setShowAudience] = useState(false)
+  const [location, setLocation] = useState("All Locations")
 
   // Check if user is logged in as host
   useEffect(() => {
@@ -135,6 +133,10 @@ export default function SearchCreatorsPage() {
     }
     // Niche
     if (niche !== "All Niches" && !creator.niches.includes(niche)) {
+      return false
+    }
+    // Location
+    if (location !== "All Locations" && creator.location !== location) {
       return false
     }
     // Audience size
@@ -192,73 +194,36 @@ export default function SearchCreatorsPage() {
               </div>
 
               {/* Platform Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => { setShowPlatform(!showPlatform); setShowNiche(false); setShowAudience(false) }}
-                  className="rounded-lg border-2 border-black bg-white px-4 py-2 text-sm font-bold text-black"
-                >
-                  {platform} ▾
-                </button>
-                {showPlatform && (
-                  <div className="absolute z-50 mt-1 w-40 rounded-lg border-2 border-black bg-white py-1 shadow-lg">
-                    {PLATFORM_OPTIONS.map(opt => (
-                      <button
-                        key={opt}
-                        onClick={() => { setPlatform(opt); setShowPlatform(false) }}
-                        className={`w-full px-3 py-2 text-left text-sm font-medium text-black hover:bg-[#FFD84A] ${platform === opt ? 'bg-[#FFD84A]' : ''}`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Select
+                className="w-36"
+                value={platform}
+                onChange={e => setPlatform(e.target.value)}
+                options={PLATFORM_OPTIONS.map(opt => ({ value: opt, label: opt }))}
+              />
 
               {/* Niche Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => { setShowNiche(!showNiche); setShowPlatform(false); setShowAudience(false) }}
-                  className="rounded-lg border-2 border-black bg-white px-4 py-2 text-sm font-bold text-black"
-                >
-                  {niche} ▾
-                </button>
-                {showNiche && (
-                  <div className="absolute z-50 mt-1 w-40 rounded-lg border-2 border-black bg-white py-1 shadow-lg max-h-48 overflow-y-auto">
-                    {NICHE_OPTIONS.map(opt => (
-                      <button
-                        key={opt}
-                        onClick={() => { setNiche(opt); setShowNiche(false) }}
-                        className={`w-full px-3 py-2 text-left text-sm font-medium text-black hover:bg-[#FFD84A] ${niche === opt ? 'bg-[#FFD84A]' : ''}`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Select
+                className="w-32"
+                value={niche}
+                onChange={e => setNiche(e.target.value)}
+                options={NICHE_OPTIONS.map(opt => ({ value: opt, label: opt }))}
+              />
+
+              {/* Location Dropdown */}
+              <Select
+                className="w-40"
+                value={location}
+                onChange={e => setLocation(e.target.value)}
+                options={LOCATION_OPTIONS.map(opt => ({ value: opt, label: opt }))}
+              />
 
               {/* Audience Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => { setShowAudience(!showAudience); setShowPlatform(false); setShowNiche(false) }}
-                  className="rounded-lg border-2 border-black bg-white px-4 py-2 text-sm font-bold text-black"
-                >
-                  {audienceSize} ▾
-                </button>
-                {showAudience && (
-                  <div className="absolute z-50 mt-1 w-40 rounded-lg border-2 border-black bg-white py-1 shadow-lg">
-                    {AUDIENCE_OPTIONS.map(opt => (
-                      <button
-                        key={opt}
-                        onClick={() => { setAudienceSize(opt); setShowAudience(false) }}
-                        className={`w-full px-3 py-2 text-left text-sm font-medium text-black hover:bg-[#FFD84A] ${audienceSize === opt ? 'bg-[#FFD84A]' : ''}`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Select
+                className="w-32"
+                value={audienceSize}
+                onChange={e => setAudienceSize(e.target.value)}
+                options={AUDIENCE_OPTIONS.map(opt => ({ value: opt, label: opt }))}
+              />
             </div>
           </div>
 

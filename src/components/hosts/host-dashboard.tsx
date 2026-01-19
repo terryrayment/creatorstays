@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
 
 // Section wrapper
 function Section({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
@@ -229,7 +230,7 @@ export function HostDashboard() {
 
   // Search state
   const [search, setSearch] = useState("")
-  const [filters, setFilters] = useState({ platform: "", niche: "" })
+  const [filters, setFilters] = useState({ platform: "", niche: "", location: "" })
   const [sortBy, setSortBy] = useState<"default" | "match">("default")
   
   // Message composer state
@@ -258,6 +259,7 @@ export function HostDashboard() {
       if (search && !c.name.toLowerCase().includes(search.toLowerCase()) && !c.handle.toLowerCase().includes(search.toLowerCase())) return false
       if (filters.platform && c.platform !== filters.platform) return false
       if (filters.niche && !c.niches.includes(filters.niche)) return false
+      if (filters.location && !c.location.toLowerCase().includes(filters.location.toLowerCase())) return false
       return true
     })
     .sort((a, b) => {
@@ -514,37 +516,62 @@ export function HostDashboard() {
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                 />
-                <select 
-                  className="rounded-lg border border-black bg-white px-3 py-2 text-sm"
+                <Select
+                  className="w-36"
+                  size="sm"
+                  placeholder="All Platforms"
                   value={filters.platform}
                   onChange={e => setFilters({...filters, platform: e.target.value})}
-                >
-                  <option value="">All Platforms</option>
-                  <option value="Instagram">Instagram</option>
-                  <option value="TikTok">TikTok</option>
-                  <option value="YouTube">YouTube</option>
-                </select>
-                <select 
-                  className="rounded-lg border border-black bg-white px-3 py-2 text-sm"
+                  options={[
+                    { value: "", label: "All Platforms" },
+                    { value: "Instagram", label: "Instagram" },
+                    { value: "TikTok", label: "TikTok" },
+                    { value: "YouTube", label: "YouTube" },
+                  ]}
+                />
+                <Select
+                  className="w-32"
+                  size="sm"
+                  placeholder="All Niches"
                   value={filters.niche}
                   onChange={e => setFilters({...filters, niche: e.target.value})}
-                >
-                  <option value="">All Niches</option>
-                  <option value="Travel">Travel</option>
-                  <option value="Lifestyle">Lifestyle</option>
-                  <option value="Photography">Photography</option>
-                  <option value="Vlog">Vlog</option>
-                  <option value="Food">Food</option>
-                  <option value="Adventure">Adventure</option>
-                </select>
-                <select 
-                  className="rounded-lg border border-black bg-white px-3 py-2 text-sm"
+                  options={[
+                    { value: "", label: "All Niches" },
+                    { value: "Travel", label: "Travel" },
+                    { value: "Lifestyle", label: "Lifestyle" },
+                    { value: "Photography", label: "Photography" },
+                    { value: "Vlog", label: "Vlog" },
+                    { value: "Food", label: "Food" },
+                    { value: "Adventure", label: "Adventure" },
+                  ]}
+                />
+                <Select
+                  className="w-36"
+                  size="sm"
+                  placeholder="All Locations"
+                  value={filters.location}
+                  onChange={e => setFilters({...filters, location: e.target.value})}
+                  options={[
+                    { value: "", label: "All Locations" },
+                    { value: "Los Angeles", label: "Los Angeles" },
+                    { value: "Austin", label: "Austin" },
+                    { value: "Miami", label: "Miami" },
+                    { value: "Denver", label: "Denver" },
+                    { value: "Portland", label: "Portland" },
+                    { value: "Seattle", label: "Seattle" },
+                  ]}
+                />
+                <Select
+                  className="w-36"
+                  size="sm"
+                  placeholder="Sort: Default"
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value as "default" | "match")}
-                >
-                  <option value="default">Sort: Default</option>
-                  <option value="match">Sort: Best Match</option>
-                </select>
+                  options={[
+                    { value: "default", label: "Sort: Default" },
+                    { value: "match", label: "Sort: Best Match" },
+                  ]}
+                />
               </div>
 
               <div className="mt-4 space-y-2">
@@ -692,27 +719,27 @@ export function HostDashboard() {
               </div>
 
               {/* Traffic Bonus Toggle */}
-              <div className="rounded-lg border-2 border-black p-3">
+              <div className="rounded-xl border-2 border-black p-4">
                 <label className="flex cursor-pointer items-center gap-3">
                   <input 
                     type="checkbox"
                     checked={message.trafficBonusEnabled}
                     onChange={e => setMessage({...message, trafficBonusEnabled: e.target.checked})}
-                    className="h-4 w-4 rounded border-2 border-black accent-black"
+                    className="h-5 w-5 rounded border-2 border-black accent-black"
                   />
                   <span className="text-sm font-bold text-black">Add Traffic Bonus (optional)</span>
                 </label>
 
                 {message.trafficBonusEnabled && (
-                  <div className="mt-3 space-y-3 border-t border-black/10 pt-3">
+                  <div className="mt-4 space-y-4 border-t border-black/20 pt-4">
                     {/* Metric */}
                     <div>
-                      <label className="mb-1 block text-[10px] font-bold text-black">Metric</label>
-                      <div className="flex gap-2">
-                        <button className="flex-1 rounded-lg border-2 border-black bg-[#FFD84A] px-3 py-1.5 text-xs font-bold text-black">
+                      <label className="mb-2 block text-xs font-medium text-black/60">Metric</label>
+                      <div className="flex gap-3">
+                        <button className="flex-1 rounded-full border-2 border-black bg-white px-4 py-2 text-sm font-medium text-black">
                           Clicks
                         </button>
-                        <button disabled className="flex-1 rounded-lg border-2 border-black/30 bg-white px-3 py-1.5 text-xs font-bold text-black">
+                        <button disabled className="flex-1 rounded-full border-2 border-black/20 bg-white px-4 py-2 text-sm font-medium text-black/40">
                           Views (coming soon)
                         </button>
                       </div>
@@ -720,16 +747,16 @@ export function HostDashboard() {
 
                     {/* Threshold */}
                     <div>
-                      <label className="mb-1 block text-[10px] font-bold text-black">Threshold</label>
-                      <div className="flex gap-1.5">
+                      <label className="mb-2 block text-xs font-medium text-black/60">Threshold</label>
+                      <div className="flex gap-2">
                         {["250", "500", "1000", "2500"].map(t => (
                           <button 
                             key={t}
                             onClick={() => setMessage({...message, trafficBonusThreshold: t})}
-                            className={`flex-1 rounded-lg border-2 px-2 py-1.5 text-xs font-bold transition-colors ${
+                            className={`flex-1 rounded-full border-2 px-3 py-2 text-sm font-medium transition-colors ${
                               message.trafficBonusThreshold === t 
-                                ? "border-black bg-black text-white" 
-                                : "border-black bg-white text-black hover:bg-black/5"
+                                ? "border-black bg-white text-black" 
+                                : "border-black/20 bg-white text-black/60 hover:border-black/40"
                             }`}
                           >
                             {parseInt(t).toLocaleString()}
@@ -740,43 +767,47 @@ export function HostDashboard() {
 
                     {/* Bonus Amount */}
                     <div>
-                      <label className="mb-1 block text-[10px] font-bold text-black">Bonus Amount ($)</label>
-                      <div className="flex gap-1.5">
+                      <label className="mb-2 block text-xs font-medium text-black/60">Bonus Amount ($)</label>
+                      <div className="flex gap-2">
                         {["25", "50", "100"].map(a => (
                           <button 
                             key={a}
                             onClick={() => setMessage({...message, trafficBonusAmount: a})}
-                            className={`rounded-lg border-2 px-3 py-1.5 text-xs font-bold transition-colors ${
+                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-colors ${
                               message.trafficBonusAmount === a 
-                                ? "border-black bg-black text-white" 
-                                : "border-black bg-white text-black hover:bg-black/5"
+                                ? "border-black bg-white text-black" 
+                                : "border-black/20 bg-white text-black/60 hover:border-black/40"
                             }`}
                           >
                             ${a}
                           </button>
                         ))}
-                        <Input 
+                        <input 
                           placeholder="Custom"
                           value={!["25", "50", "100"].includes(message.trafficBonusAmount) ? message.trafficBonusAmount : ""}
                           onChange={e => setMessage({...message, trafficBonusAmount: e.target.value})}
-                          className="w-20 text-xs"
+                          className={`w-24 rounded-full border-2 px-4 py-2 text-sm font-medium transition-colors placeholder:text-black/40 focus:outline-none ${
+                            !["25", "50", "100"].includes(message.trafficBonusAmount) && message.trafficBonusAmount
+                              ? "border-black bg-white text-black"
+                              : "border-black/20 bg-white text-black/60"
+                          }`}
                           type="number"
                         />
                       </div>
                     </div>
 
                     {/* Payout Mode */}
-                    <div className="rounded-lg bg-black/5 p-2">
-                      <p className="text-[10px] font-bold text-black">Payout Mode: Manual Approve (Beta)</p>
-                      <p className="mt-0.5 text-[9px] text-black">
+                    <div className="rounded-full border-2 border-black/20 bg-white px-4 py-3">
+                      <p className="text-sm font-medium text-black/60">Payout Mode: Manual Approve (Beta)</p>
+                      <p className="mt-0.5 text-xs text-black/40">
                         You approve bonuses after the dashboard shows the threshold was reached.
                       </p>
                     </div>
 
                     {/* Summary */}
-                    <div className="rounded-lg border-2 border-black bg-[#28D17C] p-2">
-                      <p className="text-xs font-bold text-black">
-                        Bonus: ${message.trafficBonusAmount} when link hits {parseInt(message.trafficBonusThreshold).toLocaleString()} clicks.
+                    <div className="rounded-full border-2 border-black/20 bg-white px-4 py-3">
+                      <p className="text-sm font-medium text-black/60">
+                        Bonus: ${message.trafficBonusAmount || "0"} when link hits {parseInt(message.trafficBonusThreshold || "0").toLocaleString()} clicks.
                       </p>
                     </div>
                   </div>

@@ -24,7 +24,8 @@
     "lucide-react": "^0.395.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@prisma/client": "^5.15.0",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "nanoid": "^5.0.7"
   },
   "devDependencies": {
     "@types/node": "^20.14.9",

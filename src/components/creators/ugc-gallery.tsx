@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Select } from "@/components/ui/select"
 
 export interface UGCItem {
   id: string
@@ -223,14 +224,14 @@ function ItemFormModal({
       <form onSubmit={handleSubmit} className="mt-4 space-y-3">
         <div>
           <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Type</label>
-          <select
+          <Select
             value={type}
             onChange={e => setType(e.target.value as "image" | "video")}
-            className={inputClass}
-          >
-            <option value="image">Image</option>
-            <option value="video">Video</option>
-          </select>
+            options={[
+              { value: "image", label: "Image" },
+              { value: "video", label: "Video" },
+            ]}
+          />
         </div>
 
         <div>
