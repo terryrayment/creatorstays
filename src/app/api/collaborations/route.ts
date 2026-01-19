@@ -72,9 +72,9 @@ export async function POST(request: NextRequest) {
     hostId,
     creatorId,
     propertyId,
-    proposedType: proposedType || 'affiliate',
-    proposedPercent: proposedPercent ?? creator.defaultAffiliatePercent,
-    proposedFlatFee,
+    proposedType: proposedType || 'flat',
+    proposedPercent: proposedPercent ?? creator.trafficBonusPercent ?? 10, // fallback to 10% if not set
+    proposedFlatFee: proposedFlatFee ?? creator.baseRatePerPost,
     message: message || '',
     deliverables: deliverables || creator.deliverables,
     status: 'pending',
