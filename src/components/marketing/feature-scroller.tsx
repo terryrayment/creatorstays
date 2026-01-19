@@ -5,7 +5,7 @@ import { useRef, useState, useEffect, useCallback } from "react"
 // Step 1: House icon
 function HouseIcon() {
   return (
-    <svg viewBox="0 0 100 100" fill="none" className="h-24 w-24">
+    <svg viewBox="0 0 100 100" fill="none" className="h-20 w-20">
       <rect x="18" y="38" width="70" height="50" rx="4" fill="#000" opacity="0.15" />
       <rect x="12" y="32" width="70" height="50" rx="4" fill="white" stroke="black" strokeWidth="3" />
       <path d="M12 42L47 12L82 42" stroke="black" strokeWidth="3" fill="none" />
@@ -20,7 +20,7 @@ function HouseIcon() {
 // Step 2: Person/Creator icon
 function CreatorIcon() {
   return (
-    <svg viewBox="0 0 100 100" fill="none" className="h-24 w-24">
+    <svg viewBox="0 0 100 100" fill="none" className="h-20 w-20">
       <circle cx="54" cy="38" r="18" fill="#000" opacity="0.15" />
       <circle cx="50" cy="34" r="18" fill="#D7B6FF" stroke="black" strokeWidth="3" />
       <circle cx="44" cy="30" r="3" fill="black" />
@@ -36,7 +36,7 @@ function CreatorIcon() {
 // Step 3: Link/Chain icon
 function LinkIcon() {
   return (
-    <svg viewBox="0 0 100 100" fill="none" className="h-24 w-24">
+    <svg viewBox="0 0 100 100" fill="none" className="h-20 w-20">
       <ellipse cx="54" cy="54" rx="28" ry="28" fill="#000" opacity="0.15" />
       <ellipse cx="50" cy="50" rx="28" ry="28" fill="white" stroke="black" strokeWidth="3" />
       <rect x="20" y="38" width="28" height="24" rx="12" fill="#28D17C" stroke="black" strokeWidth="3" />
@@ -51,7 +51,7 @@ function LinkIcon() {
 // Step 4: Chart/Analytics icon
 function ChartIcon() {
   return (
-    <svg viewBox="0 0 100 100" fill="none" className="h-24 w-24">
+    <svg viewBox="0 0 100 100" fill="none" className="h-20 w-20">
       <rect x="18" y="18" width="70" height="70" rx="10" fill="#000" opacity="0.15" />
       <rect x="12" y="12" width="70" height="70" rx="10" fill="white" stroke="black" strokeWidth="3" />
       <rect x="22" y="50" width="12" height="24" rx="2" fill="#28D17C" stroke="black" strokeWidth="2" />
@@ -66,7 +66,7 @@ function ChartIcon() {
 // Step 5: Payment/Doc icon
 function PaymentIcon() {
   return (
-    <svg viewBox="0 0 100 100" fill="none" className="h-24 w-24">
+    <svg viewBox="0 0 100 100" fill="none" className="h-20 w-20">
       <rect x="28" y="18" width="50" height="70" rx="4" fill="#000" opacity="0.15" />
       <rect x="22" y="12" width="50" height="70" rx="4" fill="white" stroke="black" strokeWidth="3" />
       <circle cx="62" cy="22" r="12" fill="#28D17C" stroke="black" strokeWidth="2" />
@@ -80,14 +80,15 @@ function PaymentIcon() {
   )
 }
 
-// Process steps with numbered cards
+// Process steps with expanded host-focused copy
 const steps = [
   {
     id: "step-1",
     number: "01",
     line1: "ADD YOUR",
     line2: "PROPERTY",
-    subtitle: "Paste your Airbnb link",
+    copy: "Paste your Airbnb link. We pull in your photos, description, and details automatically.",
+    benefit: "Live in 60 seconds.",
     color: "#FFD84A",
     Icon: HouseIcon,
   },
@@ -96,16 +97,18 @@ const steps = [
     number: "02",
     line1: "INVITE A",
     line2: "CREATOR",
-    subtitle: "Browse and send offers",
+    copy: "Browse creators by niche and audience. Send collaboration offers with your terms and budget.",
+    benefit: "No cold DMs. No guesswork.",
     color: "#4AA3FF",
     Icon: CreatorIcon,
   },
   {
     id: "step-3",
     number: "03",
-    line1: "SHARE",
-    line2: "TRACKED LINK",
-    subtitle: "Creator posts with your link",
+    line1: "THEY POST",
+    line2: "YOUR LINK",
+    copy: "Creators share your tracked link in their content. Every click is attributed to you.",
+    benefit: "Real reach. Real attribution.",
     color: "#28D17C",
     Icon: LinkIcon,
   },
@@ -113,17 +116,19 @@ const steps = [
     id: "step-4",
     number: "04",
     line1: "WATCH",
-    line2: "CLICKS",
-    subtitle: "Real-time analytics",
+    line2: "TRAFFIC GROW",
+    copy: "See clicks, unique visitors, and traffic sources in real time. Know exactly what's working.",
+    benefit: "More bookings, without learning ads.",
     color: "#D7B6FF",
     Icon: ChartIcon,
   },
   {
     id: "step-5",
     number: "05",
-    line1: "PAY & GET",
-    line2: "TAX DOCS",
-    subtitle: "Payouts + 1099s handled",
+    line1: "PAY THROUGH",
+    line2: "PLATFORM",
+    copy: "Pay creators via Stripe. We handle contracts, payouts, and 1099s at year-end.",
+    benefit: "Clean paperwork. Repeatable outreach.",
     color: "#FF5A1F",
     Icon: PaymentIcon,
   },
@@ -135,7 +140,6 @@ export function FeatureScroller() {
   const [isPaused, setIsPaused] = useState(false)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
 
-  // Check for reduced motion preference
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
     setPrefersReducedMotion(mq.matches)
@@ -161,14 +165,13 @@ export function FeatureScroller() {
     }
   }, [prefersReducedMotion])
 
-  // Handle scroll to update active index
   useEffect(() => {
     const container = scrollRef.current
     if (!container) return
 
     const handleScroll = () => {
       const scrollLeft = container.scrollLeft
-      const cardWidth = 340
+      const cardWidth = 360
       const newIndex = Math.round(scrollLeft / cardWidth)
       setActiveIndex(Math.min(Math.max(newIndex, 0), steps.length - 1))
     }
@@ -177,7 +180,6 @@ export function FeatureScroller() {
     return () => container.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Arrow key navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
@@ -191,7 +193,6 @@ export function FeatureScroller() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [activeIndex, scrollToIndex])
 
-  // Auto-loop carousel (2 seconds)
   useEffect(() => {
     if (prefersReducedMotion || isPaused) return
 
@@ -245,39 +246,45 @@ export function FeatureScroller() {
         {steps.map((step) => (
           <div
             key={step.id}
-            className="feature-card flex-shrink-0 snap-center rounded-2xl border-[3px] border-black p-5"
+            className="feature-card flex-shrink-0 snap-center rounded-2xl border-[3px] border-black p-4"
             style={{
               backgroundColor: step.color,
-              width: "min(340px, 80vw)",
-              height: "min(380px, 70vh)",
+              width: "min(360px, 82vw)",
+              height: "min(420px, 75vh)",
             }}
           >
             <div className="flex h-full flex-col justify-between">
               <div>
-                {/* Big number - pure black */}
+                {/* Big number */}
                 <span 
-                  className="font-heading text-[4rem] leading-none tracking-[-0.04em] text-black"
+                  className="font-heading text-[3.5rem] leading-none tracking-[-0.04em] text-black"
                   style={{ fontWeight: 900 }}
                 >
                   {step.number}
                 </span>
-                {/* Split title: line1 = extra bold (900), line2 = regular (400), all pure black */}
-                <h3 className="mt-2 font-heading leading-[0.82] tracking-[-0.04em]">
+                {/* Split title */}
+                <h3 className="mt-1 font-heading leading-[0.82] tracking-[-0.04em]">
                   <span 
-                    className="block text-[2rem] text-black sm:text-[2.5rem] md:text-[3rem]" 
+                    className="block text-[1.75rem] text-black sm:text-[2rem] md:text-[2.25rem]" 
                     style={{ fontWeight: 900 }}
                   >
                     {step.line1}
                   </span>
                   <span 
-                    className="block text-[2rem] text-black sm:text-[2.5rem] md:text-[3rem]" 
+                    className="block text-[1.75rem] text-black sm:text-[2rem] md:text-[2.25rem]" 
                     style={{ fontWeight: 400 }}
                   >
                     {step.line2}
                   </span>
                 </h3>
-                {/* Subtitle - pure black */}
-                <p className="mt-2 text-[13px] font-medium text-black">{step.subtitle}</p>
+                {/* Explanatory copy */}
+                <p className="mt-3 text-[13px] font-medium leading-snug text-black">
+                  {step.copy}
+                </p>
+                {/* Micro-benefit */}
+                <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-black">
+                  {step.benefit}
+                </p>
               </div>
               <div className="self-end">
                 {step.Icon && <step.Icon />}

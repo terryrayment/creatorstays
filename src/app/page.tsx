@@ -19,7 +19,7 @@ function HeroSection() {
           {/* PRIMARY BLOCK - Yellow */}
           <div className="block-hover rounded-2xl border-[3px] border-black bg-[#FFD84A] p-5 lg:p-6">
             {/* Label */}
-            <p className="text-[10px] font-black uppercase tracking-wider text-black/50">
+            <p className="text-[10px] font-black uppercase tracking-wider text-black">
               Now in beta
             </p>
             
@@ -67,7 +67,7 @@ function HeroSection() {
             </div>
 
             {/* Guide links */}
-            <div className="mt-3 space-y-0 border-t-2 border-black/10">
+            <div className="mt-3 space-y-0 border-t-2 border-black">
               {[
                 { href: "/how-it-works", label: "How it works" },
                 { href: "/creators", label: "Browse creators" },
@@ -76,7 +76,7 @@ function HeroSection() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="flex items-center justify-between border-b-2 border-black/10 py-2 text-[10px] font-bold uppercase tracking-wider text-black transition-colors hover:border-black"
+                  className="flex items-center justify-between border-b-2 border-black py-2 text-[10px] font-bold uppercase tracking-wider text-black transition-colors hover:border-black"
                 >
                   {link.label}
                   <span className="text-black">→</span>
@@ -101,13 +101,12 @@ function HowItWorksSection() {
         <div className="grid gap-2 lg:grid-cols-[1fr_auto]">
           {/* How It Works block */}
           <div className="block-hover rounded-2xl border-[3px] border-black bg-white p-4">
-            <p className="text-[9px] font-black uppercase tracking-wider text-black/40">
+            <p className="text-[9px] font-black uppercase tracking-wider text-black">
               Simple process
             </p>
-            <h2 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] text-black sm:text-[2rem]">
-              HOW IT
-              <br />
-              <span className="text-black/25">WORKS</span>
+            <h2 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[2rem]" style={{ fontWeight: 900 }}>
+              <span className="block text-black">HOW IT</span>
+              <span className="block text-black" style={{ fontWeight: 400 }}>WORKS</span>
             </h2>
             <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {[
@@ -116,10 +115,10 @@ function HowItWorksSection() {
                 { num: "03", title: "Track clicks", desc: "Real-time analytics" },
                 { num: "04", title: "Pay creators", desc: "Via Stripe" },
               ].map((step) => (
-                <div key={step.num} className="border-l-[3px] border-black/10 pl-2">
-                  <span className="font-heading text-[1rem] text-black/20">{step.num}</span>
+                <div key={step.num} className="border-l-[3px] border-black pl-2">
+                  <span className="font-heading text-[1rem] text-black" style={{ fontWeight: 900 }}>{step.num}</span>
                   <h4 className="text-[12px] font-bold text-black">{step.title}</h4>
-                  <p className="text-[10px] text-black/50">{step.desc}</p>
+                  <p className="text-[10px] text-black">{step.desc}</p>
                 </div>
               ))}
             </div>
@@ -161,15 +160,14 @@ function CTASection() {
       <div className="mx-auto grid max-w-7xl gap-2 md:grid-cols-2">
         {/* Hosts */}
         <div className="block-hover rounded-2xl border-[3px] border-black bg-[#FFD84A] p-4">
-          <p className="text-[9px] font-black uppercase tracking-wider text-black/40">
+          <p className="text-[9px] font-black uppercase tracking-wider text-black">
             For property owners
           </p>
-          <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] text-black sm:text-[1.75rem]">
-            LIST YOUR
-            <br />
-            <span className="text-black/40">PROPERTY</span>
+          <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]" style={{ fontWeight: 900 }}>
+            <span className="block text-black">LIST YOUR</span>
+            <span className="block text-black" style={{ fontWeight: 400 }}>PROPERTY</span>
           </h3>
-          <p className="mt-2 max-w-xs text-[12px] font-medium text-black/60">
+          <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
             Join hosts using creator marketing.
           </p>
           <Link
@@ -185,15 +183,14 @@ function CTASection() {
 
         {/* Creators */}
         <div className="block-hover rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-4">
-          <p className="text-[9px] font-black uppercase tracking-wider text-black/40">
+          <p className="text-[9px] font-black uppercase tracking-wider text-black">
             For content creators
           </p>
-          <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] text-black sm:text-[1.75rem]">
-            ALWAYS
-            <br />
-            <span className="text-black/40">HERE</span>
+          <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]" style={{ fontWeight: 900 }}>
+            <span className="block text-black">ALWAYS</span>
+            <span className="block text-black" style={{ fontWeight: 400 }}>HERE</span>
           </h3>
-          <p className="mt-2 max-w-xs text-[12px] font-medium text-black/60">
+          <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
             Questions? We have you covered.
           </p>
           <div className="mt-3 flex flex-wrap gap-1.5">
