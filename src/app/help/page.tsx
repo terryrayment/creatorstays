@@ -613,9 +613,15 @@ export default function HelpPage() {
           </a>
         </div>
 
-        {/* Image Block */}
+        {/* Hero Image - Support Illustration */}
         <div className="mt-6">
-          <ImageBlock src={pageImages[0]} aspectRatio="aspect-[21/9]" />
+          <div className="block-hover overflow-hidden rounded-2xl border-[3px] border-black bg-[#F5F0E6]">
+            <img 
+              src="/images/help-support.png" 
+              alt="CreatorStays Support" 
+              className="w-full h-auto"
+            />
+          </div>
         </div>
 
         {/* Search Block */}
