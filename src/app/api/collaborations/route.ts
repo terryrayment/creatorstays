@@ -140,13 +140,15 @@ export async function PATCH(request: NextRequest) {
     const trackingToken = generateToken()
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     
-    const host = mockHosts.find(h => h.id === req.hostId)
-    const property = host?.properties.find(p => p.id === req.propertyId)
-
     // Map old "affiliate" type to new "flat-with-bonus" type
-    const dealType: 'flat' | 'flat-with-bonus' | 'post-for-stay' = 
-      req.proposedType === 'affiliate' ? 'flat-with-bonus' : 
-      (req.proposedType as 'flat' | 'flat-with-bonus' | 'post-for-stay')
+    let dealType: 'flat' | 'flat-with-bonus' | 'post-for-stay' = 'flat'
+    if (req.proposedType === 'affiliate') {
+      dealType = 'flat-with-bonus'
+    } else if (req.proposedType === 'flat') {
+      dealType = 'flat'
+    } else if (req.proposedType === 'post-for-stay') {
+      dealType = 'post-for-stay'
+    }
 
     const newCollab: Collaboration = {
       id: `collab-${generateToken()}`,
