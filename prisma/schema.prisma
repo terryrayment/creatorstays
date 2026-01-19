@@ -187,8 +187,13 @@ model Property {
   country         String?
   
   // External listing
-  listingUrl      String?  // Airbnb/VRBO URL
-  listingPlatform String?  // "airbnb", "vrbo", "direct"
+  listingUrl      String?  // Airbnb URL
+  listingPlatform String?  @default("airbnb")
+  airbnbListingId String?  // Extracted from URL
+  
+  // Prefill metadata
+  airbnbLastFetchedAt DateTime?
+  heroImageUrl    String?
   
   // Details
   priceRangeMin   Int?
@@ -202,7 +207,9 @@ model Property {
   // Tracking
   trackingToken   String   @unique @default(cuid())
   
+  // Status
   isActive        Boolean  @default(true)
+  isDraft         Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -210,6 +217,7 @@ model Property {
   trackingLinks   TrackingLink[]
   collaborations  Collaboration[]
 
+  @@index([hostProfileId])
   @@map("properties")
 }
 
