@@ -79,21 +79,24 @@ function scanForLinks(dir: string): Map<string, string[]> {
         const fileLinks: string[] = []
         
         // Match <Link href="...">
-        const linkMatches = content.matchAll(/<Link[^>]*href=["']([^"']+)["']/g)
-        for (const match of linkMatches) {
-          fileLinks.push(match[1])
+        const linkRe = /<Link[^>]*href=["']([^"']+)["']/g
+        let linkMatch: RegExpExecArray | null
+        while ((linkMatch = linkRe.exec(content)) !== null) {
+          fileLinks.push(linkMatch[1])
         }
         
         // Match href="/..."
-        const hrefMatches = content.matchAll(/href=["'](\/[^"']+)["']/g)
-        for (const match of hrefMatches) {
-          fileLinks.push(match[1])
+        const hrefRe = /href=["'](\/[^"']+)["']/g
+        let hrefMatch: RegExpExecArray | null
+        while ((hrefMatch = hrefRe.exec(content)) !== null) {
+          fileLinks.push(hrefMatch[1])
         }
         
         // Match router.push("/...")
-        const routerMatches = content.matchAll(/router\.push\(["'](\/[^"']+)["']\)/g)
-        for (const match of routerMatches) {
-          fileLinks.push(match[1])
+        const routerRe = /router\.push\(["'](\/[^"']+)["']\)/g
+        let routerMatch: RegExpExecArray | null
+        while ((routerMatch = routerRe.exec(content)) !== null) {
+          fileLinks.push(routerMatch[1])
         }
         
         if (fileLinks.length > 0) {
