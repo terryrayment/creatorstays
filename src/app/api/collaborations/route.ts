@@ -136,12 +136,17 @@ export async function PATCH(request: NextRequest) {
     req.status = 'approved'
     req.respondedAt = new Date()
 
-    // Generate unique affiliate link for this collaboration
-    const affiliateToken = generateToken()
+    // Generate unique tracking link for this collaboration
+    const trackingToken = generateToken()
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     
     const host = mockHosts.find(h => h.id === req.hostId)
     const property = host?.properties.find(p => p.id === req.propertyId)
+
+    // Map old "affiliate" type to new "flat-with-bonus" type
+    const dealType: 'flat' | 'flat-with-bonus' | 'post-for-stay' = 
+      req.proposedType === 'affiliate' ? 'flat-with-bonus' : 
+      (req.proposedType as 'flat' | 'flat-with-bonus' | 'post-for-stay')
 
     const newCollab: Collaboration = {
       id: `collab-${generateToken()}`,
@@ -149,12 +154,12 @@ export async function PATCH(request: NextRequest) {
       hostId: req.hostId,
       creatorId: req.creatorId,
       propertyId: req.propertyId,
-      dealType: req.proposedType,
-      affiliatePercent: req.proposedPercent,
+      dealType,
+      trafficBonusPercent: req.proposedPercent,
       flatFee: req.proposedFlatFee,
       deliverables: req.deliverables,
-      affiliateToken,
-      affiliateUrl: `${baseUrl}/r/${affiliateToken}`,
+      trackingToken,
+      trackingUrl: `${baseUrl}/r/${trackingToken}`,
       status: 'active',
       contentLinks: [],
       paymentStatus: 'pending',
@@ -167,7 +172,7 @@ export async function PATCH(request: NextRequest) {
       success: true, 
       request: req,
       collaboration: newCollab,
-      message: `Collaboration approved! Affiliate link: ${newCollab.affiliateUrl}`
+      message: `Collaboration approved! Tracking link: ${newCollab.trackingUrl}`
     })
   }
 
