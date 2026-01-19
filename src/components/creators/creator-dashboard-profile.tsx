@@ -38,6 +38,38 @@ function deleteCookie(name: string) {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
 }
 
+// Toast notification component
+function Toast({ message, onClose }: { message: string; onClose: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000)
+    return () => clearTimeout(timer)
+  }, [onClose])
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
+      <div className="rounded-lg border border-foreground/10 bg-white px-4 py-3 shadow-lg">
+        <div className="flex items-center gap-2">
+          <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+          <span className="text-sm font-medium">{message}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Modal wrapper component
+function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        {children}
+      </div>
+    </div>
+  )
+}
+
 // Status indicator
 function StatusDot({ active, color }: { active: boolean; color: string }) {
   return <div className={`h-2 w-2 rounded-full ${active ? color : "bg-gray-200"}`} />
@@ -61,15 +93,13 @@ function CompletenessBar({ percent }: { percent: number }) {
   )
 }
 
-// Copy link button
-function CopyLinkButton({ handle }: { handle: string }) {
-  const [copied, setCopied] = useState(false)
+// Copy link button with toast
+function CopyLinkButton({ handle, onCopy }: { handle: string; onCopy: () => void }) {
   const link = `creatorstays.com/c/${handle}`
 
   const copy = () => {
     navigator.clipboard.writeText(`https://${link}`)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    onCopy()
   }
 
   return (
@@ -81,19 +111,8 @@ function CopyLinkButton({ handle }: { handle: string }) {
         <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
       </svg>
       <span className="flex-1 truncate text-xs text-muted-foreground">{link}</span>
-      <span className="text-[10px] font-medium text-primary">{copied ? "Copied!" : "Copy"}</span>
+      <span className="text-[10px] font-medium text-primary">Copy</span>
     </button>
-  )
-}
-
-// Empty state
-function EmptyState({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="flex flex-col items-center py-6 text-center">
-      <div className="h-10 w-10 rounded-full bg-muted/50" />
-      <p className="mt-3 text-xs font-medium">{title}</p>
-      <p className="mt-0.5 text-[10px] text-muted-foreground">{description}</p>
-    </div>
   )
 }
 
@@ -105,11 +124,10 @@ const mockCampaigns = [
     host: "Mountain View Retreats",
     linkLabel: "cabin-winter-stay",
     dateRange: "Jan 5 – Jan 19",
-    postDate: 3, // day index when content was posted
+    postDate: 3,
     totalClicks: 127,
     uniqueClicks: 98,
     revisitRate: 23,
-    // Activity pattern (0-10 scale per day)
     activity: [1, 2, 8, 10, 9, 7, 5, 4, 3, 3, 2, 2, 1, 1],
   },
   {
@@ -206,7 +224,6 @@ function CampaignTimeline() {
                   </div>
                 </div>
               </div>
-              {/* Activity timeline */}
               <div className="mt-2 flex h-6 items-end gap-px">
                 {campaign.activity.map((level, i) => (
                   <div
@@ -254,7 +271,7 @@ const mockTaxData = {
 }
 
 // Earnings Panel Component
-function EarningsPanel() {
+function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => void }) {
   const [showBreakdown, setShowBreakdown] = useState(false)
   
   return (
@@ -264,7 +281,6 @@ function EarningsPanel() {
         actions={<span className="text-[10px] text-emerald-600">2025</span>}
       />
       <PanelContent className="space-y-4">
-        {/* Primary earnings display */}
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg bg-white/60 p-2.5">
             <p className="text-[10px] text-muted-foreground">Net Paid Out</p>
@@ -276,7 +292,6 @@ function EarningsPanel() {
           </div>
         </div>
 
-        {/* View breakdown link */}
         <button 
           onClick={() => setShowBreakdown(!showBreakdown)}
           className="text-[10px] font-medium text-primary hover:underline"
@@ -284,7 +299,6 @@ function EarningsPanel() {
           {showBreakdown ? 'Hide breakdown' : 'View breakdown'}
         </button>
         
-        {/* Breakdown expand */}
         {showBreakdown && (
           <div className="rounded-lg bg-foreground/[0.02] p-2.5 text-xs space-y-1">
             <div className="flex justify-between">
@@ -302,7 +316,6 @@ function EarningsPanel() {
           </div>
         )}
 
-        {/* Bank account status */}
         <div className="rounded-lg border border-dashed border-foreground/10 bg-white/40 p-3">
           <div className="flex items-center justify-between">
             <div>
@@ -311,22 +324,28 @@ function EarningsPanel() {
                 {mockTaxData.stripeConnected ? 'Bank account connected' : 'Payouts are deposited to your bank account.'}
               </p>
             </div>
-            <Button size="sm" variant={mockTaxData.stripeConnected ? "outline" : "default"} className="text-[10px]">
-              {mockTaxData.stripeConnected ? 'Manage' : 'Connect bank account'}
+            <Button 
+              size="sm" 
+              variant={mockTaxData.stripeConnected ? "outline" : "default"} 
+              className="text-[10px]"
+              onClick={() => onComingSoon('Bank account connection')}
+            >
+              {mockTaxData.stripeConnected ? 'Manage' : 'Connect bank'}
             </Button>
           </div>
           <p className="mt-2 text-[9px] text-muted-foreground/60">Bank connection powered by Stripe</p>
         </div>
 
-        {/* Tax forms note */}
         <div className="text-[10px] text-muted-foreground leading-relaxed">
           <p>Tax forms are issued automatically for eligible US creators.</p>
-          <button className="mt-0.5 font-medium text-primary hover:underline" title="You'll complete tax details during payout setup.">
+          <button 
+            onClick={() => onComingSoon('Tax documentation')}
+            className="mt-0.5 font-medium text-primary hover:underline"
+          >
             Learn more
           </button>
         </div>
 
-        {/* Checklist */}
         <div className="space-y-1.5">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Setup checklist</p>
           {[
@@ -335,7 +354,11 @@ function EarningsPanel() {
             { key: 'bankAccount', label: 'Connect bank account', done: mockTaxData.checklist.stripeConnected },
             { key: 'payoutSchedule', label: 'Choose payout schedule', done: mockTaxData.checklist.payoutSchedule },
           ].map((item) => (
-            <div key={item.key} className="flex items-center gap-2 text-xs">
+            <button 
+              key={item.key} 
+              onClick={() => !item.done && onComingSoon(item.label)}
+              className="flex w-full items-center gap-2 text-xs hover:bg-foreground/[0.02] rounded p-1 -ml-1"
+            >
               <div className={`flex h-4 w-4 items-center justify-center rounded-full ${
                 item.done 
                   ? 'bg-emerald-500 text-white' 
@@ -348,24 +371,12 @@ function EarningsPanel() {
                 )}
               </div>
               <span className={item.done ? 'text-muted-foreground line-through' : ''}>{item.label}</span>
-            </div>
+            </button>
           ))}
         </div>
       </PanelContent>
     </Panel>
   )
-}
-
-// Mock data
-const creator = {
-  displayName: "Your Profile",
-  handle: "yourhandle",
-  bio: "Add a bio to tell hosts about your content style.",
-  niches: ["Travel", "Lifestyle"],
-  platforms: { instagram: false, tiktok: false, youtube: false },
-  dealPrefs: { flatFee: null as number | null, percent: null as number | null, postForStay: true, gifted: true },
-  deliverables: ["Feed posts", "Reels", "Stories"],
-  completeness: 35,
 }
 
 // Platform sync data type
@@ -374,8 +385,49 @@ interface PlatformSyncData {
   lastSynced: Date
 }
 
+// Available niches
+const AVAILABLE_NICHES = ['Travel', 'Lifestyle', 'Luxury', 'Adventure', 'Food', 'Photography', 'Family', 'Wellness', 'Budget', 'Solo']
+
+// Available deliverables
+const AVAILABLE_DELIVERABLES = ['Feed posts', 'Reels', 'Stories', 'TikTok', 'YouTube', 'Blog post', 'Photography', 'Drone footage']
+
 export function CreatorDashboardProfile() {
   const searchParams = useSearchParams()
+  
+  // Toast state
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  
+  // Profile state (editable)
+  const [profile, setProfile] = useState({
+    displayName: "Your Profile",
+    handle: "yourhandle",
+    bio: "Add a bio to tell hosts about your content style.",
+    niches: ["Travel", "Lifestyle"],
+    deliverables: ["Feed posts", "Reels", "Stories"],
+    dealPrefs: {
+      minFlat: null as number | null,
+      minPercent: null as number | null,
+      postForStay: true,
+    },
+  })
+  
+  // Modal states
+  const [editAboutOpen, setEditAboutOpen] = useState(false)
+  const [editDealPrefsOpen, setEditDealPrefsOpen] = useState(false)
+  const [editDeliverablesOpen, setEditDeliverablesOpen] = useState(false)
+  const [editProfileOpen, setEditProfileOpen] = useState(false)
+  const [comingSoonModal, setComingSoonModal] = useState<string | null>(null)
+  const [oauthNotConfigured, setOauthNotConfigured] = useState<Platform | null>(null)
+  
+  // Form state for modals
+  const [editBio, setEditBio] = useState(profile.bio)
+  const [editNiches, setEditNiches] = useState<string[]>(profile.niches)
+  const [editMinFlat, setEditMinFlat] = useState(profile.dealPrefs.minFlat?.toString() || '')
+  const [editMinPercent, setEditMinPercent] = useState(profile.dealPrefs.minPercent?.toString() || '')
+  const [editPostForStay, setEditPostForStay] = useState(profile.dealPrefs.postForStay)
+  const [editDeliverables, setEditDeliverables] = useState<string[]>(profile.deliverables)
+  const [editDisplayName, setEditDisplayName] = useState(profile.displayName)
+  const [editHandle, setEditHandle] = useState(profile.handle)
   
   // Platform connection state
   const [connectedPlatforms, setConnectedPlatforms] = useState<ConnectedPlatforms>({})
@@ -383,22 +435,17 @@ export function CreatorDashboardProfile() {
   const [platformUrlInput, setPlatformUrlInput] = useState('')
   const [connectLoading, setConnectLoading] = useState(false)
   const [connectError, setConnectError] = useState<string | null>(null)
-  
-  // Platform sync data (mock follower counts)
   const [platformSyncData, setPlatformSyncData] = useState<Partial<Record<Platform, PlatformSyncData>>>({})
 
-  // Check for Instagram OAuth connection on mount and URL params
+  // Check for Instagram OAuth connection on mount
   useEffect(() => {
-    // Check if returning from OAuth
     const connected = searchParams.get('connected')
     const error = searchParams.get('error')
     
     if (error) {
-      console.error('OAuth error:', error, searchParams.get('message'))
       setConnectError(`Connection failed: ${error}`)
     }
     
-    // Check for Instagram cookie
     const igCookie = getCookie('cs_ig_connected')
     if (igCookie) {
       try {
@@ -413,7 +460,6 @@ export function CreatorDashboardProfile() {
               viaOAuth: true,
             },
           }))
-          // Initialize sync data for Instagram
           if (!platformSyncData.instagram) {
             setPlatformSyncData(prev => ({
               ...prev,
@@ -427,7 +473,7 @@ export function CreatorDashboardProfile() {
     }
   }, [searchParams])
   
-  // Handle sync for a platform (mock - just updates count slightly and timestamp)
+  // Handle sync for a platform
   const handleSyncPlatform = (platform: Platform) => {
     const baseCounts: Record<Platform, number> = {
       instagram: 12400,
@@ -435,27 +481,34 @@ export function CreatorDashboardProfile() {
       youtube: 3200,
     }
     const currentCount = platformSyncData[platform]?.count || baseCounts[platform]
-    // Add small random variation (-2% to +3%)
     const variation = Math.floor(currentCount * (Math.random() * 0.05 - 0.02))
     const newCount = currentCount + variation
     
     setPlatformSyncData(prev => ({
       ...prev,
-      [platform]: {
-        count: newCount,
-        lastSynced: new Date(),
-      }
+      [platform]: { count: newCount, lastSynced: new Date() }
     }))
+    setToastMessage(`${platform.charAt(0).toUpperCase() + platform.slice(1)} synced`)
   }
 
-  // Calculate completeness based on connections
+  // Calculate completeness
   const connectionCount = Object.keys(connectedPlatforms).length
-  const baseCompleteness = creator.completeness
-  const adjustedCompleteness = Math.min(100, baseCompleteness + (connectionCount * 10))
+  const baseCompleteness = 35
+  const adjustedCompleteness = Math.min(100, baseCompleteness + (connectionCount * 10) + (profile.bio.length > 50 ? 15 : 0) + (profile.dealPrefs.minFlat ? 10 : 0))
 
   // Handle Instagram OAuth connect
-  const handleInstagramOAuth = () => {
-    window.location.href = '/api/instagram/auth'
+  const handleInstagramOAuth = async () => {
+    // Check if OAuth is configured by attempting to fetch the auth endpoint
+    try {
+      const res = await fetch('/api/instagram/auth', { method: 'HEAD' })
+      if (res.status === 500 || res.status === 404) {
+        setOauthNotConfigured('instagram')
+        return
+      }
+      window.location.href = '/api/instagram/auth'
+    } catch {
+      setOauthNotConfigured('instagram')
+    }
   }
 
   // Handle Instagram disconnect
@@ -468,6 +521,7 @@ export function CreatorDashboardProfile() {
       return updated
     })
     setConnectingPlatform(null)
+    setToastMessage('Instagram disconnected')
   }
 
   const handleConnectPlatform = async () => {
@@ -502,7 +556,6 @@ export function CreatorDashboardProfile() {
             connectedAt: new Date(),
           },
         }))
-        // Initialize sync data for the platform
         setPlatformSyncData(prev => ({
           ...prev,
           [connectingPlatform]: {
@@ -512,6 +565,7 @@ export function CreatorDashboardProfile() {
         }))
         setConnectingPlatform(null)
         setPlatformUrlInput('')
+        setToastMessage(`${connectingPlatform.charAt(0).toUpperCase() + connectingPlatform.slice(1)} connected`)
       } else {
         setConnectError(data.error || 'Failed to connect')
       }
@@ -528,13 +582,13 @@ export function CreatorDashboardProfile() {
       delete updated[platform]
       return updated
     })
-    // Clear sync data
     setPlatformSyncData(prev => {
       const updated = { ...prev }
       delete updated[platform]
       return updated
     })
     setConnectingPlatform(null)
+    setToastMessage(`${platform.charAt(0).toUpperCase() + platform.slice(1)} disconnected`)
   }
 
   const getPlaceholder = (platform: Platform) => {
@@ -545,9 +599,242 @@ export function CreatorDashboardProfile() {
     }
   }
 
+  // Save handlers
+  const saveAbout = () => {
+    setProfile(prev => ({ ...prev, bio: editBio, niches: editNiches }))
+    setEditAboutOpen(false)
+    setToastMessage('About updated')
+  }
+
+  const saveDealPrefs = () => {
+    setProfile(prev => ({
+      ...prev,
+      dealPrefs: {
+        minFlat: editMinFlat ? parseInt(editMinFlat) : null,
+        minPercent: editMinPercent ? parseInt(editMinPercent) : null,
+        postForStay: editPostForStay,
+      }
+    }))
+    setEditDealPrefsOpen(false)
+    setToastMessage('Deal preferences updated')
+  }
+
+  const saveDeliverables = () => {
+    setProfile(prev => ({ ...prev, deliverables: editDeliverables }))
+    setEditDeliverablesOpen(false)
+    setToastMessage('Deliverables updated')
+  }
+
+  const saveProfile = () => {
+    setProfile(prev => ({ ...prev, displayName: editDisplayName, handle: editHandle }))
+    setEditProfileOpen(false)
+    setToastMessage('Profile updated')
+  }
+
+  const toggleNiche = (niche: string) => {
+    setEditNiches(prev => 
+      prev.includes(niche) 
+        ? prev.filter(n => n !== niche)
+        : [...prev, niche]
+    )
+  }
+
+  const toggleDeliverable = (d: string) => {
+    setEditDeliverables(prev => 
+      prev.includes(d) 
+        ? prev.filter(x => x !== d)
+        : [...prev, d]
+    )
+  }
+
   return (
     <div className="relative min-h-screen bg-[hsl(210,20%,99%)]">
       <EdgeBlur />
+
+      {/* Toast */}
+      {toastMessage && (
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      )}
+
+      {/* Edit About Modal */}
+      {editAboutOpen && (
+        <Modal onClose={() => setEditAboutOpen(false)}>
+          <h3 className="text-lg font-semibold">Edit About</h3>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Bio</label>
+              <textarea
+                value={editBio}
+                onChange={(e) => setEditBio(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-foreground/10 p-3 text-sm"
+                rows={3}
+                placeholder="Tell hosts about your content style..."
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Niches</label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {AVAILABLE_NICHES.map(niche => (
+                  <button
+                    key={niche}
+                    onClick={() => toggleNiche(niche)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                      editNiches.includes(niche)
+                        ? 'bg-primary text-white'
+                        : 'border border-foreground/10 bg-white hover:bg-foreground/5'
+                    }`}
+                  >
+                    {niche}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setEditAboutOpen(false)}>Cancel</Button>
+            <Button className="flex-1" onClick={saveAbout}>Save</Button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Deal Prefs Modal */}
+      {editDealPrefsOpen && (
+        <Modal onClose={() => setEditDealPrefsOpen(false)}>
+          <h3 className="text-lg font-semibold">Edit Deal Preferences</h3>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Minimum flat fee ($)</label>
+              <Input
+                type="number"
+                value={editMinFlat}
+                onChange={(e) => setEditMinFlat(e.target.value)}
+                placeholder="e.g. 500"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Minimum commission (%)</label>
+              <Input
+                type="number"
+                value={editMinPercent}
+                onChange={(e) => setEditMinPercent(e.target.value)}
+                placeholder="e.g. 10"
+                className="mt-1"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Open to post-for-stay</label>
+              <button
+                onClick={() => setEditPostForStay(!editPostForStay)}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  editPostForStay ? 'bg-primary' : 'bg-foreground/20'
+                }`}
+              >
+                <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
+                  editPostForStay ? 'left-6' : 'left-1'
+                }`} />
+              </button>
+            </div>
+          </div>
+          <div className="mt-6 flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setEditDealPrefsOpen(false)}>Cancel</Button>
+            <Button className="flex-1" onClick={saveDealPrefs}>Save</Button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Deliverables Modal */}
+      {editDeliverablesOpen && (
+        <Modal onClose={() => setEditDeliverablesOpen(false)}>
+          <h3 className="text-lg font-semibold">Edit Deliverables</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Select the content types you offer.</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {AVAILABLE_DELIVERABLES.map(d => (
+              <button
+                key={d}
+                onClick={() => toggleDeliverable(d)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                  editDeliverables.includes(d)
+                    ? 'bg-primary text-white'
+                    : 'border border-foreground/10 bg-white hover:bg-foreground/5'
+                }`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+          <div className="mt-6 flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setEditDeliverablesOpen(false)}>Cancel</Button>
+            <Button className="flex-1" onClick={saveDeliverables}>Save</Button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Profile Modal */}
+      {editProfileOpen && (
+        <Modal onClose={() => setEditProfileOpen(false)}>
+          <h3 className="text-lg font-semibold">Edit Profile</h3>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Display Name</label>
+              <Input
+                value={editDisplayName}
+                onChange={(e) => setEditDisplayName(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Handle</label>
+              <div className="mt-1 flex items-center gap-1">
+                <span className="text-sm text-muted-foreground">@</span>
+                <Input
+                  value={editHandle}
+                  onChange={(e) => setEditHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setEditProfileOpen(false)}>Cancel</Button>
+            <Button className="flex-1" onClick={saveProfile}>Save</Button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Coming Soon Modal */}
+      {comingSoonModal && (
+        <Modal onClose={() => setComingSoonModal(null)}>
+          <h3 className="text-lg font-semibold">Coming Soon</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {comingSoonModal} is not available yet. We're working on it!
+          </p>
+          <div className="mt-6">
+            <Button className="w-full" onClick={() => setComingSoonModal(null)}>Got it</Button>
+          </div>
+        </Modal>
+      )}
+
+      {/* OAuth Not Configured Modal */}
+      {oauthNotConfigured && (
+        <Modal onClose={() => setOauthNotConfigured(null)}>
+          <h3 className="text-lg font-semibold">Not Configured</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {oauthNotConfigured.charAt(0).toUpperCase() + oauthNotConfigured.slice(1)} OAuth is not configured yet. 
+            The environment variables for this integration need to be set up.
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            You can still connect manually by entering your profile URL.
+          </p>
+          <div className="mt-6 flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setOauthNotConfigured(null)}>Cancel</Button>
+            <Button className="flex-1" onClick={() => {
+              setOauthNotConfigured(null)
+              setConnectingPlatform(oauthNotConfigured)
+              setPlatformUrlInput('')
+            }}>Connect Manually</Button>
+          </div>
+        </Modal>
+      )}
 
       {/* Connect Platform Modal */}
       {connectingPlatform && (
@@ -569,9 +856,6 @@ export function CreatorDashboardProfile() {
                     Since {connectedPlatforms[connectingPlatform]?.connectedAt.toLocaleDateString()}
                   </p>
                 </div>
-                <p className="mt-3 text-[10px] text-muted-foreground">
-                  Follower counts sync after you connect via platform sign-in.
-                </p>
                 <div className="mt-4 flex gap-2">
                   <Button 
                     variant="outline" 
@@ -596,61 +880,29 @@ export function CreatorDashboardProfile() {
                   </Button>
                 </div>
               </>
-            ) : connectingPlatform === 'instagram' ? (
-              // Instagram OAuth - no URL input needed
-              <>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Connect your Instagram account securely via Meta.
-                </p>
-                <p className="mt-3 text-[10px] text-muted-foreground">
-                  Follower counts sync after you connect via platform sign-in.
-                </p>
-                <div className="mt-4 flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1 text-xs"
-                    onClick={() => setConnectingPlatform(null)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    className="flex-1 text-xs"
-                    onClick={handleInstagramOAuth}
-                  >
-                    Connect with Meta
-                  </Button>
-                </div>
-              </>
             ) : (
               <>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Enter your profile URL to connect.
+                  Enter your {connectingPlatform} profile URL to connect.
                 </p>
-                
-                <div className="mt-4">
-                  <Input
-                    placeholder={getPlaceholder(connectingPlatform)}
-                    value={platformUrlInput}
-                    onChange={(e) => setPlatformUrlInput(e.target.value)}
-                    className="text-sm"
-                  />
-                  {connectError && (
-                    <p className="mt-1 text-xs text-red-600">{connectError}</p>
-                  )}
-                </div>
-                
-                <p className="mt-3 text-[10px] text-muted-foreground">
-                  Follower counts sync after you connect via platform sign-in.
-                </p>
-                
+                <Input
+                  value={platformUrlInput}
+                  onChange={(e) => setPlatformUrlInput(e.target.value)}
+                  placeholder={getPlaceholder(connectingPlatform)}
+                  className="mt-4"
+                />
+                {connectError && (
+                  <p className="mt-2 text-xs text-red-600">{connectError}</p>
+                )}
                 <div className="mt-4 flex gap-2">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     className="flex-1 text-xs"
-                    onClick={() => setConnectingPlatform(null)}
+                    onClick={() => {
+                      setConnectingPlatform(null)
+                      setConnectError(null)
+                    }}
                   >
                     Cancel
                   </Button>
@@ -660,7 +912,7 @@ export function CreatorDashboardProfile() {
                     onClick={handleConnectPlatform}
                     disabled={connectLoading || !platformUrlInput}
                   >
-                    {connectLoading ? 'Connecting…' : 'Save & Connect'}
+                    {connectLoading ? 'Connecting...' : 'Connect'}
                   </Button>
                 </div>
               </>
@@ -669,40 +921,43 @@ export function CreatorDashboardProfile() {
         </div>
       )}
 
-      {/* Top bar */}
-      <div className="border-b border-foreground/5 bg-white/50 backdrop-blur-sm">
-        <div className="mx-auto flex h-11 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-2">
-            <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">BETA</span>
-            <span className="text-xs text-muted-foreground">Creator Dashboard</span>
-          </div>
-          <Link href="/" className="text-xs text-muted-foreground hover:text-foreground">← Back</Link>
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Creator Dashboard</h1>
+          <Link 
+            href="/dashboard/creator/offers"
+            className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-medium text-white hover:bg-primary/90"
+          >
+            View Offers
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </Link>
         </div>
-      </div>
 
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-        {/* Main grid: Profile + Sidebar */}
-        <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
-          
-          {/* Main column */}
-          <div className="space-y-5">
-            {/* Profile Panel */}
+        <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+          <div className="space-y-4">
+            {/* Profile Card */}
             <Panel variant="elevated" className="overflow-hidden">
-              <div className="grid md:grid-cols-[240px_1fr]">
-                {/* Left: Identity */}
-                <div className="border-b border-foreground/5 p-5 md:border-b-0 md:border-r">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-lg font-bold text-white shadow-lg shadow-primary/20">
-                      YP
+              <div className="flex flex-col md:flex-row">
+                {/* Left: Avatar + actions */}
+                <div className="border-b border-foreground/5 bg-foreground/[0.01] p-5 md:w-56 md:border-b-0 md:border-r">
+                  <div className="flex items-center gap-3 md:flex-col md:items-start md:gap-0">
+                    <div className="relative">
+                      <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 md:h-20 md:w-20" />
+                      <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-white bg-amber-500" />
                     </div>
-                    <div className="min-w-0">
-                      <h1 className="truncate text-base font-semibold">{creator.displayName}</h1>
-                      <p className="text-xs text-muted-foreground">@{creator.handle}</p>
+                    <div className="md:mt-3">
+                      <p className="text-lg font-semibold">{profile.displayName}</p>
+                      <p className="text-xs text-muted-foreground">@{profile.handle}</p>
                     </div>
                   </div>
 
                   <div className="mt-4">
-                    <CopyLinkButton handle={creator.handle} />
+                    <CopyLinkButton 
+                      handle={profile.handle} 
+                      onCopy={() => setToastMessage('Profile link copied!')} 
+                    />
                   </div>
 
                   <div className="mt-4">
@@ -726,26 +981,39 @@ export function CreatorDashboardProfile() {
                   </div>
 
                   <div className="mt-4 space-y-2">
-                    <Button size="sm" className="w-full text-xs">Edit Profile</Button>
+                    <Button size="sm" className="w-full text-xs" onClick={() => {
+                      setEditDisplayName(profile.displayName)
+                      setEditHandle(profile.handle)
+                      setEditProfileOpen(true)
+                    }}>Edit Profile</Button>
                     <Button size="sm" variant="outline" className="w-full text-xs" asChild>
-                      <Link href="/creators/sample-travel">View Public</Link>
+                      <Link href={`/creators/${profile.handle}`}>View Public</Link>
                     </Button>
                   </div>
                 </div>
 
                 {/* Right: Editable sections */}
-                <div className="p-5">
+                <div className="p-5 flex-1">
                   <Panel variant="inset" className="p-4">
                     <div className="grid gap-5 sm:grid-cols-2">
                       {/* Bio */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
                           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">About</span>
-                          <button className="text-[10px] font-medium text-primary hover:underline">Edit</button>
+                          <button 
+                            onClick={() => {
+                              setEditBio(profile.bio)
+                              setEditNiches(profile.niches)
+                              setEditAboutOpen(true)
+                            }}
+                            className="text-[10px] font-medium text-primary hover:underline"
+                          >
+                            Edit
+                          </button>
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{creator.bio}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{profile.bio}</p>
                         <div className="mt-2 flex flex-wrap gap-1">
-                          {creator.niches.map(n => (
+                          {profile.niches.map(n => (
                             <span key={n} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">{n}</span>
                           ))}
                         </div>
@@ -763,7 +1031,6 @@ export function CreatorDashboardProfile() {
                             const label = p === 'instagram' ? 'Instagram' : p === 'tiktok' ? 'TikTok' : 'YouTube'
                             const countLabel = p === 'youtube' ? 'subscribers' : 'followers'
                             
-                            // Mock follower counts (randomized slightly per platform)
                             const mockCounts: Record<Platform, number> = {
                               instagram: platformSyncData.instagram?.count || 12400,
                               tiktok: platformSyncData.tiktok?.count || 8700,
@@ -849,21 +1116,37 @@ export function CreatorDashboardProfile() {
                             )
                           })}
                         </div>
-                        <p className="mt-2 text-[9px] text-muted-foreground/60">
-                          Follower counts sync after you connect via platform sign-in.
-                        </p>
                       </div>
 
                       {/* Deal prefs */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
                           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Deal Prefs</span>
-                          <button className="text-[10px] font-medium text-primary hover:underline">Edit</button>
+                          <button 
+                            onClick={() => {
+                              setEditMinFlat(profile.dealPrefs.minFlat?.toString() || '')
+                              setEditMinPercent(profile.dealPrefs.minPercent?.toString() || '')
+                              setEditPostForStay(profile.dealPrefs.postForStay)
+                              setEditDealPrefsOpen(true)
+                            }}
+                            className="text-[10px] font-medium text-primary hover:underline"
+                          >
+                            Edit
+                          </button>
                         </div>
                         <div className="space-y-1 text-xs">
-                          <div className="flex justify-between"><span className="text-muted-foreground">Min flat</span><span>—</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Min %</span><span>—</span></div>
-                          <div className="flex justify-between"><span className="text-muted-foreground">Post-for-stay</span><span>Open</span></div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Min flat</span>
+                            <span>{profile.dealPrefs.minFlat ? `$${profile.dealPrefs.minFlat}` : '—'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Min %</span>
+                            <span>{profile.dealPrefs.minPercent ? `${profile.dealPrefs.minPercent}%` : '—'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Post-for-stay</span>
+                            <span>{profile.dealPrefs.postForStay ? 'Open' : 'Closed'}</span>
+                          </div>
                         </div>
                       </div>
 
@@ -871,10 +1154,18 @@ export function CreatorDashboardProfile() {
                       <div>
                         <div className="mb-2 flex items-center justify-between">
                           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Deliverables</span>
-                          <button className="text-[10px] font-medium text-primary hover:underline">Edit</button>
+                          <button 
+                            onClick={() => {
+                              setEditDeliverables(profile.deliverables)
+                              setEditDeliverablesOpen(true)
+                            }}
+                            className="text-[10px] font-medium text-primary hover:underline"
+                          >
+                            Edit
+                          </button>
                         </div>
                         <div className="flex flex-wrap gap-1">
-                          {creator.deliverables.map(d => (
+                          {profile.deliverables.map(d => (
                             <span key={d} className="rounded-full border border-foreground/10 bg-white px-2 py-0.5 text-[10px]">{d}</span>
                           ))}
                         </div>
@@ -899,8 +1190,8 @@ export function CreatorDashboardProfile() {
 
           {/* Right sidebar */}
           <div className="space-y-4">
-            {/* Tax Readiness */}
-            <EarningsPanel />
+            {/* Earnings */}
+            <EarningsPanel onComingSoon={(feature) => setComingSoonModal(feature)} />
 
             {/* Offers */}
             <Panel>
@@ -932,7 +1223,7 @@ export function CreatorDashboardProfile() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </Link>
-                <Link href="/how-it-works" className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2 text-xs transition-colors hover:bg-foreground/[0.04]">
+                <Link href="/how-to/creators" className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2 text-xs transition-colors hover:bg-foreground/[0.04]">
                   How it works
                   <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
