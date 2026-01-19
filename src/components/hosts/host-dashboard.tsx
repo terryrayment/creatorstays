@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input"
 // Section wrapper
 function Section({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-black bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500">{title}</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-black">{title}</h2>
         {action}
       </div>
       {children}
@@ -42,7 +42,7 @@ function ChipSelect({ options, selected, onChange, max = 3 }: {
           className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
             selected.includes(option)
               ? "border-black bg-black text-white"
-              : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+              : "border-black bg-white text-black hover:border-black"
           }`}
         >
           {option}
@@ -153,6 +153,51 @@ const guestOptions = ["Couples", "Families", "Remote workers", "Groups", "Luxury
 const vibeOptions = ["Minimal", "Cozy", "Bold", "Rustic", "Modern", "Coastal", "Cabin", "Urban"]
 const rulesOptions = ["No parties", "Pets allowed", "No pets", "Quiet hours", "Self check-in", "Long stays welcome"]
 
+// Price range options
+const priceRangeOptions = [
+  "$50-100/night",
+  "$100-150/night",
+  "$150-200/night",
+  "$200-300/night",
+  "$300-500/night",
+  "$500-750/night",
+  "$750-1000/night",
+  "$1000+/night",
+]
+
+// Location suggestions for autocomplete
+const locationSuggestions = [
+  "Lake Arrowhead, CA",
+  "Lake Tahoe, CA",
+  "Big Bear Lake, CA",
+  "Palm Springs, CA",
+  "Joshua Tree, CA",
+  "Malibu, CA",
+  "Santa Barbara, CA",
+  "San Diego, CA",
+  "Los Angeles, CA",
+  "San Francisco, CA",
+  "Napa Valley, CA",
+  "Aspen, CO",
+  "Denver, CO",
+  "Vail, CO",
+  "Telluride, CO",
+  "Austin, TX",
+  "Scottsdale, AZ",
+  "Sedona, AZ",
+  "Miami Beach, FL",
+  "Key West, FL",
+  "Nashville, TN",
+  "Gatlinburg, TN",
+  "Savannah, GA",
+  "Charleston, SC",
+  "New Orleans, LA",
+  "Portland, OR",
+  "Seattle, WA",
+  "Maui, HI",
+  "Oahu, HI",
+]
+
 export function HostDashboard() {
   // Host profile state
   const [hostProfile, setHostProfile] = useState({
@@ -167,11 +212,13 @@ export function HostDashboard() {
   const [listing, setListing] = useState({
     url: "",
     title: "",
-    neighborhood: "",
+    location: "",
     priceRange: "",
     rating: "",
-    reviewCount: "",
   })
+  const [showPriceDropdown, setShowPriceDropdown] = useState(false)
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false)
+  const [listingSaved, setListingSaved] = useState(false)
 
   // Taste optimizer state
   const [taste, setTaste] = useState({
@@ -240,16 +287,32 @@ export function HostDashboard() {
     setTimeout(() => setToast(""), 4000)
   }
 
+  // Save listing
+  const saveListing = () => {
+    setListingSaved(true)
+    setToast("Listing details saved!")
+    setTimeout(() => {
+      setListingSaved(false)
+      setToast("")
+    }, 3000)
+  }
+
+  // Close dropdowns on outside click
+  const handleOutsideClick = () => {
+    setShowPriceDropdown(false)
+    setShowLocationSuggestions(false)
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Top bar */}
-      <div className="border-b border-gray-200 bg-white">
+      <div className="border-b border-black bg-white">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">BETA</span>
-            <span className="text-xs text-gray-500">Host Dashboard</span>
+            <span className="text-xs text-black">Host Dashboard</span>
           </div>
-          <Link href="/" className="text-xs text-gray-500 hover:text-gray-900">← Back to site</Link>
+          <Link href="/" className="text-xs text-black hover:text-black">← Back to site</Link>
         </div>
       </div>
 
@@ -257,8 +320,8 @@ export function HostDashboard() {
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Welcome, Host</h1>
-            <p className="mt-1 text-gray-600">Set up your property and start outreach.</p>
+            <h1 className="text-2xl font-bold text-black">Welcome, Host</h1>
+            <p className="mt-1 text-black">Set up your property and start outreach.</p>
           </div>
           <Button asChild>
             <Link href="/creators">Browse all creators</Link>
@@ -272,7 +335,7 @@ export function HostDashboard() {
             <Section title="Host Profile">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Display Name</label>
+                  <label className="mb-1.5 block text-xs font-medium text-black">Display Name</label>
                   <Input 
                     placeholder="Your name or brand" 
                     value={hostProfile.displayName}
@@ -280,7 +343,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Location</label>
+                  <label className="mb-1.5 block text-xs font-medium text-black">Location</label>
                   <Input 
                     placeholder="City, Region" 
                     value={hostProfile.location}
@@ -288,7 +351,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Contact Email</label>
+                  <label className="mb-1.5 block text-xs font-medium text-black">Contact Email</label>
                   <Input 
                     type="email" 
                     placeholder="you@example.com" 
@@ -297,7 +360,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-600">About (short bio)</label>
+                  <label className="mb-1.5 block text-xs font-medium text-black">About (short bio)</label>
                   <Input 
                     placeholder="A few words about you" 
                     value={hostProfile.bio}
@@ -306,7 +369,7 @@ export function HostDashboard() {
                 </div>
               </div>
               <div className="mt-4">
-                <label className="mb-2 block text-xs font-medium text-gray-600">Style Tags (select up to 3)</label>
+                <label className="mb-2 block text-xs font-medium text-black">Style Tags (select up to 3)</label>
                 <ChipSelect 
                   options={styleTagOptions} 
                   selected={hostProfile.styleTags} 
@@ -316,10 +379,20 @@ export function HostDashboard() {
             </Section>
 
             {/* Listing Details */}
-            <Section title="Listing Details">
+            <Section 
+              title="Listing Details"
+              action={
+                <button 
+                  onClick={saveListing}
+                  className="rounded-full border-2 border-black bg-black px-3 py-1 text-[10px] font-bold text-white transition-transform hover:-translate-y-0.5"
+                >
+                  Save Listing
+                </button>
+              }
+            >
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Airbnb/VRBO Listing URL</label>
+                  <label className="mb-1.5 block text-xs font-bold text-black">Airbnb/VRBO Listing URL</label>
                   <Input 
                     placeholder="https://airbnb.com/rooms/..." 
                     value={listing.url}
@@ -327,43 +400,111 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Property Title</label>
+                  <label className="mb-1.5 block text-xs font-bold text-black">Property Title</label>
                   <Input 
                     placeholder="Cozy Mountain Cabin" 
                     value={listing.title}
                     onChange={e => setListing({...listing, title: e.target.value})}
                   />
                 </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Neighborhood/Area</label>
+                <div className="relative">
+                  <label className="mb-1.5 block text-xs font-bold text-black">Location</label>
                   <Input 
-                    placeholder="Lake Tahoe, Big Bear, etc." 
-                    value={listing.neighborhood}
-                    onChange={e => setListing({...listing, neighborhood: e.target.value})}
+                    placeholder="Start typing..." 
+                    value={listing.location}
+                    onChange={e => {
+                      setListing({...listing, location: e.target.value})
+                      setShowLocationSuggestions(e.target.value.length > 1)
+                    }}
+                    onFocus={() => setShowLocationSuggestions(listing.location.length > 1)}
                   />
+                  {showLocationSuggestions && (
+                    <div className="absolute z-50 mt-1 w-full rounded-lg border-2 border-black bg-white py-1 shadow-lg">
+                      {locationSuggestions
+                        .filter(loc => loc.toLowerCase().includes(listing.location.toLowerCase()))
+                        .slice(0, 5)
+                        .map(loc => (
+                          <button
+                            key={loc}
+                            type="button"
+                            onClick={() => {
+                              setListing({...listing, location: loc})
+                              setShowLocationSuggestions(false)
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm font-medium text-black hover:bg-[#FFD84A]"
+                          >
+                            {loc}
+                          </button>
+                        ))
+                      }
+                      {locationSuggestions.filter(loc => loc.toLowerCase().includes(listing.location.toLowerCase())).length === 0 && (
+                        <div className="px-3 py-2 text-sm text-black">No suggestions found</div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Price Range</label>
-                  <Input 
-                    placeholder="$150-250/night" 
-                    value={listing.priceRange}
-                    onChange={e => setListing({...listing, priceRange: e.target.value})}
-                  />
+                  <label className="mb-1.5 block text-xs font-bold text-black">Price Range</label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowPriceDropdown(!showPriceDropdown)}
+                      className="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-left text-sm font-medium text-black"
+                    >
+                      {listing.priceRange || "Select price range"}
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <svg className={`h-4 w-4 transition-transform ${showPriceDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                      </span>
+                    </button>
+                    {showPriceDropdown && (
+                      <div className="absolute z-50 mt-1 w-full rounded-lg border-2 border-black bg-white py-1 shadow-lg">
+                        {priceRangeOptions.map(opt => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => {
+                              setListing({...listing, priceRange: opt})
+                              setShowPriceDropdown(false)
+                            }}
+                            className={`w-full px-3 py-2 text-left text-sm font-medium text-black hover:bg-[#FFD84A] ${listing.priceRange === opt ? 'bg-[#FFD84A]' : ''}`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Rating</label>
+                  <label className="mb-1.5 block text-xs font-bold text-black">Rating (1.0 - 5.0)</label>
                   <Input 
+                    type="number"
+                    step="0.1"
+                    min="1"
+                    max="5"
                     placeholder="4.9" 
                     value={listing.rating}
-                    onChange={e => setListing({...listing, rating: e.target.value})}
+                    onChange={e => {
+                      const val = parseFloat(e.target.value)
+                      if (e.target.value === '' || (val >= 1 && val <= 5)) {
+                        setListing({...listing, rating: e.target.value})
+                      }
+                    }}
                   />
                 </div>
               </div>
+              {listingSaved && (
+                <div className="mt-4 rounded-lg border-2 border-black bg-[#28D17C] px-4 py-2 text-sm font-bold text-black">
+                  ✓ Listing details saved!
+                </div>
+              )}
             </Section>
 
             {/* Creator Search */}
             <Section title="Find Creators">
-              <p className="mb-3 text-[11px] text-gray-500">
+              <p className="mb-3 text-[11px] text-black">
                 Match helps you find creators that fit your property and campaign.
               </p>
               <div className="flex flex-wrap gap-2">
@@ -374,7 +515,7 @@ export function HostDashboard() {
                   onChange={e => setSearch(e.target.value)}
                 />
                 <select 
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+                  className="rounded-lg border border-black bg-white px-3 py-2 text-sm"
                   value={filters.platform}
                   onChange={e => setFilters({...filters, platform: e.target.value})}
                 >
@@ -384,7 +525,7 @@ export function HostDashboard() {
                   <option value="YouTube">YouTube</option>
                 </select>
                 <select 
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+                  className="rounded-lg border border-black bg-white px-3 py-2 text-sm"
                   value={filters.niche}
                   onChange={e => setFilters({...filters, niche: e.target.value})}
                 >
@@ -397,7 +538,7 @@ export function HostDashboard() {
                   <option value="Adventure">Adventure</option>
                 </select>
                 <select 
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+                  className="rounded-lg border border-black bg-white px-3 py-2 text-sm"
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value as "default" | "match")}
                 >
@@ -408,17 +549,17 @@ export function HostDashboard() {
 
               <div className="mt-4 space-y-2">
                 {filteredCreators.map(creator => (
-                  <div key={creator.id} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 transition-all hover:border-gray-300 hover:shadow-sm">
+                  <div key={creator.id} className="flex items-center justify-between rounded-lg border border-black bg-white p-3 transition-all hover:border-black hover:shadow-sm">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 text-sm font-semibold text-blue-600">
                         {creator.name.split(" ")[0][0]}{creator.name.split(" ")[2]?.[0] || ""}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-gray-900">{creator.name}</p>
+                          <p className="text-sm font-medium text-black">{creator.name}</p>
                           <MatchBadge score={creator.matchScore} />
                         </div>
-                        <p className="text-xs text-gray-500">@{creator.handle} · {creator.niches[0]} · {creator.audience}</p>
+                        <p className="text-xs text-black">@{creator.handle} · {creator.niches[0]} · {creator.audience}</p>
                       </div>
                     </div>
                     <Button size="sm" variant="outline" className="text-xs" onClick={() => openComposer(creator)}>
@@ -436,7 +577,7 @@ export function HostDashboard() {
             <Section title="Taste Optimizer">
               <div className="space-y-4">
                 <div>
-                  <label className="mb-2 block text-xs font-medium text-gray-600">Ideal Guests (1-2)</label>
+                  <label className="mb-2 block text-xs font-medium text-black">Ideal Guests (1-2)</label>
                   <ChipSelect 
                     options={guestOptions} 
                     selected={taste.guests} 
@@ -445,7 +586,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-xs font-medium text-gray-600">Vibe Tags (up to 3)</label>
+                  <label className="mb-2 block text-xs font-medium text-black">Vibe Tags (up to 3)</label>
                   <ChipSelect 
                     options={vibeOptions} 
                     selected={taste.vibes} 
@@ -453,7 +594,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-xs font-medium text-gray-600">House Rules</label>
+                  <label className="mb-2 block text-xs font-medium text-black">House Rules</label>
                   <ChipSelect 
                     options={rulesOptions} 
                     selected={taste.rules} 
@@ -466,30 +607,30 @@ export function HostDashboard() {
 
             {/* Creator Brief Preview */}
             <Section title="Creator Brief Preview">
-              <div className="rounded-lg bg-gray-50 p-3">
-                <p className="text-xs leading-relaxed text-gray-700">{generateBrief()}</p>
+              <div className="rounded-lg bg-white p-3">
+                <p className="text-xs leading-relaxed text-black">{generateBrief()}</p>
               </div>
-              <p className="mt-2 text-[10px] text-gray-400">This is auto-generated from your profile and taste settings.</p>
+              <p className="mt-2 text-[10px] text-black">This is auto-generated from your profile and taste settings.</p>
             </Section>
 
             {/* Quick Stats */}
             <Section title="Your Stats">
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg bg-gray-50 p-3 text-center">
-                  <p className="text-2xl font-bold text-gray-900">0</p>
-                  <p className="text-[10px] text-gray-500">Messages Sent</p>
+                <div className="rounded-lg bg-white p-3 text-center">
+                  <p className="text-2xl font-bold text-black">0</p>
+                  <p className="text-[10px] text-black">Messages Sent</p>
                 </div>
-                <div className="rounded-lg bg-gray-50 p-3 text-center">
-                  <p className="text-2xl font-bold text-gray-900">0</p>
-                  <p className="text-[10px] text-gray-500">Active Collabs</p>
+                <div className="rounded-lg bg-white p-3 text-center">
+                  <p className="text-2xl font-bold text-black">0</p>
+                  <p className="text-[10px] text-black">Active Collabs</p>
                 </div>
-                <div className="rounded-lg bg-gray-50 p-3 text-center">
-                  <p className="text-2xl font-bold text-gray-900">0</p>
-                  <p className="text-[10px] text-gray-500">Total Clicks</p>
+                <div className="rounded-lg bg-white p-3 text-center">
+                  <p className="text-2xl font-bold text-black">0</p>
+                  <p className="text-[10px] text-black">Total Clicks</p>
                 </div>
-                <div className="rounded-lg bg-gray-50 p-3 text-center">
-                  <p className="text-2xl font-bold text-gray-900">$0</p>
-                  <p className="text-[10px] text-gray-500">Spent</p>
+                <div className="rounded-lg bg-white p-3 text-center">
+                  <p className="text-2xl font-bold text-black">$0</p>
+                  <p className="text-[10px] text-black">Spent</p>
                 </div>
               </div>
             </Section>
@@ -497,21 +638,21 @@ export function HostDashboard() {
             {/* Quick Links */}
             <Section title="Quick Links">
               <div className="space-y-1.5">
-                <Link href="/dashboard/host/settings" className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-100">
+                <Link href="/dashboard/host/settings" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
                   Account Settings
-                  <span className="text-gray-400">→</span>
+                  <span className="text-black">→</span>
                 </Link>
-                <Link href="/how-to/hosts" className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-100">
+                <Link href="/how-to/hosts" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
                   How It Works
-                  <span className="text-gray-400">→</span>
+                  <span className="text-black">→</span>
                 </Link>
-                <Link href="/pricing" className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-100">
+                <Link href="/pricing" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
                   Pricing
-                  <span className="text-gray-400">→</span>
+                  <span className="text-black">→</span>
                 </Link>
-                <Link href="/help" className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-100">
+                <Link href="/help" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
                   Help Center
-                  <span className="text-gray-400">→</span>
+                  <span className="text-black">→</span>
                 </Link>
               </div>
             </Section>
@@ -520,11 +661,11 @@ export function HostDashboard() {
       </div>
 
       {/* Footer links */}
-      <div className="border-t border-gray-200 bg-white py-6">
-        <div className="mx-auto flex max-w-6xl items-center justify-center gap-4 px-4 text-xs text-gray-400 sm:px-6">
-          <Link href="/how-it-works" className="hover:text-gray-600">How it works</Link>
+      <div className="border-t border-black bg-white py-6">
+        <div className="mx-auto flex max-w-6xl items-center justify-center gap-4 px-4 text-xs text-black sm:px-6">
+          <Link href="/how-it-works" className="hover:text-black">How it works</Link>
           <span>•</span>
-          <Link href="/waitlist" className="hover:text-gray-600">Creator Waitlist</Link>
+          <Link href="/waitlist" className="hover:text-black">Creator Waitlist</Link>
         </div>
       </div>
 
@@ -534,7 +675,7 @@ export function HostDashboard() {
           <div className="w-full max-w-md rounded-xl border-2 border-black bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold text-black">Send Offer to @{composing.handle}</h3>
-              <button onClick={() => setComposing(null)} className="text-black/60 hover:text-black">✕</button>
+              <button onClick={() => setComposing(null)} className="text-black hover:text-black">✕</button>
             </div>
             
             <div className="space-y-4">
@@ -547,7 +688,7 @@ export function HostDashboard() {
                   onChange={e => setMessage({...message, basePay: e.target.value})}
                   type="number"
                 />
-                <p className="mt-1 text-[10px] text-black/60">Flat rate for posts, reels, stories as agreed.</p>
+                <p className="mt-1 text-[10px] text-black">Flat rate for posts, reels, stories as agreed.</p>
               </div>
 
               {/* Traffic Bonus Toggle */}
@@ -571,7 +712,7 @@ export function HostDashboard() {
                         <button className="flex-1 rounded-lg border-2 border-black bg-[#FFD84A] px-3 py-1.5 text-xs font-bold text-black">
                           Clicks
                         </button>
-                        <button disabled className="flex-1 rounded-lg border-2 border-black/30 bg-white px-3 py-1.5 text-xs font-bold text-black/40">
+                        <button disabled className="flex-1 rounded-lg border-2 border-black/30 bg-white px-3 py-1.5 text-xs font-bold text-black">
                           Views (coming soon)
                         </button>
                       </div>
@@ -627,7 +768,7 @@ export function HostDashboard() {
                     {/* Payout Mode */}
                     <div className="rounded-lg bg-black/5 p-2">
                       <p className="text-[10px] font-bold text-black">Payout Mode: Manual Approve (Beta)</p>
-                      <p className="mt-0.5 text-[9px] text-black/60">
+                      <p className="mt-0.5 text-[9px] text-black">
                         You approve bonuses after the dashboard shows the threshold was reached.
                       </p>
                     </div>
