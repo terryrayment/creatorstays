@@ -202,3 +202,31 @@
     filter: blur(0);
   }
 }
+
+/* Hero atmosphere - warm grey/pink gradient matching reference */
+.hero-atmosphere {
+  background: 
+    /* Main warm center - pinkish grey */
+    radial-gradient(1400px 900px at 50% 40%, 
+      rgba(225, 215, 210, 0.6) 0%, 
+      rgba(235, 225, 220, 0.3) 40%, 
+      transparent 70%
+    ),
+    /* Top right cool tint */
+    radial-gradient(800px 600px at 85% 15%, 
+      rgba(200, 210, 220, 0.25) 0%, 
+      transparent 60%
+    ),
+    /* Bottom left subtle warmth */
+    radial-gradient(600px 500px at 10% 90%, 
+      rgba(215, 205, 200, 0.2) 0%, 
+      transparent 50%
+    ),
+    /* Base wash */
+    linear-gradient(165deg, 
+      rgba(240, 235, 232, 1) 0%, 
+      rgba(235, 228, 225, 1) 35%,
+      rgba(230, 225, 222, 1) 65%,
+      rgba(238, 233, 230, 1) 100%
+    );
+}
