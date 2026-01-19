@@ -6,7 +6,7 @@ const steps = [
   {
     number: "01",
     title: "Create your host profile",
-    description: "Sign up and add your property details. Paste your Airbnb, VRBO, or direct booking link—we'll generate a tracked URL for your campaigns.",
+    description: "Sign up and add your property details. Paste your Airbnb, VRBO, or direct booking link—we'll generate a tracked affiliate URL for your campaigns.",
     icon: (
       <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -25,8 +25,8 @@ const steps = [
   },
   {
     number: "03",
-    title: "Creator posts, you track clicks",
-    description: "Once accepted, the creator visits your property, creates content, and shares it with your unique tracked link. You see every click in real-time on your dashboard.",
+    title: "Creator posts, you track traffic",
+    description: "Once accepted, the creator visits your property, creates content, and shares it with your unique tracked link. We track clicks, revisits, and attribution within a 30-day window.",
     icon: (
       <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
@@ -35,8 +35,8 @@ const steps = [
   },
   {
     number: "04",
-    title: "Confirm results and pay",
-    description: "When you receive bookings from the campaign, confirm them in your dashboard. Pay creators based on the results they delivered. Simple, transparent, performance-based.",
+    title: "Settle payouts off-platform",
+    description: "Review your traffic reports and attribution data. Hosts and creators settle payouts directly based on their agreement—flat fee, commission, or post-for-stay.",
     icon: (
       <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -93,11 +93,18 @@ export default function HowItWorksPage() {
       <section className="border-t bg-muted/30 py-16">
         <Container>
           <div className="mx-auto max-w-3xl">
-            <h2 className="text-2xl font-semibold">What we don&apos;t do</h2>
-            <div className="mt-6 rounded-xl border border-border/50 bg-card p-6">
-              <p className="text-muted-foreground">
-                <strong className="text-foreground">No automatic booking detection.</strong> We can&apos;t see inside Airbnb, VRBO, or any booking platform. When a guest books your property, you manually confirm it in your CreatorStays dashboard. This keeps things simple, private, and transparent for everyone.
-              </p>
+            <h2 className="text-2xl font-semibold">How tracking works</h2>
+            <div className="mt-6 space-y-4">
+              <div className="rounded-xl border border-border/50 bg-card p-6">
+                <p className="text-muted-foreground">
+                  <strong className="text-foreground">No booking API access.</strong> Airbnb, VRBO, and other platforms don&apos;t share booking events with third parties. We track referral traffic and attribution within a 30-day window using first-party cookies. Hosts settle payouts with creators off-platform based on their agreement.
+                </p>
+              </div>
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-6">
+                <p className="text-sm text-amber-700">
+                  <strong>Disclosure requirement:</strong> Creators must disclose partnerships and affiliate relationships in accordance with FTC guidelines and platform terms of service.
+                </p>
+              </div>
             </div>
           </div>
         </Container>
