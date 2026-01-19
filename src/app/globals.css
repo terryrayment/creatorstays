@@ -631,3 +631,41 @@
     transparent 90%
   );
 }
+
+/* ============================================================================
+   Creator Profile Panel Hover
+   ============================================================================ */
+
+.creator-panel {
+  position: relative;
+}
+
+.creator-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    hsl(199 89% 48% / 0.04) 0%,
+    hsl(213 94% 45% / 0.02) 50%,
+    transparent 80%
+  );
+  opacity: 0;
+  transition: opacity 280ms ease-out;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(20px);
+}
+
+@media (min-width: 768px) {
+  .creator-panel:hover {
+    transform: translateY(-1px);
+    background-color: hsl(0 0% 100% / 0.65);
+    box-shadow: 0 4px 16px hsl(213 94% 45% / 0.04);
+  }
+  
+  .creator-panel:hover::before {
+    opacity: 1;
+  }
+}

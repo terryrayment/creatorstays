@@ -6,46 +6,29 @@ import Image from "next/image"
 function HeroBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      {/* Hero image - atmospheric layer */}
-      <div className="absolute inset-0 hero-image-mask">
+      {/* Hero image - full opacity at top, fades to bottom */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%)',
+        }}
+      >
         <Image
           src="/images/hero-cabin.jpg"
           alt=""
           fill
           priority
-          className="object-cover opacity-[0.42]"
+          className="object-cover blur-[2px]"
           sizes="100vw"
         />
       </div>
       
-      {/* Feather gradient overlay - blends image into background */}
+      {/* Subtle bottom blend */}
       <div 
         className="absolute inset-0"
         style={{
-          background: `
-            linear-gradient(to bottom, 
-              hsl(210 20% 98% / 0.3) 0%, 
-              transparent 25%, 
-              transparent 60%, 
-              hsl(210 20% 98% / 0.7) 85%, 
-              hsl(210 20% 98%) 100%
-            )
-          `,
-        }}
-      />
-      
-      {/* Side feathers */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: `
-            linear-gradient(to right, 
-              hsl(210 20% 98%) 0%, 
-              transparent 15%, 
-              transparent 85%, 
-              hsl(210 20% 98%) 100%
-            )
-          `,
+          background: 'linear-gradient(to bottom, transparent 60%, hsl(210 20% 98%) 100%)',
         }}
       />
       
@@ -53,18 +36,16 @@ function HeroBackground() {
       <div 
         className="absolute -top-1/4 -right-1/4 h-[120%] w-[80%]"
         style={{
-          background: "radial-gradient(ellipse at 70% 20%, hsl(199 89% 48% / 0.08) 0%, transparent 60%)",
+          background: "radial-gradient(ellipse at 70% 20%, hsl(199 89% 48% / 0.06) 0%, transparent 60%)",
         }}
       />
       {/* Counter gradient - bottom left, deep blue */}
       <div 
         className="absolute -bottom-1/4 -left-1/4 h-[100%] w-[70%]"
         style={{
-          background: "radial-gradient(ellipse at 30% 80%, hsl(213 94% 45% / 0.05) 0%, transparent 50%)",
+          background: "radial-gradient(ellipse at 30% 80%, hsl(213 94% 45% / 0.04) 0%, transparent 50%)",
         }}
       />
-      {/* Single large soft cloud */}
-      <div className="absolute top-1/4 right-1/4 h-[500px] w-[700px] rounded-full bg-accent/[0.04] blur-[150px]" />
     </div>
   )
 }
