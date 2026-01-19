@@ -106,28 +106,31 @@ const hostReasons = [
 
 function WhyHostsSection() {
   return (
-    <section className="py-24">
+    <section className="py-20">
       <Container>
         <div className="text-center opacity-0 reveal">
-          <h2 className="text-h1">
+          <h2 className="font-heading text-3xl font-normal tracking-tight md:text-4xl">
             Why hosts use CreatorStays
           </h2>
-          <p className="text-body-lg mx-auto mt-4 max-w-2xl text-muted-foreground">
+          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
             Turn creator content into bookings. Measurable marketing that actually works.
           </p>
         </div>
-        <div className="mt-16 grid gap-8 md:grid-cols-3">
+        <div className="mt-12 grid gap-5 md:grid-cols-3">
           {hostReasons.map((reason, i) => (
             <div 
               key={reason.title}
-              className={`group relative rounded-2xl border border-border/50 bg-card p-8 opacity-0 reveal transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5`}
+              className="surface-card group relative rounded-2xl p-6 opacity-0 reveal"
               style={{ animationDelay: `${(i + 1) * 100}ms` }}
             >
-              <div className="mb-4 inline-flex rounded-xl bg-primary/10 p-3 text-primary">
-                {reason.icon}
+              <div className="surface-card-glow" aria-hidden="true" />
+              <div className="relative z-10">
+                <div className="mb-4 inline-flex rounded-xl bg-primary/10 p-3 text-primary">
+                  {reason.icon}
+                </div>
+                <h3 className="font-heading text-xl font-normal leading-tight">{reason.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{reason.description}</p>
               </div>
-              <h3 className="text-h3">{reason.title}</h3>
-              <p className="text-body mt-2 text-muted-foreground">{reason.description}</p>
             </div>
           ))}
         </div>
@@ -161,28 +164,32 @@ const steps = [
 
 function HowItWorksSection() {
   return (
-    <section className="border-y border-border/50 bg-muted/30 py-24">
+    <section className="py-20">
       <Container>
         <div className="text-center opacity-0 reveal">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="font-heading text-3xl font-normal tracking-tight md:text-4xl">
             How it works for hosts
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
             From signup to bookings in four simple steps.
           </p>
         </div>
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, i) => (
-            <div 
-              key={step.number}
-              className="relative opacity-0 reveal"
-              style={{ animationDelay: `${(i + 1) * 100}ms` }}
-            >
-              <span className="text-6xl font-bold text-primary/10">{step.number}</span>
-              <h3 className="mt-4 text-xl font-semibold">{step.title}</h3>
-              <p className="mt-2 text-muted-foreground">{step.description}</p>
+        <div className="mx-auto mt-12 max-w-4xl">
+          <div className="surface-card rounded-3xl p-6 md:p-8">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {steps.map((step, i) => (
+                <div 
+                  key={step.number}
+                  className="relative opacity-0 reveal"
+                  style={{ animationDelay: `${(i + 1) * 100}ms` }}
+                >
+                  <span className="font-heading text-4xl font-normal text-primary/20">{step.number}</span>
+                  <h3 className="mt-2 font-semibold leading-tight">{step.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{step.description}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </Container>
     </section>
