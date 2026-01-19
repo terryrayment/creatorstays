@@ -69,15 +69,172 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   )
 }
 
-// Mock creators for search
+// Mock creators for search (expanded with match-relevant attributes)
 const mockCreators = [
-  { id: 1, name: "Travel Creator A", handle: "travelcreator_a", niche: "Travel", audience: "50K-100K", location: "Los Angeles, CA", platform: "Instagram" },
-  { id: 2, name: "Lifestyle Creator B", handle: "lifestyle_b", niche: "Lifestyle", audience: "100K-250K", location: "Austin, TX", platform: "TikTok" },
-  { id: 3, name: "Photo Creator C", handle: "photo_creator_c", niche: "Photography", audience: "25K-50K", location: "Miami, FL", platform: "Instagram" },
-  { id: 4, name: "Vlog Creator D", handle: "vlogger_d", niche: "Vlog", audience: "250K-500K", location: "Denver, CO", platform: "YouTube" },
-  { id: 5, name: "Food Creator E", handle: "foodie_e", niche: "Food", audience: "50K-100K", location: "Portland, OR", platform: "TikTok" },
-  { id: 6, name: "Adventure Creator F", handle: "adventure_f", niche: "Adventure", audience: "100K-250K", location: "Seattle, WA", platform: "Instagram" },
+  { 
+    id: 1, 
+    name: "Travel Creator A", 
+    handle: "travelcreator_a", 
+    niches: ["Travel", "Adventure"], 
+    audience: "50K-100K", 
+    location: "Los Angeles, CA", 
+    platform: "Instagram",
+    deliverables: ["Reels", "Stories", "Posts"],
+    openToOffers: true,
+    avgClicks: 850, // normalized past performance
+  },
+  { 
+    id: 2, 
+    name: "Lifestyle Creator B", 
+    handle: "lifestyle_b", 
+    niches: ["Lifestyle", "Design"], 
+    audience: "100K-250K", 
+    location: "Austin, TX", 
+    platform: "TikTok",
+    deliverables: ["Reels", "Videos"],
+    openToOffers: true,
+    avgClicks: 1200,
+  },
+  { 
+    id: 3, 
+    name: "Photo Creator C", 
+    handle: "photo_creator_c", 
+    niches: ["Photography", "Luxury"], 
+    audience: "25K-50K", 
+    location: "Miami, FL", 
+    platform: "Instagram",
+    deliverables: ["Posts", "Stories", "Photos"],
+    openToOffers: false,
+    avgClicks: 450,
+  },
+  { 
+    id: 4, 
+    name: "Vlog Creator D", 
+    handle: "vlogger_d", 
+    niches: ["Vlog", "Family"], 
+    audience: "250K-500K", 
+    location: "Denver, CO", 
+    platform: "YouTube",
+    deliverables: ["Videos", "Vlogs"],
+    openToOffers: true,
+    avgClicks: 2100,
+  },
+  { 
+    id: 5, 
+    name: "Food Creator E", 
+    handle: "foodie_e", 
+    niches: ["Food", "Lifestyle"], 
+    audience: "50K-100K", 
+    location: "Portland, OR", 
+    platform: "TikTok",
+    deliverables: ["Reels", "Stories"],
+    openToOffers: true,
+    avgClicks: 680,
+  },
+  { 
+    id: 6, 
+    name: "Adventure Creator F", 
+    handle: "adventure_f", 
+    niches: ["Adventure", "Travel", "Remote"], 
+    audience: "100K-250K", 
+    location: "Seattle, WA", 
+    platform: "Instagram",
+    deliverables: ["Reels", "Stories", "Posts"],
+    openToOffers: true,
+    avgClicks: 1450,
+  },
 ]
+
+// Niche-to-vibe mapping for match scoring
+const nicheVibeMap: Record<string, string[]> = {
+  "Travel": ["Coastal", "Rustic", "Cabin", "Urban"],
+  "Adventure": ["Rustic", "Cabin", "Bold"],
+  "Lifestyle": ["Cozy", "Modern", "Minimal"],
+  "Photography": ["Bold", "Modern", "Minimal"],
+  "Luxury": ["Modern", "Minimal", "Bold"],
+  "Vlog": ["Cozy", "Urban", "Modern"],
+  "Family": ["Cozy", "Rustic", "Cabin"],
+  "Food": ["Cozy", "Urban", "Rustic"],
+  "Design": ["Modern", "Minimal", "Bold"],
+  "Remote": ["Cabin", "Cozy", "Rustic"],
+}
+
+// Match score calculation (returns 0-100 internally)
+function calculateMatchScore(
+  creator: typeof mockCreators[0],
+  hostVibes: string[],
+  hostLocation: string,
+  maxClicks: number
+): number {
+  let score = 0
+  
+  // 1. Tag overlap (40% weight) - compare creator niches to host vibes
+  const creatorVibes = creator.niches.flatMap(n => nicheVibeMap[n] || [])
+  const vibeOverlap = hostVibes.filter(v => creatorVibes.includes(v)).length
+  const vibeScore = hostVibes.length > 0 ? (vibeOverlap / hostVibes.length) * 40 : 20
+  score += vibeScore
+  
+  // 2. Availability boost (20% weight)
+  if (creator.openToOffers) {
+    score += 20
+  }
+  
+  // 3. Past link performance (25% weight) - normalized
+  if (maxClicks > 0) {
+    score += (creator.avgClicks / maxClicks) * 25
+  } else {
+    score += 12.5 // neutral if no data
+  }
+  
+  // 4. Geographic relevance (15% weight) - simple state match
+  if (hostLocation && creator.location) {
+    const hostState = hostLocation.split(",").pop()?.trim().toLowerCase()
+    const creatorState = creator.location.split(",").pop()?.trim().toLowerCase()
+    if (hostState && creatorState && hostState === creatorState) {
+      score += 15
+    } else {
+      score += 7.5 // neutral for different regions
+    }
+  } else {
+    score += 7.5 // neutral if no data
+  }
+  
+  return Math.min(100, Math.max(0, score))
+}
+
+// Map score to tier
+function getMatchTier(score: number): { label: string; color: string } {
+  if (score >= 70) return { label: "Strong Match", color: "bg-emerald-100 text-emerald-700 border-emerald-200" }
+  if (score >= 45) return { label: "Good Match", color: "bg-blue-100 text-blue-700 border-blue-200" }
+  return { label: "Possible Fit", color: "bg-slate-100 text-slate-600 border-slate-200" }
+}
+
+// Match badge component
+function MatchBadge({ score }: { score: number }) {
+  const tier = getMatchTier(score)
+  const [showTooltip, setShowTooltip] = useState(false)
+  
+  return (
+    <div className="relative">
+      <button
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        onClick={() => setShowTooltip(!showTooltip)}
+        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${tier.color}`}
+      >
+        {tier.label}
+        <svg className="h-3 w-3 opacity-60" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+        </svg>
+      </button>
+      {showTooltip && (
+        <div className="absolute bottom-full left-0 z-10 mb-1 w-48 rounded-lg border border-foreground/10 bg-white p-2 text-[10px] text-muted-foreground shadow-lg">
+          Based on content type, availability, and past performance.
+        </div>
+      )}
+    </div>
+  )
+}
 
 // Style tags
 const styleTagOptions = ["Luxury", "Family-friendly", "Remote-work", "Adventure", "Pet-friendly", "Design-forward", "Budget", "Romantic"]
@@ -116,6 +273,7 @@ export function HostDashboard() {
   // Search state
   const [search, setSearch] = useState("")
   const [filters, setFilters] = useState({ platform: "", niche: "", audience: "" })
+  const [sortBy, setSortBy] = useState<"default" | "match">("default")
   
   // Message composer state
   const [composing, setComposing] = useState<typeof mockCreators[0] | null>(null)
@@ -132,13 +290,25 @@ export function HostDashboard() {
     return `We're looking for creators who connect with ${guests} and produce ${vibes} content. ${listing.title ? `Our property "${listing.title}" in ${listing.neighborhood || "the area"}` : "Our property"} offers a unique experience${rules ? ` (${rules})` : ""}. We'd love content that highlights the space and surrounding area.`
   }
 
-  // Filter creators
-  const filteredCreators = mockCreators.filter(c => {
-    if (search && !c.name.toLowerCase().includes(search.toLowerCase()) && !c.handle.toLowerCase().includes(search.toLowerCase())) return false
-    if (filters.platform && c.platform !== filters.platform) return false
-    if (filters.niche && c.niche !== filters.niche) return false
-    return true
-  })
+  // Calculate max clicks for normalization
+  const maxClicks = Math.max(...mockCreators.map(c => c.avgClicks))
+
+  // Filter and score creators
+  const filteredCreators = mockCreators
+    .filter(c => {
+      if (search && !c.name.toLowerCase().includes(search.toLowerCase()) && !c.handle.toLowerCase().includes(search.toLowerCase())) return false
+      if (filters.platform && c.platform !== filters.platform) return false
+      if (filters.niche && !c.niches.includes(filters.niche)) return false
+      return true
+    })
+    .map(c => ({
+      ...c,
+      matchScore: calculateMatchScore(c, taste.vibes, hostProfile.location, maxClicks)
+    }))
+    .sort((a, b) => {
+      if (sortBy === "match") return b.matchScore - a.matchScore
+      return 0 // default order
+    })
 
   // Open composer
   const openComposer = (creator: typeof mockCreators[0]) => {
@@ -328,6 +498,9 @@ export function HostDashboard() {
 
             {/* Creator Search */}
             <Section title="Find Creators">
+              <p className="mb-3 text-[11px] text-muted-foreground">
+                Match helps you find creators that fit your property and campaign.
+              </p>
               <div className="flex flex-wrap gap-2">
                 <Input 
                   placeholder="Search by name or handle..." 
@@ -358,6 +531,14 @@ export function HostDashboard() {
                   <option value="Food">Food</option>
                   <option value="Adventure">Adventure</option>
                 </select>
+                <select 
+                  className="rounded-lg border border-foreground/10 bg-white px-3 py-2 text-sm"
+                  value={sortBy}
+                  onChange={e => setSortBy(e.target.value as "default" | "match")}
+                >
+                  <option value="default">Sort: Default</option>
+                  <option value="match">Sort: Best Match</option>
+                </select>
               </div>
 
               <div className="mt-4 space-y-2">
@@ -368,8 +549,11 @@ export function HostDashboard() {
                         {creator.name.split(" ")[0][0]}{creator.name.split(" ")[2]?.[0] || ""}
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{creator.name}</p>
-                        <p className="text-xs text-muted-foreground">@{creator.handle} · {creator.niche} · {creator.audience}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium">{creator.name}</p>
+                          <MatchBadge score={creator.matchScore} />
+                        </div>
+                        <p className="text-xs text-muted-foreground">@{creator.handle} · {creator.niches[0]} · {creator.audience}</p>
                       </div>
                     </div>
                     <Button size="sm" variant="outline" className="text-xs" onClick={() => openComposer(creator)}>
@@ -418,21 +602,24 @@ export function HostDashboard() {
                       value={message.offerType}
                       onChange={e => setMessage({...message, offerType: e.target.value})}
                     >
-                      <option value="flat">Flat Fee</option>
-                      <option value="percent">Commission %</option>
+                      <option value="flat">Flat Fee (per post)</option>
+                      <option value="percent">Traffic Bonus %</option>
                       <option value="post-for-stay">Post-for-Stay</option>
                     </select>
                   </div>
                   {message.offerType !== "post-for-stay" && (
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                        {message.offerType === "flat" ? "Amount ($)" : "Commission (%)"}
+                        {message.offerType === "flat" ? "Amount ($)" : "Traffic Bonus (%)"}
                       </label>
                       <Input 
                         placeholder={message.offerType === "flat" ? "500" : "10"}
                         value={message.amount}
                         onChange={e => setMessage({...message, amount: e.target.value})}
                       />
+                      {message.offerType === "percent" && (
+                        <p className="mt-1 text-[10px] text-muted-foreground">Bonus based on tracked link clicks</p>
+                      )}
                     </div>
                   )}
                   <div>

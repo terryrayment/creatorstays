@@ -27,7 +27,7 @@ const mockOffers: OfferRequest[] = [
     propertyLocation: 'Big Bear Lake, CA',
     proposedType: 'affiliate',
     proposedPercent: 10,
-    message: "Hi! We love your travel content and think our cabin would be perfect for your audience. We're offering 10% affiliate commission on all bookings from your link.",
+    message: "Hi! We love your travel content and think our cabin would be perfect for your audience. We're offering $400 base rate plus 10% traffic bonus based on link clicks.",
     deliverables: ['2 Reels', '5 Stories', '1 Feed Post'],
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
   },
@@ -38,7 +38,7 @@ const mockOffers: OfferRequest[] = [
     propertyLocation: 'Malibu, CA',
     proposedType: 'flat',
     proposedFlatFee: 500,
-    message: "We'd like to hire you for a flat fee collaboration. $500 for content showcasing our beach house.",
+    message: "We'd like to hire you for content showcasing our beach house. $500 flat rate for the deliverables listed.",
     deliverables: ['1 Reel', '3 Stories'],
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
   },
@@ -56,7 +56,7 @@ export function CreatorOffersInbox() {
     if (!selectedOffer) return
 
     if (action === 'approve') {
-      setSuccessMessage(`Collaboration approved! Your unique affiliate link has been generated.`)
+      setSuccessMessage(`Collaboration approved! Your tracked link has been generated.`)
       setOffers(offers.filter(o => o.id !== selectedOffer.id))
       setSelectedOffer(null)
     } else if (action === 'decline') {
@@ -64,7 +64,7 @@ export function CreatorOffersInbox() {
       setSelectedOffer(null)
       setSuccessMessage('Offer declined.')
     } else if (action === 'counter') {
-      setSuccessMessage(`Counter offer sent: ${counterPercent}% commission.`)
+      setSuccessMessage(`Counter offer sent: ${counterPercent}% traffic bonus.`)
       setOffers(offers.filter(o => o.id !== selectedOffer.id))
       setSelectedOffer(null)
       setCounterPercent('')
@@ -116,7 +116,7 @@ export function CreatorOffersInbox() {
                       <p className="font-medium">{offer.hostName}</p>
                       <p className="text-sm text-muted-foreground">{offer.propertyTitle}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {offer.proposedType === 'affiliate' && `${offer.proposedPercent}% affiliate`}
+                        {offer.proposedType === 'affiliate' && `${offer.proposedPercent}% traffic bonus`}
                         {offer.proposedType === 'flat' && `$${offer.proposedFlatFee} flat fee`}
                         {offer.proposedType === 'post-for-stay' && 'Post-for-stay'}
                         {' · '}{formatDate(offer.createdAt)}
@@ -148,7 +148,7 @@ export function CreatorOffersInbox() {
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Proposed Terms</p>
               <div className="mt-2 space-y-1 text-sm">
                 {selectedOffer.proposedType === 'affiliate' && (
-                  <p><strong>{selectedOffer.proposedPercent}%</strong> affiliate commission per booking</p>
+                  <p><strong>{selectedOffer.proposedPercent}%</strong> traffic bonus (based on link clicks)</p>
                 )}
                 {selectedOffer.proposedType === 'flat' && (
                   <p><strong>${selectedOffer.proposedFlatFee}</strong> flat fee</p>
@@ -193,7 +193,7 @@ export function CreatorOffersInbox() {
               <div className="space-y-3 rounded-lg border border-foreground/10 p-4">
                 <p className="text-sm font-medium">Make a counter offer</p>
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Your affiliate %</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">Your traffic bonus %</label>
                   <Input
                     type="number"
                     placeholder="e.g., 15"

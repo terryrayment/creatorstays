@@ -7,8 +7,8 @@ interface CollaborationWithAnalytics {
   id: string
   partnerName: string // Creator name for hosts, Host name for creators
   propertyTitle: string
-  affiliateUrl: string
-  affiliatePercent?: number
+  trackingUrl: string
+  trafficBonusPercent?: number
   flatFee?: number
   dealType: string
   status: string
@@ -26,9 +26,10 @@ const mockCollaborations: CollaborationWithAnalytics[] = [
     id: 'collab-1',
     partnerName: 'Amy Chen (@wanderlust_amy)',
     propertyTitle: 'Cozy A-Frame Cabin',
-    affiliateUrl: 'https://creatorstays.com/r/abc123xy',
-    affiliatePercent: 12,
-    dealType: 'affiliate',
+    trackingUrl: 'https://creatorstays.com/r/abc123xy',
+    flatFee: 500,
+    trafficBonusPercent: 10,
+    dealType: 'flat-with-bonus',
     status: 'active',
     analytics: {
       totalClicks: 247,
@@ -48,9 +49,10 @@ const mockCollaborations: CollaborationWithAnalytics[] = [
     id: 'collab-2',
     partnerName: 'Marcus Webb (@photo_marcus)',
     propertyTitle: 'Cozy A-Frame Cabin',
-    affiliateUrl: 'https://creatorstays.com/r/def456yz',
-    affiliatePercent: 15,
-    dealType: 'affiliate',
+    trackingUrl: 'https://creatorstays.com/r/def456yz',
+    flatFee: 750,
+    trafficBonusPercent: 15,
+    dealType: 'flat-with-bonus',
     status: 'active',
     analytics: {
       totalClicks: 156,
@@ -115,8 +117,8 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
                       }`}>
                         {collab.status}
                       </span>
-                      {collab.affiliatePercent && (
-                        <span className="text-xs text-muted-foreground">{collab.affiliatePercent}% affiliate</span>
+                      {collab.trafficBonusPercent && (
+                        <span className="text-xs text-muted-foreground">{collab.trafficBonusPercent}% traffic bonus</span>
                       )}
                     </div>
                   </div>
@@ -148,15 +150,15 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
                   </div>
                 </div>
 
-                {/* Affiliate link */}
+                {/* Tracked link */}
                 <div className="mt-3 flex items-center gap-2 rounded-lg bg-foreground/[0.02] px-3 py-2">
                   <svg className="h-3.5 w-3.5 shrink-0 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                   </svg>
-                  <code className="flex-1 truncate text-xs text-muted-foreground">{collab.affiliateUrl}</code>
+                  <code className="flex-1 truncate text-xs text-muted-foreground">{collab.trackingUrl}</code>
                   <button 
                     className="text-[10px] font-medium text-primary hover:underline"
-                    onClick={() => navigator.clipboard.writeText(collab.affiliateUrl)}
+                    onClick={() => navigator.clipboard.writeText(collab.trackingUrl)}
                   >
                     Copy
                   </button>
@@ -170,10 +172,10 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
       {/* Note about payments */}
       <div className="rounded-lg border border-foreground/5 bg-foreground/[0.02] p-4 text-center text-xs text-muted-foreground">
         <p>
-          <strong>Payments are settled off-platform.</strong> CreatorStays tracks clicks and attribution. 
+          <strong>Creators are paid per post.</strong> Performance bonuses are based on tracked link traffic, not booking data.
           {viewAs === 'host' 
-            ? ' Pay creators directly based on your agreement.' 
-            : ' Collect payment from hosts based on your agreement.'}
+            ? ' Approve bonuses manually or via presets.' 
+            : ' Track your link performance here.'}
         </p>
       </div>
     </div>

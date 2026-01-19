@@ -22,7 +22,7 @@ function HeroSection() {
             </h1>
             
             <p className="mt-3 max-w-md text-[13px] font-medium leading-snug text-black">
-              Invite creators to stay at your property. They create content and drive traffic. You get bookings and photos you own forever.
+              Pay creators per post. They create content and drive traffic. You get professional photos and tracked link analytics.
             </p>
             
             <div className="mt-5 flex flex-wrap gap-2">
@@ -62,8 +62,8 @@ function HeroSection() {
 
             <div className="mt-3 space-y-0 border-t-2 border-black">
               {[
-                { label: "No upfront cost", desc: "Pay per result" },
-                { label: "Track every click", desc: "Real analytics" },
+                { label: "Pay per post", desc: "Simple flat rates" },
+                { label: "Track traffic", desc: "Real analytics" },
                 { label: "Own the content", desc: "Forever yours" },
               ].map((item, i) => (
                 <div
@@ -92,20 +92,20 @@ function ProcessSection() {
     },
     {
       num: "02",
-      title: "INVITE CREATORS",
-      desc: "Browse our creator directory. Filter by niche, followers, and style. Send offers directly.",
+      title: "HIRE CREATORS",
+      desc: "Browse our directory. Set your rate per post. Send offers directly to creators.",
       color: "#FFD84A",
     },
     {
       num: "03",
-      title: "GET TRACKED LINKS",
-      desc: "Every creator gets a unique link. Track clicks, traffic sources, and engagement in real-time.",
+      title: "TRACK TRAFFIC",
+      desc: "Every creator gets a unique link. See clicks and traffic sources in real-time.",
       color: "#28D17C",
     },
     {
       num: "04",
-      title: "PAY & RECEIVE CONTENT",
-      desc: "Pay creators via Stripe. Get photos and videos you own forever. Tax docs handled automatically.",
+      title: "PAY & GET CONTENT",
+      desc: "We handle payouts and tax docs. You get photos and videos you own forever.",
       color: "#FF6B6B",
     },
   ]

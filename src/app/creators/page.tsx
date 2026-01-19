@@ -47,11 +47,11 @@ function HeroSection() {
             <h1 className="font-heading text-[2.5rem] leading-[0.85] tracking-[-0.04em] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[4rem] xl:text-[5rem]" style={{ fontWeight: 900 }}>
               <span className="block text-black">CREATORS</span>
               <span className="block text-black" style={{ fontWeight: 400 }}>GET PAID</span>
-              <span className="block text-black">TO FILL CALENDARS</span>
+              <span className="block text-black">PER POST</span>
             </h1>
             
             <p className="mt-3 max-w-md text-[13px] font-medium leading-snug text-black">
-              Approve host requests. Share your unique tracked link. Earn affiliate commissions or flat fees when their guests book. All payouts handled through the platform.
+              Get paid per post, plus optional traffic-based bonuses. Share your tracked link. We handle all payouts and tax docs.
             </p>
             
             <div className="mt-5 flex flex-wrap gap-2">
@@ -86,14 +86,14 @@ function HeroSection() {
                 <span className="block text-black" style={{ fontWeight: 400 }}>EARN</span>
               </h2>
               <p className="mt-2 text-[12px] font-medium text-black">
-                Set your own terms. Get paid your way.
+                Guaranteed pay per post. Optional traffic bonuses.
               </p>
             </div>
 
             <div className="mt-3 space-y-0 border-t-2 border-black">
               {[
-                { label: "Affiliate %", desc: "Earn per booking" },
-                { label: "Flat fee", desc: "Set your rate" },
+                { label: "Base rate", desc: "Per post payout" },
+                { label: "Traffic bonus", desc: "Based on clicks" },
                 { label: "Post-for-stay", desc: "Trade content" },
               ].map((item, i) => (
                 <div
@@ -107,7 +107,7 @@ function HeroSection() {
             </div>
 
             <p className="mt-2 text-[9px] font-bold text-black">
-              1099 tax docs • Stripe payouts • Full analytics
+              1099 tax docs • Stripe payouts • Link analytics
             </p>
           </div>
         </div>
@@ -126,14 +126,14 @@ function ProcessSection() {
     },
     {
       num: "02",
-      title: "SET YOUR TERMS",
-      desc: "Choose affiliate percentage, flat fee, or post-for-stay. Define your deliverables: reels, posts, stories.",
+      title: "SET YOUR RATE",
+      desc: "Set your base rate per post. Define deliverables: reels, posts, stories, videos.",
       color: "#4AA3FF",
     },
     {
       num: "03",
       title: "CONNECT PLATFORMS",
-      desc: "Link Instagram, TikTok, or YouTube. We sync your follower counts and keep analytics updated.",
+      desc: "Link Instagram, TikTok, or YouTube. We display your follower counts to hosts.",
       color: "#28D17C",
     },
     {
@@ -144,8 +144,8 @@ function ProcessSection() {
     },
     {
       num: "05",
-      title: "SHARE & EARN",
-      desc: "Get your unique tracked link. Share it with your audience. Track clicks and get paid when guests book.",
+      title: "POST & GET PAID",
+      desc: "Share your tracked link. Get paid per post. Earn traffic bonuses based on link performance.",
       color: "#A855F7",
     },
   ]
@@ -190,7 +190,7 @@ function ControlSection() {
   const controls = [
     {
       title: "YOUR RATE",
-      desc: "Set affiliate percentage, flat fee, or post-for-stay. Change anytime. No platform-imposed minimums.",
+      desc: "Set your base rate per post. Add optional traffic bonus tiers. Change anytime.",
       color: "#FFD84A",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
@@ -211,7 +211,7 @@ function ControlSection() {
     },
     {
       title: "YOUR ANALYTICS",
-      desc: "Track every click on your link. See traffic sources, timestamps, and performance trends in real-time.",
+      desc: "Track every click on your link. See traffic sources and performance. Links track traffic, not bookings.",
       color: "#28D17C",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">

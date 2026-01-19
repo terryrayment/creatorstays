@@ -92,7 +92,7 @@ function CopyLinkButton({ handle }: { handle: string }) {
 export function CreatorProfileView({ creator }: { creator: CreatorProfile }) {
   const [showInviteModal, setShowInviteModal] = useState(false)
 
-  const dealTypeLabels: Record<string, string> = { percent: "Commission", flat: "Flat fee", "post-for-stay": "Post-for-stay" }
+  const dealTypeLabels: Record<string, string> = { percent: "Traffic bonus", flat: "Flat fee", "post-for-stay": "Post-for-stay" }
   const defaultDeliverables = [
     { title: "Feed Posts", desc: "High-quality static posts with property tags and booking link" },
     { title: "Reels / Short Video", desc: "Engaging vertical video showcasing the property" },
@@ -186,7 +186,7 @@ export function CreatorProfileView({ creator }: { creator: CreatorProfile }) {
                   )}
                   {creator.dealPreferences.minimumPercent && (
                     <div className="flex justify-between border-b border-foreground/5 pb-2">
-                      <span className="text-muted-foreground">Min commission</span>
+                      <span className="text-muted-foreground">Min traffic bonus</span>
                       <span className="font-medium">{creator.dealPreferences.minimumPercent}%</span>
                     </div>
                   )}

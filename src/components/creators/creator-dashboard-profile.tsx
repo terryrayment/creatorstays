@@ -695,10 +695,10 @@ export function CreatorDashboardProfile() {
       {/* Edit Deal Prefs Modal */}
       {editDealPrefsOpen && (
         <Modal onClose={() => setEditDealPrefsOpen(false)}>
-          <h3 className="text-lg font-semibold">Edit Deal Preferences</h3>
+          <h3 className="text-lg font-semibold">Edit Rates</h3>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="text-xs font-medium text-muted-foreground">Minimum flat fee ($)</label>
+              <label className="text-xs font-medium text-muted-foreground">Base rate per post ($)</label>
               <Input
                 type="number"
                 value={editMinFlat}
@@ -708,7 +708,7 @@ export function CreatorDashboardProfile() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground">Minimum commission (%)</label>
+              <label className="text-xs font-medium text-muted-foreground">Traffic bonus (%)</label>
               <Input
                 type="number"
                 value={editMinPercent}
@@ -716,6 +716,7 @@ export function CreatorDashboardProfile() {
                 placeholder="e.g. 10"
                 className="mt-1"
               />
+              <p className="mt-1 text-[10px] text-muted-foreground">Optional bonus based on tracked link traffic</p>
             </div>
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Open to post-for-stay</label>
@@ -1123,7 +1124,7 @@ export function CreatorDashboardProfile() {
                       {/* Deal prefs */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Deal Prefs</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Rates</span>
                           <button 
                             onClick={() => {
                               setEditMinFlat(profile.dealPrefs.minFlat?.toString() || '')
@@ -1138,11 +1139,11 @@ export function CreatorDashboardProfile() {
                         </div>
                         <div className="space-y-1 text-xs">
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Min flat</span>
+                            <span className="text-muted-foreground">Base rate</span>
                             <span>{profile.dealPrefs.minFlat ? `$${profile.dealPrefs.minFlat}` : '—'}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Min %</span>
+                            <span className="text-muted-foreground">Traffic bonus</span>
                             <span>{profile.dealPrefs.minPercent ? `${profile.dealPrefs.minPercent}%` : '—'}</span>
                           </div>
                           <div className="flex justify-between">
@@ -1183,7 +1184,7 @@ export function CreatorDashboardProfile() {
               <Metric value="247" label="Total Clicks" caption="This month" size="md" />
               <Metric value="189" label="Unique Visitors" size="md" />
               <Metric value="2" label="Active Collabs" size="md" />
-              <Metric value="12%" label="Avg Commission" size="md" />
+              <Metric value="$850" label="Pending Payout" size="md" />
             </div>
 
             {/* Campaign Timeline */}
@@ -1201,11 +1202,11 @@ export function CreatorDashboardProfile() {
               <PanelContent className="p-0">
                 <Link href="/dashboard/creator/offers" className="block px-4 py-3 transition-colors hover:bg-foreground/[0.02]">
                   <p className="text-sm font-medium">Mountain View Retreats</p>
-                  <p className="text-xs text-muted-foreground">10% affiliate · Cozy A-Frame Cabin</p>
+                  <p className="text-xs text-muted-foreground">$400/post + bonus · Cozy A-Frame Cabin</p>
                 </Link>
                 <Link href="/dashboard/creator/offers" className="block border-t border-foreground/5 px-4 py-3 transition-colors hover:bg-foreground/[0.02]">
                   <p className="text-sm font-medium">Coastal Getaways</p>
-                  <p className="text-xs text-muted-foreground">$500 flat · Modern Beach House</p>
+                  <p className="text-xs text-muted-foreground">$500/post · Modern Beach House</p>
                 </Link>
               </PanelContent>
             </Panel>

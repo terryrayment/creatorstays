@@ -13,8 +13,8 @@ export interface Creator {
     youtube?: string
   }
   // Creator-set pricing
-  defaultAffiliatePercent: number // e.g., 10 = 10%
-  minimumFlatFee?: number
+  baseRatePerPost: number // flat rate per deliverable
+  trafficBonusPercent?: number // optional bonus based on link clicks
   openToPostForStay: boolean
   deliverables: string[]
 }
@@ -69,20 +69,20 @@ export interface Collaboration {
   propertyId: string
   
   // Final agreed terms
-  dealType: 'affiliate' | 'flat' | 'post-for-stay'
-  affiliatePercent?: number
-  flatFee?: number
+  dealType: 'flat' | 'flat-with-bonus' | 'post-for-stay'
+  flatFee?: number // base rate per post
+  trafficBonusPercent?: number // optional bonus based on link clicks
   deliverables: string[]
   
-  // Unique affiliate link for this collaboration
-  affiliateToken: string
-  affiliateUrl: string
+  // Tracked link for this collaboration
+  trackingToken: string
+  trackingUrl: string
   
   // Status
   status: 'active' | 'content-submitted' | 'completed' | 'cancelled'
   contentLinks: string[] // URLs to posted content
   
-  // Payment tracking (off-platform)
+  // Payment tracking
   paymentStatus: 'pending' | 'settled'
   paymentNotes?: string
   
@@ -93,7 +93,7 @@ export interface Collaboration {
 export interface Click {
   id: string
   collaborationId: string
-  affiliateToken: string
+  trackingToken: string
   
   clickedAt: Date
   visitorId: string // hashed/anonymous
@@ -128,8 +128,8 @@ export const mockCreators: Creator[] = [
     niches: ['Travel', 'Lifestyle'],
     location: 'Los Angeles, CA',
     platforms: { instagram: '@wanderlust_amy', tiktok: '@amychen' },
-    defaultAffiliatePercent: 12,
-    minimumFlatFee: 500,
+    baseRatePerPost: 500,
+    trafficBonusPercent: 10,
     openToPostForStay: true,
     deliverables: ['2 Reels', '5 Stories', '1 Feed Post'],
   },
@@ -140,8 +140,8 @@ export const mockCreators: Creator[] = [
     niches: ['Photography', 'Adventure'],
     location: 'Denver, CO',
     platforms: { instagram: '@photo_marcus', youtube: 'MarcusWebb' },
-    defaultAffiliatePercent: 15,
-    minimumFlatFee: 750,
+    baseRatePerPost: 750,
+    trafficBonusPercent: 15,
     openToPostForStay: true,
     deliverables: ['10 Photos', '1 Reel', '3 Stories'],
   },
@@ -152,7 +152,7 @@ export const mockCreators: Creator[] = [
     niches: ['Interior Design', 'Lifestyle'],
     location: 'Austin, TX',
     platforms: { instagram: '@cozy_interiors', tiktok: '@sarahpark' },
-    defaultAffiliatePercent: 10,
+    baseRatePerPost: 400,
     openToPostForStay: false,
     deliverables: ['1 Reel', '3 Stories', 'Room Tour'],
   },

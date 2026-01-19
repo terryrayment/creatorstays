@@ -68,24 +68,42 @@ function HeroSection() {
 
             {/* Guide links */}
             <div className="mt-3 space-y-0 border-t-2 border-black">
-              {[
-                { href: "/how-it-works", label: "How it works" },
-                { href: "/creators", label: "Browse creators" },
-                { href: "/pricing", label: "Pricing" },
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-center justify-between border-b-2 border-black py-2 text-[10px] font-bold uppercase tracking-wider text-black transition-colors hover:border-black"
-                >
-                  {link.label}
-                  <span className="text-black">→</span>
-                </Link>
-              ))}
+              {/* How it Works - underline sweep */}
+              <Link
+                href="/how-it-works"
+                className="group relative flex items-center justify-between border-b-2 border-black py-2 text-[10px] font-bold uppercase tracking-wider text-black transition-transform duration-200 motion-safe:hover:-translate-y-0.5"
+              >
+                <span className="relative">
+                  How it works
+                  <span className="absolute -bottom-0.5 left-0 h-[2px] w-0 bg-black transition-all duration-300 motion-safe:group-hover:w-full" />
+                </span>
+                <span className="text-black transition-transform duration-200 motion-safe:group-hover:translate-x-1.5">→</span>
+              </Link>
+              
+              {/* Browse Creators - magnetic feel */}
+              <Link
+                href="/creators"
+                className="group relative flex items-center justify-between border-b-2 border-black py-2 text-[10px] font-bold uppercase tracking-wider text-black"
+              >
+                <span className="absolute inset-0 bg-black/0 transition-all duration-200 motion-safe:group-hover:bg-black/5" />
+                <span className="relative transition-transform duration-200 motion-safe:group-hover:translate-x-1">
+                  Browse creators
+                </span>
+                <span className="relative text-black transition-transform duration-200 motion-safe:group-hover:animate-arrow-wiggle">→</span>
+              </Link>
+              
+              {/* Pricing - bounce emphasis */}
+              <Link
+                href="/pricing"
+                className="group relative flex items-center justify-between border-b-2 border-black py-2 text-[10px] font-bold uppercase tracking-wider text-black transition-all duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-b-[3px]"
+              >
+                <span>Pricing</span>
+                <span className="text-black transition-transform duration-200 motion-safe:group-hover:animate-arrow-pop">→</span>
+              </Link>
             </div>
 
             <p className="mt-2 text-[9px] font-bold text-black">
-              Free to start • Pay per result • Track links
+              Free to start • Pay per post • Track traffic
             </p>
           </div>
         </div>
@@ -111,9 +129,9 @@ function HowItWorksSection() {
             <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { num: "01", title: "Add property", desc: "Paste Airbnb link" },
-                { num: "02", title: "Find creators", desc: "Browse directory" },
-                { num: "03", title: "Track clicks", desc: "Real-time analytics" },
-                { num: "04", title: "Pay creators", desc: "Via Stripe" },
+                { num: "02", title: "Hire creators", desc: "Pay per post" },
+                { num: "03", title: "Track traffic", desc: "Real-time analytics" },
+                { num: "04", title: "Pay easily", desc: "We handle payouts" },
               ].map((step) => (
                 <div key={step.num} className="border-l-[3px] border-black pl-2">
                   <span className="font-heading text-[1rem] text-black" style={{ fontWeight: 900 }}>{step.num}</span>

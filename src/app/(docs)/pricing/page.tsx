@@ -80,18 +80,20 @@ export default function PricingPage() {
             <Panel className="bg-foreground/[0.02]">
               <h2 className="text-[15px] font-semibold mb-3">Example</h2>
               <div className="text-[14px] space-y-2">
-                <p>A host agrees to pay a creator <span className="font-medium">$500</span> for a campaign.</p>
+                <p>A host pays a creator <span className="font-medium">$500</span> for a post with tracked link.</p>
                 <ul className="space-y-1 text-[13px] text-muted-foreground ml-4">
                   <li>• Host pays: $500 + $75 (15% fee) = <span className="font-medium text-foreground">$575</span></li>
                   <li>• Creator receives: $500 - $75 (15% fee) = <span className="font-medium text-foreground">$425</span></li>
                 </ul>
+                <p className="text-[12px] text-muted-foreground mt-3">Creators are paid per post. Performance bonuses are based on tracked link traffic, not booking data.</p>
               </div>
             </Panel>
 
             {/* Notes */}
             <div className="text-[13px] text-muted-foreground space-y-2">
-              <p>All payments processed securely via Stripe. You only pay when you approve completed work.</p>
+              <p>All payments processed securely via Stripe. Pay per deliverable—no booking tracking required.</p>
               <p>No hidden fees. No monthly subscriptions. No contracts.</p>
+              <p className="text-[12px] pt-2 border-t border-foreground/5">CreatorStays links track traffic, not bookings. Hosts decide bonuses based on link performance.</p>
             </div>
           </div>
 

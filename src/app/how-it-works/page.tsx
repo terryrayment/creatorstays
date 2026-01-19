@@ -10,37 +10,37 @@ const steps = [
   },
   {
     num: "02",
-    title: "BROWSE",
+    title: "HIRE",
     subtitle: "CREATORS",
-    content: "Search our directory by niche, platform, and audience size. Filter for travel, lifestyle, or luxury creators. View portfolios and past collaborations before reaching out.",
+    content: "Browse our directory by niche, platform, and audience size. View portfolios and rates. Pay per post—simple flat pricing.",
     color: "#4AA3FF",
   },
   {
     num: "03",
     title: "SEND",
     subtitle: "OFFERS",
-    content: "Set your budget, deliverables, and timeline. Creators receive your offer and can accept, counter, or decline. No cold DMs or awkward negotiations.",
+    content: "Set your budget per deliverable. Creators can accept, counter, or decline. No cold DMs or awkward negotiations.",
     color: "#D7B6FF",
   },
   {
     num: "04",
     title: "THEY POST",
     subtitle: "YOUR LINK",
-    content: "Each creator gets a unique tracked link. When they post content, every click is attributed to your listing. Real reach with real attribution.",
+    content: "Each creator gets a unique tracked link. When they post content, every click is tracked. Real reach with real attribution.",
     color: "#28D17C",
   },
   {
     num: "05",
-    title: "WATCH",
+    title: "TRACK",
     subtitle: "TRAFFIC",
-    content: "See clicks, unique visitors, and referral sources in real time. Know exactly which creators drive results. Optimize future campaigns with data.",
+    content: "See clicks, unique visitors, and referral sources in real time. Links track traffic, not bookings. Hosts decide bonuses based on performance.",
     color: "#FF5A1F",
   },
   {
     num: "06",
     title: "PAY VIA",
     subtitle: "PLATFORM",
-    content: "Approve completed work and pay through Stripe. We handle contracts, invoices, and 1099 tax forms. Clean paperwork, every time.",
+    content: "We handle payouts and 1099 tax forms. You pay for content. Traffic is tracked. Clean paperwork, every time.",
     color: "#E8D5E8",
   },
 ]
@@ -57,7 +57,7 @@ export default function HowItWorksPage() {
             <span className="block text-black" style={{ fontWeight: 400 }}>WORKS</span>
           </h1>
           <p className="mt-4 max-w-lg text-[15px] font-medium leading-snug text-black">
-            CreatorStays connects vacation rental hosts with content creators. You get traffic and content. They get paid. Everyone wins.
+            CreatorStays connects vacation rental hosts with content creators. You pay for content. Traffic is tracked. Payouts are handled.
           </p>
         </div>
 
