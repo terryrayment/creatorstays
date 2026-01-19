@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { FeatureScroller } from "@/components/marketing/feature-scroller"
 import { RevealStack } from "@/components/marketing/reveal-stack"
 
@@ -47,6 +48,33 @@ function getCardColors(): { hero: [CardColor, CardColor]; cta: [CardColor, CardC
 // Get colors once at module level for consistent render
 const cardColors = getCardColors()
 
+// Floating illustration component
+function FloatingIllustration({ 
+  src, 
+  alt, 
+  className,
+  size = 120 
+}: { 
+  src: string
+  alt: string
+  className?: string
+  size?: number
+}) {
+  return (
+    <div className={`pointer-events-none absolute ${className}`}>
+      <div className="animate-float">
+        <Image
+          src={src}
+          alt={alt}
+          width={size}
+          height={size}
+          className="object-contain drop-shadow-lg"
+        />
+      </div>
+    </div>
+  )
+}
+
 // Simple icon tiles
 function IconTile({ children }: { children: React.ReactNode }) {
   return (
@@ -58,8 +86,22 @@ function IconTile({ children }: { children: React.ReactNode }) {
 
 function HeroSection() {
   return (
-    <section className="bg-black px-3 pb-2 pt-16 lg:px-4">
-      <div className="mx-auto max-w-7xl">
+    <section className="relative bg-black px-3 pb-2 pt-16 lg:px-4 overflow-hidden">
+      {/* Floating illustrations - hidden on mobile */}
+      <FloatingIllustration 
+        src="/images/house-wifi-3.png" 
+        alt="" 
+        className="hidden lg:block -right-8 top-20 opacity-80"
+        size={140}
+      />
+      <FloatingIllustration 
+        src="/images/luggage-2.png" 
+        alt="" 
+        className="hidden lg:block -left-4 bottom-8 opacity-70"
+        size={100}
+      />
+      
+      <div className="mx-auto max-w-7xl relative z-10">
         <div className="grid gap-2 lg:grid-cols-[1.5fr_1fr] lg:gap-3">
           {/* PRIMARY BLOCK */}
           <div 
@@ -225,8 +267,16 @@ function HowItWorksSection() {
 
 function CTASection() {
   return (
-    <section className="bg-black px-3 py-2 lg:px-4">
-      <div className="mx-auto grid max-w-7xl gap-2 md:grid-cols-2">
+    <section className="relative bg-black px-3 py-2 lg:px-4 overflow-hidden">
+      {/* Floating illustration */}
+      <FloatingIllustration 
+        src="/images/house-wifi-1.png" 
+        alt="" 
+        className="hidden lg:block right-4 -top-8 opacity-70"
+        size={100}
+      />
+      
+      <div className="mx-auto grid max-w-7xl gap-2 md:grid-cols-2 relative z-10">
         {/* Hosts */}
         <div 
           className="block-hover rounded-2xl border-[3px] border-black p-4"

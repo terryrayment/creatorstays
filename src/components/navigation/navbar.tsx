@@ -39,14 +39,14 @@ export function Navbar() {
             </button>
             <div className="invisible absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border-2 border-black bg-white p-1.5 opacity-0 shadow-xl transition-all group-hover:visible group-hover:opacity-100">
               <Link 
-                href="/dev-login?role=host" 
+                href="/demo-login?role=host" 
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-[11px] font-semibold text-black transition-colors hover:bg-black/5"
               >
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#FFD84A] text-[9px] font-bold">H</span>
                 Host Login
               </Link>
               <Link 
-                href="/dev-login?role=creator" 
+                href="/demo-login?role=creator" 
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-[11px] font-semibold text-black transition-colors hover:bg-black/5"
               >
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#4AA3FF] text-[9px] font-bold">C</span>

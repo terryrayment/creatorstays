@@ -1123,6 +1123,30 @@
   animation: arrow-pop 0.25s ease-out;
 }
 
+/* Floating illustration animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-4px) rotate(-1deg);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Slower variant */
+.animate-float-slow {
+  animation: float 10s ease-in-out infinite;
+  will-change: transform;
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .animate-arrow-wiggle,
