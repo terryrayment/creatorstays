@@ -354,28 +354,112 @@
 
 .focus-card {
   transition: 
-    filter 220ms ease-out,
-    opacity 220ms ease-out,
-    transform 220ms ease-out,
-    background 220ms ease-out;
+    filter 250ms ease-out,
+    opacity 250ms ease-out,
+    transform 250ms ease-out,
+    background 250ms ease-out;
 }
 
 /* Desktop only: blur siblings on hover */
 @media (min-width: 768px) {
   .focus-group:hover .focus-card {
-    filter: blur(3px);
-    opacity: 0.55;
+    filter: blur(10px);
+    opacity: 0.35;
   }
   
   .focus-group:hover .focus-card:hover {
     filter: blur(0);
     opacity: 1;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
   
   /* Stronger glow on focused card */
   .focus-group:hover .focus-card:hover .surface-card-glow {
     opacity: 1;
     filter: blur(32px);
+  }
+}
+
+/* ============================================================================
+   Marketing Pill Cards - Full width pill with micro-animations
+   ============================================================================ */
+
+.marketing-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.02),
+    0 4px 12px rgba(0, 0, 0, 0.01);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  transition: 
+    filter 250ms ease-out,
+    opacity 250ms ease-out,
+    transform 250ms ease-out,
+    box-shadow 280ms ease-out,
+    background 280ms ease-out;
+}
+
+/* Animated gradient sweep pseudo-element */
+.marketing-pill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(199 89% 48% / 0.06) 25%,
+    hsl(213 94% 45% / 0.08) 50%,
+    hsl(199 89% 48% / 0.06) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: -100% 0;
+  opacity: 0;
+  transition: opacity 300ms ease-out, background-position 600ms ease-out;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .marketing-pill:hover {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.03),
+      0 8px 24px hsl(213 94% 45% / 0.08);
+  }
+  
+  .marketing-pill:hover::before {
+    opacity: 1;
+    background-position: 100% 0;
+  }
+}
+
+/* Pill glow element */
+.marketing-pill-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(199 89% 48% / 0.12) 0%,
+    hsl(213 94% 45% / 0.06) 40%,
+    transparent 70%
+  );
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (min-width: 768px) {
+  .focus-group:hover .marketing-pill:hover .marketing-pill-glow {
+    opacity: 1;
   }
 }

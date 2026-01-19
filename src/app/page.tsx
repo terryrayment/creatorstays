@@ -75,65 +75,45 @@ function EdgeBlur({ className = "" }: { className?: string }) {
 
 const hostReasons = [
   {
-    title: "More Bookings",
-    description: "Creators drive real traffic. Track every click.",
-    featured: true,
+    title: "More Traffic",
+    description: "Creators drive real clicks to your listing. Track every visit.",
   },
   {
     title: "Professional Content",
-    description: "Scroll-stopping photos and videos. Yours forever.",
-    featured: false,
+    description: "Scroll-stopping photos and videos. Yours to keep forever.",
   },
   {
     title: "Targeted Reach",
-    description: "Real travelers who book, not random followers.",
-    featured: false,
+    description: "Real travelers who actually book, not random followers.",
   }
 ]
 
 function WhyHostsSection() {
   return (
-    <section className="py-8">
+    <section className="py-10">
       <Container>
-        <div className="mb-5 opacity-0 reveal">
+        <div className="mb-6 opacity-0 reveal">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
             Why hosts use CreatorStays
           </h2>
         </div>
         <div className="relative">
-          {/* Extreme edge blur behind cards */}
+          {/* Edge blur behind pills */}
           <div className="pointer-events-none absolute -inset-20 -z-10" aria-hidden="true">
             <div className="absolute left-1/4 top-0 h-[400px] w-[500px] rounded-full bg-[hsl(199,89%,48%)]/[0.08] blur-[180px]" />
             <div className="absolute bottom-0 right-1/4 h-[350px] w-[450px] rounded-full bg-[hsl(213,94%,45%)]/[0.06] blur-[160px]" />
           </div>
-          <div className="focus-group grid gap-2 md:grid-cols-12">
-            {/* Featured card - takes more space */}
-            <div 
-              className="focus-card surface-card group relative rounded-xl p-4 opacity-0 reveal md:col-span-5 md:row-span-2 md:p-5"
-              style={{ animationDelay: '100ms' }}
-            >
-              <div className="surface-card-glow" aria-hidden="true" />
-              <div className="relative z-10 flex h-full flex-col">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Primary benefit</span>
-                <h3 className="mt-1.5 text-lg font-semibold leading-snug tracking-tight md:text-xl">{hostReasons[0].title}</h3>
-                <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground/80 md:text-[13px]">{hostReasons[0].description}</p>
-                <div className="mt-auto pt-4">
-                  <span className="text-[10px] text-muted-foreground/50">Measurable ROI on every campaign</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Secondary cards - stacked */}
-            {hostReasons.slice(1).map((reason, i) => (
+          <div className="focus-group flex flex-col gap-3">
+            {hostReasons.map((reason, i) => (
               <div 
                 key={reason.title}
-                className="focus-card surface-card group relative rounded-xl p-3 opacity-0 reveal md:col-span-7 md:p-4"
-                style={{ animationDelay: `${(i + 2) * 100}ms` }}
+                className="marketing-pill focus-card opacity-0 reveal"
+                style={{ animationDelay: `${(i + 1) * 100}ms` }}
               >
-                <div className="surface-card-glow" aria-hidden="true" />
-                <div className="relative z-10">
-                  <h3 className="text-[14px] font-semibold leading-tight tracking-tight md:text-[15px]">{reason.title}</h3>
-                  <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground/70 md:text-[12px]">{reason.description}</p>
+                <div className="marketing-pill-glow" aria-hidden="true" />
+                <div className="relative z-10 flex flex-1 items-center justify-between gap-4">
+                  <h3 className="text-[15px] font-semibold tracking-tight md:text-base">{reason.title}</h3>
+                  <p className="text-[12px] text-muted-foreground/70 md:text-[13px]">{reason.description}</p>
                 </div>
               </div>
             ))}
@@ -145,40 +125,43 @@ function WhyHostsSection() {
 }
 
 const steps = [
-  { number: "1", title: "Add property", description: "Paste your Airbnb link" },
-  { number: "2", title: "Find creators", description: "Browse by niche & audience" },
-  { number: "3", title: "Track clicks", description: "Real-time link analytics" },
-  { number: "4", title: "Pay & settle", description: "Direct creator payouts" },
+  { number: "1", title: "Add property", description: "Paste your Airbnb link to get started" },
+  { number: "2", title: "Find creators", description: "Browse by niche, audience size & location" },
+  { number: "3", title: "Track traffic", description: "Real-time click analytics on every link" },
+  { number: "4", title: "Pay & settle", description: "Direct payouts to creators through Stripe" },
 ]
 
 function HowItWorksSection() {
   return (
-    <section className="py-6">
+    <section className="py-8">
       <Container>
-        <div className="mb-4 opacity-0 reveal">
+        <div className="mb-6 opacity-0 reveal">
           <h2 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
             How it works
           </h2>
         </div>
         <div className="relative">
-          {/* Extreme edge blur behind cards */}
+          {/* Edge blur behind pills */}
           <div className="pointer-events-none absolute -inset-16 -z-10" aria-hidden="true">
             <div className="absolute left-0 top-1/2 h-[300px] w-[400px] -translate-y-1/2 rounded-full bg-[hsl(199,89%,48%)]/[0.07] blur-[160px]" />
             <div className="absolute right-0 top-1/2 h-[280px] w-[380px] -translate-y-1/2 rounded-full bg-[hsl(213,94%,45%)]/[0.05] blur-[140px]" />
           </div>
-          <div className="focus-group grid grid-cols-2 gap-1.5 md:grid-cols-4 md:gap-2">
+          <div className="focus-group flex flex-col gap-2">
             {steps.map((step, i) => (
               <div 
                 key={step.number}
-                className="focus-card surface-card relative overflow-hidden rounded-lg px-2.5 py-3 opacity-0 reveal md:px-3 md:py-3.5"
+                className="marketing-pill focus-card opacity-0 reveal"
                 style={{ animationDelay: `${(i + 1) * 80}ms` }}
               >
-                <span className="absolute -right-1.5 -top-3 font-heading text-[60px] font-normal leading-none text-foreground/[0.04] md:text-[72px]">
-                  {step.number}
-                </span>
-                <div className="relative z-10">
-                  <h3 className="text-[12px] font-semibold leading-tight tracking-tight md:text-[13px]">{step.title}</h3>
-                  <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground/60 md:text-[11px]">{step.description}</p>
+                <div className="marketing-pill-glow" aria-hidden="true" />
+                <div className="relative z-10 flex flex-1 items-center gap-4">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                    {step.number}
+                  </span>
+                  <div className="flex flex-1 items-center justify-between gap-4">
+                    <h3 className="text-[14px] font-semibold tracking-tight md:text-[15px]">{step.title}</h3>
+                    <p className="text-[11px] text-muted-foreground/60 md:text-[12px]">{step.description}</p>
+                  </div>
                 </div>
               </div>
             ))}
