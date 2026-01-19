@@ -123,6 +123,15 @@ function isValidAirbnbUrl(url: string): boolean {
   return normalized.includes("airbnb.com")
 }
 
+interface ListingPrefill {
+  title?: string
+  city?: string
+  rating?: number
+  reviewCount?: number
+  price?: string
+  photos?: string[]
+}
+
 export function HostSignupForm() {
   const [submitted, setSubmitted] = useState(false)
   const [form, setForm] = useState({
@@ -136,13 +145,54 @@ export function HostSignupForm() {
     confirmPassword: "",
     agreeTerms: false,
   })
+  
+  // Prefill state
+  const [prefill, setPrefill] = useState<ListingPrefill | null>(null)
+  const [prefillStatus, setPrefillStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [manuallyEdited, setManuallyEdited] = useState(false)
+  const [prefillAttempted, setPrefillAttempted] = useState(false)
 
   const listingUrlError = form.listingUrl && !isValidAirbnbUrl(form.listingUrl)
   const canSubmit = !listingUrlError
+  const showPrefillButton = form.listingUrl && isValidAirbnbUrl(form.listingUrl) && form.listingUrl.includes("airbnb.com")
 
   const handleListingUrlBlur = () => {
     if (form.listingUrl) {
-      setForm({ ...form, listingUrl: normalizeUrl(form.listingUrl) })
+      const normalized = normalizeUrl(form.listingUrl)
+      setForm({ ...form, listingUrl: normalized })
+      
+      // Auto-trigger prefill if valid and not manually edited
+      if (isValidAirbnbUrl(normalized) && normalized.includes("airbnb.com") && !manuallyEdited && !prefillAttempted) {
+        fetchPrefill(normalized)
+      }
+    }
+  }
+
+  const fetchPrefill = async (url: string) => {
+    setPrefillStatus("loading")
+    setPrefillAttempted(true)
+    
+    try {
+      const res = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(url)}`)
+      const data = await res.json()
+      
+      if (data.ok) {
+        setPrefill(data)
+        setPrefillStatus("success")
+        setLastUpdated(new Date())
+        
+        // Auto-fill city if not already set
+        if (data.city && !form.cityRegion) {
+          setForm(prev => ({ ...prev, cityRegion: data.city }))
+        }
+      } else {
+        setPrefillStatus("error")
+        setPrefill(null)
+      }
+    } catch {
+      setPrefillStatus("error")
+      setPrefill(null)
     }
   }
 
@@ -150,7 +200,7 @@ export function HostSignupForm() {
     e.preventDefault()
     if (!canSubmit) return
     // Demo only - no backend call
-    console.log("Host signup:", form)
+    console.log("Host signup:", form, prefill)
     setSubmitted(true)
   }
 
@@ -219,27 +269,80 @@ export function HostSignupForm() {
         <label className="mb-1.5 block text-sm font-medium">City / Region *</label>
         <CityAutocomplete
           value={form.cityRegion}
-          onChange={(value) => setForm({ ...form, cityRegion: value })}
+          onChange={(value) => { 
+            setForm({ ...form, cityRegion: value })
+            setManuallyEdited(true)
+          }}
         />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium">Airbnb listing URL *</label>
-        <Input
-          required
-          type="text"
-          placeholder="airbnb.com/rooms/..."
-          value={form.listingUrl}
-          onChange={e => setForm({ ...form, listingUrl: e.target.value })}
-          onBlur={handleListingUrlBlur}
-          className={listingUrlError ? "border-red-300 focus-visible:ring-red-500" : ""}
-        />
+        <label className="mb-1.5 block text-sm font-medium">Airbnb listing URL (required)</label>
+        <div className="flex gap-2">
+          <Input
+            required
+            type="text"
+            placeholder="airbnb.com/rooms/..."
+            value={form.listingUrl}
+            onChange={e => setForm({ ...form, listingUrl: e.target.value })}
+            onBlur={handleListingUrlBlur}
+            className={`flex-1 ${listingUrlError ? "border-red-300 focus-visible:ring-red-500" : ""}`}
+          />
+          {showPrefillButton && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={prefillStatus === "loading"}
+              onClick={() => fetchPrefill(form.listingUrl)}
+              className="shrink-0 text-xs"
+            >
+              {prefillStatus === "loading" ? "Fetching…" : "Pull details"}
+            </Button>
+          )}
+        </div>
         {listingUrlError ? (
           <p className="mt-1 text-xs text-red-600">Only Airbnb listings are supported during beta.</p>
+        ) : prefillStatus === "error" ? (
+          <p className="mt-1 text-xs text-amber-600">Couldn&apos;t pull details. Enter manually below.</p>
         ) : (
-          <p className="mt-1 text-xs text-muted-foreground">VRBO and other platforms coming soon.</p>
+          <p className="mt-1 text-xs text-muted-foreground">VRBO and other platforms coming soon. Best-effort auto-fill.</p>
         )}
       </div>
+
+      {/* Listing preview (after prefill) */}
+      {prefillStatus === "success" && prefill && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              {prefill.title && (
+                <h4 className="font-medium text-sm leading-tight">{prefill.title}</h4>
+              )}
+              {prefill.city && (
+                <p className="text-xs text-muted-foreground mt-0.5">{prefill.city}</p>
+              )}
+              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                {prefill.rating && (
+                  <span>★ {prefill.rating}{prefill.reviewCount && ` (${prefill.reviewCount} reviews)`}</span>
+                )}
+                {prefill.price && <span>{prefill.price}/night</span>}
+              </div>
+            </div>
+            {prefill.photos && prefill.photos[0] && (
+              <img 
+                src={prefill.photos[0]} 
+                alt="Listing" 
+                className="h-16 w-20 rounded-md object-cover shrink-0"
+              />
+            )}
+          </div>
+          {lastUpdated && (
+            <p className="mt-2 text-[10px] text-muted-foreground/70">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
