@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = "force-dynamic"
+
 /**
  * GET /api/tracking/analytics
  * Legacy endpoint - redirects to /api/analytics
