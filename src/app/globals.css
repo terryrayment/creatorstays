@@ -561,3 +561,52 @@
     filter: blur(60px);
   }
 }
+
+/* ============================================================================
+   Help Scenario Cards - With micro blur hover
+   ============================================================================ */
+
+.help-scenario-card {
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  transition: 
+    background 250ms ease-out,
+    filter 250ms ease-out,
+    opacity 250ms ease-out,
+    transform 250ms ease-out,
+    box-shadow 250ms ease-out;
+}
+
+.help-scenario-glow {
+  position: absolute;
+  inset: -25px;
+  border-radius: 16px;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(199 89% 48% / 0.08) 0%,
+    hsl(213 94% 45% / 0.04) 50%,
+    transparent 70%
+  );
+  filter: blur(35px);
+  opacity: 0;
+  transition: opacity 280ms ease-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (min-width: 768px) {
+  .help-scenario-grid:hover .help-scenario-card {
+    filter: blur(1.5px);
+    opacity: 0.55;
+  }
+  
+  .help-scenario-grid:hover .help-scenario-card:hover {
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px hsl(213 94% 45% / 0.06);
+  }
+  
+  .help-scenario-card:hover .help-scenario-glow {
+    opacity: 1;
+  }
+}

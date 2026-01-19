@@ -28,6 +28,12 @@ export function Footer() {
             >
               Hosts
             </Link>
+            <Link
+              href="/help"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Help
+            </Link>
           </div>
         </div>
       </Container>
