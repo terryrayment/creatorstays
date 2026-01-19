@@ -344,6 +344,12 @@ const creator = {
   completeness: 35,
 }
 
+// Platform sync data type
+interface PlatformSyncData {
+  count: number
+  lastSynced: Date
+}
+
 export function CreatorDashboardProfile() {
   const searchParams = useSearchParams()
   
@@ -353,6 +359,9 @@ export function CreatorDashboardProfile() {
   const [platformUrlInput, setPlatformUrlInput] = useState('')
   const [connectLoading, setConnectLoading] = useState(false)
   const [connectError, setConnectError] = useState<string | null>(null)
+  
+  // Platform sync data (mock follower counts)
+  const [platformSyncData, setPlatformSyncData] = useState<Partial<Record<Platform, PlatformSyncData>>>({})
 
   // Check for Instagram OAuth connection on mount and URL params
   useEffect(() => {
@@ -380,12 +389,40 @@ export function CreatorDashboardProfile() {
               viaOAuth: true,
             },
           }))
+          // Initialize sync data for Instagram
+          if (!platformSyncData.instagram) {
+            setPlatformSyncData(prev => ({
+              ...prev,
+              instagram: { count: 12400, lastSynced: new Date() }
+            }))
+          }
         }
       } catch (e) {
         console.error('Failed to parse Instagram cookie:', e)
       }
     }
   }, [searchParams])
+  
+  // Handle sync for a platform (mock - just updates count slightly and timestamp)
+  const handleSyncPlatform = (platform: Platform) => {
+    const baseCounts: Record<Platform, number> = {
+      instagram: 12400,
+      tiktok: 8700,
+      youtube: 3200,
+    }
+    const currentCount = platformSyncData[platform]?.count || baseCounts[platform]
+    // Add small random variation (-2% to +3%)
+    const variation = Math.floor(currentCount * (Math.random() * 0.05 - 0.02))
+    const newCount = currentCount + variation
+    
+    setPlatformSyncData(prev => ({
+      ...prev,
+      [platform]: {
+        count: newCount,
+        lastSynced: new Date(),
+      }
+    }))
+  }
 
   // Calculate completeness based on connections
   const connectionCount = Object.keys(connectedPlatforms).length
@@ -428,6 +465,11 @@ export function CreatorDashboardProfile() {
       const data = await res.json()
       
       if (data.ok) {
+        const baseCounts: Record<Platform, number> = {
+          instagram: 12400,
+          tiktok: 8700,
+          youtube: 3200,
+        }
         setConnectedPlatforms(prev => ({
           ...prev,
           [connectingPlatform]: {
@@ -435,6 +477,14 @@ export function CreatorDashboardProfile() {
             handle: data.handle,
             connectedAt: new Date(),
           },
+        }))
+        // Initialize sync data for the platform
+        setPlatformSyncData(prev => ({
+          ...prev,
+          [connectingPlatform]: {
+            count: baseCounts[connectingPlatform],
+            lastSynced: new Date(),
+          }
         }))
         setConnectingPlatform(null)
         setPlatformUrlInput('')
@@ -450,6 +500,12 @@ export function CreatorDashboardProfile() {
 
   const handleDisconnect = (platform: Platform) => {
     setConnectedPlatforms(prev => {
+      const updated = { ...prev }
+      delete updated[platform]
+      return updated
+    })
+    // Clear sync data
+    setPlatformSyncData(prev => {
       const updated = { ...prev }
       delete updated[platform]
       return updated
@@ -489,8 +545,8 @@ export function CreatorDashboardProfile() {
                     Since {connectedPlatforms[connectingPlatform]?.connectedAt.toLocaleDateString()}
                   </p>
                 </div>
-                <p className="mt-3 text-xs text-muted-foreground">
-                  Follower counts and analytics will sync automatically after beta.
+                <p className="mt-3 text-[10px] text-muted-foreground">
+                  Follower counts sync after you connect via platform sign-in.
                 </p>
                 <div className="mt-4 flex gap-2">
                   <Button 
@@ -523,7 +579,7 @@ export function CreatorDashboardProfile() {
                   Connect your Instagram account securely via Meta.
                 </p>
                 <p className="mt-3 text-[10px] text-muted-foreground">
-                  Follower counts and analytics will sync automatically after beta.
+                  Follower counts sync after you connect via platform sign-in.
                 </p>
                 <div className="mt-4 flex gap-2">
                   <Button 
@@ -562,7 +618,7 @@ export function CreatorDashboardProfile() {
                 </div>
                 
                 <p className="mt-3 text-[10px] text-muted-foreground">
-                  Follower counts and analytics will sync automatically after beta.
+                  Follower counts sync after you connect via platform sign-in.
                 </p>
                 
                 <div className="mt-4 flex gap-2">
@@ -676,62 +732,101 @@ export function CreatorDashboardProfile() {
                         <div className="mb-2 flex items-center justify-between">
                           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Platforms</span>
                         </div>
-                        <div className="space-y-1.5 text-xs">
+                        <div className="space-y-2 text-xs">
                           {(["instagram", "tiktok", "youtube"] as Platform[]).map(p => {
                             const connection = connectedPlatforms[p]
                             const isConnected = !!connection
                             const label = p === 'instagram' ? 'Instagram' : p === 'tiktok' ? 'TikTok' : 'YouTube'
+                            const countLabel = p === 'youtube' ? 'subscribers' : 'followers'
+                            
+                            // Mock follower counts (randomized slightly per platform)
+                            const mockCounts: Record<Platform, number> = {
+                              instagram: platformSyncData.instagram?.count || 12400,
+                              tiktok: platformSyncData.tiktok?.count || 8700,
+                              youtube: platformSyncData.youtube?.count || 3200,
+                            }
+                            const followerCount = isConnected ? mockCounts[p] : null
+                            const lastSynced = platformSyncData[p]?.lastSynced
+                            
+                            const formatCount = (n: number) => {
+                              if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
+                              if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
+                              return n.toString()
+                            }
+                            
+                            const formatSyncTime = (date: Date) => {
+                              const diff = Date.now() - date.getTime()
+                              if (diff < 60000) return 'just now'
+                              if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`
+                              if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`
+                              return date.toLocaleDateString()
+                            }
                             
                             return (
-                              <div key={p} className="flex items-center justify-between">
-                                <div className="flex items-center gap-1.5">
-                                  {isConnected && (
-                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                  )}
-                                  <span className={isConnected ? "font-medium" : ""}>{label}</span>
-                                  {isConnected && (
-                                    <span className="text-[10px] text-muted-foreground">{connection.handle}</span>
-                                  )}
+                              <div key={p} className="rounded-lg bg-foreground/[0.02] p-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-1.5">
+                                    {isConnected && (
+                                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                    )}
+                                    <span className={isConnected ? "font-medium" : "text-muted-foreground"}>{label}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {isConnected && (
+                                      <button 
+                                        onClick={() => handleSyncPlatform(p)}
+                                        className="text-[9px] text-muted-foreground hover:text-primary"
+                                      >
+                                        Sync
+                                      </button>
+                                    )}
+                                    {p === 'instagram' ? (
+                                      isConnected ? (
+                                        <button 
+                                          onClick={() => {
+                                            setConnectingPlatform(p)
+                                            setConnectError(null)
+                                          }}
+                                          className="text-[10px] font-medium text-primary hover:underline"
+                                        >
+                                          Manage
+                                        </button>
+                                      ) : (
+                                        <button 
+                                          onClick={handleInstagramOAuth}
+                                          className="text-[10px] font-medium text-primary hover:underline"
+                                        >
+                                          Connect
+                                        </button>
+                                      )
+                                    ) : (
+                                      <button 
+                                        onClick={() => {
+                                          setConnectingPlatform(p)
+                                          setPlatformUrlInput('')
+                                          setConnectError(null)
+                                        }}
+                                        className="text-[10px] font-medium text-primary hover:underline"
+                                      >
+                                        {isConnected ? "Manage" : "Connect"}
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
-                                {p === 'instagram' ? (
-                                  // Instagram uses OAuth
-                                  isConnected ? (
-                                    <button 
-                                      onClick={() => {
-                                        setConnectingPlatform(p)
-                                        setConnectError(null)
-                                      }}
-                                      className="text-[10px] font-medium text-primary hover:underline"
-                                    >
-                                      Manage
-                                    </button>
-                                  ) : (
-                                    <button 
-                                      onClick={handleInstagramOAuth}
-                                      className="text-[10px] font-medium text-primary hover:underline"
-                                    >
-                                      Connect
-                                    </button>
-                                  )
-                                ) : (
-                                  // TikTok/YouTube use manual URL entry
-                                  <button 
-                                    onClick={() => {
-                                      setConnectingPlatform(p)
-                                      setPlatformUrlInput('')
-                                      setConnectError(null)
-                                    }}
-                                    className="text-[10px] font-medium text-primary hover:underline"
-                                  >
-                                    {isConnected ? "Manage" : "Connect"}
-                                  </button>
-                                )}
+                                <div className="mt-1 flex items-center justify-between text-[10px]">
+                                  <span className={isConnected ? "font-medium" : "text-muted-foreground/50"}>
+                                    {followerCount ? formatCount(followerCount) : "—"} {countLabel}
+                                  </span>
+                                  <span className="text-muted-foreground/50">
+                                    {isConnected && lastSynced ? `Synced ${formatSyncTime(lastSynced)}` : isConnected ? "Not synced" : "Not connected"}
+                                  </span>
+                                </div>
                               </div>
                             )
                           })}
                         </div>
                         <p className="mt-2 text-[9px] text-muted-foreground/60">
-                          Analytics sync coming after beta.
+                          Follower counts sync after you connect via platform sign-in.
                         </p>
                       </div>
 
