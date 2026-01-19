@@ -75,61 +75,61 @@ function EdgeBlur({ className = "" }: { className?: string }) {
 
 const hostReasons = [
   {
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-      </svg>
-    ),
     title: "More Bookings",
-    description: "Creators drive real traffic to your listing. Track every click and measure your ROI."
+    description: "Creators drive real traffic. Track every click.",
+    featured: true,
   },
   {
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-      </svg>
-    ),
     title: "Professional Content",
-    description: "Get scroll-stopping photos and videos you can use forever. No photographer fees."
+    description: "Scroll-stopping photos and videos. Yours forever.",
+    featured: false,
   },
   {
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-      </svg>
-    ),
     title: "Targeted Reach",
-    description: "Your property shown to travelers who actually book. Not random followers—real guests."
+    description: "Real travelers who book, not random followers.",
+    featured: false,
   }
 ]
 
 function WhyHostsSection() {
   return (
-    <section className="py-20">
+    <section className="py-14">
       <Container>
-        <div className="text-center opacity-0 reveal">
-          <h2 className="font-heading text-3xl font-normal tracking-tight md:text-4xl">
+        <div className="mb-8 opacity-0 reveal">
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
             Why hosts use CreatorStays
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Turn creator content into bookings. Measurable marketing that actually works.
-          </p>
         </div>
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {hostReasons.map((reason, i) => (
+        <div className="grid gap-3 md:grid-cols-12">
+          {/* Featured card - takes more space */}
+          <div 
+            className="surface-card group relative rounded-xl p-5 opacity-0 reveal md:col-span-5 md:row-span-2"
+            style={{ animationDelay: '100ms' }}
+          >
+            <div className="surface-card-glow" aria-hidden="true" />
+            <div className="relative z-10 flex h-full flex-col">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Primary benefit</span>
+              <h3 className="mt-2 text-xl font-semibold leading-snug tracking-tight">{hostReasons[0].title}</h3>
+              <p className="mt-1 text-[13px] leading-snug text-muted-foreground/80">{hostReasons[0].description}</p>
+              <div className="mt-auto pt-6">
+                <span className="text-[11px] text-muted-foreground/50">Measurable ROI on every campaign</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Secondary cards - stacked */}
+          {hostReasons.slice(1).map((reason, i) => (
             <div 
               key={reason.title}
-              className="surface-card group relative rounded-2xl p-6 opacity-0 reveal"
-              style={{ animationDelay: `${(i + 1) * 100}ms` }}
+              className="surface-card group relative rounded-xl p-4 opacity-0 reveal md:col-span-7"
+              style={{ animationDelay: `${(i + 2) * 100}ms` }}
             >
               <div className="surface-card-glow" aria-hidden="true" />
-              <div className="relative z-10">
-                <div className="mb-4 inline-flex rounded-xl bg-primary/10 p-3 text-primary">
-                  {reason.icon}
+              <div className="relative z-10 flex items-start gap-3">
+                <div className="flex-1">
+                  <h3 className="text-[15px] font-semibold leading-tight tracking-tight">{reason.title}</h3>
+                  <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground/70">{reason.description}</p>
                 </div>
-                <h3 className="font-heading text-xl font-normal leading-tight">{reason.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{reason.description}</p>
               </div>
             </div>
           ))}
@@ -140,56 +140,37 @@ function WhyHostsSection() {
 }
 
 const steps = [
-  {
-    number: "01",
-    title: "Add Your Property",
-    description: "Create your host profile and paste your Airbnb or VRBO link. We'll pull in your listing details."
-  },
-  {
-    number: "02", 
-    title: "Browse & Hire Creators",
-    description: "Find creators who match your property vibe. Send offers with your budget and requirements."
-  },
-  {
-    number: "03",
-    title: "They Post, You Track",
-    description: "Creators publish content with your tracked link. Watch clicks roll in from their audience."
-  },
-  {
-    number: "04",
-    title: "Confirm & Pay",
-    description: "Review results, confirm bookings you received, and pay creators for performance."
-  }
+  { number: "1", title: "Add property", description: "Paste your Airbnb link" },
+  { number: "2", title: "Find creators", description: "Browse by niche & audience" },
+  { number: "3", title: "Track clicks", description: "Real-time link analytics" },
+  { number: "4", title: "Pay & settle", description: "Direct creator payouts" },
 ]
 
 function HowItWorksSection() {
   return (
-    <section className="py-20">
+    <section className="py-12">
       <Container>
-        <div className="text-center opacity-0 reveal">
-          <h2 className="font-heading text-3xl font-normal tracking-tight md:text-4xl">
-            How it works for hosts
+        <div className="mb-6 opacity-0 reveal">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
+            How it works
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            From signup to bookings in four simple steps.
-          </p>
         </div>
-        <div className="mx-auto mt-12 max-w-4xl">
-          <div className="surface-card rounded-3xl p-6 md:p-8">
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {steps.map((step, i) => (
-                <div 
-                  key={step.number}
-                  className="relative opacity-0 reveal"
-                  style={{ animationDelay: `${(i + 1) * 100}ms` }}
-                >
-                  <span className="font-heading text-4xl font-normal text-primary/20">{step.number}</span>
-                  <h3 className="mt-2 font-semibold leading-tight">{step.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{step.description}</p>
-                </div>
-              ))}
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
+          {steps.map((step, i) => (
+            <div 
+              key={step.number}
+              className="surface-card relative overflow-hidden rounded-lg px-3 py-4 opacity-0 reveal"
+              style={{ animationDelay: `${(i + 1) * 80}ms` }}
+            >
+              <span className="absolute -right-2 -top-4 font-heading text-[72px] font-normal leading-none text-foreground/[0.04]">
+                {step.number}
+              </span>
+              <div className="relative z-10">
+                <h3 className="text-[13px] font-semibold leading-tight tracking-tight">{step.title}</h3>
+                <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground/60">{step.description}</p>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       </Container>
     </section>
