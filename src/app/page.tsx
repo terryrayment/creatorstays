@@ -33,10 +33,10 @@ function HeroSection() {
           </p>
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
             <Button size="lg" asChild className="px-8">
-              <Link href="/creators">Find Creators</Link>
+              <Link href="/hosts">Host Signup</Link>
             </Button>
-            <Button size="lg" variant="ghost" asChild className="px-8">
-              <Link href="/waitlist">I&apos;m a creator</Link>
+            <Button size="lg" variant="outline" asChild className="px-8">
+              <Link href="/waitlist">Join Waitlist</Link>
             </Button>
           </div>
         </div>
@@ -161,49 +161,72 @@ function HowItWorksSection() {
   )
 }
 
-const creators = [
-  { name: "Alex Rivera", handle: "@alexcreates", followers: "2.4M", category: "Travel" },
-  { name: "Jordan Lee", handle: "@jordanlee", followers: "890K", category: "Lifestyle" },
-  { name: "Sam Chen", handle: "@samvisuals", followers: "1.2M", category: "Photography" },
-  { name: "Taylor Morgan", handle: "@taylormorg", followers: "3.1M", category: "Vlog" },
-  { name: "Casey Brooks", handle: "@caseyb", followers: "670K", category: "Food" },
-  { name: "Morgan Silva", handle: "@morgansilva", followers: "1.8M", category: "Adventure" },
+const creatorTypes = [
+  { category: "Travel", description: "Destination & adventure content" },
+  { category: "Lifestyle", description: "Home & living inspiration" },
+  { category: "Photography", description: "Stunning visual storytelling" },
+  { category: "Vlog", description: "Day-in-the-life experiences" },
+  { category: "Food & Hospitality", description: "Culinary & hosting content" },
+  { category: "Adventure", description: "Outdoor & exploration content" },
 ]
 
-function FeaturedCreatorsSection() {
+function BetaSection() {
   return (
     <section className="py-24">
       <Container>
         <div className="text-center opacity-0 reveal">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Creators ready to promote your property
+          <span className="inline-block rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5 text-sm font-medium text-accent">
+            Now in Beta
+          </span>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+            CreatorStays is launching soon
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Browse vetted creators with engaged audiences of travelers and adventure seekers.
+            We&apos;re building the marketplace to connect vacation rental hosts with content creators. Get early access.
           </p>
         </div>
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {creators.map((creator, i) => (
-            <div 
-              key={creator.handle}
-              className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-6 opacity-0 reveal transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5"
-              style={{ animationDelay: `${((i % 3) + 1) * 100}ms` }}
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-lg font-bold text-white">
-                  {creator.name.split(' ').map(n => n[0]).join('')}
+
+        <div className="mt-12 grid gap-8 md:grid-cols-2">
+          <div className="rounded-2xl border border-border/50 bg-card p-8 opacity-0 reveal" style={{ animationDelay: '100ms' }}>
+            <h3 className="text-xl font-semibold">For Hosts</h3>
+            <p className="mt-2 text-muted-foreground">
+              Sign up to list your property and connect with creators who can drive bookings through authentic content.
+            </p>
+            <Button className="mt-6" asChild>
+              <Link href="/hosts">Host Signup</Link>
+            </Button>
+          </div>
+
+          <div className="rounded-2xl border border-border/50 bg-card p-8 opacity-0 reveal" style={{ animationDelay: '200ms' }}>
+            <h3 className="text-xl font-semibold">For Creators</h3>
+            <p className="mt-2 text-muted-foreground">
+              Join the waitlist to get early access. Be first to browse properties and receive offers from hosts.
+            </p>
+            <Button variant="outline" className="mt-6" asChild>
+              <Link href="/waitlist">Join Waitlist</Link>
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-16">
+          <p className="mb-6 text-center text-sm font-medium text-muted-foreground">Creator categories we&apos;re recruiting</p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {creatorTypes.map((type, i) => (
+              <div 
+                key={type.category}
+                className="flex items-center gap-4 rounded-xl border border-border/50 bg-muted/30 p-4 opacity-0 reveal"
+                style={{ animationDelay: `${(i % 3 + 1) * 100}ms` }}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/20">
+                  <span className="text-lg font-semibold text-primary">{type.category[0]}</span>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">{creator.name}</h3>
-                  <p className="text-sm text-muted-foreground">{creator.handle}</p>
-                  <div className="mt-2 flex items-center gap-3">
-                    <span className="text-sm font-medium text-primary">{creator.followers} followers</span>
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">{creator.category}</span>
-                  </div>
+                <div>
+                  <p className="font-medium">{type.category}</p>
+                  <p className="text-sm text-muted-foreground">{type.description}</p>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </Container>
     </section>
@@ -217,17 +240,17 @@ function FinalCTASection() {
       <Container>
         <div className="relative rounded-3xl border border-primary/10 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 p-12 text-center md:p-16 opacity-0 reveal">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            Ready to fill your calendar?
+            Get early access
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Start browsing creators today. No commitment until you find the perfect match.
+            Be among the first to use CreatorStays when we launch.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button size="lg" asChild className="px-8">
-              <Link href="/creators">Find Creators</Link>
+              <Link href="/hosts">Host Signup</Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="px-8">
-              <Link href="/how-it-works">Learn More</Link>
+              <Link href="/waitlist">Creator Waitlist</Link>
             </Button>
           </div>
         </div>
@@ -242,7 +265,7 @@ export default function HomePage() {
       <HeroSection />
       <WhyHostsSection />
       <HowItWorksSection />
-      <FeaturedCreatorsSection />
+      <BetaSection />
       <FinalCTASection />
     </>
   )

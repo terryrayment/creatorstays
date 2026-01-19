@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button"
 
 const navLinks = [
   { href: "/how-it-works", label: "How It Works" },
-  { href: "/creators", label: "Find Creators" },
   { href: "/hosts", label: "For Hosts" },
+  { href: "/waitlist", label: "For Creators" },
 ]
 
 export function Navbar() {
@@ -29,11 +29,11 @@ export function Navbar() {
             ))}
           </ul>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
-              <Link href="/waitlist">I&apos;m a creator</Link>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/waitlist">Join Waitlist</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/creators">Find Creators</Link>
+              <Link href="/hosts">Host Signup</Link>
             </Button>
           </div>
         </nav>
