@@ -1,0 +1,418 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER & AUTH
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  creatorProfile CreatorProfile?
+  hostProfile    HostProfile?
+  accounts       Account[]
+  sessions       Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================================
+// CREATOR
+// ============================================================================
+
+model CreatorProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic info
+  handle      String   @unique
+  displayName String
+  bio         String?  @db.Text
+  location    String?
+  avatarUrl   String?
+  
+  // Niches/categories
+  niches      String[] // ["Travel", "Lifestyle", "Photography"]
+  
+  // Social platforms
+  instagramHandle   String?
+  instagramUrl      String?
+  instagramFollowers Int?
+  tiktokHandle      String?
+  tiktokUrl         String?
+  tiktokFollowers   Int?
+  youtubeHandle     String?
+  youtubeUrl        String?
+  youtubeSubscribers Int?
+  
+  // Stats (auto-synced later)
+  totalFollowers    Int?
+  engagementRate    Float?
+  avgViews          Int?
+  
+  // Deal preferences
+  dealTypes         String[] // ["flat", "percent", "post-for-stay"]
+  minimumFlatFee    Int?
+  minimumPercent    Float?
+  openToGiftedStays Boolean  @default(true)
+  
+  // Deliverables
+  deliverables      String[] // ["Feed posts", "Reels", "Stories"]
+  
+  // Media kit
+  mediaKitUrl       String?
+  
+  // Status
+  isVerified        Boolean  @default(false)
+  isActive          Boolean  @default(true)
+  profileComplete   Int      @default(0) // Percentage 0-100
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  receivedMessages  Message[]     @relation("CreatorMessages")
+  offers            Offer[]
+  collaborations    Collaboration[]
+
+  @@map("creator_profiles")
+}
+
+// ============================================================================
+// HOST
+// ============================================================================
+
+model HostProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic info
+  displayName String
+  bio         String?  @db.Text
+  location    String?
+  avatarUrl   String?
+  contactEmail String?
+  
+  // Style preferences
+  styleTags   String[] // ["Luxury", "Family-friendly", "Remote-work"]
+  
+  // Taste optimizer
+  idealGuests String[] // ["Couples", "Families", "Remote workers"]
+  vibes       String[] // ["Minimal", "Cozy", "Modern"]
+  houseRules  String[] // ["No parties", "Pets allowed"]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  properties  Property[]
+  sentMessages Message[] @relation("HostMessages")
+  offers      Offer[]
+
+  @@map("host_profiles")
+}
+
+// ============================================================================
+// PROPERTY / LISTING
+// ============================================================================
+
+model Property {
+  id              String   @id @default(cuid())
+  hostProfileId   String
+  hostProfile     HostProfile @relation(fields: [hostProfileId], references: [id], onDelete: Cascade)
+  
+  // Listing info
+  title           String
+  description     String?  @db.Text
+  neighborhood    String?
+  city            String?
+  region          String?
+  country         String?
+  
+  // External listing
+  listingUrl      String?  // Airbnb/VRBO URL
+  listingPlatform String?  // "airbnb", "vrbo", "direct"
+  
+  // Details
+  priceRangeMin   Int?
+  priceRangeMax   Int?
+  rating          Float?
+  reviewCount     Int?
+  
+  // Photos (URLs)
+  photoUrls       String[]
+  
+  // Tracking
+  trackingToken   String   @unique @default(cuid())
+  
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  trackingLinks   TrackingLink[]
+  collaborations  Collaboration[]
+
+  @@map("properties")
+}
+
+// ============================================================================
+// TRACKING & ATTRIBUTION
+// ============================================================================
+
+model TrackingLink {
+  id            String   @id @default(cuid())
+  token         String   @unique @default(cuid())
+  
+  propertyId    String
+  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  // Optional: associate with specific creator/campaign
+  creatorId     String?
+  campaignName  String?
+  
+  destinationUrl String
+  
+  // Stats
+  clickCount    Int      @default(0)
+  uniqueClicks  Int      @default(0)
+  
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  expiresAt     DateTime?
+
+  // Relations
+  clicks        Click[]
+
+  @@map("tracking_links")
+}
+
+model Click {
+  id              String   @id @default(cuid())
+  trackingLinkId  String
+  trackingLink    TrackingLink @relation(fields: [trackingLinkId], references: [id], onDelete: Cascade)
+  
+  // Click metadata
+  clickedAt       DateTime @default(now())
+  ipHash          String?  // Hashed for privacy
+  userAgent       String?  @db.Text
+  referer         String?
+  country         String?
+  city            String?
+  device          String?  // "mobile", "desktop", "tablet"
+  
+  // Attribution
+  attributionId   String?  // Links multiple clicks from same user
+  isUnique        Boolean  @default(true)
+  isRevisit       Boolean  @default(false)
+
+  @@index([trackingLinkId, clickedAt])
+  @@map("clicks")
+}
+
+// ============================================================================
+// MESSAGING & OFFERS
+// ============================================================================
+
+model Message {
+  id              String   @id @default(cuid())
+  
+  hostProfileId   String
+  hostProfile     HostProfile @relation("HostMessages", fields: [hostProfileId], references: [id], onDelete: Cascade)
+  
+  creatorProfileId String
+  creatorProfile  CreatorProfile @relation("CreatorMessages", fields: [creatorProfileId], references: [id], onDelete: Cascade)
+  
+  // Message content
+  subject         String?
+  body            String   @db.Text
+  
+  // Metadata
+  isRead          Boolean  @default(false)
+  sentAt          DateTime @default(now())
+  readAt          DateTime?
+
+  // Relations
+  offer           Offer?
+
+  @@index([hostProfileId, sentAt])
+  @@index([creatorProfileId, sentAt])
+  @@map("messages")
+}
+
+model Offer {
+  id              String   @id @default(cuid())
+  
+  hostProfileId   String
+  hostProfile     HostProfile @relation(fields: [hostProfileId], references: [id], onDelete: Cascade)
+  
+  creatorProfileId String
+  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+  
+  messageId       String?  @unique
+  message         Message? @relation(fields: [messageId], references: [id])
+  
+  // Offer details
+  offerType       String   // "flat", "percent", "post-for-stay"
+  flatAmount      Int?     // In cents
+  percentAmount   Float?
+  
+  // Requirements
+  requirements    String?  @db.Text
+  deliverables    String[] // ["2 Reels", "5 Stories", "1 Feed Post"]
+  
+  // Stay details (if applicable)
+  stayStartDate   DateTime?
+  stayEndDate     DateTime?
+  
+  // Status
+  status          String   @default("pending") // "pending", "accepted", "declined", "expired", "completed"
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  expiresAt       DateTime?
+  respondedAt     DateTime?
+
+  // Relations
+  collaboration   Collaboration?
+
+  @@index([hostProfileId, status])
+  @@index([creatorProfileId, status])
+  @@map("offers")
+}
+
+// ============================================================================
+// COLLABORATIONS (Active deals)
+// ============================================================================
+
+model Collaboration {
+  id              String   @id @default(cuid())
+  
+  offerId         String   @unique
+  offer           Offer    @relation(fields: [offerId], references: [id])
+  
+  creatorProfileId String
+  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id])
+  
+  propertyId      String
+  property        Property @relation(fields: [propertyId], references: [id])
+  
+  // Status tracking
+  status          String   @default("active") // "active", "content-submitted", "completed", "cancelled"
+  
+  // Content delivery
+  contentLinks    String[] // URLs to posted content
+  contentSubmittedAt DateTime?
+  
+  // Results
+  clicksGenerated Int      @default(0)
+  
+  // Payment (tracked, but settled off-platform)
+  paymentStatus   String   @default("pending") // "pending", "settled"
+  paymentNotes    String?  @db.Text
+  settledAt       DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  completedAt     DateTime?
+
+  @@map("collaborations")
+}
+
+// ============================================================================
+// WAITLIST
+// ============================================================================
+
+model WaitlistEntry {
+  id              String   @id @default(cuid())
+  
+  email           String   @unique
+  name            String?
+  userType        String   // "creator" or "host"
+  
+  // Creator fields
+  handle          String?
+  platform        String?
+  niche           String?
+  audienceSize    String?
+  instagramUrl    String?
+  tiktokUrl       String?
+  youtubeUrl      String?
+  
+  // Host fields
+  propertyLocation String?
+  propertyType    String?
+  listingUrl      String?
+  
+  // Metadata
+  source          String?  // "organic", "referral", etc.
+  referredBy      String?
+  
+  // Status
+  status          String   @default("pending") // "pending", "invited", "converted"
+  invitedAt       DateTime?
+  convertedAt     DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userType, createdAt])
+  @@map("waitlist_entries")
+}
