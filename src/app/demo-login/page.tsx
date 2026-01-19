@@ -1,22 +1,38 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default function DemoLoginPage() {
+function DemoLoginContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const roleParam = searchParams.get('role')
   const [loading, setLoading] = useState<'host' | 'creator' | null>(null)
+
+  // Auto-login if role param provided
+  useEffect(() => {
+    if (roleParam === 'host' || roleParam === 'creator') {
+      handleLogin(roleParam)
+    }
+  }, [roleParam])
 
   const handleLogin = (role: 'host' | 'creator') => {
     setLoading(role)
-    // Simulate brief loading then redirect to appropriate dashboard
+    
+    // Set cookie: 7 days, path=/, SameSite=Lax
+    const expires = new Date()
+    expires.setDate(expires.getDate() + 7)
+    document.cookie = `cs_demo_role=${role.toUpperCase()}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`
+    
+    // Redirect to appropriate dashboard
     setTimeout(() => {
       if (role === 'host') {
         router.push('/dashboard/host')
       } else {
         router.push('/dashboard/creator')
       }
-    }, 500)
+    }, 300)
   }
 
   return (
@@ -32,7 +48,7 @@ export default function DemoLoginPage() {
               disabled={loading !== null}
               className="w-full border-4 border-black bg-[#FFCC00] hover:bg-[#FFD633] text-black font-bold py-4 px-6 transition-colors disabled:opacity-50"
             >
-              {loading === 'host' ? 'Loading...' : 'Enter as Host'}
+              {loading === 'host' ? 'Loading...' : 'Demo as Host'}
             </button>
             
             <button
@@ -40,7 +56,7 @@ export default function DemoLoginPage() {
               disabled={loading !== null}
               className="w-full border-4 border-black bg-white hover:bg-gray-50 text-black font-bold py-4 px-6 transition-colors disabled:opacity-50"
             >
-              {loading === 'creator' ? 'Loading...' : 'Enter as Creator'}
+              {loading === 'creator' ? 'Loading...' : 'Demo as Creator'}
             </button>
           </div>
           
@@ -50,5 +66,13 @@ export default function DemoLoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function DemoLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <DemoLoginContent />
+    </Suspense>
   )
 }

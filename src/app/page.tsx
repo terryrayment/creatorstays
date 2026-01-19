@@ -2,6 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { FeatureScroller } from "@/components/marketing/feature-scroller"
 import { RevealStack } from "@/components/marketing/reveal-stack"
+import { ImageBlock, MARKETING_IMAGES } from "@/components/marketing/image-block"
 
 // Color palette for cards
 const CARD_COLORS = {
@@ -48,60 +49,21 @@ function getCardColors(): { hero: [CardColor, CardColor]; cta: [CardColor, CardC
 // Get colors once at module level for consistent render
 const cardColors = getCardColors()
 
-// Floating illustration component
-function FloatingIllustration({ 
-  src, 
-  alt, 
-  className,
-  size = 120 
-}: { 
-  src: string
-  alt: string
-  className?: string
-  size?: number
-}) {
-  return (
-    <div className={`pointer-events-none absolute ${className}`}>
-      <div className="animate-float">
-        <Image
-          src={src}
-          alt={alt}
-          width={size}
-          height={size}
-          className="object-contain drop-shadow-lg"
-        />
-      </div>
-    </div>
-  )
-}
-
-// Simple icon tiles
-function IconTile({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex h-12 w-12 items-center justify-center rounded-xl border-[3px] border-black bg-white transition-transform duration-200 hover:-translate-y-1">
-      {children}
-    </div>
-  )
-}
+// Select images for this page (date-based for consistency within a day)
+const pageImages = (() => {
+  const seed = new Date().getDate()
+  const shuffled = [...MARKETING_IMAGES]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = (seed * (i + 1) * 7) % (i + 1)
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled.slice(0, 3)
+})()
 
 function HeroSection() {
   return (
-    <section className="relative bg-black px-3 pb-2 pt-16 lg:px-4 overflow-hidden">
-      {/* Floating illustrations - hidden on mobile */}
-      <FloatingIllustration 
-        src="/images/house-wifi-3.png" 
-        alt="" 
-        className="hidden lg:block -right-8 top-20 opacity-80"
-        size={140}
-      />
-      <FloatingIllustration 
-        src="/images/luggage-2.png" 
-        alt="" 
-        className="hidden lg:block -left-4 bottom-8 opacity-70"
-        size={100}
-      />
-      
-      <div className="mx-auto max-w-7xl relative z-10">
+    <section className="bg-black px-3 pb-2 pt-16 lg:px-4">
+      <div className="mx-auto max-w-7xl">
         <div className="grid gap-2 lg:grid-cols-[1.5fr_1fr] lg:gap-3">
           {/* PRIMARY BLOCK */}
           <div 
@@ -235,30 +197,12 @@ function HowItWorksSection() {
             </div>
           </div>
 
-          {/* Icon tiles grid */}
-          <div className="grid grid-cols-2 gap-1 self-start">
-            <IconTile>
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
-                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              </svg>
-            </IconTile>
-            <IconTile>
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
-                <rect x="3" y="6" width="18" height="14" rx="2" />
-                <circle cx="12" cy="13" r="4" />
-              </svg>
-            </IconTile>
-            <IconTile>
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
-                <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.4 5.7 21l2.3-7-6-4.6h7.6L12 2z" />
-              </svg>
-            </IconTile>
-            <IconTile>
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </IconTile>
-          </div>
+          {/* Visual block */}
+          <ImageBlock 
+            src={pageImages[0]} 
+            className="hidden lg:block w-[140px]" 
+            aspectRatio="aspect-square"
+          />
         </div>
       </div>
     </section>
@@ -267,70 +211,71 @@ function HowItWorksSection() {
 
 function CTASection() {
   return (
-    <section className="relative bg-black px-3 py-2 lg:px-4 overflow-hidden">
-      {/* Floating illustration */}
-      <FloatingIllustration 
-        src="/images/house-wifi-1.png" 
-        alt="" 
-        className="hidden lg:block right-4 -top-8 opacity-70"
-        size={100}
-      />
-      
-      <div className="mx-auto grid max-w-7xl gap-2 md:grid-cols-2 relative z-10">
-        {/* Hosts */}
-        <div 
-          className="block-hover rounded-2xl border-[3px] border-black p-4"
-          style={{ backgroundColor: CARD_COLORS[cardColors.cta[0]] }}
-        >
-          <p className="text-[9px] font-black uppercase tracking-wider text-black">
-            For property owners
-          </p>
-          <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]" style={{ fontWeight: 900 }}>
-            <span className="block text-black">LIST YOUR</span>
-            <span className="block text-black" style={{ fontWeight: 400 }}>PROPERTY</span>
-          </h3>
-          <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
-            Join hosts using creator marketing.
-          </p>
-          <Link
-            href="/hosts"
-            className="mt-3 inline-flex h-9 items-center gap-2 rounded-full bg-black px-4 text-[9px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
+    <section className="bg-black px-3 py-2 lg:px-4">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-2 md:grid-cols-3">
+          {/* Hosts */}
+          <div 
+            className="block-hover rounded-2xl border-[3px] border-black p-4"
+            style={{ backgroundColor: CARD_COLORS[cardColors.cta[0]] }}
           >
-            Get Started
-            <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M7 17L17 7M17 7H7M17 7V17" />
-            </svg>
-          </Link>
-        </div>
+            <p className="text-[9px] font-black uppercase tracking-wider text-black">
+              For property owners
+            </p>
+            <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]" style={{ fontWeight: 900 }}>
+              <span className="block text-black">LIST YOUR</span>
+              <span className="block text-black" style={{ fontWeight: 400 }}>PROPERTY</span>
+            </h3>
+            <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
+              Join hosts using creator marketing.
+            </p>
+            <Link
+              href="/hosts"
+              className="mt-3 inline-flex h-9 items-center gap-2 rounded-full bg-black px-4 text-[9px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
+            >
+              Get Started
+              <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="M7 17L17 7M17 7H7M17 7V17" />
+              </svg>
+            </Link>
+          </div>
 
-        {/* Creators */}
-        <div 
-          className="block-hover rounded-2xl border-[3px] border-black p-4"
-          style={{ backgroundColor: CARD_COLORS[cardColors.cta[1]] }}
-        >
-          <p className="text-[9px] font-black uppercase tracking-wider text-black">
-            For content creators
-          </p>
-          <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]" style={{ fontWeight: 900 }}>
-            <span className="block text-black">ALWAYS</span>
-            <span className="block text-black" style={{ fontWeight: 400 }}>HERE</span>
-          </h3>
-          <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
-            Questions? We have you covered.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            <Link
-              href="/waitlist"
-              className="inline-flex h-9 items-center gap-2 rounded-full bg-black px-4 text-[9px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
-            >
-              Creator Waitlist
-            </Link>
-            <Link
-              href="/help"
-              className="inline-flex h-9 items-center rounded-full border-[3px] border-black px-4 text-[9px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
-            >
-              Help
-            </Link>
+          {/* Visual block */}
+          <ImageBlock 
+            src={pageImages[1]} 
+            className="hidden md:block"
+            aspectRatio="aspect-auto min-h-[160px]"
+          />
+
+          {/* Creators */}
+          <div 
+            className="block-hover rounded-2xl border-[3px] border-black p-4"
+            style={{ backgroundColor: CARD_COLORS[cardColors.cta[1]] }}
+          >
+            <p className="text-[9px] font-black uppercase tracking-wider text-black">
+              For content creators
+            </p>
+            <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]" style={{ fontWeight: 900 }}>
+              <span className="block text-black">ALWAYS</span>
+              <span className="block text-black" style={{ fontWeight: 400 }}>HERE</span>
+            </h3>
+            <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
+              Questions? We have you covered.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <Link
+                href="/waitlist"
+                className="inline-flex h-9 items-center gap-2 rounded-full bg-black px-4 text-[9px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
+              >
+                Creator Waitlist
+              </Link>
+              <Link
+                href="/help"
+                className="inline-flex h-9 items-center rounded-full border-[3px] border-black px-4 text-[9px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
+              >
+                Help
+              </Link>
+            </div>
           </div>
         </div>
       </div>
