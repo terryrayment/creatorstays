@@ -843,3 +843,45 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ============================================================================
+   Block Hover Animation
+   ============================================================================ */
+
+.block-hover {
+  transition: transform 200ms ease-out;
+}
+
+.block-hover:hover {
+  transform: translateY(-6px);
+}
+
+/* Illustration micro-animation */
+.illus-float {
+  animation: illus-float 4s ease-in-out infinite;
+}
+
+@keyframes illus-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.illus-wiggle:hover {
+  animation: illus-wiggle 0.4s ease-in-out;
+}
+
+@keyframes illus-wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
