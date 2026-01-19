@@ -253,28 +253,22 @@ const mockTaxData = {
   }
 }
 
-// Tax Readiness Panel Component
-function TaxReadinessPanel() {
+// Earnings Panel Component
+function EarningsPanel() {
+  const [showBreakdown, setShowBreakdown] = useState(false)
+  
   return (
     <Panel className="border-emerald-200/50 bg-gradient-to-b from-emerald-50/30 to-transparent">
       <PanelHeader 
-        title="Tax readiness" 
+        title="Earnings" 
         actions={<span className="text-[10px] text-emerald-600">2025</span>}
       />
       <PanelContent className="space-y-4">
-        {/* Earnings summary */}
+        {/* Primary earnings display */}
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg bg-white/60 p-2.5">
-            <p className="text-[10px] text-muted-foreground">YTD Gross</p>
-            <p className="text-base font-semibold text-emerald-600">${mockTaxData.ytdGross.toFixed(2)}</p>
-          </div>
-          <div className="rounded-lg bg-white/60 p-2.5">
-            <p className="text-[10px] text-muted-foreground">Platform Fees (15%)</p>
-            <p className="text-base font-semibold">-${mockTaxData.platformFees.toFixed(2)}</p>
-          </div>
-          <div className="rounded-lg bg-white/60 p-2.5">
             <p className="text-[10px] text-muted-foreground">Net Paid Out</p>
-            <p className="text-base font-semibold">${mockTaxData.netPaidOut.toFixed(2)}</p>
+            <p className="text-base font-semibold text-emerald-600">${mockTaxData.netPaidOut.toFixed(2)}</p>
           </div>
           <div className="rounded-lg bg-white/60 p-2.5">
             <p className="text-[10px] text-muted-foreground">Pending</p>
@@ -282,25 +276,55 @@ function TaxReadinessPanel() {
           </div>
         </div>
 
-        {/* Stripe status */}
+        {/* View breakdown link */}
+        <button 
+          onClick={() => setShowBreakdown(!showBreakdown)}
+          className="text-[10px] font-medium text-primary hover:underline"
+        >
+          {showBreakdown ? 'Hide breakdown' : 'View breakdown'}
+        </button>
+        
+        {/* Breakdown expand */}
+        {showBreakdown && (
+          <div className="rounded-lg bg-foreground/[0.02] p-2.5 text-xs space-y-1">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Gross earnings</span>
+              <span>${mockTaxData.ytdGross.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Platform fees (15%)</span>
+              <span>-${mockTaxData.platformFees.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between border-t border-foreground/5 pt-1">
+              <span className="font-medium">Net</span>
+              <span className="font-medium">${mockTaxData.netPaidOut.toFixed(2)}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Bank account status */}
         <div className="rounded-lg border border-dashed border-foreground/10 bg-white/40 p-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium">Payout account</p>
               <p className="text-[10px] text-muted-foreground">
-                {mockTaxData.stripeConnected ? 'Connected via Stripe' : 'Not connected'}
+                {mockTaxData.stripeConnected ? 'Bank account connected' : 'Payouts are deposited to your bank account.'}
               </p>
             </div>
             <Button size="sm" variant={mockTaxData.stripeConnected ? "outline" : "default"} className="text-[10px]">
-              {mockTaxData.stripeConnected ? 'Manage' : 'Connect Stripe'}
+              {mockTaxData.stripeConnected ? 'Manage' : 'Connect bank account'}
             </Button>
           </div>
+          <p className="mt-2 text-[9px] text-muted-foreground/60">Bank connection powered by Stripe</p>
         </div>
 
-        {/* 1099 note */}
-        <p className="text-[10px] text-muted-foreground leading-relaxed">
-          1099-NEC will be issued via Stripe for US creators earning $600+ in a calendar year.
-        </p>
+        {/* Tax forms note */}
+        <div className="text-[10px] text-muted-foreground leading-relaxed">
+          <p>Tax forms are issued automatically for eligible US creators.</p>
+          <button className="mt-0.5 font-medium text-primary hover:underline" title="You'll complete tax details during payout setup.">
+            Learn more
+          </button>
+        </div>
 
         {/* Checklist */}
         <div className="space-y-1.5">
@@ -308,7 +332,7 @@ function TaxReadinessPanel() {
           {[
             { key: 'legalName', label: 'Add legal name', done: mockTaxData.checklist.legalName },
             { key: 'address', label: 'Add address', done: mockTaxData.checklist.address },
-            { key: 'stripeConnected', label: 'Connect Stripe', done: mockTaxData.checklist.stripeConnected },
+            { key: 'bankAccount', label: 'Connect bank account', done: mockTaxData.checklist.stripeConnected },
             { key: 'payoutSchedule', label: 'Choose payout schedule', done: mockTaxData.checklist.payoutSchedule },
           ].map((item) => (
             <div key={item.key} className="flex items-center gap-2 text-xs">
@@ -876,7 +900,7 @@ export function CreatorDashboardProfile() {
           {/* Right sidebar */}
           <div className="space-y-4">
             {/* Tax Readiness */}
-            <TaxReadinessPanel />
+            <EarningsPanel />
 
             {/* Offers */}
             <Panel>
