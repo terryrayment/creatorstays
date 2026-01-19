@@ -77,43 +77,17 @@ export default function WaitlistPage() {
           {/* Header */}
           <div className="mb-8 text-center">
             <span className="mb-3 inline-block rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary">
-              Early Access
+              For Creators
             </span>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Join the Waitlist
+              Creator Waitlist
             </h1>
             <p className="mt-3 text-muted-foreground">
-              Be first in line when CreatorStays launches. Get early access and shape the platform.
+              Join beta access for creators. <a href="/hosts" className="text-primary hover:underline">Hosts are live now →</a>
             </p>
           </div>
 
-          {/* User type toggle */}
-          <div className="mb-8 flex justify-center">
-            <div className="inline-flex rounded-full border border-foreground/10 bg-white p-1">
-              <button
-                onClick={() => setUserType("creator")}
-                className={`rounded-full px-6 py-2 text-sm font-medium transition-all ${
-                  userType === "creator" 
-                    ? "bg-primary text-white shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                I&apos;m a Creator
-              </button>
-              <button
-                onClick={() => setUserType("host")}
-                className={`rounded-full px-6 py-2 text-sm font-medium transition-all ${
-                  userType === "host" 
-                    ? "bg-primary text-white shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                I&apos;m a Host
-              </button>
-            </div>
-          </div>
-
-          {/* Form */}
+          {/* Form - Creator only */}
           <form onSubmit={handleSubmit} className="rounded-2xl border border-foreground/5 bg-white/70 p-6 shadow-xl shadow-black/[0.03] backdrop-blur-sm md:p-8">
             {/* Common fields */}
             <div className="space-y-4">

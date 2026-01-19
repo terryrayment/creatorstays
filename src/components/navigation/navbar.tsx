@@ -30,7 +30,7 @@ export function Navbar() {
           </ul>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" asChild>
-              <Link href="/waitlist">Join Waitlist</Link>
+              <Link href="/waitlist">Creator Waitlist</Link>
             </Button>
             <Button size="sm" asChild>
               <Link href="/hosts">Host Signup</Link>

@@ -36,7 +36,7 @@ function HeroSection() {
               <Link href="/hosts">Host Signup</Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="px-8">
-              <Link href="/waitlist">Join Waitlist</Link>
+              <Link href="/waitlist">Creator Waitlist</Link>
             </Button>
           </div>
         </div>
