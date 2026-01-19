@@ -1,44 +1,21 @@
 import { Container } from "@/components/layout/container"
 import Link from "next/link"
-
-function HeroGraphics() {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {/* Strong color field - left side */}
-      <div className="absolute left-0 top-0 h-full w-[45%] bg-[#0066FF]" />
-      
-      {/* Subtle atmosphere on right */}
-      <div className="absolute right-0 top-0 h-full w-[55%] bg-[#FAFAFA]" />
-      
-      {/* Floating abstract shapes */}
-      <div className="hero-drift absolute left-[8%] top-[15%] h-32 w-32 border-[3px] border-white/40" style={{ animationDelay: '0s' }} />
-      <div className="hero-drift absolute left-[25%] bottom-[20%] h-24 w-24 rounded-full border-[3px] border-white/30" style={{ animationDelay: '2s' }} />
-      <div className="hero-drift absolute left-[5%] bottom-[35%] h-16 w-40 bg-white/10" style={{ animationDelay: '4s' }} />
-      
-      {/* Line illustrations */}
-      <svg className="hero-drift absolute left-[30%] top-[30%] h-40 w-40 text-white/20" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2" style={{ animationDelay: '1s' }}>
-        <path d="M10 50 L50 10 L90 50 L50 90 Z" />
-        <circle cx="50" cy="50" r="15" />
-      </svg>
-      
-      <svg className="hero-drift absolute left-[15%] top-[60%] h-24 w-24 text-white/15" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2" style={{ animationDelay: '3s' }}>
-        <path d="M20 80 L50 20 L80 80 Z" />
-      </svg>
-      
-      {/* Right side subtle shapes */}
-      <div className="hero-drift absolute right-[10%] top-[20%] h-48 w-48 rounded-full border border-[#0066FF]/10" style={{ animationDelay: '1.5s' }} />
-      <div className="hero-drift absolute right-[25%] bottom-[25%] h-20 w-20 bg-[#0066FF]/5" style={{ animationDelay: '2.5s' }} />
-    </div>
-  )
-}
+import { AnimatedLayer, AnimatedDivider } from "@/components/marketing/animated-layer"
 
 function HeroSection() {
   return (
     <section className="relative min-h-[90vh] overflow-hidden">
-      <HeroGraphics />
+      {/* Color fields */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div className="absolute left-0 top-0 h-full w-[45%] bg-[#0066FF]" />
+        <div className="absolute right-0 top-0 h-full w-[55%] bg-[#FAFAFA]" />
+      </div>
+      
+      {/* Animated graphics on blue side */}
+      <AnimatedLayer variant="hero" className="z-0" />
       
       {/* Content grid */}
-      <div className="relative grid min-h-[90vh] grid-cols-1 lg:grid-cols-2">
+      <div className="relative z-10 grid min-h-[90vh] grid-cols-1 lg:grid-cols-2">
         {/* Left - headline on blue */}
         <div className="flex flex-col justify-center px-6 py-20 lg:px-12 xl:px-20">
           <h1 className="font-heading text-[3.5rem] font-black uppercase leading-[0.85] tracking-[-0.03em] text-white sm:text-[4.5rem] md:text-[5.5rem] lg:text-[4rem] xl:text-[5.5rem]">
@@ -93,10 +70,10 @@ function HeroSection() {
 function ValuePropsSection() {
   return (
     <section className="relative bg-foreground py-24 text-white">
-      {/* Floating shape */}
-      <div className="hero-drift pointer-events-none absolute right-[10%] top-[20%] h-32 w-32 rounded-full border border-white/10" style={{ animationDelay: '0.5s' }} />
+      {/* Animated layer for dark section */}
+      <AnimatedLayer variant="dark" />
       
-      <Container>
+      <Container className="relative z-10">
         <div className="grid gap-16 lg:grid-cols-2 lg:gap-20">
           {/* Left - section title */}
           <div>

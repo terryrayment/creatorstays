@@ -671,9 +671,101 @@
 }
 
 /* ============================================================================
-   Hero Editorial Animation - Slow vertical drift
+   Marketing Animations - Slush-style slow drift, fade, blur
    ============================================================================ */
 
+/* Slow vertical float */
+@keyframes anim-float {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-25px);
+    opacity: 0.7;
+  }
+}
+
+/* Reverse float direction */
+@keyframes anim-float-reverse {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(20px);
+    opacity: 1;
+  }
+}
+
+/* Fade in/out with slight scale */
+@keyframes anim-fade {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Blur pulse */
+@keyframes anim-blur {
+  0%, 100% {
+    opacity: 0.4;
+    filter: blur(8px);
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    filter: blur(12px);
+    transform: scale(1.1);
+  }
+}
+
+/* Horizontal slide */
+@keyframes anim-slide {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Apply animations */
+.anim-float {
+  animation: anim-float 10s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.anim-float-reverse {
+  animation: anim-float-reverse 12s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.anim-fade {
+  animation: anim-fade 8s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.anim-blur {
+  animation: anim-blur 14s ease-in-out infinite;
+  will-change: opacity, filter, transform;
+}
+
+.anim-slide {
+  animation: anim-slide 20s linear infinite;
+  will-change: transform, opacity;
+}
+
+/* Hero drift (existing) */
 @keyframes hero-drift {
   0%, 100% {
     transform: translateY(0);
@@ -690,7 +782,13 @@
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+  .anim-float,
+  .anim-float-reverse,
+  .anim-fade,
+  .anim-blur,
+  .anim-slide,
   .hero-drift {
     animation: none;
+    opacity: 0.5;
   }
 }
