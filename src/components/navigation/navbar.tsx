@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 const navLinks = [
   { href: "/how-it-works", label: "How It Works" },
   { href: "/hosts", label: "For Hosts" },
-  { href: "/waitlist", label: "For Creators" },
+  { href: "/waitlist", label: "Creator Waitlist" },
 ]
 
 export function Navbar() {
