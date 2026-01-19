@@ -57,17 +57,17 @@ function getChecklist(p: EditingProperty): { label: string; done: boolean }[] {
 
 function PropertyListItem({ property, isSelected, onSelect }: { property: Property; isSelected: boolean; onSelect: () => void }) {
   return (
-    <button onClick={onSelect} className={`w-full rounded-lg border p-3 text-left transition-all ${isSelected ? 'border-primary bg-primary/5' : 'border-foreground/5 bg-white/50 hover:bg-white/70'}`}>
+    <button onClick={onSelect} className={`w-full rounded-lg border-2 border-black p-3 text-left transition-all ${isSelected ? 'bg-[#FFD84A]' : 'bg-white hover:bg-gray-50'}`}>
       <div className="flex items-start gap-3">
-        <div className="h-12 w-16 shrink-0 overflow-hidden rounded bg-foreground/5">
-          {property.heroImageUrl ? <img src={property.heroImageUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-lg text-muted-foreground/30">🏠</div>}
+        <div className="h-12 w-16 shrink-0 overflow-hidden rounded border-2 border-black bg-gray-100">
+          {property.heroImageUrl ? <img src={property.heroImageUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-lg text-black/30">🏠</div>}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{property.title || 'Untitled'}</p>
-          <p className="text-[11px] text-muted-foreground">{property.cityRegion || 'No location'}</p>
+          <p className="truncate text-sm font-bold text-black">{property.title || 'Untitled'}</p>
+          <p className="text-[11px] text-black/60">{property.cityRegion || 'No location'}</p>
           <div className="mt-1 flex items-center gap-2">
-            <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${property.isDraft ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>{property.isDraft ? 'Draft' : 'Ready'}</span>
-            <span className="text-[9px] text-muted-foreground">Updated {formatDate(property.updatedAt)}</span>
+            <span className={`rounded-full border border-black px-1.5 py-0.5 text-[9px] font-bold ${property.isDraft ? 'bg-amber-100 text-black' : 'bg-emerald-100 text-black'}`}>{property.isDraft ? 'Draft' : 'Ready'}</span>
+            <span className="text-[9px] text-black/50">{formatDate(property.updatedAt)}</span>
           </div>
         </div>
       </div>
@@ -222,6 +222,7 @@ export default function HostPropertiesPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<EditingProperty | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   useEffect(() => { fetchProperties() }, [])
 
@@ -233,14 +234,22 @@ export default function HostPropertiesPage() {
     finally { setIsLoading(false) }
   }
 
-  const handleSelect = (p: Property) => { setSelectedId(p.id); setEditing(p) }
-  const handleAddNew = () => { setSelectedId(null); setEditing({ isNew: true, isDraft: true, isActive: true, amenities: [], vibeTags: [], photos: [] }) }
+  const handleSelect = (p: Property) => { setSelectedId(p.id); setEditing(p); setSaveSuccess(false) }
+  const handleAddNew = () => { setSelectedId(null); setEditing({ isNew: true, isDraft: true, isActive: true, amenities: [], vibeTags: [], photos: [] }); setSaveSuccess(false) }
 
   const handleSave = async (data: EditingProperty) => {
     setIsSaving(true)
+    setSaveSuccess(false)
     try {
       const res = await fetch('/api/properties', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-      if (res.ok) { const { property } = await res.json(); await fetchProperties(); setSelectedId(property.id); setEditing(property) }
+      if (res.ok) { 
+        const { property } = await res.json()
+        await fetchProperties()
+        setSelectedId(property.id)
+        setEditing(property)
+        setSaveSuccess(true)
+        setTimeout(() => setSaveSuccess(false), 2000)
+      }
     } catch (e) { console.error(e) }
     finally { setIsSaving(false) }
   }
@@ -252,23 +261,45 @@ export default function HostPropertiesPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[hsl(210,20%,98%)]">
+    <div className="dashboard flex min-h-screen flex-col bg-[#FAFAFA]">
       <Navbar />
       <main className="flex-1 py-6">
         <Container>
-          <div className="mb-4"><Link href="/dashboard/host" className="text-xs text-muted-foreground hover:text-foreground">← Dashboard</Link></div>
+          <div className="mb-4"><Link href="/dashboard/host" className="text-xs font-bold text-black/60 hover:text-black">← Dashboard</Link></div>
+          
+          {/* Success Toast */}
+          {saveSuccess && (
+            <div className="mb-4 rounded-lg border-2 border-black bg-[#28D17C] px-4 py-2 text-sm font-bold text-black">
+              ✓ Property saved!
+            </div>
+          )}
+          
           <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+            {/* Left: Property List */}
             <div>
-              <div className="mb-3 flex items-center justify-between"><h2 className="text-sm font-semibold">Your Properties</h2><Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={handleAddNew}>+ Add</Button></div>
-              {isLoading ? <p className="text-sm text-muted-foreground">Loading...</p> : properties.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-foreground/10 p-4 text-center"><p className="text-xs text-muted-foreground">No properties yet</p><Button size="sm" className="mt-2" onClick={handleAddNew}>Add your first</Button></div>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-bold text-black">Your Properties</h2>
+                <button onClick={handleAddNew} className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black hover:bg-gray-50">+ Add</button>
+              </div>
+              {isLoading ? <p className="text-sm text-black/60">Loading...</p> : properties.length === 0 ? (
+                <div className="rounded-lg border-2 border-dashed border-black/30 p-4 text-center">
+                  <p className="text-xs text-black/60">No properties yet</p>
+                  <button onClick={handleAddNew} className="mt-2 rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1.5 text-[10px] font-bold text-black">Add your first</button>
+                </div>
               ) : (
                 <div className="space-y-2">{properties.map(p => <PropertyListItem key={p.id} property={p} isSelected={selectedId === p.id} onSelect={() => handleSelect(p)} />)}</div>
               )}
             </div>
+            
+            {/* Right: Editor */}
             <div>
               {editing ? <PropertyEditor property={editing} onSave={handleSave} onDelete={selectedId ? handleDelete : undefined} isSaving={isSaving} /> : (
-                <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-foreground/10 bg-white/30"><div className="text-center"><p className="text-sm text-muted-foreground">Select a property or add a new one</p><Button className="mt-3" onClick={handleAddNew}>+ Add Property</Button></div></div>
+                <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed border-black/30 bg-white">
+                  <div className="text-center">
+                    <p className="text-sm text-black/60">Select a property or add a new one</p>
+                    <button onClick={handleAddNew} className="mt-3 rounded-full border-2 border-black bg-black px-5 py-2 text-[10px] font-bold text-white">+ Add Property</button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
