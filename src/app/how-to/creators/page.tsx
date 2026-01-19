@@ -12,15 +12,17 @@ const steps = [
 
 function StepRow({ step, index }: { step: typeof steps[0], index: number }) {
   return (
-    <div className="guide-row group flex items-start gap-4 rounded-lg px-4 py-4 -mx-4 transition-all duration-200 hover:bg-foreground/[0.02]">
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[13px] font-semibold text-accent">
+    <div className="guide-row group relative flex items-start gap-4 rounded-lg px-4 py-4 -mx-4 transition-all duration-200">
+      {/* Blur glow on hover */}
+      <div className="absolute inset-0 rounded-lg bg-accent/[0.03] opacity-0 blur-xl group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[13px] font-semibold text-accent group-hover:bg-accent/20 transition-colors">
         {index + 1}
       </div>
-      <div className="flex-1 min-w-0">
-        <span className="text-[15px] font-medium text-foreground group-hover:text-accent transition-colors">
+      <div className="relative flex-1 min-w-0">
+        <span className="text-[15px] font-medium text-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all duration-200 inline-block">
           {step.title}
         </span>
-        <span className="block text-[13px] text-muted-foreground mt-0.5 leading-relaxed">{step.desc}</span>
+        <span className="block text-[13px] text-muted-foreground mt-0.5 leading-relaxed group-hover:text-muted-foreground/80 transition-colors">{step.desc}</span>
       </div>
     </div>
   )

@@ -37,16 +37,18 @@ const faqItems = [
 
 function GuideRow({ item }: { item: typeof guideItems[0] }) {
   const content = (
-    <div className="guide-row group flex items-start gap-4 rounded-lg px-4 py-3 -mx-4 transition-all duration-200 hover:bg-foreground/[0.02]">
-      <div className="flex-1 min-w-0">
-        <span className="block text-[15px] font-medium text-foreground group-hover:text-primary transition-colors">
+    <div className="guide-row group relative flex items-start gap-4 rounded-lg px-4 py-3 -mx-4 transition-all duration-200">
+      {/* Blur glow on hover */}
+      <div className="absolute inset-0 rounded-lg bg-primary/[0.03] opacity-0 blur-xl group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative flex-1 min-w-0">
+        <span className="block text-[15px] font-medium text-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-200">
           {item.title}
         </span>
         {item.desc && (
-          <span className="block text-[13px] text-muted-foreground mt-0.5">{item.desc}</span>
+          <span className="block text-[13px] text-muted-foreground mt-0.5 group-hover:text-muted-foreground/80 transition-colors">{item.desc}</span>
         )}
       </div>
-      <svg className="h-4 w-4 mt-1 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+      <svg className="relative h-4 w-4 mt-1 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
       </svg>
     </div>
