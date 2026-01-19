@@ -671,59 +671,186 @@
 }
 
 /* ============================================================================
-   Hero Collage Animations
+   Hero Cel Animation - Anime/Hand-drawn Style
    ============================================================================ */
 
-@keyframes hero-card-drift {
+/* Color blob pulse and drift */
+@keyframes cel-blob-pulse {
   0%, 100% {
-    opacity: 0.08;
-    transform: rotate(var(--rotate, 0deg)) translateY(0) scale(1);
-    filter: blur(1px);
+    transform: scale(1) translate(0, 0);
+    opacity: 0.25;
   }
   25% {
-    opacity: 0.15;
-    transform: rotate(var(--rotate, 0deg)) translateY(-8px) scale(1.02);
-    filter: blur(0px);
+    transform: scale(1.15) translate(10px, -15px);
+    opacity: 0.35;
   }
   50% {
-    opacity: 0.12;
-    transform: rotate(var(--rotate, 0deg)) translateY(-4px) scale(1.01);
-    filter: blur(0.5px);
+    transform: scale(0.95) translate(-5px, 10px);
+    opacity: 0.2;
   }
   75% {
-    opacity: 0.18;
-    transform: rotate(var(--rotate, 0deg)) translateY(-10px) scale(1.03);
-    filter: blur(0px);
+    transform: scale(1.1) translate(-10px, -5px);
+    opacity: 0.3;
   }
 }
 
-@keyframes hero-sticker-bob {
+.cel-blob {
+  animation: cel-blob-pulse 8s ease-in-out infinite;
+  filter: blur(40px);
+  will-change: transform, opacity;
+}
+
+/* Wiggle animation - hand-drawn shake */
+@keyframes cel-wiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  10% { transform: rotate(-8deg) scale(1.05); }
+  20% { transform: rotate(6deg) scale(0.98); }
+  30% { transform: rotate(-5deg) scale(1.02); }
+  40% { transform: rotate(7deg) scale(1); }
+  50% { transform: rotate(-3deg) scale(1.03); }
+  60% { transform: rotate(5deg) scale(0.99); }
+  70% { transform: rotate(-6deg) scale(1.01); }
+  80% { transform: rotate(4deg) scale(1); }
+  90% { transform: rotate(-2deg) scale(1.02); }
+}
+
+.cel-wiggle {
+  animation: cel-wiggle 3s ease-in-out infinite;
+}
+
+/* Spin animation */
+@keyframes cel-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.cel-spin {
+  animation: cel-spin 12s linear infinite;
+}
+
+/* Bounce animation */
+@keyframes cel-bounce {
+  0%, 100% { transform: translateY(0) rotate(15deg); }
+  50% { transform: translateY(-20px) rotate(15deg); }
+}
+
+.cel-bounce {
+  animation: cel-bounce 2s ease-in-out infinite;
+}
+
+/* Shape float and pulse */
+@keyframes cel-shape-float {
   0%, 100% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0) scale(1);
+    opacity: 0.5;
   }
   33% {
-    transform: translateY(-6px) rotate(3deg);
+    transform: translateY(-25px) scale(1.1);
+    opacity: 0.7;
   }
   66% {
-    transform: translateY(-3px) rotate(-2deg);
+    transform: translateY(-10px) scale(0.95);
+    opacity: 0.6;
   }
 }
 
-.hero-card {
-  animation: hero-card-drift 12s ease-in-out infinite;
-  will-change: transform, opacity, filter;
+.cel-shape {
+  animation: cel-shape-float 6s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
-.hero-sticker {
-  animation: hero-sticker-bob 8s ease-in-out infinite;
-  will-change: transform;
+.cel-shape-1 { animation-delay: 0s; }
+.cel-shape-2 { animation-delay: 1s; }
+.cel-shape-3 { animation-delay: 2s; }
+.cel-shape-4 { animation-delay: 3s; }
+
+/* Sparkle pop */
+@keyframes cel-sparkle-pop {
+  0%, 100% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    transform: scale(1.2) rotate(90deg);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(0.8) rotate(180deg);
+    opacity: 0.8;
+  }
+  60% {
+    transform: scale(1.1) rotate(270deg);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(0.9) rotate(360deg);
+    opacity: 0.6;
+  }
+}
+
+.cel-sparkle {
+  animation: cel-sparkle-pop 2.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Squiggly line draw */
+@keyframes cel-squiggle-draw {
+  0%, 100% {
+    stroke-dashoffset: 100;
+    opacity: 0.3;
+    transform: translateX(0);
+  }
+  50% {
+    stroke-dashoffset: 0;
+    opacity: 0.6;
+    transform: translateX(10px);
+  }
+}
+
+.cel-squiggle {
+  animation: cel-squiggle-draw 4s ease-in-out infinite;
+}
+
+.cel-squiggle path {
+  stroke-dasharray: 100;
+}
+
+/* Icon bounce and glow */
+@keyframes cel-icon-bounce {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+  }
+  25% {
+    transform: translateY(-15px) rotate(-5deg);
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+  }
+  50% {
+    transform: translateY(-8px) rotate(3deg);
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.12));
+  }
+  75% {
+    transform: translateY(-18px) rotate(-3deg);
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+  }
+}
+
+.cel-icon {
+  animation: cel-icon-bounce 4s ease-in-out infinite;
+  will-change: transform, filter;
 }
 
 /* Disable animations for reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-  .hero-card,
-  .hero-sticker {
+  .cel-blob,
+  .cel-wiggle,
+  .cel-spin,
+  .cel-bounce,
+  .cel-shape,
+  .cel-sparkle,
+  .cel-squiggle,
+  .cel-icon {
     animation: none;
-    opacity: 0.1;
+    opacity: 0.3;
   }
 }

@@ -3,67 +3,88 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 function HeroCollage() {
-  // Photo cards with different positions, sizes, rotations
-  const cards = [
-    { left: '5%', top: '15%', w: 80, h: 100, rotate: -8, delay: 0 },
-    { left: '85%', top: '10%', w: 70, h: 90, rotate: 12, delay: 1.5 },
-    { left: '10%', top: '60%', w: 90, h: 70, rotate: 6, delay: 3 },
-    { left: '80%', top: '55%', w: 75, h: 95, rotate: -10, delay: 0.8 },
-    { left: '25%', top: '5%', w: 65, h: 85, rotate: 4, delay: 2.2 },
-    { left: '70%', top: '75%', w: 85, h: 65, rotate: -5, delay: 4 },
-    { left: '2%', top: '40%', w: 60, h: 80, rotate: 15, delay: 2.8 },
-    { left: '92%', top: '35%', w: 70, h: 55, rotate: -12, delay: 1.2 },
-  ]
-
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      {/* Base gradient layer */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(165deg, hsl(210 20% 99%) 0%, hsl(210 30% 97.5%) 50%, hsl(210 20% 99%) 100%)" }} />
+      {/* Vibrant gradient base */}
+      <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-rose-50" />
       
-      {/* Soft glow accents */}
-      <div className="absolute -top-1/4 -right-1/4 h-[120%] w-[80%]" style={{ background: "radial-gradient(ellipse at 70% 20%, hsl(199 89% 48% / 0.05) 0%, transparent 60%)" }} />
-      <div className="absolute -bottom-1/4 -left-1/4 h-[100%] w-[70%]" style={{ background: "radial-gradient(ellipse at 30% 80%, hsl(213 94% 45% / 0.03) 0%, transparent 50%)" }} />
+      {/* Large animated color blobs - cel style */}
+      <div className="cel-blob absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-cyan-400/30 to-blue-500/20" style={{ animationDelay: '0s' }} />
+      <div className="cel-blob absolute -right-10 top-20 h-96 w-96 rounded-full bg-gradient-to-br from-pink-400/25 to-rose-500/15" style={{ animationDelay: '0.5s' }} />
+      <div className="cel-blob absolute left-1/4 -bottom-20 h-72 w-72 rounded-full bg-gradient-to-br from-amber-300/30 to-orange-400/20" style={{ animationDelay: '1s' }} />
+      <div className="cel-blob absolute right-1/4 bottom-10 h-64 w-64 rounded-full bg-gradient-to-br from-violet-400/25 to-purple-500/15" style={{ animationDelay: '1.5s' }} />
+      <div className="cel-blob absolute left-1/2 top-0 h-56 w-56 rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-500/15" style={{ animationDelay: '0.8s' }} />
       
-      {/* Animated photo cards */}
-      {cards.map((card, i) => (
-        <div
-          key={i}
-          className="hero-card absolute rounded-lg border border-foreground/[0.06] bg-gradient-to-br from-white/80 to-foreground/[0.02] shadow-sm"
-          style={{
-            left: card.left,
-            top: card.top,
-            width: card.w,
-            height: card.h,
-            transform: `rotate(${card.rotate}deg)`,
-            animationDelay: `${card.delay}s`,
-          }}
-        >
-          {/* Inner "photo" placeholder with gradient */}
-          <div className="absolute inset-2 rounded bg-gradient-to-br from-primary/[0.08] via-accent/[0.05] to-transparent" />
-          <div className="absolute bottom-2 left-2 right-2 h-2 rounded-full bg-foreground/[0.04]" />
-        </div>
-      ))}
-      
-      {/* Home icon sticker */}
-      <div className="hero-sticker absolute left-[15%] top-[25%] opacity-[0.12]" style={{ animationDelay: '0.5s' }}>
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary">
-          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M9 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* Floating shapes - hand-drawn feel */}
+      <div className="cel-shape cel-shape-1 absolute left-[8%] top-[15%]">
+        <svg width="60" height="60" viewBox="0 0 60 60" className="cel-wiggle">
+          <circle cx="30" cy="30" r="25" fill="none" stroke="url(#grad1)" strokeWidth="3" strokeDasharray="8 4" />
+          <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#06b6d4" /><stop offset="100%" stopColor="#3b82f6" /></linearGradient></defs>
         </svg>
       </div>
       
-      {/* Spark/star sticker */}
-      <div className="hero-sticker absolute right-[18%] top-[30%] opacity-[0.15]" style={{ animationDelay: '1.2s' }}>
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent">
-          <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6L12 2z" strokeLinecap="round" strokeLinejoin="round"/>
+      <div className="cel-shape cel-shape-2 absolute right-[12%] top-[20%]">
+        <svg width="50" height="50" viewBox="0 0 50 50" className="cel-spin">
+          <path d="M25 5 L30 20 L45 25 L30 30 L25 45 L20 30 L5 25 L20 20 Z" fill="none" stroke="url(#grad2)" strokeWidth="2.5" strokeLinejoin="round" />
+          <defs><linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f472b6" /><stop offset="100%" stopColor="#ec4899" /></linearGradient></defs>
         </svg>
       </div>
       
-      {/* Camera sticker */}
-      <div className="hero-sticker absolute left-[78%] top-[65%] opacity-[0.1]" style={{ animationDelay: '2s' }}>
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary">
-          <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2v11z" strokeLinecap="round" strokeLinejoin="round"/>
-          <circle cx="12" cy="13" r="4" strokeLinecap="round" strokeLinejoin="round"/>
+      <div className="cel-shape cel-shape-3 absolute left-[5%] bottom-[25%]">
+        <svg width="55" height="55" viewBox="0 0 55 55" className="cel-bounce">
+          <rect x="10" y="10" width="35" height="35" rx="8" fill="none" stroke="url(#grad3)" strokeWidth="3" transform="rotate(15 27.5 27.5)" />
+          <defs><linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#fbbf24" /><stop offset="100%" stopColor="#f97316" /></linearGradient></defs>
+        </svg>
+      </div>
+      
+      <div className="cel-shape cel-shape-4 absolute right-[8%] bottom-[30%]">
+        <svg width="45" height="45" viewBox="0 0 45 45" className="cel-wiggle" style={{ animationDelay: '0.3s' }}>
+          <polygon points="22.5,5 40,40 5,40" fill="none" stroke="url(#grad4)" strokeWidth="2.5" strokeLinejoin="round" />
+          <defs><linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#a78bfa" /><stop offset="100%" stopColor="#8b5cf6" /></linearGradient></defs>
+        </svg>
+      </div>
+      
+      {/* Sparkle dots */}
+      <div className="cel-sparkle absolute left-[20%] top-[35%] h-3 w-3 rounded-full bg-cyan-400" style={{ animationDelay: '0s' }} />
+      <div className="cel-sparkle absolute right-[25%] top-[15%] h-2 w-2 rounded-full bg-pink-400" style={{ animationDelay: '0.2s' }} />
+      <div className="cel-sparkle absolute left-[75%] top-[45%] h-2.5 w-2.5 rounded-full bg-amber-400" style={{ animationDelay: '0.4s' }} />
+      <div className="cel-sparkle absolute left-[30%] bottom-[20%] h-2 w-2 rounded-full bg-violet-400" style={{ animationDelay: '0.6s' }} />
+      <div className="cel-sparkle absolute right-[15%] bottom-[40%] h-3 w-3 rounded-full bg-emerald-400" style={{ animationDelay: '0.8s' }} />
+      <div className="cel-sparkle absolute left-[45%] top-[10%] h-2 w-2 rounded-full bg-rose-400" style={{ animationDelay: '1s' }} />
+      <div className="cel-sparkle absolute right-[40%] bottom-[15%] h-2.5 w-2.5 rounded-full bg-blue-400" style={{ animationDelay: '1.2s' }} />
+      
+      {/* Squiggly lines */}
+      <svg className="cel-squiggle absolute left-[15%] top-[55%] opacity-40" width="80" height="30" viewBox="0 0 80 30" style={{ animationDelay: '0s' }}>
+        <path d="M5 15 Q 15 5, 25 15 T 45 15 T 65 15 T 75 15" fill="none" stroke="#06b6d4" strokeWidth="3" strokeLinecap="round" />
+      </svg>
+      <svg className="cel-squiggle absolute right-[10%] top-[60%] opacity-40" width="70" height="25" viewBox="0 0 70 25" style={{ animationDelay: '0.5s' }}>
+        <path d="M5 12 Q 12 2, 20 12 T 35 12 T 50 12 T 65 12" fill="none" stroke="#f472b6" strokeWidth="2.5" strokeLinecap="round" />
+      </svg>
+      
+      {/* Home icon - bold cel style */}
+      <div className="cel-icon absolute left-[10%] top-[25%]" style={{ animationDelay: '0.2s' }}>
+        <svg width="56" height="56" viewBox="0 0 56 56" className="drop-shadow-lg">
+          <path d="M28 8 L48 26 L48 48 L8 48 L8 26 Z" fill="white" stroke="url(#homeGrad)" strokeWidth="3.5" strokeLinejoin="round" />
+          <rect x="22" y="32" width="12" height="16" fill="url(#homeGrad)" rx="2" />
+          <defs><linearGradient id="homeGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#3b82f6" /><stop offset="100%" stopColor="#06b6d4" /></linearGradient></defs>
+        </svg>
+      </div>
+      
+      {/* Camera icon - bold cel style */}
+      <div className="cel-icon absolute right-[12%] top-[30%]" style={{ animationDelay: '0.7s' }}>
+        <svg width="52" height="52" viewBox="0 0 52 52" className="drop-shadow-lg">
+          <rect x="6" y="16" width="40" height="30" rx="4" fill="white" stroke="url(#camGrad)" strokeWidth="3" />
+          <circle cx="26" cy="31" r="9" fill="none" stroke="url(#camGrad)" strokeWidth="3" />
+          <rect x="18" y="10" width="16" height="8" rx="2" fill="url(#camGrad)" />
+          <defs><linearGradient id="camGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#ec4899" /><stop offset="100%" stopColor="#f472b6" /></linearGradient></defs>
+        </svg>
+      </div>
+      
+      {/* Star burst */}
+      <div className="cel-icon absolute left-[80%] bottom-[35%]" style={{ animationDelay: '1.2s' }}>
+        <svg width="48" height="48" viewBox="0 0 48 48" className="drop-shadow-lg">
+          <path d="M24 4 L28 18 L42 18 L30 28 L34 42 L24 34 L14 42 L18 28 L6 18 L20 18 Z" fill="white" stroke="url(#starGrad)" strokeWidth="3" strokeLinejoin="round" />
+          <defs><linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#fbbf24" /><stop offset="100%" stopColor="#f97316" /></linearGradient></defs>
         </svg>
       </div>
     </div>
