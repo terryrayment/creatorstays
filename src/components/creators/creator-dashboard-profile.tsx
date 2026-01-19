@@ -3,9 +3,21 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Panel, PanelHeader, PanelContent } from "@/components/ui/panel"
 import { Metric } from "@/components/ui/metric"
 import { EdgeBlur } from "@/components/ui/edge-blur"
+
+// Platform connection types
+type Platform = 'instagram' | 'tiktok' | 'youtube'
+
+interface PlatformConnection {
+  url: string
+  handle: string
+  connectedAt: Date
+}
+
+type ConnectedPlatforms = Partial<Record<Platform, PlatformConnection>>
 
 // Status indicator
 function StatusDot({ active, color }: { active: boolean; color: string }) {
@@ -79,9 +91,164 @@ const creator = {
 }
 
 export function CreatorDashboardProfile() {
+  // Platform connection state
+  const [connectedPlatforms, setConnectedPlatforms] = useState<ConnectedPlatforms>({})
+  const [connectingPlatform, setConnectingPlatform] = useState<Platform | null>(null)
+  const [platformUrlInput, setPlatformUrlInput] = useState('')
+  const [connectLoading, setConnectLoading] = useState(false)
+  const [connectError, setConnectError] = useState<string | null>(null)
+
+  // Calculate completeness based on connections
+  const connectionCount = Object.keys(connectedPlatforms).length
+  const baseCompleteness = creator.completeness
+  const adjustedCompleteness = Math.min(100, baseCompleteness + (connectionCount * 10))
+
+  const handleConnectPlatform = async () => {
+    if (!connectingPlatform || !platformUrlInput) return
+    
+    setConnectLoading(true)
+    setConnectError(null)
+    
+    try {
+      const res = await fetch('/api/creator/connect-platform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          platform: connectingPlatform,
+          url: platformUrlInput,
+        }),
+      })
+      
+      const data = await res.json()
+      
+      if (data.ok) {
+        setConnectedPlatforms(prev => ({
+          ...prev,
+          [connectingPlatform]: {
+            url: platformUrlInput,
+            handle: data.handle,
+            connectedAt: new Date(),
+          },
+        }))
+        setConnectingPlatform(null)
+        setPlatformUrlInput('')
+      } else {
+        setConnectError(data.error || 'Failed to connect')
+      }
+    } catch {
+      setConnectError('Connection failed. Try again.')
+    } finally {
+      setConnectLoading(false)
+    }
+  }
+
+  const handleDisconnect = (platform: Platform) => {
+    setConnectedPlatforms(prev => {
+      const updated = { ...prev }
+      delete updated[platform]
+      return updated
+    })
+    setConnectingPlatform(null)
+  }
+
+  const getPlaceholder = (platform: Platform) => {
+    switch (platform) {
+      case 'instagram': return 'instagram.com/username'
+      case 'tiktok': return 'tiktok.com/@username'
+      case 'youtube': return 'youtube.com/@channel'
+    }
+  }
+
   return (
     <div className="relative min-h-screen bg-[hsl(210,20%,99%)]">
       <EdgeBlur />
+
+      {/* Connect Platform Modal */}
+      {connectingPlatform && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <h3 className="text-lg font-semibold">
+              {connectedPlatforms[connectingPlatform] ? 'Manage' : 'Connect'} {connectingPlatform === 'instagram' ? 'Instagram' : connectingPlatform === 'tiktok' ? 'TikTok' : 'YouTube'}
+            </h3>
+            
+            {connectedPlatforms[connectingPlatform] ? (
+              <>
+                <div className="mt-4 rounded-lg bg-emerald-50 p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="text-sm font-medium text-emerald-700">Connected</span>
+                  </div>
+                  <p className="mt-1 text-sm text-emerald-600">{connectedPlatforms[connectingPlatform]?.handle}</p>
+                  <p className="mt-0.5 text-[10px] text-emerald-600/60">
+                    Since {connectedPlatforms[connectingPlatform]?.connectedAt.toLocaleDateString()}
+                  </p>
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Follower counts and analytics will sync automatically after beta.
+                </p>
+                <div className="mt-4 flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 text-xs text-red-600 hover:bg-red-50"
+                    onClick={() => handleDisconnect(connectingPlatform)}
+                  >
+                    Disconnect
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    className="flex-1 text-xs"
+                    onClick={() => setConnectingPlatform(null)}
+                  >
+                    Done
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Enter your profile URL to connect.
+                </p>
+                
+                <div className="mt-4">
+                  <Input
+                    placeholder={getPlaceholder(connectingPlatform)}
+                    value={platformUrlInput}
+                    onChange={(e) => setPlatformUrlInput(e.target.value)}
+                    className="text-sm"
+                  />
+                  {connectError && (
+                    <p className="mt-1 text-xs text-red-600">{connectError}</p>
+                  )}
+                </div>
+                
+                <p className="mt-3 text-[10px] text-muted-foreground">
+                  Follower counts and analytics will sync automatically after beta.
+                </p>
+                
+                <div className="mt-4 flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 text-xs"
+                    onClick={() => setConnectingPlatform(null)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    className="flex-1 text-xs"
+                    onClick={handleConnectPlatform}
+                    disabled={connectLoading || !platformUrlInput}
+                  >
+                    {connectLoading ? 'Connecting…' : 'Save & Connect'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Top bar */}
       <div className="border-b border-foreground/5 bg-white/50 backdrop-blur-sm">
@@ -120,7 +287,7 @@ export function CreatorDashboardProfile() {
                   </div>
 
                   <div className="mt-4">
-                    <CompletenessBar percent={creator.completeness} />
+                    <CompletenessBar percent={adjustedCompleteness} />
                   </div>
 
                   {/* Status indicators */}
@@ -169,16 +336,41 @@ export function CreatorDashboardProfile() {
                       <div>
                         <div className="mb-2 flex items-center justify-between">
                           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Platforms</span>
-                          <button className="text-[10px] font-medium text-primary hover:underline">Manage</button>
                         </div>
                         <div className="space-y-1.5 text-xs">
-                          {["Instagram", "TikTok", "YouTube"].map(p => (
-                            <div key={p} className="flex items-center justify-between">
-                              <span>{p}</span>
-                              <button className="text-[10px] font-medium text-primary">Connect</button>
-                            </div>
-                          ))}
+                          {(["instagram", "tiktok", "youtube"] as Platform[]).map(p => {
+                            const connection = connectedPlatforms[p]
+                            const isConnected = !!connection
+                            const label = p === 'instagram' ? 'Instagram' : p === 'tiktok' ? 'TikTok' : 'YouTube'
+                            
+                            return (
+                              <div key={p} className="flex items-center justify-between">
+                                <div className="flex items-center gap-1.5">
+                                  {isConnected && (
+                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                  )}
+                                  <span className={isConnected ? "font-medium" : ""}>{label}</span>
+                                  {isConnected && (
+                                    <span className="text-[10px] text-muted-foreground">{connection.handle}</span>
+                                  )}
+                                </div>
+                                <button 
+                                  onClick={() => {
+                                    setConnectingPlatform(p)
+                                    setPlatformUrlInput('')
+                                    setConnectError(null)
+                                  }}
+                                  className="text-[10px] font-medium text-primary hover:underline"
+                                >
+                                  {isConnected ? "Manage" : "Connect"}
+                                </button>
+                              </div>
+                            )
+                          })}
                         </div>
+                        <p className="mt-2 text-[9px] text-muted-foreground/60">
+                          Analytics sync coming after beta.
+                        </p>
                       </div>
 
                       {/* Deal prefs */}
