@@ -56,7 +56,7 @@ export function Navbar() {
           </div>
           
           <Link
-            href="/hosts"
+            href="/hosts#signup"
             className="rounded-full bg-white px-5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-black transition-all hover:bg-white/90"
           >
             Host Signup
