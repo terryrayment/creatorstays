@@ -170,9 +170,14 @@ export function HostDashboard() {
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold">Welcome, Host</h1>
-          <p className="mt-1 text-muted-foreground">Set up your property and start outreach.</p>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Welcome, Host</h1>
+            <p className="mt-1 text-muted-foreground">Set up your property and start outreach.</p>
+          </div>
+          <Button asChild>
+            <Link href="/creators">Search creators</Link>
+          </Button>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
