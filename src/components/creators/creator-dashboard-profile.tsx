@@ -811,31 +811,34 @@ export function CreatorDashboardProfile() {
         </Modal>
       )}
 
-      {/* OAuth Not Configured Modal */}
+      {/* Instagram Stats Gating Modal */}
       {oauthNotConfigured && (
         <Modal onClose={() => setOauthNotConfigured(null)}>
-          <h3 className="text-lg font-semibold">Instagram Connect Not Configured</h3>
-          <p className="mt-2 text-sm text-black/60">
-            Instagram OAuth requires environment variables to be set up.
+          <h3 className="text-lg font-bold text-black">Unlock Instagram stats</h3>
+          <p className="mt-2 text-sm text-black">
+            Instagram only shares follower and engagement data with Creator or Business accounts. Personal accounts can still use CreatorStays, but stats won't auto-sync until you switch.
           </p>
-          <div className="mt-3 rounded-lg bg-black/5 p-3">
-            <p className="text-xs font-medium text-black">Required:</p>
-            <ul className="mt-1 space-y-0.5 text-xs text-black/60 font-mono">
-              <li>META_APP_ID</li>
-              <li>META_APP_SECRET</li>
-              <li>META_REDIRECT_URI</li>
-            </ul>
+          <div className="mt-4 rounded-lg border-2 border-black bg-[#FFD84A]/20 p-3">
+            <p className="text-xs font-bold text-black">How to switch:</p>
+            <p className="mt-1 text-xs text-black">
+              Instagram → Settings → Account → Switch to Professional Account → Choose Creator.
+            </p>
           </div>
-          <p className="mt-3 text-xs text-black/60">
-            Create a Meta App at developers.facebook.com and add the Instagram Basic Display product.
+          <p className="mt-3 text-xs text-black">
+            Creator accounts are free and designed for influencers.
           </p>
           <div className="mt-6 flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => setOauthNotConfigured(null)}>Close</Button>
+            <button 
+              onClick={() => setOauthNotConfigured(null)}
+              className="flex-1 text-sm font-medium text-black hover:underline"
+            >
+              I'll switch later
+            </button>
             <Button className="flex-1" onClick={() => {
               setOauthNotConfigured(null)
               setConnectingPlatform(oauthNotConfigured)
               setPlatformUrlInput('')
-            }}>Connect Manually</Button>
+            }}>Got it</Button>
           </div>
         </Modal>
       )}
