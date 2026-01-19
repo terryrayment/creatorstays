@@ -6,16 +6,16 @@ import Link from "next/link"
 
 // Mock data - replace with DB lookup later
 const mockCreators: Record<string, CreatorProfile> = {
-  "rivercole": {
-    handle: "rivercole",
-    displayName: "River Cole",
-    bio: "Travel content creator passionate about unique stays and hidden gems. I help vacation rentals tell their story through cinematic video and authentic storytelling. Based in California, traveling everywhere.",
+  "sample-travel": {
+    handle: "sample-travel",
+    displayName: "Sample Travel Creator",
+    bio: "This is a sample profile showing how a travel content creator might appear on CreatorStays. Travel creators help vacation rentals tell their story through cinematic video and authentic storytelling.",
     location: "Los Angeles, CA",
     niches: ["Travel", "Lifestyle", "Adventure"],
     platforms: {
-      instagram: "rivercole",
-      tiktok: "rivercole",
-      youtube: "rivercole",
+      instagram: "example",
+      tiktok: "example",
+      youtube: "example",
     },
     stats: {
       followers: null,
@@ -32,15 +32,15 @@ const mockCreators: Record<string, CreatorProfile> = {
     pastCollabs: [],
     isSample: true,
   },
-  "julespark": {
-    handle: "julespark",
-    displayName: "Jules Park",
-    bio: "Photographer and visual storyteller specializing in interiors and hospitality. I create scroll-stopping content that makes people want to book. Let's make your property famous.",
+  "sample-photo": {
+    handle: "sample-photo",
+    displayName: "Sample Photography Creator",
+    bio: "This is a sample profile showing how a photography creator might appear. Photography creators specialize in interiors and hospitality, creating scroll-stopping content that makes people want to book.",
     location: "Austin, TX",
     niches: ["Photography", "Interior Design", "Hospitality"],
     platforms: {
-      instagram: "julespark",
-      tiktok: "julespark",
+      instagram: "example",
+      tiktok: "example",
     },
     stats: {
       followers: null,
@@ -54,16 +54,16 @@ const mockCreators: Record<string, CreatorProfile> = {
     },
     isSample: true,
   },
-  "mikitravel": {
-    handle: "mikitravel",
-    displayName: "Miki Tanaka",
-    bio: "Full-time traveler documenting unique accommodations around the world. From treehouses to luxury villas, I've stayed in 200+ properties and helped hosts increase their bookings through engaging content.",
+  "sample-vlog": {
+    handle: "sample-vlog",
+    displayName: "Sample Vlog Creator",
+    bio: "This is a sample profile showing how a vlogging creator might appear. Vlog creators document unique accommodations and experiences, creating engaging day-in-the-life content that drives bookings.",
     location: "Miami, FL",
     niches: ["Travel", "Vlog", "Food & Hospitality"],
     platforms: {
-      instagram: "mikitravel",
-      youtube: "mikitravels",
-      tiktok: "mikitravel",
+      instagram: "example",
+      youtube: "example",
+      tiktok: "example",
     },
     stats: {
       followers: null,
