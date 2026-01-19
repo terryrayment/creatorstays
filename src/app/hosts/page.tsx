@@ -159,7 +159,17 @@ function ImageSection() {
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-2 md:grid-cols-2">
           <ImageBlock src={pageImages[0]} aspectRatio="aspect-[16/9]" />
-          <ImageBlock src={pageImages[1]} aspectRatio="aspect-[16/9]" />
+          {/* Video block */}
+          <div className="block-hover relative overflow-hidden rounded-2xl border-[3px] border-black bg-[#F5F5F0] aspect-[16/9]">
+            <video
+              src="/images/coffee-sunrise.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="h-full w-full object-cover transition-transform duration-200 hover:scale-[1.03]"
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -180,7 +190,7 @@ function BenefitsSection() {
     },
     {
       title: "PHOTOS & CONTENT YOU OWN",
-      desc: "Professional photos and videos of your property. Use them anywhere, forever. No licensing fees.",
+      desc: "Professional photos and videos of your property. Option to offer a free stay in exchange for content (post-for-stay). Use content anywhere, forever.",
       color: "#FFD84A",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
