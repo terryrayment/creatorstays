@@ -64,11 +64,12 @@ export async function GET(request: NextRequest) {
       photos.push(ogImage)
     }
     
-    // Try to find additional images
-    const imageMatches = html.matchAll(/content="(https:\/\/a0\.muscache\.com\/[^"]+)"/g)
-    for (const match of imageMatches) {
-      if (!photos.includes(match[1]) && photos.length < 6) {
-        photos.push(match[1])
+    // Try to find additional images using exec loop
+    const imageRegex = /content="(https:\/\/a0\.muscache\.com\/[^"]+)"/g
+    let imageMatch: RegExpExecArray | null
+    while ((imageMatch = imageRegex.exec(html)) !== null && photos.length < 6) {
+      if (!photos.includes(imageMatch[1])) {
+        photos.push(imageMatch[1])
       }
     }
     
