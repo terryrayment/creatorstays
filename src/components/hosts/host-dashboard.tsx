@@ -4,14 +4,13 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { EdgeBlur } from "@/components/ui/edge-blur"
 
 // Section wrapper
 function Section({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-foreground/5 bg-white/60 p-5 backdrop-blur-sm">
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{title}</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500">{title}</h2>
         {action}
       </div>
       {children}
@@ -23,29 +22,30 @@ function Section({ title, children, action }: { title: string; children: React.R
 function ChipSelect({ options, selected, onChange, max = 3 }: { 
   options: string[]
   selected: string[]
-  onChange: (s: string[]) => void
+  onChange: (selected: string[]) => void
   max?: number
 }) {
-  const toggle = (opt: string) => {
-    if (selected.includes(opt)) {
-      onChange(selected.filter(s => s !== opt))
+  const toggle = (option: string) => {
+    if (selected.includes(option)) {
+      onChange(selected.filter(s => s !== option))
     } else if (selected.length < max) {
-      onChange([...selected, opt])
+      onChange([...selected, option])
     }
   }
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {options.map(opt => (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map(option => (
         <button
-          key={opt}
-          onClick={() => toggle(opt)}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
-            selected.includes(opt) 
-              ? "bg-primary text-white" 
-              : "border border-foreground/10 bg-white hover:border-foreground/20"
+          key={option}
+          onClick={() => toggle(option)}
+          className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+            selected.includes(option)
+              ? "border-black bg-black text-white"
+              : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
           }`}
         >
-          {opt}
+          {option}
         </button>
       ))}
     </div>
@@ -55,21 +55,29 @@ function ChipSelect({ options, selected, onChange, max = 3 }: {
 // Toast notification
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 shadow-lg">
-      <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-      </svg>
-      <span className="text-sm font-medium text-emerald-800">{message}</span>
-      <button onClick={onClose} className="text-emerald-600 hover:text-emerald-800">
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg bg-black px-4 py-3 text-sm text-white shadow-lg">
+      <span>{message}</span>
+      <button onClick={onClose} className="ml-2 text-white/60 hover:text-white">✕</button>
     </div>
   )
 }
 
-// Mock creators for search (expanded with match-relevant attributes)
+// Match badge
+function MatchBadge({ score }: { score: number }) {
+  const tier = score >= 70 
+    ? { label: "Strong Match", color: "bg-emerald-100 text-emerald-700 border-emerald-200" }
+    : score >= 45 
+    ? { label: "Good Match", color: "bg-blue-100 text-blue-700 border-blue-200" }
+    : { label: "Possible Fit", color: "bg-slate-100 text-slate-600 border-slate-200" }
+  
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${tier.color}`}>
+      {tier.label}
+    </span>
+  )
+}
+
+// Mock creators for search
 const mockCreators = [
   { 
     id: 1, 
@@ -79,9 +87,8 @@ const mockCreators = [
     audience: "50K-100K", 
     location: "Los Angeles, CA", 
     platform: "Instagram",
-    deliverables: ["Reels", "Stories", "Posts"],
     openToOffers: true,
-    avgClicks: 850, // normalized past performance
+    matchScore: 82,
   },
   { 
     id: 2, 
@@ -91,9 +98,8 @@ const mockCreators = [
     audience: "100K-250K", 
     location: "Austin, TX", 
     platform: "TikTok",
-    deliverables: ["Reels", "Videos"],
     openToOffers: true,
-    avgClicks: 1200,
+    matchScore: 68,
   },
   { 
     id: 3, 
@@ -103,9 +109,8 @@ const mockCreators = [
     audience: "25K-50K", 
     location: "Miami, FL", 
     platform: "Instagram",
-    deliverables: ["Posts", "Stories", "Photos"],
     openToOffers: false,
-    avgClicks: 450,
+    matchScore: 55,
   },
   { 
     id: 4, 
@@ -115,9 +120,8 @@ const mockCreators = [
     audience: "250K-500K", 
     location: "Denver, CO", 
     platform: "YouTube",
-    deliverables: ["Videos", "Vlogs"],
     openToOffers: true,
-    avgClicks: 2100,
+    matchScore: 74,
   },
   { 
     id: 5, 
@@ -127,114 +131,21 @@ const mockCreators = [
     audience: "50K-100K", 
     location: "Portland, OR", 
     platform: "TikTok",
-    deliverables: ["Reels", "Stories"],
     openToOffers: true,
-    avgClicks: 680,
+    matchScore: 41,
   },
   { 
     id: 6, 
     name: "Adventure Creator F", 
     handle: "adventure_f", 
-    niches: ["Adventure", "Travel", "Remote"], 
+    niches: ["Adventure", "Travel"], 
     audience: "100K-250K", 
     location: "Seattle, WA", 
     platform: "Instagram",
-    deliverables: ["Reels", "Stories", "Posts"],
     openToOffers: true,
-    avgClicks: 1450,
+    matchScore: 89,
   },
 ]
-
-// Niche-to-vibe mapping for match scoring
-const nicheVibeMap: Record<string, string[]> = {
-  "Travel": ["Coastal", "Rustic", "Cabin", "Urban"],
-  "Adventure": ["Rustic", "Cabin", "Bold"],
-  "Lifestyle": ["Cozy", "Modern", "Minimal"],
-  "Photography": ["Bold", "Modern", "Minimal"],
-  "Luxury": ["Modern", "Minimal", "Bold"],
-  "Vlog": ["Cozy", "Urban", "Modern"],
-  "Family": ["Cozy", "Rustic", "Cabin"],
-  "Food": ["Cozy", "Urban", "Rustic"],
-  "Design": ["Modern", "Minimal", "Bold"],
-  "Remote": ["Cabin", "Cozy", "Rustic"],
-}
-
-// Match score calculation (returns 0-100 internally)
-function calculateMatchScore(
-  creator: typeof mockCreators[0],
-  hostVibes: string[],
-  hostLocation: string,
-  maxClicks: number
-): number {
-  let score = 0
-  
-  // 1. Tag overlap (40% weight) - compare creator niches to host vibes
-  const creatorVibes = creator.niches.flatMap(n => nicheVibeMap[n] || [])
-  const vibeOverlap = hostVibes.filter(v => creatorVibes.includes(v)).length
-  const vibeScore = hostVibes.length > 0 ? (vibeOverlap / hostVibes.length) * 40 : 20
-  score += vibeScore
-  
-  // 2. Availability boost (20% weight)
-  if (creator.openToOffers) {
-    score += 20
-  }
-  
-  // 3. Past link performance (25% weight) - normalized
-  if (maxClicks > 0) {
-    score += (creator.avgClicks / maxClicks) * 25
-  } else {
-    score += 12.5 // neutral if no data
-  }
-  
-  // 4. Geographic relevance (15% weight) - simple state match
-  if (hostLocation && creator.location) {
-    const hostState = hostLocation.split(",").pop()?.trim().toLowerCase()
-    const creatorState = creator.location.split(",").pop()?.trim().toLowerCase()
-    if (hostState && creatorState && hostState === creatorState) {
-      score += 15
-    } else {
-      score += 7.5 // neutral for different regions
-    }
-  } else {
-    score += 7.5 // neutral if no data
-  }
-  
-  return Math.min(100, Math.max(0, score))
-}
-
-// Map score to tier
-function getMatchTier(score: number): { label: string; color: string } {
-  if (score >= 70) return { label: "Strong Match", color: "bg-emerald-100 text-emerald-700 border-emerald-200" }
-  if (score >= 45) return { label: "Good Match", color: "bg-blue-100 text-blue-700 border-blue-200" }
-  return { label: "Possible Fit", color: "bg-slate-100 text-slate-600 border-slate-200" }
-}
-
-// Match badge component
-function MatchBadge({ score }: { score: number }) {
-  const tier = getMatchTier(score)
-  const [showTooltip, setShowTooltip] = useState(false)
-  
-  return (
-    <div className="relative">
-      <button
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-        onClick={() => setShowTooltip(!showTooltip)}
-        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${tier.color}`}
-      >
-        {tier.label}
-        <svg className="h-3 w-3 opacity-60" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-        </svg>
-      </button>
-      {showTooltip && (
-        <div className="absolute bottom-full left-0 z-10 mb-1 w-48 rounded-lg border border-foreground/10 bg-white p-2 text-[10px] text-muted-foreground shadow-lg">
-          Based on content type, availability, and past performance.
-        </div>
-      )}
-    </div>
-  )
-}
 
 // Style tags
 const styleTagOptions = ["Luxury", "Family-friendly", "Remote-work", "Adventure", "Pet-friendly", "Design-forward", "Budget", "Romantic"]
@@ -260,7 +171,6 @@ export function HostDashboard() {
     priceRange: "",
     rating: "",
     reviewCount: "",
-    photos: ["", "", "", "", "", ""],
   })
 
   // Taste optimizer state
@@ -272,7 +182,7 @@ export function HostDashboard() {
 
   // Search state
   const [search, setSearch] = useState("")
-  const [filters, setFilters] = useState({ platform: "", niche: "", audience: "" })
+  const [filters, setFilters] = useState({ platform: "", niche: "" })
   const [sortBy, setSortBy] = useState<"default" | "match">("default")
   
   // Message composer state
@@ -286,14 +196,10 @@ export function HostDashboard() {
   const generateBrief = () => {
     const guests = taste.guests.length ? taste.guests.join(" and ").toLowerCase() : "travelers"
     const vibes = taste.vibes.length ? taste.vibes.join(", ").toLowerCase() : "authentic"
-    const rules = taste.rules.filter(r => r.includes("allowed") || r.includes("welcome")).join(", ").toLowerCase()
-    return `We're looking for creators who connect with ${guests} and produce ${vibes} content. ${listing.title ? `Our property "${listing.title}" in ${listing.neighborhood || "the area"}` : "Our property"} offers a unique experience${rules ? ` (${rules})` : ""}. We'd love content that highlights the space and surrounding area.`
+    return `We're looking for creators who connect with ${guests} and produce ${vibes} content. ${listing.title ? `Our property "${listing.title}"` : "Our property"} offers a unique experience. We'd love content that highlights the space and surrounding area.`
   }
 
-  // Calculate max clicks for normalization
-  const maxClicks = Math.max(...mockCreators.map(c => c.avgClicks))
-
-  // Filter and score creators
+  // Filter creators
   const filteredCreators = mockCreators
     .filter(c => {
       if (search && !c.name.toLowerCase().includes(search.toLowerCase()) && !c.handle.toLowerCase().includes(search.toLowerCase())) return false
@@ -301,13 +207,9 @@ export function HostDashboard() {
       if (filters.niche && !c.niches.includes(filters.niche)) return false
       return true
     })
-    .map(c => ({
-      ...c,
-      matchScore: calculateMatchScore(c, taste.vibes, hostProfile.location, maxClicks)
-    }))
     .sort((a, b) => {
       if (sortBy === "match") return b.matchScore - a.matchScore
-      return 0 // default order
+      return 0
     })
 
   // Open composer
@@ -324,17 +226,15 @@ export function HostDashboard() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[hsl(210,20%,99%)]">
-      <EdgeBlur />
-
+    <div className="min-h-screen bg-gray-50">
       {/* Top bar */}
-      <div className="border-b border-foreground/5 bg-white/50 backdrop-blur-sm">
+      <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">BETA</span>
-            <span className="text-xs text-muted-foreground">Host Dashboard</span>
+            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">BETA</span>
+            <span className="text-xs text-gray-500">Host Dashboard</span>
           </div>
-          <Link href="/" className="text-xs text-muted-foreground hover:text-foreground">← Back to site</Link>
+          <Link href="/" className="text-xs text-gray-500 hover:text-gray-900">← Back to site</Link>
         </div>
       </div>
 
@@ -342,11 +242,11 @@ export function HostDashboard() {
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Welcome, Host</h1>
-            <p className="mt-1 text-muted-foreground">Set up your property and start outreach.</p>
+            <h1 className="text-2xl font-bold text-gray-900">Welcome, Host</h1>
+            <p className="mt-1 text-gray-600">Set up your property and start outreach.</p>
           </div>
           <Button asChild>
-            <Link href="/creators">Search creators</Link>
+            <Link href="/creators">Browse all creators</Link>
           </Button>
         </div>
 
@@ -357,7 +257,7 @@ export function HostDashboard() {
             <Section title="Host Profile">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Display Name</label>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Display Name</label>
                   <Input 
                     placeholder="Your name or brand" 
                     value={hostProfile.displayName}
@@ -365,7 +265,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Location</label>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Location</label>
                   <Input 
                     placeholder="City, Region" 
                     value={hostProfile.location}
@@ -373,7 +273,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Contact Email</label>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Contact Email</label>
                   <Input 
                     type="email" 
                     placeholder="you@example.com" 
@@ -382,7 +282,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">About (short bio)</label>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-600">About (short bio)</label>
                   <Input 
                     placeholder="A few words about you" 
                     value={hostProfile.bio}
@@ -391,7 +291,7 @@ export function HostDashboard() {
                 </div>
               </div>
               <div className="mt-4">
-                <label className="mb-2 block text-xs font-medium text-muted-foreground">Style Tags (select up to 3)</label>
+                <label className="mb-2 block text-xs font-medium text-gray-600">Style Tags (select up to 3)</label>
                 <ChipSelect 
                   options={styleTagOptions} 
                   selected={hostProfile.styleTags} 
@@ -400,11 +300,11 @@ export function HostDashboard() {
               </div>
             </Section>
 
-            {/* Listing Preview */}
+            {/* Listing Details */}
             <Section title="Listing Details">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Airbnb/VRBO Listing URL</label>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Airbnb/VRBO Listing URL</label>
                   <Input 
                     placeholder="https://airbnb.com/rooms/..." 
                     value={listing.url}
@@ -412,7 +312,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Property Title</label>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Property Title</label>
                   <Input 
                     placeholder="Cozy Mountain Cabin" 
                     value={listing.title}
@@ -420,85 +320,35 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Neighborhood/City</label>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Neighborhood/Area</label>
                   <Input 
-                    placeholder="Big Bear, CA" 
+                    placeholder="Lake Tahoe, Big Bear, etc." 
                     value={listing.neighborhood}
                     onChange={e => setListing({...listing, neighborhood: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Price Range (nightly)</label>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Price Range</label>
                   <Input 
-                    placeholder="$150-200" 
+                    placeholder="$150-250/night" 
                     value={listing.priceRange}
                     onChange={e => setListing({...listing, priceRange: e.target.value})}
                   />
                 </div>
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Rating</label>
-                    <Input 
-                      placeholder="4.9" 
-                      value={listing.rating}
-                      onChange={e => setListing({...listing, rating: e.target.value})}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Reviews</label>
-                    <Input 
-                      placeholder="127" 
-                      value={listing.reviewCount}
-                      onChange={e => setListing({...listing, reviewCount: e.target.value})}
-                    />
-                  </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-600">Rating</label>
+                  <Input 
+                    placeholder="4.9" 
+                    value={listing.rating}
+                    onChange={e => setListing({...listing, rating: e.target.value})}
+                  />
                 </div>
               </div>
-
-              {/* Photo grid */}
-              <div className="mt-4">
-                <label className="mb-2 block text-xs font-medium text-muted-foreground">Photo URLs (up to 6)</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {listing.photos.map((_, i) => (
-                    <div key={i} className="aspect-[4/3] rounded-lg border-2 border-dashed border-foreground/10 bg-foreground/[0.02] flex items-center justify-center">
-                      <span className="text-[10px] text-muted-foreground/50">Photo {i + 1}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Listing preview card */}
-              {listing.title && (
-                <div className="mt-4 rounded-xl border border-foreground/10 bg-white p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold">{listing.title}</h3>
-                      <p className="text-sm text-muted-foreground">{listing.neighborhood}</p>
-                      <div className="mt-2 flex items-center gap-3 text-sm">
-                        {listing.priceRange && <span className="font-medium">{listing.priceRange}/night</span>}
-                        {listing.rating && (
-                          <span className="flex items-center gap-1">
-                            <svg className="h-4 w-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            {listing.rating} ({listing.reviewCount})
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {listing.url && (
-                      <a href={listing.url} target="_blank" rel="noopener noreferrer" className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary/90">
-                        View on Airbnb
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
             </Section>
 
             {/* Creator Search */}
             <Section title="Find Creators">
-              <p className="mb-3 text-[11px] text-muted-foreground">
+              <p className="mb-3 text-[11px] text-gray-500">
                 Match helps you find creators that fit your property and campaign.
               </p>
               <div className="flex flex-wrap gap-2">
@@ -509,7 +359,7 @@ export function HostDashboard() {
                   onChange={e => setSearch(e.target.value)}
                 />
                 <select 
-                  className="rounded-lg border border-foreground/10 bg-white px-3 py-2 text-sm"
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
                   value={filters.platform}
                   onChange={e => setFilters({...filters, platform: e.target.value})}
                 >
@@ -519,7 +369,7 @@ export function HostDashboard() {
                   <option value="YouTube">YouTube</option>
                 </select>
                 <select 
-                  className="rounded-lg border border-foreground/10 bg-white px-3 py-2 text-sm"
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
                   value={filters.niche}
                   onChange={e => setFilters({...filters, niche: e.target.value})}
                 >
@@ -532,7 +382,7 @@ export function HostDashboard() {
                   <option value="Adventure">Adventure</option>
                 </select>
                 <select 
-                  className="rounded-lg border border-foreground/10 bg-white px-3 py-2 text-sm"
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value as "default" | "match")}
                 >
@@ -543,17 +393,17 @@ export function HostDashboard() {
 
               <div className="mt-4 space-y-2">
                 {filteredCreators.map(creator => (
-                  <div key={creator.id} className="flex items-center justify-between rounded-lg border border-foreground/5 bg-white/50 p-3 transition-all hover:border-foreground/10 hover:bg-white">
+                  <div key={creator.id} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 transition-all hover:border-gray-300 hover:shadow-sm">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/20 text-sm font-semibold text-primary">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 text-sm font-semibold text-blue-600">
                         {creator.name.split(" ")[0][0]}{creator.name.split(" ")[2]?.[0] || ""}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium">{creator.name}</p>
+                          <p className="text-sm font-medium text-gray-900">{creator.name}</p>
                           <MatchBadge score={creator.matchScore} />
                         </div>
-                        <p className="text-xs text-muted-foreground">@{creator.handle} · {creator.niches[0]} · {creator.audience}</p>
+                        <p className="text-xs text-gray-500">@{creator.handle} · {creator.niches[0]} · {creator.audience}</p>
                       </div>
                     </div>
                     <Button size="sm" variant="outline" className="text-xs" onClick={() => openComposer(creator)}>
@@ -565,132 +415,162 @@ export function HostDashboard() {
             </Section>
           </div>
 
-          {/* Right column */}
+          {/* Right sidebar */}
           <div className="space-y-6">
             {/* Taste Optimizer */}
             <Section title="Taste Optimizer">
               <div className="space-y-4">
                 <div>
-                  <label className="mb-2 block text-xs font-medium text-muted-foreground">Ideal Guests (1-2)</label>
-                  <ChipSelect options={guestOptions} selected={taste.guests} onChange={g => setTaste({...taste, guests: g})} max={2} />
+                  <label className="mb-2 block text-xs font-medium text-gray-600">Ideal Guests (1-2)</label>
+                  <ChipSelect 
+                    options={guestOptions} 
+                    selected={taste.guests} 
+                    onChange={s => setTaste({...taste, guests: s})}
+                    max={2}
+                  />
                 </div>
                 <div>
-                  <label className="mb-2 block text-xs font-medium text-muted-foreground">Vibe (2-3)</label>
-                  <ChipSelect options={vibeOptions} selected={taste.vibes} onChange={v => setTaste({...taste, vibes: v})} max={3} />
+                  <label className="mb-2 block text-xs font-medium text-gray-600">Vibe Tags (up to 3)</label>
+                  <ChipSelect 
+                    options={vibeOptions} 
+                    selected={taste.vibes} 
+                    onChange={s => setTaste({...taste, vibes: s})}
+                  />
                 </div>
                 <div>
-                  <label className="mb-2 block text-xs font-medium text-muted-foreground">House Rules</label>
-                  <ChipSelect options={rulesOptions} selected={taste.rules} onChange={r => setTaste({...taste, rules: r})} max={4} />
+                  <label className="mb-2 block text-xs font-medium text-gray-600">House Rules</label>
+                  <ChipSelect 
+                    options={rulesOptions} 
+                    selected={taste.rules} 
+                    onChange={s => setTaste({...taste, rules: s})}
+                    max={4}
+                  />
                 </div>
-              </div>
-
-              {/* Generated brief */}
-              <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-primary">Generated Creator Brief</p>
-                <p className="text-xs leading-relaxed text-foreground/80">{generateBrief()}</p>
               </div>
             </Section>
 
-            {/* Message Composer */}
-            {composing && (
-              <Section title={`Message @${composing.handle}`}>
-                <div className="space-y-3">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Offer Type</label>
-                    <select 
-                      className="w-full rounded-lg border border-foreground/10 bg-white px-3 py-2 text-sm"
-                      value={message.offerType}
-                      onChange={e => setMessage({...message, offerType: e.target.value})}
-                    >
-                      <option value="flat">Flat Fee (per post)</option>
-                      <option value="percent">Traffic Bonus %</option>
-                      <option value="post-for-stay">Post-for-Stay</option>
-                    </select>
-                  </div>
-                  {message.offerType !== "post-for-stay" && (
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                        {message.offerType === "flat" ? "Amount ($)" : "Traffic Bonus (%)"}
-                      </label>
-                      <Input 
-                        placeholder={message.offerType === "flat" ? "500" : "10"}
-                        value={message.amount}
-                        onChange={e => setMessage({...message, amount: e.target.value})}
-                      />
-                      {message.offerType === "percent" && (
-                        <p className="mt-1 text-[10px] text-muted-foreground">Bonus based on tracked link clicks</p>
-                      )}
-                    </div>
-                  )}
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Message</label>
-                    <textarea 
-                      className="w-full rounded-lg border border-foreground/10 bg-white px-3 py-2 text-sm"
-                      rows={5}
-                      value={message.text}
-                      onChange={e => setMessage({...message, text: e.target.value})}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button className="flex-1 text-xs" onClick={sendMessage}>Send Message</Button>
-                    <Button variant="outline" className="text-xs" onClick={() => setComposing(null)}>Cancel</Button>
-                  </div>
-                </div>
-              </Section>
-            )}
+            {/* Creator Brief Preview */}
+            <Section title="Creator Brief Preview">
+              <div className="rounded-lg bg-gray-50 p-3">
+                <p className="text-xs leading-relaxed text-gray-700">{generateBrief()}</p>
+              </div>
+              <p className="mt-2 text-[10px] text-gray-400">This is auto-generated from your profile and taste settings.</p>
+            </Section>
 
-            {/* Quick stats placeholder */}
-            <div className="rounded-xl border border-foreground/5 bg-white/60 p-5 backdrop-blur-sm">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Outreach Stats</h3>
-              <div className="mt-4 grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <p className="text-2xl font-bold">0</p>
-                  <p className="text-[10px] text-muted-foreground">Messages sent</p>
+            {/* Quick Stats */}
+            <Section title="Your Stats">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-gray-50 p-3 text-center">
+                  <p className="text-2xl font-bold text-gray-900">0</p>
+                  <p className="text-[10px] text-gray-500">Messages Sent</p>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">0</p>
-                  <p className="text-[10px] text-muted-foreground">Responses</p>
+                <div className="rounded-lg bg-gray-50 p-3 text-center">
+                  <p className="text-2xl font-bold text-gray-900">0</p>
+                  <p className="text-[10px] text-gray-500">Active Collabs</p>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">0</p>
-                  <p className="text-[10px] text-muted-foreground">Active deals</p>
+                <div className="rounded-lg bg-gray-50 p-3 text-center">
+                  <p className="text-2xl font-bold text-gray-900">0</p>
+                  <p className="text-[10px] text-gray-500">Total Clicks</p>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">—</p>
-                  <p className="text-[10px] text-muted-foreground">Link clicks</p>
+                <div className="rounded-lg bg-gray-50 p-3 text-center">
+                  <p className="text-2xl font-bold text-gray-900">$0</p>
+                  <p className="text-[10px] text-gray-500">Spent</p>
                 </div>
               </div>
-              <div className="mt-4 border-t border-foreground/5 pt-4">
-                <Link 
-                  href="/dashboard/host/pay" 
-                  className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2.5 text-xs font-medium transition-colors hover:bg-foreground/[0.04]"
-                >
-                  <span>Approve & pay a creator</span>
-                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
+            </Section>
+
+            {/* Quick Links */}
+            <Section title="Quick Links">
+              <div className="space-y-1.5">
+                <Link href="/dashboard/host/settings" className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-100">
+                  Account Settings
+                  <span className="text-gray-400">→</span>
                 </Link>
-                <Link 
-                  href="/dashboard/analytics" 
-                  className="mt-2 flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2.5 text-xs font-medium transition-colors hover:bg-foreground/[0.04]"
-                >
-                  <span>View link analytics</span>
-                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
+                <Link href="/how-to/hosts" className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-100">
+                  How It Works
+                  <span className="text-gray-400">→</span>
                 </Link>
+                <Link href="/pricing" className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-100">
+                  Pricing
+                  <span className="text-gray-400">→</span>
+                </Link>
+                <Link href="/help" className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-100">
+                  Help Center
+                  <span className="text-gray-400">→</span>
+                </Link>
+              </div>
+            </Section>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer links */}
+      <div className="border-t border-gray-200 bg-white py-6">
+        <div className="mx-auto flex max-w-6xl items-center justify-center gap-4 px-4 text-xs text-gray-400 sm:px-6">
+          <Link href="/how-it-works" className="hover:text-gray-600">How it works</Link>
+          <span>•</span>
+          <Link href="/waitlist" className="hover:text-gray-600">Creator Waitlist</Link>
+        </div>
+      </div>
+
+      {/* Message Composer Modal */}
+      {composing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Message @{composing.handle}</h3>
+              <button onClick={() => setComposing(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-gray-600">Offer Type</label>
+                <select 
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+                  value={message.offerType}
+                  onChange={e => setMessage({...message, offerType: e.target.value})}
+                >
+                  <option value="flat">Flat Fee (per post)</option>
+                  <option value="bonus">Flat Fee + Traffic Bonus</option>
+                  <option value="stay">Post-for-Stay</option>
+                </select>
+              </div>
+              
+              {message.offerType !== "stay" && (
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-600">
+                    {message.offerType === "bonus" ? "Flat Fee + Bonus %" : "Flat Fee Amount"}
+                  </label>
+                  <Input 
+                    placeholder={message.offerType === "bonus" ? "$400 + 10%" : "$500"}
+                    value={message.amount}
+                    onChange={e => setMessage({...message, amount: e.target.value})}
+                  />
+                </div>
+              )}
+              
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-gray-600">Message</label>
+                <textarea 
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  rows={4}
+                  value={message.text}
+                  onChange={e => setMessage({...message, text: e.target.value})}
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => setComposing(null)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={sendMessage}>
+                  Send Message
+                </Button>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="mt-8 flex items-center justify-center gap-6 text-xs text-muted-foreground">
-          <Link href="/how-it-works" className="hover:text-foreground">How it works</Link>
-          <span className="text-foreground/20">•</span>
-          <Link href="/waitlist" className="hover:text-foreground">Creator Waitlist</Link>
-        </div>
-      </div>
+      )}
 
       {/* Toast */}
       {toast && <Toast message={toast} onClose={() => setToast("")} />}

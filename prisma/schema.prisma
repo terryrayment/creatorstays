@@ -123,6 +123,10 @@ model CreatorProfile {
   isActive          Boolean  @default(true)
   profileComplete   Int      @default(0) // Percentage 0-100
   
+  // Beta access - tracks how creator was onboarded
+  isBeta            Boolean  @default(false)    // True if signed up via invite
+  inviteTokenUsed   String?                     // The invite token that was used
+  
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -132,6 +136,39 @@ model CreatorProfile {
   collaborations    Collaboration[]
 
   @@map("creator_profiles")
+}
+
+// ============================================================================
+// CREATOR INVITES (Private Beta Access)
+// ============================================================================
+
+model CreatorInvite {
+  id          String    @id @default(cuid())
+  
+  // Token for invite URL (e.g., cs_beta_abc123)
+  token       String    @unique
+  
+  // Usage limits
+  maxUses     Int       @default(1)   // How many times this invite can be used
+  uses        Int       @default(0)   // Current usage count
+  
+  // Expiration (optional)
+  expiresAt   DateTime?               // If set, invite expires at this time
+  
+  // Audit trail
+  createdBy   String?                 // Admin email or ID who created invite
+  note        String?                 // Optional note (e.g., "For influencer X")
+  
+  // Revocation
+  revoked     Boolean   @default(false)  // Set true to disable without deleting
+  revokedAt   DateTime?
+  revokedBy   String?
+  
+  createdAt   DateTime  @default(now())
+
+  @@index([token])
+  @@index([createdAt])
+  @@map("creator_invites")
 }
 
 // ============================================================================

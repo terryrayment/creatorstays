@@ -2,6 +2,51 @@ import Link from "next/link"
 import { FeatureScroller } from "@/components/marketing/feature-scroller"
 import { RevealStack } from "@/components/marketing/reveal-stack"
 
+// Color palette for cards
+const CARD_COLORS = {
+  yellow: "#FFD84A",
+  blue: "#4AA3FF", 
+  green: "#28D17C",
+  purple: "#D7B6FF",
+  orange: "#FF5A1F",
+  white: "#FFFFFF",
+} as const
+
+type CardColor = keyof typeof CARD_COLORS
+
+// Deterministic color assignment that avoids vertical repetition
+// Grid layout: each row has positions, we track what color was used at each column position
+function getCardColors(): { hero: [CardColor, CardColor]; cta: [CardColor, CardColor]; footer: CardColor } {
+  // Row 1 (Hero): 2 cards side by side
+  const heroColors: [CardColor, CardColor] = ["yellow", "blue"]
+  
+  // Row 2 (How It Works): white - skipped for color variety calc
+  
+  // Row 3 (CTA): 2 cards side by side - must differ from hero at same positions
+  // Left card was yellow in hero, so use green/purple/orange
+  // Right card was blue in hero, so use yellow/green/purple
+  const ctaLeftOptions: CardColor[] = ["green", "purple", "orange"]
+  const ctaRightOptions: CardColor[] = ["yellow", "green", "purple"]
+  
+  // Pick based on a rotation - use date-based seed for variety across days
+  const seed = new Date().getDate() % 3
+  const ctaColors: [CardColor, CardColor] = [
+    ctaLeftOptions[seed],
+    ctaRightOptions[(seed + 1) % ctaRightOptions.length]
+  ]
+  
+  // Footer: avoid whatever color is most prominent in CTA row
+  const footerOptions: CardColor[] = ["green", "purple", "orange"].filter(
+    c => c !== ctaColors[0] && c !== ctaColors[1]
+  )
+  const footerColor: CardColor = footerOptions[0] || "green"
+  
+  return { hero: heroColors, cta: ctaColors, footer: footerColor }
+}
+
+// Get colors once at module level for consistent render
+const cardColors = getCardColors()
+
 // Simple icon tiles
 function IconTile({ children }: { children: React.ReactNode }) {
   return (
@@ -16,8 +61,11 @@ function HeroSection() {
     <section className="bg-black px-3 pb-2 pt-16 lg:px-4">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-2 lg:grid-cols-[1.5fr_1fr] lg:gap-3">
-          {/* PRIMARY BLOCK - Yellow */}
-          <div className="block-hover rounded-2xl border-[3px] border-black bg-[#FFD84A] p-5 lg:p-6">
+          {/* PRIMARY BLOCK */}
+          <div 
+            className="block-hover rounded-2xl border-[3px] border-black p-5 lg:p-6"
+            style={{ backgroundColor: CARD_COLORS[cardColors.hero[0]] }}
+          >
             {/* Label */}
             <p className="text-[10px] font-black uppercase tracking-wider text-black">
               Now in beta
@@ -54,8 +102,11 @@ function HeroSection() {
             </div>
           </div>
 
-          {/* SECONDARY BLOCK - Blue */}
-          <div className="block-hover flex flex-col justify-between rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-5">
+          {/* SECONDARY BLOCK */}
+          <div 
+            className="block-hover flex flex-col justify-between rounded-2xl border-[3px] border-black p-5"
+            style={{ backgroundColor: CARD_COLORS[cardColors.hero[1]] }}
+          >
             <div>
               <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] sm:text-[2.5rem]" style={{ fontWeight: 900 }}>
                 <span className="block text-black">GET</span>
@@ -177,7 +228,10 @@ function CTASection() {
     <section className="bg-black px-3 py-2 lg:px-4">
       <div className="mx-auto grid max-w-7xl gap-2 md:grid-cols-2">
         {/* Hosts */}
-        <div className="block-hover rounded-2xl border-[3px] border-black bg-[#FFD84A] p-4">
+        <div 
+          className="block-hover rounded-2xl border-[3px] border-black p-4"
+          style={{ backgroundColor: CARD_COLORS[cardColors.cta[0]] }}
+        >
           <p className="text-[9px] font-black uppercase tracking-wider text-black">
             For property owners
           </p>
@@ -200,7 +254,10 @@ function CTASection() {
         </div>
 
         {/* Creators */}
-        <div className="block-hover rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-4">
+        <div 
+          className="block-hover rounded-2xl border-[3px] border-black p-4"
+          style={{ backgroundColor: CARD_COLORS[cardColors.cta[1]] }}
+        >
           <p className="text-[9px] font-black uppercase tracking-wider text-black">
             For content creators
           </p>
@@ -233,7 +290,10 @@ function CTASection() {
 
 function FooterMarquee() {
   return (
-    <div className="mx-3 mb-3 mt-2 overflow-hidden rounded-2xl border-[3px] border-black bg-[#28D17C] py-2 lg:mx-4">
+    <div 
+      className="mx-3 mb-3 mt-2 overflow-hidden rounded-2xl border-[3px] border-black py-2 lg:mx-4"
+      style={{ backgroundColor: CARD_COLORS[cardColors.footer] }}
+    >
       <div className="marquee-track flex whitespace-nowrap">
         {[...Array(10)].map((_, i) => (
           <span key={i} className="mx-4 font-heading text-[1.75rem] tracking-[-0.02em] text-black sm:text-[2.5rem]">

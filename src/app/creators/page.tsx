@@ -38,10 +38,10 @@ function HeroSection() {
         <div className="grid gap-2 lg:grid-cols-[1.5fr_1fr] lg:gap-3">
           {/* PRIMARY BLOCK - Blue */}
           <div className="block-hover relative rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-5 lg:p-6">
-            {/* Beta badge */}
+            {/* Invite-only badge */}
             <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border-[2px] border-black bg-white px-3 py-1">
-              <span className="h-2 w-2 rounded-full bg-[#28D17C]" />
-              <span className="text-[10px] font-black uppercase tracking-wider text-black">Beta</span>
+              <span className="text-sm">🔒</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-black">Invite Only</span>
             </div>
             
             <h1 className="font-heading text-[2.5rem] leading-[0.85] tracking-[-0.04em] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[4rem] xl:text-[5rem]" style={{ fontWeight: 900 }}>
@@ -51,7 +51,7 @@ function HeroSection() {
             </h1>
             
             <p className="mt-3 max-w-md text-[13px] font-medium leading-snug text-black">
-              Get paid per post, plus optional traffic-based bonuses. Share your tracked link. We handle all payouts and tax docs.
+              Creator access is currently invite-only. Join the waitlist for early access.
             </p>
             
             <div className="mt-5 flex flex-wrap gap-2">
