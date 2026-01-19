@@ -1,133 +1,157 @@
-import { Container } from "@/components/layout/container"
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 const steps = [
   {
-    number: "01",
-    title: "Create your host profile",
-    description: "Sign up and add your property details. Paste your Airbnb, VRBO, or direct booking link—we'll generate a tracked affiliate URL for your campaigns.",
-    icon: (
-      <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-      </svg>
-    )
+    num: "01",
+    title: "ADD YOUR",
+    subtitle: "PROPERTY",
+    content: "Paste your Airbnb listing URL. We automatically import your photos, description, amenities, and pricing. Your listing goes live in under 60 seconds.",
+    color: "#FFD84A",
   },
   {
-    number: "02",
-    title: "Browse creators and send offers",
-    description: "Search our marketplace of vetted creators by niche, audience size, and location. Found a match? Send them an offer with your budget and content requirements.",
-    icon: (
-      <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-      </svg>
-    )
+    num: "02",
+    title: "BROWSE",
+    subtitle: "CREATORS",
+    content: "Search our directory by niche, platform, and audience size. Filter for travel, lifestyle, or luxury creators. View portfolios and past collaborations before reaching out.",
+    color: "#4AA3FF",
   },
   {
-    number: "03",
-    title: "Creator posts, you track traffic",
-    description: "Once accepted, the creator visits your property, creates content, and shares it with your unique tracked link. We track clicks, revisits, and attribution within a 30-day window.",
-    icon: (
-      <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-      </svg>
-    )
+    num: "03",
+    title: "SEND",
+    subtitle: "OFFERS",
+    content: "Set your budget, deliverables, and timeline. Creators receive your offer and can accept, counter, or decline. No cold DMs or awkward negotiations.",
+    color: "#D7B6FF",
   },
   {
-    number: "04",
-    title: "Settle payouts off-platform",
-    description: "Review your traffic reports and attribution data. Hosts and creators settle payouts directly based on their agreement—flat fee, commission, or post-for-stay.",
-    icon: (
-      <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    )
-  }
+    num: "04",
+    title: "THEY POST",
+    subtitle: "YOUR LINK",
+    content: "Each creator gets a unique tracked link. When they post content, every click is attributed to your listing. Real reach with real attribution.",
+    color: "#28D17C",
+  },
+  {
+    num: "05",
+    title: "WATCH",
+    subtitle: "TRAFFIC",
+    content: "See clicks, unique visitors, and referral sources in real time. Know exactly which creators drive results. Optimize future campaigns with data.",
+    color: "#FF5A1F",
+  },
+  {
+    num: "06",
+    title: "PAY VIA",
+    subtitle: "PLATFORM",
+    content: "Approve completed work and pay through Stripe. We handle contracts, invoices, and 1099 tax forms. Clean paperwork, every time.",
+    color: "#E8D5E8",
+  },
 ]
 
 export default function HowItWorksPage() {
   return (
-    <>
-      <section className="py-16 md:py-24">
-        <Container>
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              How CreatorStays works
-            </h1>
-            <p className="mt-6 text-lg text-muted-foreground">
-              Get more bookings through creator marketing. Here&apos;s the process from start to finish.
-            </p>
-          </div>
-        </Container>
-      </section>
+    <div className="min-h-screen bg-black px-3 pb-8 pt-20 lg:px-4">
+      <div className="mx-auto max-w-5xl">
+        
+        {/* Hero Block */}
+        <div className="block-hover rounded-2xl border-[3px] border-black bg-[#FFD84A] p-6">
+          <h1 className="font-heading text-[2.5rem] leading-[0.85] tracking-[-0.03em] sm:text-[3.5rem] md:text-[4.5rem]" style={{ fontWeight: 900 }}>
+            <span className="block text-black">HOW IT</span>
+            <span className="block text-black" style={{ fontWeight: 400 }}>WORKS</span>
+          </h1>
+          <p className="mt-4 max-w-lg text-[15px] font-medium leading-snug text-black">
+            CreatorStays connects vacation rental hosts with content creators. You get traffic and content. They get paid. Everyone wins.
+          </p>
+        </div>
 
-      <section className="pb-24">
-        <Container>
-          <div className="mx-auto max-w-4xl">
-            <div className="space-y-12">
-              {steps.map((step, i) => (
-                <div 
-                  key={step.number}
-                  className="relative flex gap-6 md:gap-8"
-                >
-                  <div className="flex flex-col items-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                      {step.icon}
-                    </div>
-                    {i < steps.length - 1 && (
-                      <div className="mt-4 h-full w-px bg-border" />
-                    )}
-                  </div>
-                  <div className="flex-1 pb-12">
-                    <span className="text-sm font-medium text-primary">Step {step.number}</span>
-                    <h2 className="mt-1 text-2xl font-semibold">{step.title}</h2>
-                    <p className="mt-3 text-muted-foreground">{step.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </section>
+        {/* Quick Links */}
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          <Link 
+            href="/hosts"
+            className="block-hover flex items-center justify-between rounded-xl border-[3px] border-black bg-white p-4 transition-transform duration-200"
+          >
+            <span className="text-[12px] font-black uppercase tracking-wider text-black">
+              Start as Host
+            </span>
+            <span className="text-black">→</span>
+          </Link>
+          <Link 
+            href="/waitlist"
+            className="block-hover flex items-center justify-between rounded-xl border-[3px] border-black bg-white p-4 transition-transform duration-200"
+          >
+            <span className="text-[12px] font-black uppercase tracking-wider text-black">
+              Creator Waitlist
+            </span>
+            <span className="text-black">→</span>
+          </Link>
+          <Link 
+            href="/pricing"
+            className="block-hover flex items-center justify-between rounded-xl border-[3px] border-black bg-white p-4 transition-transform duration-200"
+          >
+            <span className="text-[12px] font-black uppercase tracking-wider text-black">
+              View Pricing
+            </span>
+            <span className="text-black">→</span>
+          </Link>
+        </div>
 
-      <section className="border-t bg-muted/30 py-16">
-        <Container>
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-2xl font-semibold">How tracking works</h2>
-            <div className="mt-6 space-y-4">
-              <div className="rounded-xl border border-border/50 bg-card p-6">
-                <p className="text-muted-foreground">
-                  <strong className="text-foreground">No booking API access.</strong> Airbnb, VRBO, and other platforms don&apos;t share booking events with third parties. We track referral traffic and attribution within a 30-day window using first-party cookies. Hosts settle payouts with creators off-platform based on their agreement.
+        {/* Steps */}
+        <div className="mt-8">
+          <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-white">
+            The Process
+          </p>
+          <div className="grid gap-2 md:grid-cols-2">
+            {steps.map((step) => (
+              <div
+                key={step.num}
+                className="block-hover rounded-2xl border-[3px] border-black p-5 transition-transform duration-200"
+                style={{ backgroundColor: step.color }}
+              >
+                <span className="font-heading text-[2.5rem] leading-none text-black" style={{ fontWeight: 900 }}>
+                  {step.num}
+                </span>
+                <h2 className="mt-2 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]">
+                  <span className="block text-black" style={{ fontWeight: 900 }}>{step.title}</span>
+                  <span className="block text-black" style={{ fontWeight: 400 }}>{step.subtitle}</span>
+                </h2>
+                <p className="mt-3 text-[13px] font-medium leading-snug text-black">
+                  {step.content}
                 </p>
               </div>
-              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-6">
-                <p className="text-sm text-amber-700">
-                  <strong>Disclosure requirement:</strong> Creators must disclose partnerships and affiliate relationships in accordance with FTC guidelines and platform terms of service.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
-        </Container>
-      </section>
+        </div>
 
-      <section className="py-16">
-        <Container>
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight">Ready to get started?</h2>
-            <p className="mt-4 text-muted-foreground">
-              Browse creators and find the perfect match for your property.
+        {/* Bottom CTA */}
+        <div className="mt-8 grid gap-2 sm:grid-cols-2">
+          <div className="block-hover rounded-2xl border-[3px] border-black bg-[#28D17C] p-5">
+            <h3 className="font-heading text-[1.25rem] text-black" style={{ fontWeight: 900 }}>
+              READY TO START?
+            </h3>
+            <p className="mt-2 text-[13px] font-medium text-black">
+              List your property in 60 seconds. No contracts, no upfront fees.
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" asChild className="px-8">
-                <Link href="/creators">Find Creators</Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild className="px-8">
-                <Link href="/waitlist">I&apos;m a creator</Link>
-              </Button>
-            </div>
+            <Link 
+              href="/hosts"
+              className="mt-4 inline-flex h-9 items-center gap-2 rounded-full bg-black px-4 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
+            >
+              Get Started →
+            </Link>
           </div>
-        </Container>
-      </section>
-    </>
+          <div className="block-hover rounded-2xl border-[3px] border-black bg-white p-5">
+            <h3 className="font-heading text-[1.25rem] text-black" style={{ fontWeight: 900 }}>
+              QUESTIONS?
+            </h3>
+            <p className="mt-2 text-[13px] font-medium text-black">
+              Check our help center or message support directly.
+            </p>
+            <Link 
+              href="/help"
+              className="mt-4 inline-flex h-9 items-center gap-2 rounded-full border-[3px] border-black bg-white px-4 text-[10px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
+            >
+              Help Center →
+            </Link>
+          </div>
+        </div>
+
+      </div>
+    </div>
   )
 }

@@ -1,87 +1,173 @@
-import { Container } from "@/components/layout/container"
 import Link from "next/link"
 
 const steps = [
-  { title: "Join the creator waitlist", desc: "Sign up to get early access. We onboard creators in batches to ensure quality matches." },
-  { title: "Set your default rates and deliverables", desc: "Choose your preferred deal types: commission %, flat fee, or post-for-stay." },
-  { title: "Connect socials for analytics sync", desc: "Link Instagram, TikTok, or YouTube via OAuth. Follower counts sync automatically." },
-  { title: "Approve or counter host requests", desc: "Review property offers and accept, decline, or counter with your own terms." },
-  { title: "Share your affiliate links", desc: "Once live, share your unique tracking link in your content. Every click is tracked." },
-  { title: "Track analytics and earnings", desc: "See clicks, visitors, and pending earnings in your dashboard. Payouts are automatic." },
+  {
+    num: "01",
+    title: "JOIN",
+    subtitle: "WAITLIST",
+    content: "Submit your social profiles and niche. We review applications within 5-7 days. Priority goes to travel, lifestyle, and hospitality creators with engaged audiences.",
+  },
+  {
+    num: "02",
+    title: "COMPLETE",
+    subtitle: "PROFILE",
+    content: "Add your rates, portfolio, and connect your social accounts. The more complete your profile, the more likely hosts will reach out.",
+  },
+  {
+    num: "03",
+    title: "RECEIVE",
+    subtitle: "OFFERS",
+    content: "Hosts browse and send collaboration offers. You'll see their property, budget, deliverables, and timeline. Accept, counter, or decline.",
+  },
+  {
+    num: "04",
+    title: "CREATE",
+    subtitle: "CONTENT",
+    content: "Post content featuring the property with your unique tracked link. Be authentic—your audience trusts you. Good content performs better for everyone.",
+  },
+  {
+    num: "05",
+    title: "SUBMIT",
+    subtitle: "DELIVERABLES",
+    content: "Upload proof of your posts. The host reviews and approves your work. Most hosts approve within 24 hours.",
+  },
+  {
+    num: "06",
+    title: "GET",
+    subtitle: "PAID",
+    content: "Once approved, payment processes through Stripe. Funds arrive in 5-7 business days. We handle tax forms at year-end.",
+  },
 ]
 
-function StepRow({ step, index }: { step: typeof steps[0], index: number }) {
-  return (
-    <div className="guide-row group relative flex items-start gap-4 rounded-lg px-4 py-4 -mx-4 transition-all duration-200">
-      {/* Blur glow on hover */}
-      <div className="absolute inset-0 rounded-lg bg-accent/[0.03] opacity-0 blur-xl group-hover:opacity-100 transition-opacity duration-300" />
-      <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[13px] font-semibold text-accent group-hover:bg-accent/20 transition-colors">
-        {index + 1}
-      </div>
-      <div className="relative flex-1 min-w-0">
-        <span className="text-[15px] font-medium text-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all duration-200 inline-block">
-          {step.title}
-        </span>
-        <span className="block text-[13px] text-muted-foreground mt-0.5 leading-relaxed group-hover:text-muted-foreground/80 transition-colors">{step.desc}</span>
-      </div>
-    </div>
-  )
-}
+const tips = [
+  {
+    title: "ENGAGEMENT > FOLLOWERS",
+    content: "A focused niche audience often commands higher rates. Don't undervalue yourself based on follower count alone.",
+  },
+  {
+    title: "BE AUTHENTIC",
+    content: "Your audience follows you for you. Overly promotional content underperforms. Showcase properties you'd actually stay at.",
+  },
+  {
+    title: "RESPOND FAST",
+    content: "Hosts send offers to multiple creators. Quick responses land more collaborations.",
+  },
+  {
+    title: "BUILD RELATIONSHIPS",
+    content: "Great hosts come back. Deliver quality work and you'll get repeat offers without competing.",
+  },
+]
 
 export default function HowToCreatorsPage() {
   return (
-    <section className="py-12 md:py-16">
-      <Container>
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <h1 className="text-2xl font-semibold tracking-tight">How To: Creators</h1>
-          <p className="mt-2 text-[15px] text-muted-foreground">Turn your travel content into booking commissions in 6 steps.</p>
-          
-          {/* Quick links pill row */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/waitlist" className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-white px-3 py-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
-              Join waitlist →
-            </Link>
-            <Link href="/creators" className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-white px-3 py-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
-              Creator directory
-            </Link>
-            <Link href="/help" className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-white px-3 py-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
-              Help center
-            </Link>
-          </div>
+    <div className="min-h-screen bg-black px-3 pb-8 pt-20 lg:px-4">
+      <div className="mx-auto max-w-5xl">
+        
+        {/* Hero Block */}
+        <div className="block-hover rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-6">
+          <p className="text-[10px] font-black uppercase tracking-wider text-black">
+            Guide for Content Creators
+          </p>
+          <h1 className="mt-2 font-heading text-[2.5rem] leading-[0.85] tracking-[-0.03em] sm:text-[3.5rem]" style={{ fontWeight: 900 }}>
+            <span className="block text-black">HOW TO:</span>
+            <span className="block text-black" style={{ fontWeight: 400 }}>CREATORS</span>
+          </h1>
+          <p className="mt-4 max-w-lg text-[15px] font-medium leading-snug text-black">
+            Get paid to showcase vacation rentals. Set your rates, receive offers, and earn money doing what you love.
+          </p>
+        </div>
 
-          {/* Steps list */}
-          <div className="mt-10">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">Step by step</h2>
-            <div className="space-y-0">
-              {steps.map((step, i) => (
-                <StepRow key={i} step={step} index={i} />
-              ))}
-            </div>
-          </div>
+        {/* Quick Links */}
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <Link 
+            href="/waitlist"
+            className="block-hover flex items-center justify-between rounded-xl border-[3px] border-black bg-[#28D17C] p-4 transition-transform duration-200"
+          >
+            <span className="text-[12px] font-black uppercase tracking-wider text-black">
+              Join Waitlist
+            </span>
+            <span className="text-black">→</span>
+          </Link>
+          <Link 
+            href="/pricing"
+            className="block-hover flex items-center justify-between rounded-xl border-[3px] border-black bg-white p-4 transition-transform duration-200"
+          >
+            <span className="text-[12px] font-black uppercase tracking-wider text-black">
+              View Fees
+            </span>
+            <span className="text-black">→</span>
+          </Link>
+        </div>
 
-          {/* Utility blocks */}
-          <div className="mt-16 grid gap-4 sm:grid-cols-2">
-            {/* CTA block */}
-            <div className="rounded-xl border border-foreground/5 bg-gradient-to-br from-accent/5 to-primary/5 p-5">
-              <h3 className="text-[13px] font-semibold">Ready to get started?</h3>
-              <p className="mt-1 text-[12px] text-muted-foreground">Join the waitlist and we&apos;ll reach out when there&apos;s a spot.</p>
-              <Link href="/waitlist" className="mt-4 inline-flex h-9 items-center justify-center rounded-lg bg-accent px-4 text-[12px] font-medium text-white hover:bg-accent/90 transition-colors">
-                Creator waitlist
-              </Link>
-            </div>
-
-            {/* Support block */}
-            <div className="rounded-xl border border-foreground/5 bg-white/50 p-5">
-              <h3 className="text-[13px] font-semibold">Need help?</h3>
-              <p className="mt-1 text-[12px] text-muted-foreground">Check our help center or message support.</p>
-              <Link href="/help" className="mt-4 inline-flex h-9 items-center justify-center rounded-lg border border-foreground/10 bg-white px-4 text-[12px] font-medium hover:bg-foreground/[0.02] transition-colors">
-                Help center
-              </Link>
-            </div>
+        {/* Steps */}
+        <div className="mt-8">
+          <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-white">
+            Step by Step
+          </p>
+          <div className="space-y-2">
+            {steps.map((step) => (
+              <div
+                key={step.num}
+                className="block-hover rounded-2xl border-[3px] border-black bg-white p-4 transition-transform duration-200"
+              >
+                <div className="flex gap-4">
+                  <span className="font-heading text-[2rem] leading-none text-black" style={{ fontWeight: 900 }}>
+                    {step.num}
+                  </span>
+                  <div>
+                    <h2 className="font-heading text-[1.25rem] leading-[0.85] tracking-[-0.02em]">
+                      <span className="text-black" style={{ fontWeight: 900 }}>{step.title} </span>
+                      <span className="text-black" style={{ fontWeight: 400 }}>{step.subtitle}</span>
+                    </h2>
+                    <p className="mt-2 text-[13px] font-medium leading-snug text-black">
+                      {step.content}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </Container>
-    </section>
+
+        {/* Tips */}
+        <div className="mt-8">
+          <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-white">
+            Pro Tips
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {tips.map((tip, i) => (
+              <div
+                key={i}
+                className="block-hover rounded-2xl border-[3px] border-black bg-[#FFD84A] p-4 transition-transform duration-200"
+              >
+                <h3 className="font-heading text-[1rem] text-black" style={{ fontWeight: 900 }}>
+                  {tip.title}
+                </h3>
+                <p className="mt-2 text-[13px] font-medium leading-snug text-black">
+                  {tip.content}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="mt-8 rounded-2xl border-[3px] border-black bg-[#D7B6FF] p-5">
+          <h3 className="font-heading text-[1.25rem] text-black" style={{ fontWeight: 900 }}>
+            READY TO EARN?
+          </h3>
+          <p className="mt-2 text-[13px] font-medium text-black">
+            Join the waitlist. We're onboarding creators in batches.
+          </p>
+          <Link 
+            href="/waitlist"
+            className="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-black px-5 text-[11px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
+          >
+            Join Waitlist →
+          </Link>
+        </div>
+
+      </div>
+    </div>
   )
 }
