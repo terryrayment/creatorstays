@@ -887,75 +887,218 @@
 }
 
 /* ============================================================================
-   Dashboard Design Tokens (subtle marketing parity)
+   Dashboard Design System - Slush-style parity (black outlines, flat fills)
    ============================================================================ */
 
 .dashboard {
-  /* Slightly stronger borders */
-  --dashboard-border: hsl(210, 10%, 85%);
-  --dashboard-border-hover: hsl(210, 10%, 75%);
-  --dashboard-radius: 0.75rem;
-  --dashboard-radius-lg: 1rem;
+  /* Flat white background - no gradients */
+  background: #FAFAFA;
+  min-height: 100vh;
+  
+  /* Border system */
+  --db-border: #000;
+  --db-border-width: 2px;
+  --db-radius: 0.75rem;
+  --db-radius-lg: 1rem;
+  
+  /* Accent colors (same as homepage, sparingly) */
+  --db-yellow: #FFD84A;
+  --db-blue: #4AA3FF;
+  --db-green: #28D17C;
+  --db-purple: #D7B6FF;
+  --db-orange: #FF5A1F;
 }
 
-/* Dashboard panels - slightly rounder, thicker borders */
-.dashboard .rounded-xl {
-  border-radius: var(--dashboard-radius-lg);
+/* Remove any gradient backgrounds in dashboard */
+.dashboard,
+.dashboard > *,
+.dashboard .bg-gradient-to-br,
+.dashboard .bg-gradient-to-r,
+.dashboard .bg-gradient-to-b {
+  background-image: none !important;
 }
 
+/* Dashboard panels/cards - black outline, no shadow, flat white */
+.dashboard .rounded-xl,
+.dashboard .rounded-lg,
+.dashboard [class*="panel"],
+.dashboard [class*="card"] {
+  background: #fff;
+  border: var(--db-border-width) solid var(--db-border);
+  border-radius: var(--db-radius-lg);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* Dashboard section containers */
 .dashboard .border {
-  border-color: var(--dashboard-border);
+  border-color: var(--db-border);
+  border-width: var(--db-border-width);
 }
 
-.dashboard .border-foreground\/5 {
-  border-color: var(--dashboard-border);
+.dashboard .border-foreground\/5,
+.dashboard .border-foreground\/10 {
+  border-color: var(--db-border);
 }
 
-/* Dashboard section titles - heavier weight */
-.dashboard h1,
-.dashboard h2,
-.dashboard h3 {
+/* Dashboard headings - clean, not poster-style */
+.dashboard h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #000;
+}
+
+.dashboard h2 {
+  font-size: 1.125rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  color: #000;
 }
 
-.dashboard .text-sm.font-semibold.uppercase {
-  font-weight: 800;
-  letter-spacing: 0.05em;
-}
-
-/* Dashboard buttons - pill style aligned with marketing */
-.dashboard button,
-.dashboard [role="button"] {
-  border-radius: 9999px;
+.dashboard h3 {
+  font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  color: #000;
 }
 
-/* Dashboard primary buttons - stronger presence */
-.dashboard .bg-primary {
+/* Dashboard section labels */
+.dashboard .text-sm.font-semibold.uppercase,
+.dashboard .text-xs.font-semibold.uppercase {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #000;
+}
+
+/* Dashboard buttons - pill with black outline */
+.dashboard button,
+.dashboard [role="button"],
+.dashboard a[class*="btn"],
+.dashboard .inline-flex[class*="rounded"] {
+  border-radius: 9999px;
   font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: transform 150ms ease-out, background-color 150ms ease-out;
 }
 
-/* Dashboard cards hover - subtle lift */
-.dashboard .rounded-xl.border {
-  transition: transform 150ms ease-out, border-color 150ms ease-out;
+/* Primary button - solid black, white text */
+.dashboard .bg-primary,
+.dashboard [class*="bg-primary"] {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: var(--db-border-width) solid #000;
 }
 
-.dashboard .rounded-xl.border:hover {
-  border-color: var(--dashboard-border-hover);
+.dashboard .bg-primary:hover,
+.dashboard [class*="bg-primary"]:hover {
+  transform: translateY(-1px);
 }
 
-/* Dashboard input fields - rounder */
+/* Secondary button - white with black outline */
+.dashboard .bg-secondary,
+.dashboard [class*="bg-white"],
+.dashboard [class*="bg-background"] {
+  background-color: #fff !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard .bg-secondary:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* Dashboard inputs - black outline */
 .dashboard input,
 .dashboard textarea,
-.dashboard select {
+.dashboard select,
+.dashboard [class*="input"] {
+  background: #fff;
+  border: var(--db-border-width) solid var(--db-border);
   border-radius: 0.5rem;
-  border-color: var(--dashboard-border);
+  box-shadow: none;
 }
 
 .dashboard input:focus,
 .dashboard textarea:focus,
 .dashboard select:focus {
-  border-color: var(--dashboard-border-hover);
+  border-color: var(--db-border);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard metric values */
+.dashboard .text-3xl,
+.dashboard .text-4xl,
+.dashboard [class*="text-metric"] {
+  color: #000;
+  font-weight: 700;
+}
+
+/* Status chips - accent colors (sparingly) */
+.dashboard [class*="bg-green"],
+.dashboard [class*="bg-emerald"] {
+  background-color: var(--db-green) !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard [class*="bg-yellow"],
+.dashboard [class*="bg-amber"] {
+  background-color: var(--db-yellow) !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard [class*="bg-blue"] {
+  background-color: var(--db-blue) !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard [class*="bg-purple"],
+.dashboard [class*="bg-violet"] {
+  background-color: var(--db-purple) !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard [class*="bg-orange"],
+.dashboard [class*="bg-red"] {
+  background-color: var(--db-orange) !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+/* Remove muted foreground colors - use pure black */
+.dashboard .text-muted-foreground {
+  color: #000;
+  opacity: 0.6;
+}
+
+/* Dashboard card hover - subtle lift, no glow */
+.dashboard .rounded-xl:hover,
+.dashboard .rounded-lg:hover {
+  transform: translateY(-2px);
+}
+
+/* Remove any blur/glow effects */
+.dashboard .panel-glow,
+.dashboard .surface-card-glow,
+.dashboard [class*="glow"],
+.dashboard [class*="blur"] {
+  display: none !important;
+}
+
+/* Dashboard dividers */
+.dashboard hr,
+.dashboard .border-t,
+.dashboard .border-b {
+  border-color: #000;
+  opacity: 0.15;
+}
+
+/* Dashboard loading spinner */
+.dashboard .animate-spin {
+  border-color: #000;
+  border-top-color: transparent;
 }
