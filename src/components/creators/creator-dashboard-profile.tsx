@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,9 +16,27 @@ interface PlatformConnection {
   url: string
   handle: string
   connectedAt: Date
+  viaOAuth?: boolean
 }
 
 type ConnectedPlatforms = Partial<Record<Platform, PlatformConnection>>
+
+// Helper to get cookie value
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) {
+    const cookieValue = parts.pop()?.split(';').shift()
+    return cookieValue ? decodeURIComponent(cookieValue) : null
+  }
+  return null
+}
+
+// Helper to delete cookie
+function deleteCookie(name: string) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+}
 
 // Status indicator
 function StatusDot({ active, color }: { active: boolean; color: string }) {
@@ -91,6 +110,8 @@ const creator = {
 }
 
 export function CreatorDashboardProfile() {
+  const searchParams = useSearchParams()
+  
   // Platform connection state
   const [connectedPlatforms, setConnectedPlatforms] = useState<ConnectedPlatforms>({})
   const [connectingPlatform, setConnectingPlatform] = useState<Platform | null>(null)
@@ -98,10 +119,60 @@ export function CreatorDashboardProfile() {
   const [connectLoading, setConnectLoading] = useState(false)
   const [connectError, setConnectError] = useState<string | null>(null)
 
+  // Check for Instagram OAuth connection on mount and URL params
+  useEffect(() => {
+    // Check if returning from OAuth
+    const connected = searchParams.get('connected')
+    const error = searchParams.get('error')
+    
+    if (error) {
+      console.error('OAuth error:', error, searchParams.get('message'))
+      setConnectError(`Connection failed: ${error}`)
+    }
+    
+    // Check for Instagram cookie
+    const igCookie = getCookie('cs_ig_connected')
+    if (igCookie) {
+      try {
+        const igData = JSON.parse(igCookie)
+        if (igData.connected) {
+          setConnectedPlatforms(prev => ({
+            ...prev,
+            instagram: {
+              url: 'oauth',
+              handle: igData.userName || '@connected',
+              connectedAt: new Date(igData.connectedAt),
+              viaOAuth: true,
+            },
+          }))
+        }
+      } catch (e) {
+        console.error('Failed to parse Instagram cookie:', e)
+      }
+    }
+  }, [searchParams])
+
   // Calculate completeness based on connections
   const connectionCount = Object.keys(connectedPlatforms).length
   const baseCompleteness = creator.completeness
   const adjustedCompleteness = Math.min(100, baseCompleteness + (connectionCount * 10))
+
+  // Handle Instagram OAuth connect
+  const handleInstagramOAuth = () => {
+    window.location.href = '/api/instagram/auth'
+  }
+
+  // Handle Instagram disconnect
+  const handleInstagramDisconnect = () => {
+    deleteCookie('cs_ig_connected')
+    deleteCookie('cs_ig_token')
+    setConnectedPlatforms(prev => {
+      const updated = { ...prev }
+      delete updated.instagram
+      return updated
+    })
+    setConnectingPlatform(null)
+  }
 
   const handleConnectPlatform = async () => {
     if (!connectingPlatform || !platformUrlInput) return
@@ -191,7 +262,13 @@ export function CreatorDashboardProfile() {
                     variant="outline" 
                     size="sm" 
                     className="flex-1 text-xs text-red-600 hover:bg-red-50"
-                    onClick={() => handleDisconnect(connectingPlatform)}
+                    onClick={() => {
+                      if (connectingPlatform === 'instagram') {
+                        handleInstagramDisconnect()
+                      } else {
+                        handleDisconnect(connectingPlatform)
+                      }
+                    }}
                   >
                     Disconnect
                   </Button>
@@ -201,6 +278,33 @@ export function CreatorDashboardProfile() {
                     onClick={() => setConnectingPlatform(null)}
                   >
                     Done
+                  </Button>
+                </div>
+              </>
+            ) : connectingPlatform === 'instagram' ? (
+              // Instagram OAuth - no URL input needed
+              <>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Connect your Instagram account securely via Meta.
+                </p>
+                <p className="mt-3 text-[10px] text-muted-foreground">
+                  Follower counts and analytics will sync automatically after beta.
+                </p>
+                <div className="mt-4 flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 text-xs"
+                    onClick={() => setConnectingPlatform(null)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    className="flex-1 text-xs"
+                    onClick={handleInstagramOAuth}
+                  >
+                    Connect with Meta
                   </Button>
                 </div>
               </>
@@ -354,16 +458,39 @@ export function CreatorDashboardProfile() {
                                     <span className="text-[10px] text-muted-foreground">{connection.handle}</span>
                                   )}
                                 </div>
-                                <button 
-                                  onClick={() => {
-                                    setConnectingPlatform(p)
-                                    setPlatformUrlInput('')
-                                    setConnectError(null)
-                                  }}
-                                  className="text-[10px] font-medium text-primary hover:underline"
-                                >
-                                  {isConnected ? "Manage" : "Connect"}
-                                </button>
+                                {p === 'instagram' ? (
+                                  // Instagram uses OAuth
+                                  isConnected ? (
+                                    <button 
+                                      onClick={() => {
+                                        setConnectingPlatform(p)
+                                        setConnectError(null)
+                                      }}
+                                      className="text-[10px] font-medium text-primary hover:underline"
+                                    >
+                                      Manage
+                                    </button>
+                                  ) : (
+                                    <button 
+                                      onClick={handleInstagramOAuth}
+                                      className="text-[10px] font-medium text-primary hover:underline"
+                                    >
+                                      Connect
+                                    </button>
+                                  )
+                                ) : (
+                                  // TikTok/YouTube use manual URL entry
+                                  <button 
+                                    onClick={() => {
+                                      setConnectingPlatform(p)
+                                      setPlatformUrlInput('')
+                                      setConnectError(null)
+                                    }}
+                                    className="text-[10px] font-medium text-primary hover:underline"
+                                  >
+                                    {isConnected ? "Manage" : "Connect"}
+                                  </button>
+                                )}
                               </div>
                             )
                           })}
