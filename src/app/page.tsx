@@ -2,36 +2,53 @@ import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
-function EdgeBlur({ className = "" }: { className?: string }) {
+function HeroBackground() {
   return (
-    <div 
-      className={`absolute inset-0 -z-10 overflow-hidden ${className}`}
-      aria-hidden="true"
-    >
-      <div className="absolute -top-1/2 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-primary/5 blur-[120px]" />
-      <div className="absolute -bottom-1/2 right-0 h-[400px] w-[600px] rounded-full bg-accent/5 blur-[100px]" />
+    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+      {/* Base gradient wash - top right, warm sky */}
+      <div 
+        className="absolute -top-1/4 -right-1/4 h-[120%] w-[80%]"
+        style={{
+          background: "radial-gradient(ellipse at 70% 20%, hsl(199 89% 48% / 0.06) 0%, transparent 60%)",
+        }}
+      />
+      {/* Counter gradient - bottom left, deep blue */}
+      <div 
+        className="absolute -bottom-1/4 -left-1/4 h-[100%] w-[70%]"
+        style={{
+          background: "radial-gradient(ellipse at 30% 80%, hsl(213 94% 45% / 0.04) 0%, transparent 50%)",
+        }}
+      />
+      {/* Soft atmospheric layer */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(165deg, hsl(210 20% 99%) 0%, hsl(210 30% 97%) 50%, hsl(210 20% 99%) 100%)",
+        }}
+      />
+      {/* Single large soft cloud */}
+      <div className="absolute top-1/4 right-1/4 h-[500px] w-[700px] rounded-full bg-accent/[0.03] blur-[150px]" />
     </div>
   )
 }
 
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden py-24 md:py-32">
-      <EdgeBlur />
+    <section className="relative overflow-hidden py-16 md:py-20">
+      <HeroBackground />
       <Container>
         <div className="flex flex-col items-center text-center opacity-0 reveal">
-          <span className="text-label mb-4 inline-block rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-primary">
+          <span className="text-label mb-3 inline-block rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-primary">
             Influencer marketing for vacation rentals
           </span>
-          <h1 className="text-display max-w-4xl">
-            Get more bookings with
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"> creator marketing</span>
+          <h1 className="font-heading text-[2.5rem] font-normal leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-[4.25rem]">
+            <span className="whitespace-nowrap">Get more bookings with</span>{" "}
+            <span className="whitespace-nowrap bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">creator marketing</span>
           </h1>
-          <p className="text-body-lg mt-6 max-w-2xl text-muted-foreground">
-            Hire vetted content creators to showcase your property. 
-            They post, you get clicks, bookings, and stunning content.
+          <p className="mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
+            Hire vetted creators to showcase your property. They post, you get clicks and stunning content.
           </p>
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Button size="lg" asChild className="px-8">
               <Link href="/hosts">Host Signup</Link>
             </Button>
@@ -42,6 +59,18 @@ function HeroSection() {
         </div>
       </Container>
     </section>
+  )
+}
+
+function EdgeBlur({ className = "" }: { className?: string }) {
+  return (
+    <div 
+      className={`absolute inset-0 -z-10 overflow-hidden ${className}`}
+      aria-hidden="true"
+    >
+      <div className="absolute -top-1/4 right-0 h-[500px] w-[600px] rounded-full bg-accent/[0.04] blur-[120px]" />
+      <div className="absolute -bottom-1/4 left-0 h-[400px] w-[500px] rounded-full bg-primary/[0.03] blur-[100px]" />
+    </div>
   )
 }
 
