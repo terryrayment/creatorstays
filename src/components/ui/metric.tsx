@@ -57,35 +57,38 @@ const Metric = React.forwardRef<HTMLDivElement, MetricProps>(
       <div
         ref={ref}
         className={cn(
-          "flex flex-col justify-center rounded-xl border border-foreground/5 bg-white/70 p-4 backdrop-blur-sm transition-all duration-200 hover:border-foreground/10 hover:shadow-sm",
+          "panel-surface relative flex flex-col justify-center rounded-xl p-4 transition-all duration-300 ease-out",
           alignClasses[align],
           className
         )}
         {...props}
       >
-        <div className="flex items-baseline gap-2">
-          <span className={cn("leading-none", sizeClasses[size].value)}>
-            {value}
+        <div className="panel-glow" aria-hidden="true" />
+        <div className="relative z-10">
+          <div className="flex items-baseline gap-2">
+            <span className={cn("leading-none transition-transform duration-200", sizeClasses[size].value)}>
+              {value}
+            </span>
+            {trend && (
+              <span className={cn(
+                "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium",
+                trendColors[trend.direction]
+              )}>
+                {trend.direction === "up" && "↑"}
+                {trend.direction === "down" && "↓"}
+                {trend.value}
+              </span>
+            )}
+          </div>
+          <span className={cn("mt-1 font-medium text-muted-foreground", sizeClasses[size].label)}>
+            {label}
           </span>
-          {trend && (
-            <span className={cn(
-              "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium",
-              trendColors[trend.direction]
-            )}>
-              {trend.direction === "up" && "↑"}
-              {trend.direction === "down" && "↓"}
-              {trend.value}
+          {caption && (
+            <span className={cn("mt-0.5 text-muted-foreground/60", sizeClasses[size].caption)}>
+              {caption}
             </span>
           )}
         </div>
-        <span className={cn("mt-1 font-medium text-muted-foreground", sizeClasses[size].label)}>
-          {label}
-        </span>
-        {caption && (
-          <span className={cn("mt-0.5 text-muted-foreground/60", sizeClasses[size].caption)}>
-            {caption}
-          </span>
-        )}
       </div>
     )
   }

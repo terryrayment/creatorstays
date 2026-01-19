@@ -15,22 +15,24 @@ interface PanelHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 const Panel = React.forwardRef<HTMLDivElement, PanelProps>(
   ({ className, variant = "default", children, ...props }, ref) => {
     const variants = {
-      default: "border border-foreground/5 bg-white/70 backdrop-blur-sm",
-      elevated: "border border-white/60 bg-white/80 shadow-xl shadow-black/[0.03] backdrop-blur-sm",
-      inset: "bg-foreground/[0.015] border-0",
+      default: "panel-surface",
+      elevated: "panel-surface-elevated",
+      inset: "bg-foreground/[0.02] border-0 rounded-lg",
     }
 
     return (
       <div
         ref={ref}
         className={cn(
-          "rounded-xl transition-all duration-200",
+          "relative rounded-xl transition-all duration-300 ease-out",
           variants[variant],
           className
         )}
         {...props}
       >
-        {children}
+        {/* Hover glow pseudo-element via CSS */}
+        {variant !== "inset" && <div className="panel-glow" aria-hidden="true" />}
+        <div className="relative z-10">{children}</div>
       </div>
     )
   }
@@ -43,7 +45,7 @@ const PanelHeader = React.forwardRef<HTMLDivElement, PanelHeaderProps>(
       <div
         ref={ref}
         className={cn(
-          "flex items-start justify-between gap-4 border-b border-foreground/5 px-5 py-4",
+          "flex items-start justify-between gap-4 border-b border-foreground/[0.04] px-5 py-4",
           className
         )}
         {...props}
@@ -78,7 +80,7 @@ const PanelFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("border-t border-foreground/5 px-5 py-3", className)}
+    className={cn("border-t border-foreground/[0.04] px-5 py-3", className)}
     {...props}
   />
 ))

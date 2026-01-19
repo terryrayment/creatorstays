@@ -231,3 +231,77 @@
       rgba(238, 233, 230, 1) 100%
     );
 }
+
+/* ============================================================================
+   Panel Surface System - Cards with hover glow
+   ============================================================================ */
+
+/* Base panel surface */
+.panel-surface {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.02),
+    0 0 0 1px rgba(0, 0, 0, 0.02);
+}
+
+.panel-surface:hover {
+  background: rgba(255, 255, 255, 0.78);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.03),
+    0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+
+/* Elevated panel (more prominent) */
+.panel-surface-elevated {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    0 8px 24px rgba(0, 0, 0, 0.02);
+}
+
+.panel-surface-elevated:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 12px 32px rgba(0, 0, 0, 0.03);
+}
+
+/* Hover glow element - light bleeding effect */
+.panel-glow {
+  position: absolute;
+  inset: -20px;
+  z-index: 0;
+  border-radius: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease-out;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(199 89% 48% / 0.08) 0%,
+    hsl(213 94% 45% / 0.04) 40%,
+    transparent 70%
+  );
+  filter: blur(30px);
+}
+
+.panel-surface:hover .panel-glow,
+.panel-surface-elevated:hover .panel-glow {
+  opacity: 1;
+}
+
+/* Metric card hover enhancement */
+.panel-surface .text-3xl,
+.panel-surface-elevated .text-3xl {
+  transition: transform 200ms ease-out;
+}
+
+.panel-surface:hover .text-3xl,
+.panel-surface-elevated:hover .text-3xl {
+  transform: scale(1.02);
+}
