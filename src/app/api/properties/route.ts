@@ -1,32 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// Extract Airbnb listing ID from URL
-function extractAirbnbId(url: string): string | null {
-  // Match patterns like /rooms/12345 or /h/listing-name
-  const roomsMatch = url.match(/airbnb\.[^/]+\/rooms\/(\d+)/)
-  if (roomsMatch) return roomsMatch[1]
-  
-  const hMatch = url.match(/airbnb\.[^/]+\/h\/([^/?]+)/)
-  if (hMatch) return hMatch[1]
-  
-  return null
-}
+// Demo host ID (TODO: replace with auth session)
+const DEMO_HOST_ID = 'demo-host-001'
 
 // Validate Airbnb URL format
 function isValidAirbnbUrl(url: string): boolean {
   return /^https?:\/\/(www\.)?airbnb\.[a-z.]+\/(rooms\/\d+|h\/[^/?]+)/i.test(url)
 }
 
-// GET /api/properties - List properties for a host
-export async function GET(request: NextRequest) {
+// GET /api/properties - List properties for current host
+export async function GET() {
   try {
-    // In production, get hostProfileId from session
-    // For now, use query param or mock
-    const hostProfileId = request.nextUrl.searchParams.get('hostProfileId') || 'mock-host-id'
-    
     const properties = await prisma.property.findMany({
-      where: { hostProfileId },
+      where: { hostProfileId: DEMO_HOST_ID },
       orderBy: { updatedAt: 'desc' },
     })
     
@@ -43,69 +30,53 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { 
       id,
-      hostProfileId = 'mock-host-id', // In production, from session
-      listingUrl,
+      airbnbUrl,
       title,
-      description,
-      city,
-      region,
-      country,
+      cityRegion,
+      priceNightlyRange,
+      rating,
+      reviewCount,
+      guests,
+      beds,
+      baths,
+      amenities = [],
+      vibeTags = [],
+      houseRules,
+      photos = [],
       heroImageUrl,
-      photoUrls = [],
+      creatorBrief,
       isActive = true,
-      isDraft = false,
-      refreshFromAirbnb = false,
+      isDraft = true,
+      lastImportedAt,
     } = body
 
     // Validate Airbnb URL if provided
-    if (listingUrl && !isValidAirbnbUrl(listingUrl)) {
+    if (airbnbUrl && !isValidAirbnbUrl(airbnbUrl)) {
       return NextResponse.json({ 
         error: 'Invalid Airbnb URL. Use format: airbnb.com/rooms/123456' 
       }, { status: 400 })
     }
 
-    const airbnbListingId = listingUrl ? extractAirbnbId(listingUrl) : null
-
-    // Prefill from Airbnb if new or refresh requested
-    let prefillData: Record<string, unknown> = {}
-    if (listingUrl && (!id || refreshFromAirbnb)) {
-      try {
-        // Call our existing prefill API
-        const prefillUrl = new URL('/api/airbnb/prefill', request.url)
-        prefillUrl.searchParams.set('url', listingUrl)
-        
-        const prefillRes = await fetch(prefillUrl.toString())
-        if (prefillRes.ok) {
-          const prefill = await prefillRes.json()
-          prefillData = {
-            title: prefill.title || title,
-            heroImageUrl: prefill.imageUrl || heroImageUrl,
-            city: prefill.cityRegion?.split(',')[0]?.trim() || city,
-            region: prefill.cityRegion?.split(',')[1]?.trim() || region,
-            airbnbLastFetchedAt: new Date(),
-          }
-        }
-      } catch (prefillError) {
-        console.warn('[Properties API] Prefill failed:', prefillError)
-        // Continue without prefill data
-      }
-    }
-
     const propertyData = {
-      hostProfileId,
-      listingUrl,
-      listingPlatform: 'airbnb',
-      airbnbListingId,
-      title: prefillData.title as string || title || 'Untitled Property',
-      description,
-      city: prefillData.city as string || city,
-      region: prefillData.region as string || region,
-      country,
-      heroImageUrl: prefillData.heroImageUrl as string || heroImageUrl,
-      photoUrls,
+      hostProfileId: DEMO_HOST_ID,
+      airbnbUrl: airbnbUrl || null,
+      title: title || null,
+      cityRegion: cityRegion || null,
+      priceNightlyRange: priceNightlyRange || null,
+      rating: rating ? parseFloat(rating) : null,
+      reviewCount: reviewCount ? parseInt(reviewCount) : null,
+      guests: guests ? parseInt(guests) : null,
+      beds: beds ? parseInt(beds) : null,
+      baths: baths ? parseInt(baths) : null,
+      amenities,
+      vibeTags,
+      houseRules: houseRules || null,
+      photos,
+      heroImageUrl: heroImageUrl || null,
+      creatorBrief: creatorBrief || null,
       isActive,
       isDraft,
-      airbnbLastFetchedAt: prefillData.airbnbLastFetchedAt as Date || undefined,
+      lastImportedAt: lastImportedAt ? new Date(lastImportedAt) : null,
     }
 
     let property

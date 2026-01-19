@@ -178,38 +178,39 @@ model Property {
   hostProfileId   String
   hostProfile     HostProfile @relation(fields: [hostProfileId], references: [id], onDelete: Cascade)
   
+  // Airbnb import
+  airbnbUrl       String?
+  lastImportedAt  DateTime?
+  
   // Listing info
-  title           String
-  description     String?  @db.Text
-  neighborhood    String?
-  city            String?
-  region          String?
-  country         String?
-  
-  // External listing
-  listingUrl      String?  // Airbnb URL
-  listingPlatform String?  @default("airbnb")
-  airbnbListingId String?  // Extracted from URL
-  
-  // Prefill metadata
-  airbnbLastFetchedAt DateTime?
-  heroImageUrl    String?
-  
-  // Details
-  priceRangeMin   Int?
-  priceRangeMax   Int?
+  title           String?
+  cityRegion      String?
+  priceNightlyRange String?  // e.g. "$150-$250"
   rating          Float?
   reviewCount     Int?
   
-  // Photos (URLs)
-  photoUrls       String[]
+  // Property details
+  guests          Int?
+  beds            Int?
+  baths           Int?
+  amenities       String[]  // ["WiFi", "Pool", "Hot Tub", ...]
+  vibeTags        String[]  // ["Cozy", "Modern", "Remote", ...]
+  houseRules      Json?     // { "checkIn": "3pm", "checkOut": "11am", "noSmoking": true, ... }
   
-  // Tracking
-  trackingToken   String   @unique @default(cuid())
+  // Photos (URLs)
+  photos          String[]
+  heroImageUrl    String?
+  
+  // Creator collaboration
+  creatorBrief    String?   @db.Text
   
   // Status
   isActive        Boolean  @default(true)
   isDraft         Boolean  @default(true)
+  
+  // Tracking
+  trackingToken   String   @unique @default(cuid())
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -217,6 +218,7 @@ model Property {
   trackingLinks   TrackingLink[]
   collaborations  Collaboration[]
 
+  @@unique([hostProfileId, airbnbUrl])
   @@index([hostProfileId])
   @@map("properties")
 }

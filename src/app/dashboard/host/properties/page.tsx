@@ -10,262 +10,208 @@ import { Footer } from "@/components/navigation/footer"
 
 interface Property {
   id: string
-  title: string
-  description?: string
-  listingUrl?: string
-  city?: string
-  region?: string
-  country?: string
+  airbnbUrl?: string
+  title?: string
+  cityRegion?: string
+  priceNightlyRange?: string
+  rating?: number
+  reviewCount?: number
+  guests?: number
+  beds?: number
+  baths?: number
+  amenities: string[]
+  vibeTags: string[]
+  houseRules?: Record<string, unknown>
+  photos: string[]
   heroImageUrl?: string
+  creatorBrief?: string
   isActive: boolean
   isDraft: boolean
-  airbnbLastFetchedAt?: string
-  updatedAt: string
+  lastImportedAt?: string
   createdAt: string
+  updatedAt: string
 }
 
 type EditingProperty = Partial<Property> & { isNew?: boolean }
 
+const COMMON_AMENITIES = ["WiFi", "Pool", "Hot Tub", "Kitchen", "Washer", "Dryer", "AC", "Heating", "Workspace", "TV", "Fireplace", "Gym", "Parking", "EV Charger", "BBQ", "Patio", "Beach Access", "Ski-in/Ski-out", "Pet Friendly", "Kid Friendly"]
+const COMMON_VIBE_TAGS = ["Cozy", "Modern", "Rustic", "Luxury", "Minimal", "Bohemian", "Romantic", "Family", "Remote", "Urban", "Beachfront", "Mountain", "Lakeside", "Historic", "Eco-Friendly", "Unique", "Instagrammable", "Quiet", "Social", "Adventure"]
+
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
-  })
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-function PropertyCard({ 
-  property, 
-  onEdit, 
-  onDelete 
-}: { 
-  property: Property
-  onEdit: () => void
-  onDelete: () => void 
-}) {
+function getChecklist(p: EditingProperty): { label: string; done: boolean }[] {
+  return [
+    { label: "Airbnb URL", done: !!p.airbnbUrl },
+    { label: "Title", done: !!p.title },
+    { label: "City/region", done: !!p.cityRegion },
+    { label: "3+ photos", done: (p.photos?.length || 0) >= 3 },
+    { label: "Price range", done: !!p.priceNightlyRange },
+    { label: "Guests/beds/baths", done: !!p.guests && !!p.beds && !!p.baths },
+    { label: "5+ amenities", done: (p.amenities?.length || 0) >= 5 },
+    { label: "Vibe tags", done: (p.vibeTags?.length || 0) >= 1 },
+    { label: "Creator brief", done: !!p.creatorBrief && p.creatorBrief.length > 20 },
+  ]
+}
+
+function PropertyListItem({ property, isSelected, onSelect }: { property: Property; isSelected: boolean; onSelect: () => void }) {
   return (
-    <div className="group rounded-xl border border-foreground/5 bg-white/50 p-4 transition-all hover:bg-white/70">
-      <div className="flex gap-4">
-        {/* Thumbnail */}
-        <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-foreground/5">
-          {property.heroImageUrl ? (
-            <img src={property.heroImageUrl} alt={property.title} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full items-center justify-center text-2xl text-muted-foreground/30">🏠</div>
-          )}
+    <button onClick={onSelect} className={`w-full rounded-lg border p-3 text-left transition-all ${isSelected ? 'border-primary bg-primary/5' : 'border-foreground/5 bg-white/50 hover:bg-white/70'}`}>
+      <div className="flex items-start gap-3">
+        <div className="h-12 w-16 shrink-0 overflow-hidden rounded bg-foreground/5">
+          {property.heroImageUrl ? <img src={property.heroImageUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-lg text-muted-foreground/30">🏠</div>}
         </div>
-        
-        {/* Info */}
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <h3 className="text-sm font-semibold">{property.title}</h3>
-              <p className="text-[11px] text-muted-foreground">
-                {[property.city, property.region].filter(Boolean).join(', ') || 'No location'}
-              </p>
-            </div>
-            <div className="flex items-center gap-1">
-              {property.isDraft && (
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-medium text-amber-700">Draft</span>
-              )}
-              {!property.isActive && !property.isDraft && (
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[9px] font-medium text-gray-600">Inactive</span>
-              )}
-              {property.isActive && !property.isDraft && (
-                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-medium text-emerald-700">Active</span>
-              )}
-            </div>
-          </div>
-          
-          <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
-            <span>Updated {formatDate(property.updatedAt)}</span>
-            {property.airbnbLastFetchedAt && (
-              <span>• Synced {formatDate(property.airbnbLastFetchedAt)}</span>
-            )}
-          </div>
-          
-          <div className="mt-2 flex gap-2">
-            <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={onEdit}>Edit</Button>
-            <Button size="sm" variant="ghost" className="h-7 text-[10px] text-red-600 hover:bg-red-50 hover:text-red-700" onClick={onDelete}>Delete</Button>
-            {property.listingUrl && (
-              <a href={property.listingUrl} target="_blank" rel="noopener noreferrer" 
-                className="ml-auto flex h-7 items-center rounded-md px-2 text-[10px] text-muted-foreground hover:bg-foreground/5">
-                View on Airbnb ↗
-              </a>
-            )}
+          <p className="truncate text-sm font-medium">{property.title || 'Untitled'}</p>
+          <p className="text-[11px] text-muted-foreground">{property.cityRegion || 'No location'}</p>
+          <div className="mt-1 flex items-center gap-2">
+            <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${property.isDraft ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>{property.isDraft ? 'Draft' : 'Ready'}</span>
+            <span className="text-[9px] text-muted-foreground">Updated {formatDate(property.updatedAt)}</span>
           </div>
         </div>
+      </div>
+    </button>
+  )
+}
+
+function ChipSelector({ options, selected, onChange, label }: { options: string[]; selected: string[]; onChange: (v: string[]) => void; label: string }) {
+  const toggle = (opt: string) => onChange(selected.includes(opt) ? selected.filter(s => s !== opt) : [...selected, opt])
+  return (
+    <div>
+      <label className="mb-2 block text-[11px] font-medium text-muted-foreground">{label}</label>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map(opt => (
+          <button key={opt} type="button" onClick={() => toggle(opt)} className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${selected.includes(opt) ? 'border-primary bg-primary/10 text-primary' : 'border-foreground/10 bg-white hover:bg-foreground/[0.02]'}`}>{opt}</button>
+        ))}
       </div>
     </div>
   )
 }
 
-function PropertyEditor({ 
-  property, 
-  onSave, 
-  onCancel,
-  isSaving 
-}: { 
-  property: EditingProperty
-  onSave: (data: EditingProperty) => void
-  onCancel: () => void
-  isSaving: boolean
-}) {
+function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: EditingProperty; onSave: (data: EditingProperty) => void; onDelete?: () => void; isSaving: boolean }) {
   const [form, setForm] = useState<EditingProperty>(property)
-  const [isPrefilling, setIsPrefilling] = useState(false)
-  const [prefillError, setPrefillError] = useState<string | null>(null)
+  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [isImporting, setIsImporting] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
 
-  const handlePrefill = async () => {
-    if (!form.listingUrl) return
-    setIsPrefilling(true)
-    setPrefillError(null)
-    
+  useEffect(() => { setForm(property); setStep(1) }, [property])
+
+  const handleImport = async () => {
+    if (!form.airbnbUrl) return
+    setIsImporting(true)
+    setImportError(null)
     try {
-      const res = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(form.listingUrl)}`)
+      const res = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(form.airbnbUrl)}`)
       if (res.ok) {
         const data = await res.json()
-        setForm(prev => ({
-          ...prev,
-          title: data.title || prev.title,
-          heroImageUrl: data.imageUrl || prev.heroImageUrl,
-          city: data.cityRegion?.split(',')[0]?.trim() || prev.city,
-          region: data.cityRegion?.split(',')[1]?.trim() || prev.region,
-        }))
+        setForm(prev => ({ ...prev, title: data.title || prev.title, heroImageUrl: data.imageUrl || prev.heroImageUrl, cityRegion: data.cityRegion || prev.cityRegion, lastImportedAt: new Date().toISOString() }))
+        setStep(2)
       } else {
-        setPrefillError('Could not fetch listing details. You can enter them manually.')
+        setImportError('Could not fetch listing. Check URL and try again.')
       }
-    } catch {
-      setPrefillError('Prefill failed. Please enter details manually.')
-    } finally {
-      setIsPrefilling(false)
-    }
+    } catch { setImportError('Import failed. Enter details manually.') }
+    finally { setIsImporting(false) }
   }
 
-  const handleSubmit = (e: React.FormEvent, asDraft = false) => {
-    e.preventDefault()
-    onSave({ ...form, isDraft: asDraft })
+  const generateBrief = () => {
+    const tags = form.vibeTags?.join(', ') || 'cozy, unique'
+    const location = form.cityRegion || 'this beautiful destination'
+    setForm(prev => ({ ...prev, creatorBrief: `This ${tags} property in ${location} is perfect for creators looking for authentic, visually stunning content opportunities. Ideal for travel, lifestyle, and photography content. The space offers unique angles and natural lighting throughout the day.` }))
   }
+
+  const handleSave = (asDraft: boolean) => {
+    onSave({ ...form, isDraft: asDraft })
+    setToast('Property saved!')
+    setTimeout(() => setToast(null), 2000)
+  }
+
+  const checklist = getChecklist(form)
+  const checklistComplete = checklist.filter(c => c.done).length
+  const canPublish = checklistComplete >= 7
 
   return (
-    <div className="rounded-xl border border-primary/10 bg-white/70 p-6">
-      <h2 className="text-lg font-semibold">{property.isNew ? 'Add Property' : 'Edit Property'}</h2>
-      
-      <form onSubmit={(e) => handleSubmit(e, false)} className="mt-4 space-y-4">
-        {/* Airbnb URL */}
-        <div>
-          <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Airbnb URL</label>
-          <div className="flex gap-2">
-            <Input
-              value={form.listingUrl || ''}
-              onChange={e => setForm({ ...form, listingUrl: e.target.value })}
-              placeholder="https://airbnb.com/rooms/123456"
-              className="flex-1"
-            />
-            <Button type="button" variant="outline" size="sm" onClick={handlePrefill} disabled={!form.listingUrl || isPrefilling}>
-              {isPrefilling ? 'Fetching...' : form.id ? 'Refresh' : 'Prefill'}
-            </Button>
-          </div>
-          {prefillError && <p className="mt-1 text-[11px] text-amber-600">{prefillError}</p>}
-          <p className="mt-1 text-[10px] text-muted-foreground">Paste your Airbnb listing URL to auto-fill details</p>
-        </div>
+    <div className="rounded-xl border border-foreground/5 bg-white/60 p-5">
+      {toast && <div className="mb-4 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">{toast}</div>}
 
-        {/* Hero Image Preview */}
-        {form.heroImageUrl && (
-          <div>
-            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Preview</label>
-            <div className="h-32 w-48 overflow-hidden rounded-lg bg-foreground/5">
-              <img src={form.heroImageUrl} alt="Property" className="h-full w-full object-cover" />
-            </div>
-          </div>
-        )}
+      <div className="mb-5 flex gap-1 rounded-lg bg-foreground/[0.03] p-1">
+        {[1, 2, 3].map(s => (
+          <button key={s} onClick={() => setStep(s as 1 | 2 | 3)} className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${step === s ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+            {s === 1 ? '1. Import' : s === 2 ? '2. Confirm' : '3. Brief'}
+          </button>
+        ))}
+      </div>
 
-        {/* Title */}
-        <div>
-          <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Title *</label>
-          <Input
-            value={form.title || ''}
-            onChange={e => setForm({ ...form, title: e.target.value })}
-            placeholder="Cozy Mountain Cabin"
-            required
-          />
-        </div>
-
-        {/* Location */}
-        <div className="grid gap-4 sm:grid-cols-3">
+      {step === 1 && (
+        <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">City</label>
-            <Input
-              value={form.city || ''}
-              onChange={e => setForm({ ...form, city: e.target.value })}
-              placeholder="Aspen"
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Region / State</label>
-            <Input
-              value={form.region || ''}
-              onChange={e => setForm({ ...form, region: e.target.value })}
-              placeholder="Colorado"
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Country</label>
-            <Input
-              value={form.country || ''}
-              onChange={e => setForm({ ...form, country: e.target.value })}
-              placeholder="USA"
-            />
-          </div>
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Description</label>
-          <textarea
-            value={form.description || ''}
-            onChange={e => setForm({ ...form, description: e.target.value })}
-            placeholder="Describe your property..."
-            rows={3}
-            className="w-full resize-none rounded-lg border border-foreground/10 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
-
-        {/* Status */}
-        {form.id && (
-          <div>
-            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Status</label>
+            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Airbnb URL</label>
             <div className="flex gap-2">
-              <button type="button" onClick={() => setForm({ ...form, isActive: true })}
-                className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${form.isActive ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-foreground/10 bg-white'}`}>
-                Active
-              </button>
-              <button type="button" onClick={() => setForm({ ...form, isActive: false })}
-                className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${!form.isActive ? 'border-gray-400 bg-gray-50 text-gray-700' : 'border-foreground/10 bg-white'}`}>
-                Inactive
-              </button>
+              <Input value={form.airbnbUrl || ''} onChange={e => setForm({ ...form, airbnbUrl: e.target.value })} placeholder="https://airbnb.com/rooms/123456" className="flex-1" />
+              <Button onClick={handleImport} disabled={!form.airbnbUrl || isImporting}>{isImporting ? 'Importing...' : 'Import'}</Button>
+            </div>
+            {importError && <p className="mt-1.5 text-[11px] text-amber-600">{importError}</p>}
+          </div>
+          {form.heroImageUrl && (
+            <div className="rounded-lg border border-foreground/5 bg-foreground/[0.02] p-3">
+              <div className="flex gap-4">
+                <div className="h-24 w-36 shrink-0 overflow-hidden rounded-lg bg-foreground/5"><img src={form.heroImageUrl} alt="" className="h-full w-full object-cover" /></div>
+                <div>
+                  <p className="text-sm font-medium">{form.title || 'Untitled'}</p>
+                  <p className="text-[11px] text-muted-foreground">{form.cityRegion || 'No location'}</p>
+                  {form.lastImportedAt && <p className="mt-2 text-[10px] text-muted-foreground">Last imported: {formatDate(form.lastImportedAt)}</p>}
+                  <Button size="sm" variant="outline" className="mt-2 h-7 text-[10px]" onClick={handleImport} disabled={isImporting}>Refresh from Airbnb</Button>
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2"><Button variant="outline" onClick={() => setStep(2)}>Skip to details →</Button></div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Title *</label><Input value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Cozy Mountain Cabin" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">City / Region *</label><Input value={form.cityRegion || ''} onChange={e => setForm({ ...form, cityRegion: e.target.value })} placeholder="Aspen, Colorado" /></div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-4">
+            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Price/night</label><Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="$150-$250" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Guests</label><Input type="number" value={form.guests || ''} onChange={e => setForm({ ...form, guests: parseInt(e.target.value) || undefined })} placeholder="4" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Beds</label><Input type="number" value={form.beds || ''} onChange={e => setForm({ ...form, beds: parseInt(e.target.value) || undefined })} placeholder="2" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Baths</label><Input type="number" value={form.baths || ''} onChange={e => setForm({ ...form, baths: parseInt(e.target.value) || undefined })} placeholder="1" /></div>
+          </div>
+          <ChipSelector options={COMMON_AMENITIES} selected={form.amenities || []} onChange={v => setForm({ ...form, amenities: v })} label="Amenities (select 5+)" />
+          <ChipSelector options={COMMON_VIBE_TAGS} selected={form.vibeTags || []} onChange={v => setForm({ ...form, vibeTags: v })} label="Vibe Tags" />
+          <div>
+            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">Photo URLs (one per line, 3+ recommended)</label>
+            <textarea value={(form.photos || []).join('\n')} onChange={e => setForm({ ...form, photos: e.target.value.split('\n').filter(Boolean) })} placeholder="https://example.com/photo1.jpg" rows={3} className="w-full resize-none rounded-lg border border-foreground/10 bg-white px-3 py-2 text-xs focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+          </div>
+          <div className="rounded-lg bg-foreground/[0.02] p-3">
+            <p className="mb-2 text-[11px] font-semibold text-muted-foreground">Checklist ({checklistComplete}/{checklist.length})</p>
+            <div className="grid gap-1 sm:grid-cols-3">
+              {checklist.map(item => (<div key={item.label} className="flex items-center gap-1.5 text-[11px]"><span className={item.done ? 'text-emerald-500' : 'text-muted-foreground/40'}>{item.done ? '✓' : '○'}</span><span className={item.done ? 'text-foreground' : 'text-muted-foreground'}>{item.label}</span></div>))}
             </div>
           </div>
-        )}
-
-        {/* Last updated info */}
-        {form.updatedAt && (
-          <p className="text-[10px] text-muted-foreground">
-            Last updated: {formatDate(form.updatedAt)}
-            {form.airbnbLastFetchedAt && ` • Last synced from Airbnb: ${formatDate(form.airbnbLastFetchedAt)}`}
-          </p>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-3 pt-2">
-          <Button type="submit" disabled={isSaving || !form.title}>
-            {isSaving ? 'Saving...' : 'Save Property'}
-          </Button>
-          {property.isNew && (
-            <Button type="button" variant="outline" onClick={(e) => handleSubmit(e as unknown as React.FormEvent, true)} disabled={isSaving || !form.title}>
-              Save as Draft
-            </Button>
-          )}
-          <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+          <div className="flex justify-between pt-2"><Button variant="outline" onClick={() => setStep(1)}>← Back</Button><Button onClick={() => setStep(3)}>Next: Creator Brief →</Button></div>
         </div>
-      </form>
+      )}
+
+      {step === 3 && (
+        <div className="space-y-4">
+          <div>
+            <div className="mb-1.5 flex items-center justify-between"><label className="text-[11px] font-medium text-muted-foreground">Creator Brief</label><Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={generateBrief}>Generate from tags</Button></div>
+            <textarea value={form.creatorBrief || ''} onChange={e => setForm({ ...form, creatorBrief: e.target.value })} placeholder="Describe what makes your property special for content creators..." rows={6} className="w-full resize-none rounded-lg border border-foreground/10 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
+            <p className="mt-1 text-[10px] text-muted-foreground">This helps creators understand your property.</p>
+          </div>
+          <div className="flex items-center justify-between border-t border-foreground/5 pt-4">
+            <div className="flex gap-2"><Button variant="outline" onClick={() => setStep(2)}>← Back</Button>{onDelete && <Button variant="ghost" className="text-red-600 hover:bg-red-50" onClick={onDelete}>Delete</Button>}</div>
+            <div className="flex gap-2"><Button variant="outline" onClick={() => handleSave(true)} disabled={isSaving}>Save Draft</Button><Button onClick={() => handleSave(false)} disabled={isSaving || !canPublish}>{isSaving ? 'Saving...' : 'Save Property'}</Button></div>
+          </div>
+          {!canPublish && <p className="text-right text-[10px] text-amber-600">Complete at least 7 checklist items to publish</p>}
+        </div>
+      )}
     </div>
   )
 }
@@ -273,133 +219,61 @@ function PropertyEditor({
 export default function HostPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<EditingProperty | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Fetch properties
-  useEffect(() => {
-    fetchProperties()
-  }, [])
+  useEffect(() => { fetchProperties() }, [])
 
   const fetchProperties = async () => {
     try {
       const res = await fetch('/api/properties')
-      if (res.ok) {
-        const data = await res.json()
-        setProperties(data.properties || [])
-      }
-    } catch (error) {
-      console.error('Failed to fetch properties:', error)
-    } finally {
-      setIsLoading(false)
-    }
+      if (res.ok) { const data = await res.json(); setProperties(data.properties || []) }
+    } catch (e) { console.error(e) }
+    finally { setIsLoading(false) }
   }
+
+  const handleSelect = (p: Property) => { setSelectedId(p.id); setEditing(p) }
+  const handleAddNew = () => { setSelectedId(null); setEditing({ isNew: true, isDraft: true, isActive: true, amenities: [], vibeTags: [], photos: [] }) }
 
   const handleSave = async (data: EditingProperty) => {
     setIsSaving(true)
     try {
-      const res = await fetch('/api/properties', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      if (res.ok) {
-        await fetchProperties()
-        setEditing(null)
-      }
-    } catch (error) {
-      console.error('Failed to save property:', error)
-    } finally {
-      setIsSaving(false)
-    }
+      const res = await fetch('/api/properties', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+      if (res.ok) { const { property } = await res.json(); await fetchProperties(); setSelectedId(property.id); setEditing(property) }
+    } catch (e) { console.error(e) }
+    finally { setIsSaving(false) }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this property? This cannot be undone.')) return
-    
-    try {
-      const res = await fetch('/api/properties', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      })
-      if (res.ok) {
-        setProperties(prev => prev.filter(p => p.id !== id))
-      }
-    } catch (error) {
-      console.error('Failed to delete property:', error)
-    }
+  const handleDelete = async () => {
+    if (!selectedId || !confirm('Delete this property?')) return
+    try { await fetch('/api/properties', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: selectedId }) }); setProperties(prev => prev.filter(p => p.id !== selectedId)); setSelectedId(null); setEditing(null) }
+    catch (e) { console.error(e) }
   }
 
   return (
     <div className="flex min-h-screen flex-col bg-[hsl(210,20%,98%)]">
       <Navbar />
-      
-      <main className="flex-1 py-8">
+      <main className="flex-1 py-6">
         <Container>
-          {/* Header */}
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-4"><Link href="/dashboard/host" className="text-xs text-muted-foreground hover:text-foreground">← Dashboard</Link></div>
+          <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
             <div>
-              <div className="flex items-center gap-2">
-                <Link href="/dashboard/host" className="text-xs text-muted-foreground hover:text-foreground">← Dashboard</Link>
-              </div>
-              <h1 className="mt-1 text-2xl font-semibold">My Properties</h1>
-              <p className="mt-0.5 text-sm text-muted-foreground">Manage your vacation rental listings</p>
+              <div className="mb-3 flex items-center justify-between"><h2 className="text-sm font-semibold">Your Properties</h2><Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={handleAddNew}>+ Add</Button></div>
+              {isLoading ? <p className="text-sm text-muted-foreground">Loading...</p> : properties.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-foreground/10 p-4 text-center"><p className="text-xs text-muted-foreground">No properties yet</p><Button size="sm" className="mt-2" onClick={handleAddNew}>Add your first</Button></div>
+              ) : (
+                <div className="space-y-2">{properties.map(p => <PropertyListItem key={p.id} property={p} isSelected={selectedId === p.id} onSelect={() => handleSelect(p)} />)}</div>
+              )}
             </div>
-            {!editing && (
-              <Button onClick={() => setEditing({ isNew: true, isActive: true, isDraft: true })}>
-                + Add Property
-              </Button>
-            )}
-          </div>
-
-          {/* Editor */}
-          {editing && (
-            <div className="mb-6">
-              <PropertyEditor
-                property={editing}
-                onSave={handleSave}
-                onCancel={() => setEditing(null)}
-                isSaving={isSaving}
-              />
+            <div>
+              {editing ? <PropertyEditor property={editing} onSave={handleSave} onDelete={selectedId ? handleDelete : undefined} isSaving={isSaving} /> : (
+                <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-foreground/10 bg-white/30"><div className="text-center"><p className="text-sm text-muted-foreground">Select a property or add a new one</p><Button className="mt-3" onClick={handleAddNew}>+ Add Property</Button></div></div>
+              )}
             </div>
-          )}
-
-          {/* Properties List */}
-          {isLoading ? (
-            <div className="rounded-xl border border-foreground/5 bg-white/50 p-8 text-center">
-              <p className="text-sm text-muted-foreground">Loading properties...</p>
-            </div>
-          ) : properties.length === 0 && !editing ? (
-            <div className="rounded-xl border border-dashed border-foreground/10 bg-white/30 p-12 text-center">
-              <p className="text-lg font-medium">No properties yet</p>
-              <p className="mt-1 text-sm text-muted-foreground">Add your first Airbnb listing to get started</p>
-              <Button className="mt-4" onClick={() => setEditing({ isNew: true, isActive: true, isDraft: true })}>
-                + Add Your First Property
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {properties.map(property => (
-                <PropertyCard
-                  key={property.id}
-                  property={property}
-                  onEdit={() => setEditing(property)}
-                  onDelete={() => handleDelete(property.id)}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Help text */}
-          <div className="mt-8 text-center">
-            <p className="text-[11px] text-muted-foreground">
-              Need help? <Link href="/help" className="text-primary hover:underline">Visit Help Center</Link>
-            </p>
           </div>
         </Container>
       </main>
-
       <Footer />
     </div>
   )
