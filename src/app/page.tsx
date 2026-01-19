@@ -1,33 +1,70 @@
 import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import Image from "next/image"
 
 function HeroBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+      {/* Hero image - atmospheric layer */}
+      <div className="absolute inset-0 hero-image-mask">
+        <Image
+          src="/images/hero-cabin.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover opacity-[0.42]"
+          sizes="100vw"
+        />
+      </div>
+      
+      {/* Feather gradient overlay - blends image into background */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: `
+            linear-gradient(to bottom, 
+              hsl(210 20% 98% / 0.3) 0%, 
+              transparent 25%, 
+              transparent 60%, 
+              hsl(210 20% 98% / 0.7) 85%, 
+              hsl(210 20% 98%) 100%
+            )
+          `,
+        }}
+      />
+      
+      {/* Side feathers */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: `
+            linear-gradient(to right, 
+              hsl(210 20% 98%) 0%, 
+              transparent 15%, 
+              transparent 85%, 
+              hsl(210 20% 98%) 100%
+            )
+          `,
+        }}
+      />
+      
       {/* Base gradient wash - top right, warm sky */}
       <div 
         className="absolute -top-1/4 -right-1/4 h-[120%] w-[80%]"
         style={{
-          background: "radial-gradient(ellipse at 70% 20%, hsl(199 89% 48% / 0.06) 0%, transparent 60%)",
+          background: "radial-gradient(ellipse at 70% 20%, hsl(199 89% 48% / 0.08) 0%, transparent 60%)",
         }}
       />
       {/* Counter gradient - bottom left, deep blue */}
       <div 
         className="absolute -bottom-1/4 -left-1/4 h-[100%] w-[70%]"
         style={{
-          background: "radial-gradient(ellipse at 30% 80%, hsl(213 94% 45% / 0.04) 0%, transparent 50%)",
-        }}
-      />
-      {/* Soft atmospheric layer */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: "linear-gradient(165deg, hsl(210 20% 99%) 0%, hsl(210 30% 97%) 50%, hsl(210 20% 99%) 100%)",
+          background: "radial-gradient(ellipse at 30% 80%, hsl(213 94% 45% / 0.05) 0%, transparent 50%)",
         }}
       />
       {/* Single large soft cloud */}
-      <div className="absolute top-1/4 right-1/4 h-[500px] w-[700px] rounded-full bg-accent/[0.03] blur-[150px]" />
+      <div className="absolute top-1/4 right-1/4 h-[500px] w-[700px] rounded-full bg-accent/[0.04] blur-[150px]" />
     </div>
   )
 }
@@ -37,21 +74,21 @@ function HeroSection() {
     <section className="relative overflow-hidden py-16 md:py-20">
       <Container>
         <div className="flex flex-col items-center text-center opacity-0 reveal">
-          <span className="text-label mb-3 inline-block rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-primary">
+          <span className="text-label mb-3 inline-block rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-primary backdrop-blur-sm">
             Influencer marketing for vacation rentals
           </span>
-          <h1 className="font-heading text-[2.5rem] font-normal leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-[4.25rem]">
+          <h1 className="font-heading text-[2.5rem] font-normal leading-[1.05] tracking-tight drop-shadow-sm sm:text-5xl md:text-6xl lg:text-[4.25rem]">
             <span className="whitespace-nowrap">Get more bookings with</span>{" "}
             <span className="whitespace-nowrap bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">creator marketing</span>
           </h1>
-          <p className="mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
+          <p className="mt-4 max-w-xl text-base text-muted-foreground drop-shadow-sm md:text-lg">
             Hire vetted creators to showcase your property. They post, you get clicks and stunning content.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Button size="lg" asChild className="px-8">
+            <Button size="lg" asChild className="px-8 shadow-lg shadow-primary/20">
               <Link href="/hosts">Host Signup</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="px-8">
+            <Button size="lg" variant="outline" asChild className="bg-white/80 px-8 backdrop-blur-sm">
               <Link href="/waitlist">Creator Waitlist</Link>
             </Button>
           </div>

@@ -610,3 +610,24 @@
     opacity: 1;
   }
 }
+
+/* ============================================================================
+   Hero Image Mask - Feathered edges for atmospheric effect
+   ============================================================================ */
+
+.hero-image-mask {
+  -webkit-mask-image: radial-gradient(
+    ellipse 85% 80% at 50% 45%,
+    black 40%,
+    rgba(0, 0, 0, 0.6) 60%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 90%
+  );
+  mask-image: radial-gradient(
+    ellipse 85% 80% at 50% 45%,
+    black 40%,
+    rgba(0, 0, 0, 0.6) 60%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 90%
+  );
+}
