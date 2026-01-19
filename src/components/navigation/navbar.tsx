@@ -35,9 +35,28 @@ export function Navbar() {
         </ul>
         
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="hidden rounded-full text-xs sm:inline-flex" asChild>
-            <Link href="/waitlist">Join Creator Waitlist</Link>
-          </Button>
+          {/* Demo login links */}
+          <div className="group relative">
+            <Button variant="ghost" size="sm" className="rounded-full text-xs">
+              Demo Login ▾
+            </Button>
+            <div className="invisible absolute right-0 top-full z-50 mt-2 w-48 rounded-xl border border-foreground/10 bg-white/95 p-2 opacity-0 shadow-xl backdrop-blur-sm transition-all group-hover:visible group-hover:opacity-100">
+              <Link 
+                href="/dashboard/host" 
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-foreground/5"
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">H</span>
+                Host Dashboard
+              </Link>
+              <Link 
+                href="/dashboard/creator" 
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-foreground/5"
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 text-[10px] font-bold text-accent">C</span>
+                Creator Dashboard
+              </Link>
+            </div>
+          </div>
           <Button size="sm" className="rounded-full text-xs" asChild>
             <Link href="/hosts">Host Signup</Link>
           </Button>
