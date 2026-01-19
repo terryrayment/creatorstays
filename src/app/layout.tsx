@@ -3,6 +3,7 @@ import { DM_Sans, Bebas_Neue } from "next/font/google"
 import "./globals.css"
 import { Navbar } from "@/components/navigation/navbar"
 import { Footer } from "@/components/navigation/footer"
+import { AuthProvider } from "@/components/providers/auth-provider"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -30,9 +31,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} ${bebasNeue.variable}`}>
       <body className="flex min-h-screen flex-col font-body text-foreground antialiased">
-        <Navbar />
-        <main className="flex-1 pt-20">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-1 pt-20">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   )

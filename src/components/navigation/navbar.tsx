@@ -3,26 +3,37 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
 
 export function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [userRole, setUserRole] = useState<'host' | 'creator' | null>(null)
+  const { data: session, status } = useSession()
   const pathname = usePathname()
-
-  // Check login state from localStorage
+  
+  // Fallback to localStorage for demo mode
+  const [demoRole, setDemoRole] = useState<'host' | 'creator' | null>(null)
+  
   useEffect(() => {
     const role = localStorage.getItem('creatorstays_role')
     if (role === 'host' || role === 'creator') {
-      setIsLoggedIn(true)
-      setUserRole(role)
+      setDemoRole(role)
     }
   }, [pathname])
 
-  const handleLogout = () => {
+  // Use NextAuth session if available, otherwise fall back to demo mode
+  const isLoggedIn = status === "authenticated" || demoRole !== null
+  const userRole = session?.user?.role || demoRole
+
+  const handleLogout = async () => {
+    // Clear demo mode
     localStorage.removeItem('creatorstays_role')
-    setIsLoggedIn(false)
-    setUserRole(null)
-    window.location.href = '/'
+    setDemoRole(null)
+    
+    // Sign out from NextAuth if authenticated
+    if (status === "authenticated") {
+      await signOut({ callbackUrl: '/' })
+    } else {
+      window.location.href = '/'
+    }
   }
 
   return (
@@ -58,6 +69,15 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
             <>
+              {/* User avatar/name if available */}
+              {session?.user?.image && (
+                <img 
+                  src={session.user.image} 
+                  alt="" 
+                  className="h-8 w-8 rounded-full border-2 border-white/50"
+                />
+              )}
+              
               {/* Dashboard Link */}
               <Link
                 href={userRole === 'host' ? '/dashboard/host' : '/dashboard/creator'}
@@ -75,28 +95,13 @@ export function Navbar() {
             </>
           ) : (
             <>
-              {/* Login dropdown */}
-              <div className="group relative">
-                <button className="rounded-full border-2 border-white/50 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white transition-all hover:border-white">
-                  Login ▾
-                </button>
-                <div className="invisible absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border-2 border-black bg-white p-1.5 opacity-0 shadow-xl transition-all group-hover:visible group-hover:opacity-100">
-                  <Link 
-                    href="/demo-login?role=host" 
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-[11px] font-semibold text-black transition-colors hover:bg-black/5"
-                  >
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#FFD84A] text-[9px] font-bold">H</span>
-                    Host Login
-                  </Link>
-                  <Link 
-                    href="/demo-login?role=creator" 
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-[11px] font-semibold text-black transition-colors hover:bg-black/5"
-                  >
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#4AA3FF] text-[9px] font-bold">C</span>
-                    Creator Login
-                  </Link>
-                </div>
-              </div>
+              {/* Login link */}
+              <Link
+                href="/login"
+                className="rounded-full border-2 border-white/50 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white transition-all hover:border-white"
+              >
+                Login
+              </Link>
               
               <Link
                 href="/hosts#signup"
