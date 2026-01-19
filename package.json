@@ -28,7 +28,7 @@
     "nanoid": "^5.0.7",
     "next-auth": "^4.24.5",
     "@auth/prisma-adapter": "^1.0.12",
-    "nodemailer": "^6.9.8"
+    "nodemailer": "^7.0.7"
   },
   "devDependencies": {
     "@types/node": "^20.14.9",
