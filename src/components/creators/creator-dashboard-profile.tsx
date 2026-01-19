@@ -441,6 +441,11 @@ export function CreatorDashboardProfile() {
   useEffect(() => {
     const connected = searchParams.get('connected')
     const error = searchParams.get('error')
+    const igError = searchParams.get('ig_error')
+    
+    if (igError === 'not_configured') {
+      setOauthNotConfigured('instagram')
+    }
     
     if (error) {
       setConnectError(`Connection failed: ${error}`)
@@ -497,18 +502,8 @@ export function CreatorDashboardProfile() {
   const adjustedCompleteness = Math.min(100, baseCompleteness + (connectionCount * 10) + (profile.bio.length > 50 ? 15 : 0) + (profile.dealPrefs.minFlat ? 10 : 0))
 
   // Handle Instagram OAuth connect
-  const handleInstagramOAuth = async () => {
-    // Check if OAuth is configured by attempting to fetch the auth endpoint
-    try {
-      const res = await fetch('/api/instagram/auth', { method: 'HEAD' })
-      if (res.status === 500 || res.status === 404) {
-        setOauthNotConfigured('instagram')
-        return
-      }
-      window.location.href = '/api/instagram/auth'
-    } catch {
-      setOauthNotConfigured('instagram')
-    }
+  const handleInstagramOAuth = () => {
+    window.location.href = '/api/instagram/auth'
   }
 
   // Handle Instagram disconnect
@@ -817,16 +812,23 @@ export function CreatorDashboardProfile() {
       {/* OAuth Not Configured Modal */}
       {oauthNotConfigured && (
         <Modal onClose={() => setOauthNotConfigured(null)}>
-          <h3 className="text-lg font-semibold">Not Configured</h3>
+          <h3 className="text-lg font-semibold">Instagram Connect Not Configured</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            {oauthNotConfigured.charAt(0).toUpperCase() + oauthNotConfigured.slice(1)} OAuth is not configured yet. 
-            The environment variables for this integration need to be set up.
+            Instagram OAuth requires environment variables to be set up.
           </p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            You can still connect manually by entering your profile URL.
+          <div className="mt-3 rounded-lg bg-foreground/5 p-3">
+            <p className="text-xs font-medium text-foreground">Required:</p>
+            <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground font-mono">
+              <li>META_APP_ID</li>
+              <li>META_APP_SECRET</li>
+              <li>META_REDIRECT_URI</li>
+            </ul>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Create a Meta App at developers.facebook.com and add the Instagram Basic Display product.
           </p>
           <div className="mt-6 flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => setOauthNotConfigured(null)}>Cancel</Button>
+            <Button variant="outline" className="flex-1" onClick={() => setOauthNotConfigured(null)}>Close</Button>
             <Button className="flex-1" onClick={() => {
               setOauthNotConfigured(null)
               setConnectingPlatform(oauthNotConfigured)
