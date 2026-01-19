@@ -5,16 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Panel, PanelHeader, PanelContent } from "@/components/ui/panel"
 import { Metric } from "@/components/ui/metric"
-
-// Edge blur
-function EdgeBlur() {
-  return (
-    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      <div className="absolute -top-40 -right-40 h-[700px] w-[700px] rounded-full bg-[hsl(199,89%,48%)]/6 blur-[200px]" />
-      <div className="absolute -bottom-60 -left-40 h-[600px] w-[600px] rounded-full bg-[hsl(213,94%,45%)]/5 blur-[180px]" />
-    </div>
-  )
-}
+import { EdgeBlur } from "@/components/ui/edge-blur"
 
 // Status indicator
 function StatusDot({ active, color }: { active: boolean; color: string }) {

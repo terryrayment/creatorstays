@@ -34,14 +34,7 @@ export interface CreatorProfile {
   isSample?: boolean
 }
 
-function EdgeBlur() {
-  return (
-    <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      <div className="absolute -top-1/2 left-1/4 h-[600px] w-[800px] rounded-full bg-primary/4 blur-[120px]" />
-      <div className="absolute top-0 right-0 h-[400px] w-[600px] rounded-full bg-accent/3 blur-[100px]" />
-    </div>
-  )
-}
+import { SectionBlur } from "@/components/ui/edge-blur"
 
 function StatTile({ value, label, note }: { value: string; label: string; note?: string }) {
   return (
@@ -150,7 +143,7 @@ export function CreatorProfileView({ creator }: { creator: CreatorProfile }) {
     <>
       {/* Hero Section */}
       <section className="relative overflow-hidden pb-8 pt-12 md:pb-12 md:pt-20">
-        <EdgeBlur />
+        <SectionBlur />
         <Container>
           {/* Beta Badge */}
           <div className="mb-8">

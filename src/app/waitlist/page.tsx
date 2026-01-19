@@ -5,15 +5,7 @@ import { Container } from "@/components/layout/container"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select } from "@/components/ui/select"
-
-function EdgeBlur() {
-  return (
-    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      <div className="absolute -top-40 right-0 h-[500px] w-[500px] rounded-full bg-[hsl(199,89%,48%)]/6 blur-[150px]" />
-      <div className="absolute -bottom-40 -left-20 h-[400px] w-[400px] rounded-full bg-[hsl(213,94%,45%)]/5 blur-[120px]" />
-    </div>
-  )
-}
+import { SectionBlur } from "@/components/ui/edge-blur"
 
 const creatorNicheOptions = [
   { value: "Travel", label: "Travel" },
@@ -78,7 +70,7 @@ export default function WaitlistPage() {
   if (submitted) {
     return (
       <div className="relative min-h-[80vh]">
-        <EdgeBlur />
+        <SectionBlur />
         <Container className="flex min-h-[80vh] items-center justify-center py-16">
           <div className="mx-auto max-w-md text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
@@ -101,7 +93,7 @@ export default function WaitlistPage() {
 
   return (
     <div className="relative">
-      <EdgeBlur />
+      <SectionBlur />
       <Container className="py-12 md:py-16">
         <div className="mx-auto max-w-xl">
           {/* Header */}

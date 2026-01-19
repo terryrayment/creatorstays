@@ -93,46 +93,51 @@ const hostReasons = [
 
 function WhyHostsSection() {
   return (
-    <section className="py-14">
+    <section className="py-8">
       <Container>
-        <div className="mb-8 opacity-0 reveal">
+        <div className="mb-5 opacity-0 reveal">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
             Why hosts use CreatorStays
           </h2>
         </div>
-        <div className="grid gap-3 md:grid-cols-12">
-          {/* Featured card - takes more space */}
-          <div 
-            className="surface-card group relative rounded-xl p-5 opacity-0 reveal md:col-span-5 md:row-span-2"
-            style={{ animationDelay: '100ms' }}
-          >
-            <div className="surface-card-glow" aria-hidden="true" />
-            <div className="relative z-10 flex h-full flex-col">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Primary benefit</span>
-              <h3 className="mt-2 text-xl font-semibold leading-snug tracking-tight">{hostReasons[0].title}</h3>
-              <p className="mt-1 text-[13px] leading-snug text-muted-foreground/80">{hostReasons[0].description}</p>
-              <div className="mt-auto pt-6">
-                <span className="text-[11px] text-muted-foreground/50">Measurable ROI on every campaign</span>
-              </div>
-            </div>
+        <div className="relative">
+          {/* Extreme edge blur behind cards */}
+          <div className="pointer-events-none absolute -inset-20 -z-10" aria-hidden="true">
+            <div className="absolute left-1/4 top-0 h-[400px] w-[500px] rounded-full bg-[hsl(199,89%,48%)]/[0.08] blur-[180px]" />
+            <div className="absolute bottom-0 right-1/4 h-[350px] w-[450px] rounded-full bg-[hsl(213,94%,45%)]/[0.06] blur-[160px]" />
           </div>
-          
-          {/* Secondary cards - stacked */}
-          {hostReasons.slice(1).map((reason, i) => (
+          <div className="focus-group grid gap-2 md:grid-cols-12">
+            {/* Featured card - takes more space */}
             <div 
-              key={reason.title}
-              className="surface-card group relative rounded-xl p-4 opacity-0 reveal md:col-span-7"
-              style={{ animationDelay: `${(i + 2) * 100}ms` }}
+              className="focus-card surface-card group relative rounded-xl p-4 opacity-0 reveal md:col-span-5 md:row-span-2 md:p-5"
+              style={{ animationDelay: '100ms' }}
             >
               <div className="surface-card-glow" aria-hidden="true" />
-              <div className="relative z-10 flex items-start gap-3">
-                <div className="flex-1">
-                  <h3 className="text-[15px] font-semibold leading-tight tracking-tight">{reason.title}</h3>
-                  <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground/70">{reason.description}</p>
+              <div className="relative z-10 flex h-full flex-col">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">Primary benefit</span>
+                <h3 className="mt-1.5 text-lg font-semibold leading-snug tracking-tight md:text-xl">{hostReasons[0].title}</h3>
+                <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground/80 md:text-[13px]">{hostReasons[0].description}</p>
+                <div className="mt-auto pt-4">
+                  <span className="text-[10px] text-muted-foreground/50">Measurable ROI on every campaign</span>
                 </div>
               </div>
             </div>
-          ))}
+            
+            {/* Secondary cards - stacked */}
+            {hostReasons.slice(1).map((reason, i) => (
+              <div 
+                key={reason.title}
+                className="focus-card surface-card group relative rounded-xl p-3 opacity-0 reveal md:col-span-7 md:p-4"
+                style={{ animationDelay: `${(i + 2) * 100}ms` }}
+              >
+                <div className="surface-card-glow" aria-hidden="true" />
+                <div className="relative z-10">
+                  <h3 className="text-[14px] font-semibold leading-tight tracking-tight md:text-[15px]">{reason.title}</h3>
+                  <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground/70 md:text-[12px]">{reason.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </Container>
     </section>
@@ -148,29 +153,36 @@ const steps = [
 
 function HowItWorksSection() {
   return (
-    <section className="py-12">
+    <section className="py-6">
       <Container>
-        <div className="mb-6 opacity-0 reveal">
+        <div className="mb-4 opacity-0 reveal">
           <h2 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
             How it works
           </h2>
         </div>
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-          {steps.map((step, i) => (
-            <div 
-              key={step.number}
-              className="surface-card relative overflow-hidden rounded-lg px-3 py-4 opacity-0 reveal"
-              style={{ animationDelay: `${(i + 1) * 80}ms` }}
-            >
-              <span className="absolute -right-2 -top-4 font-heading text-[72px] font-normal leading-none text-foreground/[0.04]">
-                {step.number}
-              </span>
-              <div className="relative z-10">
-                <h3 className="text-[13px] font-semibold leading-tight tracking-tight">{step.title}</h3>
-                <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground/60">{step.description}</p>
+        <div className="relative">
+          {/* Extreme edge blur behind cards */}
+          <div className="pointer-events-none absolute -inset-16 -z-10" aria-hidden="true">
+            <div className="absolute left-0 top-1/2 h-[300px] w-[400px] -translate-y-1/2 rounded-full bg-[hsl(199,89%,48%)]/[0.07] blur-[160px]" />
+            <div className="absolute right-0 top-1/2 h-[280px] w-[380px] -translate-y-1/2 rounded-full bg-[hsl(213,94%,45%)]/[0.05] blur-[140px]" />
+          </div>
+          <div className="focus-group grid grid-cols-2 gap-1.5 md:grid-cols-4 md:gap-2">
+            {steps.map((step, i) => (
+              <div 
+                key={step.number}
+                className="focus-card surface-card relative overflow-hidden rounded-lg px-2.5 py-3 opacity-0 reveal md:px-3 md:py-3.5"
+                style={{ animationDelay: `${(i + 1) * 80}ms` }}
+              >
+                <span className="absolute -right-1.5 -top-3 font-heading text-[60px] font-normal leading-none text-foreground/[0.04] md:text-[72px]">
+                  {step.number}
+                </span>
+                <div className="relative z-10">
+                  <h3 className="text-[12px] font-semibold leading-tight tracking-tight md:text-[13px]">{step.title}</h3>
+                  <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground/60 md:text-[11px]">{step.description}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </Container>
     </section>

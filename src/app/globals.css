@@ -347,3 +347,35 @@
 .surface-card:hover .surface-card-glow {
   opacity: 1;
 }
+
+/* ============================================================================
+   Focus Group - Hover blur effect for card groups
+   ============================================================================ */
+
+.focus-card {
+  transition: 
+    filter 220ms ease-out,
+    opacity 220ms ease-out,
+    transform 220ms ease-out,
+    background 220ms ease-out;
+}
+
+/* Desktop only: blur siblings on hover */
+@media (min-width: 768px) {
+  .focus-group:hover .focus-card {
+    filter: blur(3px);
+    opacity: 0.55;
+  }
+  
+  .focus-group:hover .focus-card:hover {
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+  
+  /* Stronger glow on focused card */
+  .focus-group:hover .focus-card:hover .surface-card-glow {
+    opacity: 1;
+    filter: blur(32px);
+  }
+}
