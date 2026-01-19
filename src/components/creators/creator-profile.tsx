@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navigation/navbar"
 import { Footer } from "@/components/navigation/footer"
+import { UGCGalleryPublic, loadPortfolio, type UGCItem } from "@/components/creators/ugc-gallery"
 
 export interface CreatorProfile {
   handle: string
@@ -91,6 +92,17 @@ function CopyLinkButton({ handle }: { handle: string }) {
 
 export function CreatorProfileView({ creator }: { creator: CreatorProfile }) {
   const [showInviteModal, setShowInviteModal] = useState(false)
+  const [portfolioItems, setPortfolioItems] = useState<UGCItem[]>([])
+
+  // Load portfolio from localStorage for demo creators
+  useEffect(() => {
+    // For demo purposes, load from localStorage if this is a sample creator
+    // In production, this would fetch from the creator's actual portfolio
+    if (creator.isSample || creator.handle.startsWith("sample-")) {
+      const items = loadPortfolio()
+      setPortfolioItems(items)
+    }
+  }, [creator.handle, creator.isSample])
 
   const dealTypeLabels: Record<string, string> = { percent: "Traffic bonus", flat: "Flat fee", "post-for-stay": "Post-for-stay" }
   const defaultDeliverables = [
@@ -196,6 +208,9 @@ export function CreatorProfileView({ creator }: { creator: CreatorProfile }) {
                   </div>
                 </div>
               </Panel>
+
+              {/* Portfolio Gallery */}
+              <UGCGalleryPublic items={portfolioItems} />
             </div>
 
             {/* Right Column (4) */}

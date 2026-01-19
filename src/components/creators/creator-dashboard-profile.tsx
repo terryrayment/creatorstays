@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Panel, PanelHeader, PanelContent } from "@/components/ui/panel"
 import { Metric } from "@/components/ui/metric"
 import { EdgeBlur } from "@/components/ui/edge-blur"
+import { UGCGalleryManager } from "@/components/creators/ugc-gallery"
 
 // Platform connection types
 type Platform = 'instagram' | 'tiktok' | 'youtube'
@@ -1189,6 +1190,9 @@ export function CreatorDashboardProfile() {
 
             {/* Campaign Timeline */}
             <CampaignTimeline />
+
+            {/* Portfolio Gallery */}
+            <UGCGalleryManager />
           </div>
 
           {/* Right sidebar */}
