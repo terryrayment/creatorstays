@@ -20,14 +20,14 @@ function HeroSection() {
       <EdgeBlur />
       <Container>
         <div className="flex flex-col items-center text-center opacity-0 reveal">
-          <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+          <span className="text-label mb-4 inline-block rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-primary">
             Influencer marketing for vacation rentals
           </span>
-          <h1 className="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+          <h1 className="text-display max-w-4xl">
             Get more bookings with
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"> creator marketing</span>
           </h1>
-          <p className="mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
+          <p className="text-body-lg mt-6 max-w-2xl text-muted-foreground">
             Hire vetted content creators to showcase your property. 
             They post, you get clicks, bookings, and stunning content.
           </p>
@@ -81,10 +81,10 @@ function WhyHostsSection() {
     <section className="py-24">
       <Container>
         <div className="text-center opacity-0 reveal">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="text-h1">
             Why hosts use CreatorStays
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+          <p className="text-body-lg mx-auto mt-4 max-w-2xl text-muted-foreground">
             Turn creator content into bookings. Measurable marketing that actually works.
           </p>
         </div>
@@ -98,8 +98,8 @@ function WhyHostsSection() {
               <div className="mb-4 inline-flex rounded-xl bg-primary/10 p-3 text-primary">
                 {reason.icon}
               </div>
-              <h3 className="text-xl font-semibold">{reason.title}</h3>
-              <p className="mt-2 text-muted-foreground">{reason.description}</p>
+              <h3 className="text-h3">{reason.title}</h3>
+              <p className="text-body mt-2 text-muted-foreground">{reason.description}</p>
             </div>
           ))}
         </div>

@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    /* Blue Horizon Palette */
     --background: 210 20% 99%;
     --foreground: 215 25% 15%;
     --card: 0 0% 100%;
@@ -22,6 +23,10 @@
     --input: 214 25% 90%;
     --ring: 213 94% 45%;
     --radius: 0.75rem;
+
+    /* Typography */
+    --font-body: var(--font-body), system-ui, sans-serif;
+    --font-heading: var(--font-heading), Georgia, serif;
   }
 
   .dark {
@@ -49,35 +54,140 @@
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Default heading styles */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    @apply font-normal tracking-tight text-foreground;
+  }
+}
+
+@layer components {
+  /* Typography Scale - Product Grade */
+  
+  /* Display: Hero headlines, massive impact */
+  .text-display {
+    font-family: var(--font-heading);
+    @apply text-5xl font-normal leading-[1.05] tracking-tight;
+  }
+  @media (min-width: 768px) {
+    .text-display {
+      @apply text-6xl;
+    }
+  }
+  @media (min-width: 1024px) {
+    .text-display {
+      @apply text-7xl;
+    }
+  }
+
+  /* H1: Page titles */
+  .text-h1 {
+    font-family: var(--font-heading);
+    @apply text-4xl font-normal leading-[1.1] tracking-tight;
+  }
+  @media (min-width: 768px) {
+    .text-h1 {
+      @apply text-5xl;
+    }
+  }
+
+  /* H2: Section headings */
+  .text-h2 {
+    font-family: var(--font-heading);
+    @apply text-2xl font-normal leading-[1.15] tracking-tight;
+  }
+  @media (min-width: 768px) {
+    .text-h2 {
+      @apply text-3xl;
+    }
+  }
+
+  /* H3: Card titles, subsections */
+  .text-h3 {
+    font-family: var(--font-heading);
+    @apply text-xl font-normal leading-[1.2] tracking-tight;
+  }
+
+  /* Body: Default readable text */
+  .text-body {
+    font-family: var(--font-body);
+    @apply text-base leading-relaxed;
+  }
+
+  /* Body Large: Subheads, intros */
+  .text-body-lg {
+    font-family: var(--font-body);
+    @apply text-lg leading-relaxed;
+  }
+  @media (min-width: 768px) {
+    .text-body-lg {
+      @apply text-xl;
+    }
+  }
+
+  /* Small: Secondary info, captions */
+  .text-small {
+    font-family: var(--font-body);
+    @apply text-sm leading-normal;
+  }
+
+  /* Label: UI labels, form labels, metrics */
+  .text-label {
+    font-family: var(--font-body);
+    @apply text-xs font-medium uppercase tracking-wider;
+  }
+
+  /* Metric: Big numbers in dashboards */
+  .text-metric {
+    font-family: var(--font-body);
+    @apply text-3xl font-bold leading-none tracking-tight;
+  }
+  @media (min-width: 768px) {
+    .text-metric {
+      @apply text-4xl;
+    }
+  }
+
+  /* Prose container for long-form text */
+  .prose-container {
+    @apply max-w-prose;
+  }
+  
+  .prose-container p {
+    @apply text-body text-muted-foreground;
+  }
+  
+  .prose-container p + p {
+    @apply mt-4;
   }
 }
 
 @layer utilities {
+  /* Font family utilities */
+  .font-body {
+    font-family: var(--font-body);
+  }
+  
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  /* Reveal animations */
   .reveal {
     animation: reveal 0.8s ease-out forwards;
   }
   
-  .reveal-delay-1 {
-    animation-delay: 0.1s;
-  }
-  
-  .reveal-delay-2 {
-    animation-delay: 0.2s;
-  }
-  
-  .reveal-delay-3 {
-    animation-delay: 0.3s;
-  }
-  
-  .reveal-delay-4 {
-    animation-delay: 0.4s;
-  }
-  
-  .reveal-delay-5 {
-    animation-delay: 0.5s;
-  }
+  .reveal-delay-1 { animation-delay: 0.1s; }
+  .reveal-delay-2 { animation-delay: 0.2s; }
+  .reveal-delay-3 { animation-delay: 0.3s; }
+  .reveal-delay-4 { animation-delay: 0.4s; }
+  .reveal-delay-5 { animation-delay: 0.5s; }
 }
 
 @keyframes reveal {
