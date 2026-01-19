@@ -5,118 +5,114 @@ import Link from "next/link"
 function HeroCollage() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      {/* Vibrant gradient base */}
-      <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-rose-50" />
+      {/* Gradient base */}
+      <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-violet-50/50" />
       
-      {/* Large animated color blobs - cel style */}
-      <div className="cel-blob absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-cyan-400/30 to-blue-500/20" style={{ animationDelay: '0s' }} />
-      <div className="cel-blob absolute -right-10 top-20 h-96 w-96 rounded-full bg-gradient-to-br from-pink-400/25 to-rose-500/15" style={{ animationDelay: '0.5s' }} />
-      <div className="cel-blob absolute left-1/4 -bottom-20 h-72 w-72 rounded-full bg-gradient-to-br from-amber-300/30 to-orange-400/20" style={{ animationDelay: '1s' }} />
-      <div className="cel-blob absolute right-1/4 bottom-10 h-64 w-64 rounded-full bg-gradient-to-br from-violet-400/25 to-purple-500/15" style={{ animationDelay: '1.5s' }} />
-      <div className="cel-blob absolute left-1/2 top-0 h-56 w-56 rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-500/15" style={{ animationDelay: '0.8s' }} />
+      {/* Large floating gradient orbs - 3D feel */}
+      <div className="hero-float-1 absolute -left-32 top-0 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-cyan-400/40 to-blue-600/30 blur-3xl" />
+      <div className="hero-float-2 absolute -right-20 top-20 h-[400px] w-[400px] rounded-full bg-gradient-to-br from-pink-400/35 to-rose-500/25 blur-3xl" />
+      <div className="hero-float-3 absolute bottom-0 left-1/3 h-[350px] w-[350px] rounded-full bg-gradient-to-br from-amber-300/30 to-orange-500/20 blur-3xl" />
+      <div className="hero-float-4 absolute -bottom-20 right-1/4 h-[300px] w-[300px] rounded-full bg-gradient-to-br from-violet-400/35 to-purple-600/25 blur-3xl" />
       
-      {/* Floating shapes - hand-drawn feel */}
-      <div className="cel-shape cel-shape-1 absolute left-[8%] top-[15%]">
-        <svg width="60" height="60" viewBox="0 0 60 60" className="cel-wiggle">
-          <circle cx="30" cy="30" r="25" fill="none" stroke="url(#grad1)" strokeWidth="3" strokeDasharray="8 4" />
-          <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#06b6d4" /><stop offset="100%" stopColor="#3b82f6" /></linearGradient></defs>
-        </svg>
+      {/* Floating 3D cards */}
+      <div className="hero-card-float absolute left-[5%] top-[20%] h-24 w-32 rounded-2xl bg-white/80 shadow-2xl shadow-cyan-500/20 backdrop-blur-sm" style={{ animationDelay: '0.2s' }}>
+        <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500" />
+      </div>
+      <div className="hero-card-float absolute right-[8%] top-[15%] h-20 w-28 rounded-2xl bg-white/80 shadow-2xl shadow-pink-500/20 backdrop-blur-sm" style={{ animationDelay: '0.4s' }}>
+        <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-pink-400 to-rose-500" />
+      </div>
+      <div className="hero-card-float absolute left-[8%] bottom-[25%] h-16 w-24 rounded-2xl bg-white/80 shadow-2xl shadow-amber-500/20 backdrop-blur-sm" style={{ animationDelay: '0.6s' }}>
+        <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500" />
+      </div>
+      <div className="hero-card-float absolute right-[12%] bottom-[30%] h-20 w-20 rounded-2xl bg-white/80 shadow-2xl shadow-violet-500/20 backdrop-blur-sm" style={{ animationDelay: '0.8s' }}>
+        <div className="absolute inset-3 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500" />
       </div>
       
-      <div className="cel-shape cel-shape-2 absolute right-[12%] top-[20%]">
-        <svg width="50" height="50" viewBox="0 0 50 50" className="cel-spin">
-          <path d="M25 5 L30 20 L45 25 L30 30 L25 45 L20 30 L5 25 L20 20 Z" fill="none" stroke="url(#grad2)" strokeWidth="2.5" strokeLinejoin="round" />
-          <defs><linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f472b6" /><stop offset="100%" stopColor="#ec4899" /></linearGradient></defs>
-        </svg>
+      {/* Floating icons with 3D depth */}
+      <div className="hero-icon-pop absolute left-[15%] top-[40%]" style={{ animationDelay: '0.5s' }}>
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-xl shadow-blue-500/30">
+          <svg className="h-7 w-7 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+          </svg>
+        </div>
+      </div>
+      <div className="hero-icon-pop absolute right-[18%] top-[35%]" style={{ animationDelay: '0.7s' }}>
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-xl shadow-pink-500/30">
+          <svg className="h-6 w-6 text-pink-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6L12 2z"/>
+          </svg>
+        </div>
+      </div>
+      <div className="hero-icon-pop absolute left-[75%] bottom-[40%]" style={{ animationDelay: '0.9s' }}>
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-xl shadow-amber-500/30">
+          <svg className="h-5 w-5 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2v11z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </div>
       </div>
       
-      <div className="cel-shape cel-shape-3 absolute left-[5%] bottom-[25%]">
-        <svg width="55" height="55" viewBox="0 0 55 55" className="cel-bounce">
-          <rect x="10" y="10" width="35" height="35" rx="8" fill="none" stroke="url(#grad3)" strokeWidth="3" transform="rotate(15 27.5 27.5)" />
-          <defs><linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#fbbf24" /><stop offset="100%" stopColor="#f97316" /></linearGradient></defs>
-        </svg>
-      </div>
-      
-      <div className="cel-shape cel-shape-4 absolute right-[8%] bottom-[30%]">
-        <svg width="45" height="45" viewBox="0 0 45 45" className="cel-wiggle" style={{ animationDelay: '0.3s' }}>
-          <polygon points="22.5,5 40,40 5,40" fill="none" stroke="url(#grad4)" strokeWidth="2.5" strokeLinejoin="round" />
-          <defs><linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#a78bfa" /><stop offset="100%" stopColor="#8b5cf6" /></linearGradient></defs>
-        </svg>
-      </div>
+      {/* Decorative rings */}
+      <div className="hero-ring absolute left-[20%] bottom-[15%] h-20 w-20 rounded-full border-4 border-cyan-400/30" style={{ animationDelay: '1s' }} />
+      <div className="hero-ring absolute right-[25%] top-[60%] h-16 w-16 rounded-full border-4 border-pink-400/30" style={{ animationDelay: '1.2s' }} />
       
       {/* Sparkle dots */}
-      <div className="cel-sparkle absolute left-[20%] top-[35%] h-3 w-3 rounded-full bg-cyan-400" style={{ animationDelay: '0s' }} />
-      <div className="cel-sparkle absolute right-[25%] top-[15%] h-2 w-2 rounded-full bg-pink-400" style={{ animationDelay: '0.2s' }} />
-      <div className="cel-sparkle absolute left-[75%] top-[45%] h-2.5 w-2.5 rounded-full bg-amber-400" style={{ animationDelay: '0.4s' }} />
-      <div className="cel-sparkle absolute left-[30%] bottom-[20%] h-2 w-2 rounded-full bg-violet-400" style={{ animationDelay: '0.6s' }} />
-      <div className="cel-sparkle absolute right-[15%] bottom-[40%] h-3 w-3 rounded-full bg-emerald-400" style={{ animationDelay: '0.8s' }} />
-      <div className="cel-sparkle absolute left-[45%] top-[10%] h-2 w-2 rounded-full bg-rose-400" style={{ animationDelay: '1s' }} />
-      <div className="cel-sparkle absolute right-[40%] bottom-[15%] h-2.5 w-2.5 rounded-full bg-blue-400" style={{ animationDelay: '1.2s' }} />
-      
-      {/* Squiggly lines */}
-      <svg className="cel-squiggle absolute left-[15%] top-[55%] opacity-40" width="80" height="30" viewBox="0 0 80 30" style={{ animationDelay: '0s' }}>
-        <path d="M5 15 Q 15 5, 25 15 T 45 15 T 65 15 T 75 15" fill="none" stroke="#06b6d4" strokeWidth="3" strokeLinecap="round" />
-      </svg>
-      <svg className="cel-squiggle absolute right-[10%] top-[60%] opacity-40" width="70" height="25" viewBox="0 0 70 25" style={{ animationDelay: '0.5s' }}>
-        <path d="M5 12 Q 12 2, 20 12 T 35 12 T 50 12 T 65 12" fill="none" stroke="#f472b6" strokeWidth="2.5" strokeLinecap="round" />
-      </svg>
-      
-      {/* Home icon - bold cel style */}
-      <div className="cel-icon absolute left-[10%] top-[25%]" style={{ animationDelay: '0.2s' }}>
-        <svg width="56" height="56" viewBox="0 0 56 56" className="drop-shadow-lg">
-          <path d="M28 8 L48 26 L48 48 L8 48 L8 26 Z" fill="white" stroke="url(#homeGrad)" strokeWidth="3.5" strokeLinejoin="round" />
-          <rect x="22" y="32" width="12" height="16" fill="url(#homeGrad)" rx="2" />
-          <defs><linearGradient id="homeGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#3b82f6" /><stop offset="100%" stopColor="#06b6d4" /></linearGradient></defs>
-        </svg>
-      </div>
-      
-      {/* Camera icon - bold cel style */}
-      <div className="cel-icon absolute right-[12%] top-[30%]" style={{ animationDelay: '0.7s' }}>
-        <svg width="52" height="52" viewBox="0 0 52 52" className="drop-shadow-lg">
-          <rect x="6" y="16" width="40" height="30" rx="4" fill="white" stroke="url(#camGrad)" strokeWidth="3" />
-          <circle cx="26" cy="31" r="9" fill="none" stroke="url(#camGrad)" strokeWidth="3" />
-          <rect x="18" y="10" width="16" height="8" rx="2" fill="url(#camGrad)" />
-          <defs><linearGradient id="camGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#ec4899" /><stop offset="100%" stopColor="#f472b6" /></linearGradient></defs>
-        </svg>
-      </div>
-      
-      {/* Star burst */}
-      <div className="cel-icon absolute left-[80%] bottom-[35%]" style={{ animationDelay: '1.2s' }}>
-        <svg width="48" height="48" viewBox="0 0 48 48" className="drop-shadow-lg">
-          <path d="M24 4 L28 18 L42 18 L30 28 L34 42 L24 34 L14 42 L18 28 L6 18 L20 18 Z" fill="white" stroke="url(#starGrad)" strokeWidth="3" strokeLinejoin="round" />
-          <defs><linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#fbbf24" /><stop offset="100%" stopColor="#f97316" /></linearGradient></defs>
-        </svg>
-      </div>
+      <div className="hero-sparkle absolute left-[30%] top-[25%] h-2 w-2 rounded-full bg-cyan-400" style={{ animationDelay: '0.3s' }} />
+      <div className="hero-sparkle absolute right-[30%] top-[20%] h-3 w-3 rounded-full bg-pink-400" style={{ animationDelay: '0.5s' }} />
+      <div className="hero-sparkle absolute left-[60%] bottom-[25%] h-2 w-2 rounded-full bg-amber-400" style={{ animationDelay: '0.7s' }} />
+      <div className="hero-sparkle absolute right-[40%] bottom-[35%] h-2.5 w-2.5 rounded-full bg-violet-400" style={{ animationDelay: '0.9s' }} />
     </div>
   )
 }
 
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden py-16 md:py-20">
+    <section className="relative min-h-[85vh] overflow-hidden flex items-center">
       <HeroCollage />
       <Container>
-        <div className="relative flex flex-col items-center text-center opacity-0 reveal">
-          {/* Subtle backdrop for text readability */}
-          <div className="absolute inset-0 -mx-8 -my-4 rounded-3xl bg-white/40 backdrop-blur-[2px]" />
-          
-          <span className="relative text-label mb-3 inline-block rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-primary">
-            Influencer marketing for vacation rentals
+        <div className="relative flex flex-col items-center text-center">
+          {/* Badge - slides down */}
+          <span className="hero-slide-down text-label mb-4 inline-block rounded-full border border-primary/20 bg-white/80 px-4 py-1.5 text-sm font-medium text-primary shadow-lg shadow-primary/10 backdrop-blur-sm">
+            ✨ Influencer marketing for vacation rentals
           </span>
-          <h1 className="relative font-heading text-[2.5rem] font-normal leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-[4.25rem]">
-            <span className="whitespace-nowrap">Get more bookings with</span>{" "}
-            <span className="whitespace-nowrap bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">creator marketing</span>
+          
+          {/* Main headline - fades up with scale */}
+          <h1 className="hero-fade-up font-heading text-[2.75rem] font-bold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl lg:text-[5rem]" style={{ animationDelay: '0.15s' }}>
+            <span className="block">Get more bookings</span>
+            <span className="block mt-1 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-x">
+              with creator marketing
+            </span>
           </h1>
-          <p className="relative mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
+          
+          {/* Subheadline - fades up */}
+          <p className="hero-fade-up mt-6 max-w-xl text-lg text-muted-foreground md:text-xl" style={{ animationDelay: '0.3s' }}>
             Hire vetted creators to showcase your property. They post, you get clicks and stunning content.
           </p>
-          <div className="relative mt-6 flex flex-col gap-3 sm:flex-row">
-            <Button size="lg" asChild className="px-8 shadow-lg shadow-primary/20">
-              <Link href="/hosts">Host Signup</Link>
+          
+          {/* CTAs - pop in */}
+          <div className="hero-fade-up mt-8 flex flex-col gap-4 sm:flex-row" style={{ animationDelay: '0.45s' }}>
+            <Button size="lg" asChild className="hero-btn px-10 py-6 text-base font-semibold shadow-2xl shadow-primary/30 hover:shadow-primary/40 hover:scale-105 transition-all duration-300">
+              <Link href="/hosts">Start as Host</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="bg-white/80 px-8 backdrop-blur-sm">
-              <Link href="/waitlist">Creator Waitlist</Link>
+            <Button size="lg" variant="outline" asChild className="hero-btn px-10 py-6 text-base font-semibold bg-white/90 backdrop-blur-sm border-2 hover:bg-white hover:scale-105 transition-all duration-300">
+              <Link href="/waitlist">Join as Creator</Link>
             </Button>
+          </div>
+          
+          {/* Trust indicators - fade in last */}
+          <div className="hero-fade-up mt-12 flex items-center gap-6 text-sm text-muted-foreground" style={{ animationDelay: '0.6s' }}>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              Free to start
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              No contracts
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              Pay per result
+            </span>
           </div>
         </div>
       </Container>

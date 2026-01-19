@@ -1,6 +1,4 @@
 import { Container } from "@/components/layout/container"
-import { Navbar } from "@/components/navigation/navbar"
-import { Footer } from "@/components/navigation/footer"
 import Link from "next/link"
 
 export default function HowToHostsPage() {
@@ -39,15 +37,13 @@ export default function HowToHostsPage() {
   ]
 
   return (
-    <div className="flex min-h-screen flex-col bg-[hsl(210,20%,98%)]">
-      <Navbar />
-      <main className="flex-1 py-12">
-        <Container>
-          <div className="mx-auto max-w-2xl">
-            <Link href="/how-it-works" className="text-xs text-muted-foreground hover:text-foreground">← How It Works</Link>
-            
-            <h1 className="mt-4 text-3xl font-bold tracking-tight">How To: Hosts</h1>
-            <p className="mt-2 text-muted-foreground">
+    <section className="py-12">
+      <Container>
+        <div className="mx-auto max-w-2xl">
+          <Link href="/how-it-works" className="text-xs text-muted-foreground hover:text-foreground">← How It Works</Link>
+          
+          <h1 className="mt-4 text-3xl font-bold tracking-tight">How To: Hosts</h1>
+          <p className="mt-2 text-muted-foreground">
               Get your property in front of travel creators in 6 steps.
             </p>
 
@@ -84,8 +80,6 @@ export default function HowToHostsPage() {
             </div>
           </div>
         </Container>
-      </main>
-      <Footer />
-    </div>
+      </section>
   )
 }

@@ -671,186 +671,236 @@
 }
 
 /* ============================================================================
-   Hero Cel Animation - Anime/Hand-drawn Style
+   Hero Intro Animations - Slush-style dynamic entrance
    ============================================================================ */
 
-/* Color blob pulse and drift */
-@keyframes cel-blob-pulse {
-  0%, 100% {
-    transform: scale(1) translate(0, 0);
-    opacity: 0.25;
-  }
-  25% {
-    transform: scale(1.15) translate(10px, -15px);
-    opacity: 0.35;
-  }
-  50% {
-    transform: scale(0.95) translate(-5px, 10px);
-    opacity: 0.2;
-  }
-  75% {
-    transform: scale(1.1) translate(-10px, -5px);
-    opacity: 0.3;
-  }
+/* Gradient text animation */
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
-.cel-blob {
-  animation: cel-blob-pulse 8s ease-in-out infinite;
-  filter: blur(40px);
-  will-change: transform, opacity;
+.animate-gradient-x {
+  animation: gradient-x 3s ease-in-out infinite;
 }
 
-/* Wiggle animation - hand-drawn shake */
-@keyframes cel-wiggle {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  10% { transform: rotate(-8deg) scale(1.05); }
-  20% { transform: rotate(6deg) scale(0.98); }
-  30% { transform: rotate(-5deg) scale(1.02); }
-  40% { transform: rotate(7deg) scale(1); }
-  50% { transform: rotate(-3deg) scale(1.03); }
-  60% { transform: rotate(5deg) scale(0.99); }
-  70% { transform: rotate(-6deg) scale(1.01); }
-  80% { transform: rotate(4deg) scale(1); }
-  90% { transform: rotate(-2deg) scale(1.02); }
-}
-
-.cel-wiggle {
-  animation: cel-wiggle 3s ease-in-out infinite;
-}
-
-/* Spin animation */
-@keyframes cel-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.cel-spin {
-  animation: cel-spin 12s linear infinite;
-}
-
-/* Bounce animation */
-@keyframes cel-bounce {
-  0%, 100% { transform: translateY(0) rotate(15deg); }
-  50% { transform: translateY(-20px) rotate(15deg); }
-}
-
-.cel-bounce {
-  animation: cel-bounce 2s ease-in-out infinite;
-}
-
-/* Shape float and pulse */
-@keyframes cel-shape-float {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-    opacity: 0.5;
-  }
-  33% {
-    transform: translateY(-25px) scale(1.1);
-    opacity: 0.7;
-  }
-  66% {
-    transform: translateY(-10px) scale(0.95);
-    opacity: 0.6;
-  }
-}
-
-.cel-shape {
-  animation: cel-shape-float 6s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-
-.cel-shape-1 { animation-delay: 0s; }
-.cel-shape-2 { animation-delay: 1s; }
-.cel-shape-3 { animation-delay: 2s; }
-.cel-shape-4 { animation-delay: 3s; }
-
-/* Sparkle pop */
-@keyframes cel-sparkle-pop {
-  0%, 100% {
-    transform: scale(0) rotate(0deg);
+/* Slide down from top */
+@keyframes hero-slide-down {
+  0% {
     opacity: 0;
+    transform: translateY(-30px);
   }
-  20% {
-    transform: scale(1.2) rotate(90deg);
+  100% {
     opacity: 1;
+    transform: translateY(0);
   }
-  40% {
-    transform: scale(0.8) rotate(180deg);
-    opacity: 0.8;
+}
+
+.hero-slide-down {
+  animation: hero-slide-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fade up with slight scale */
+@keyframes hero-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hero-fade-up {
+  opacity: 0;
+  animation: hero-fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Floating orb animations - gentle drift */
+@keyframes hero-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-10px, 20px) scale(0.95); }
+  75% { transform: translate(20px, 10px) scale(1.02); }
+}
+
+@keyframes hero-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-20px, 30px) scale(1.03); }
+  50% { transform: translate(25px, -15px) scale(0.97); }
+  75% { transform: translate(-15px, -20px) scale(1.05); }
+}
+
+@keyframes hero-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(25px, -25px) scale(1.04); }
+  66% { transform: translate(-20px, 15px) scale(0.96); }
+}
+
+@keyframes hero-float-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-30px, -30px) scale(1.06); }
+}
+
+.hero-float-1 {
+  animation: hero-float-1 15s ease-in-out infinite;
+}
+
+.hero-float-2 {
+  animation: hero-float-2 18s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.hero-float-3 {
+  animation: hero-float-3 12s ease-in-out infinite;
+  animation-delay: 4s;
+}
+
+.hero-float-4 {
+  animation: hero-float-4 20s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Card float - entrance + continuous */
+@keyframes hero-card-float-in {
+  0% {
+    opacity: 0;
+    transform: translateY(60px) rotate(-10deg) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes hero-card-hover {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+}
+
+.hero-card-float {
+  opacity: 0;
+  animation: hero-card-float-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             hero-card-hover 6s ease-in-out 0.8s infinite;
+}
+
+/* Icon pop entrance */
+@keyframes hero-icon-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
   }
   60% {
-    transform: scale(1.1) rotate(270deg);
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes hero-icon-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(3deg); }
+  75% { transform: translateY(-4px) rotate(-2deg); }
+}
+
+.hero-icon-pop {
+  opacity: 0;
+  animation: hero-icon-pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             hero-icon-bob 4s ease-in-out 0.6s infinite;
+}
+
+/* Ring expand */
+@keyframes hero-ring-expand {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
     opacity: 1;
   }
-  80% {
-    transform: scale(0.9) rotate(360deg);
-    opacity: 0.6;
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
   }
 }
 
-.cel-sparkle {
-  animation: cel-sparkle-pop 2.5s ease-in-out infinite;
-  will-change: transform, opacity;
+@keyframes hero-ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 0.3; }
 }
 
-/* Squiggly line draw */
-@keyframes cel-squiggle-draw {
-  0%, 100% {
-    stroke-dashoffset: 100;
-    opacity: 0.3;
-    transform: translateX(0);
-  }
-  50% {
-    stroke-dashoffset: 0;
-    opacity: 0.6;
-    transform: translateX(10px);
-  }
+.hero-ring {
+  opacity: 0;
+  animation: hero-ring-expand 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+             hero-ring-pulse 3s ease-in-out 0.8s infinite;
 }
 
-.cel-squiggle {
-  animation: cel-squiggle-draw 4s ease-in-out infinite;
-}
-
-.cel-squiggle path {
-  stroke-dasharray: 100;
-}
-
-/* Icon bounce and glow */
-@keyframes cel-icon-bounce {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-  }
-  25% {
-    transform: translateY(-15px) rotate(-5deg);
-    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+/* Sparkle pop */
+@keyframes hero-sparkle-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0);
   }
   50% {
-    transform: translateY(-8px) rotate(3deg);
-    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.12));
+    opacity: 1;
+    transform: scale(1.5);
   }
-  75% {
-    transform: translateY(-18px) rotate(-3deg);
-    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-.cel-icon {
-  animation: cel-icon-bounce 4s ease-in-out infinite;
-  will-change: transform, filter;
+@keyframes hero-sparkle-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
 }
 
-/* Disable animations for reduced motion preference */
+.hero-sparkle {
+  opacity: 0;
+  animation: hero-sparkle-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             hero-sparkle-twinkle 2s ease-in-out 0.4s infinite;
+}
+
+/* Button hover glow */
+.hero-btn {
+  position: relative;
+}
+
+.hero-btn::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  opacity: 0;
+  z-index: -1;
+  filter: blur(12px);
+  transition: opacity 0.3s ease;
+}
+
+.hero-btn:hover::before {
+  opacity: 0.4;
+}
+
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .cel-blob,
-  .cel-wiggle,
-  .cel-spin,
-  .cel-bounce,
-  .cel-shape,
-  .cel-sparkle,
-  .cel-squiggle,
-  .cel-icon {
+  .hero-slide-down,
+  .hero-fade-up,
+  .hero-float-1,
+  .hero-float-2,
+  .hero-float-3,
+  .hero-float-4,
+  .hero-card-float,
+  .hero-icon-pop,
+  .hero-ring,
+  .hero-sparkle,
+  .animate-gradient-x {
     animation: none;
-    opacity: 0.3;
+    opacity: 1;
+    transform: none;
   }
 }
