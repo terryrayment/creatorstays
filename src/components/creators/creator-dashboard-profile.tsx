@@ -223,42 +223,47 @@ export function CreatorDashboardProfile() {
 
             {/* Metrics row */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Metric value="—" label="Followers" caption="Auto-sync" size="md" />
-              <Metric value="—" label="Avg Views" caption="Auto-sync" size="md" />
-              <Metric value="—" label="Engagement" caption="Auto-sync" size="md" />
-              <Metric value="—" label="Response" caption="After first offer" size="md" />
+              <Metric value="247" label="Total Clicks" caption="This month" size="md" />
+              <Metric value="189" label="Unique Visitors" size="md" />
+              <Metric value="2" label="Active Collabs" size="md" />
+              <Metric value="12%" label="Avg Commission" size="md" />
             </div>
           </div>
 
           {/* Right sidebar */}
           <div className="space-y-4">
-            {/* Inbox */}
-            <Panel>
-              <PanelHeader title="Inbox" actions={<span className="text-[10px] text-muted-foreground">0</span>} />
-              <PanelContent className="py-2">
-                <EmptyState title="No messages" description="Host messaging after beta" />
-              </PanelContent>
-            </Panel>
-
             {/* Offers */}
             <Panel>
-              <PanelHeader title="Offers" actions={<span className="text-[10px] text-muted-foreground">0 active</span>} />
-              <PanelContent className="py-2">
-                <EmptyState title="No offers yet" description="Offers appear here" />
+              <PanelHeader title="Pending Offers" actions={<span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">2 new</span>} />
+              <PanelContent className="p-0">
+                <Link href="/dashboard/creator/offers" className="block px-4 py-3 transition-colors hover:bg-foreground/[0.02]">
+                  <p className="text-sm font-medium">Mountain View Retreats</p>
+                  <p className="text-xs text-muted-foreground">10% affiliate · Cozy A-Frame Cabin</p>
+                </Link>
+                <Link href="/dashboard/creator/offers" className="block border-t border-foreground/5 px-4 py-3 transition-colors hover:bg-foreground/[0.02]">
+                  <p className="text-sm font-medium">Coastal Getaways</p>
+                  <p className="text-xs text-muted-foreground">$500 flat · Modern Beach House</p>
+                </Link>
               </PanelContent>
             </Panel>
 
             {/* Quick links */}
             <Panel>
               <PanelContent className="space-y-1.5 py-3">
-                <Link href="/how-it-works" className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2 text-xs transition-colors hover:bg-foreground/[0.04]">
-                  How it works
+                <Link href="/dashboard/creator/offers" className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2 text-xs transition-colors hover:bg-foreground/[0.04]">
+                  View all offers
                   <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </Link>
-                <Link href="/hosts" className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2 text-xs transition-colors hover:bg-foreground/[0.04]">
-                  For hosts
+                <Link href="/dashboard/analytics" className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2 text-xs transition-colors hover:bg-foreground/[0.04]">
+                  Link analytics
+                  <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </Link>
+                <Link href="/how-it-works" className="flex items-center justify-between rounded-lg bg-foreground/[0.02] px-3 py-2 text-xs transition-colors hover:bg-foreground/[0.04]">
+                  How it works
                   <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
