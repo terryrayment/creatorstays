@@ -787,8 +787,49 @@
   .anim-fade,
   .anim-blur,
   .anim-slide,
-  .hero-drift {
+  .hero-drift,
+  .sticker-float,
+  .marquee-track {
     animation: none;
     opacity: 0.5;
   }
+}
+
+/* ============================================================================
+   Slush-style Sticker Float Animation
+   ============================================================================ */
+
+@keyframes sticker-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+  75% {
+    transform: translateY(-4px) rotate(-1deg);
+  }
+}
+
+.sticker-float {
+  animation: sticker-float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ============================================================================
+   Marquee Animation
+   ============================================================================ */
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee 20s linear infinite;
+  will-change: transform;
 }

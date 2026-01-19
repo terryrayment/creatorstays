@@ -1,313 +1,298 @@
-import { Container } from "@/components/layout/container"
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { AnimatedLayer, AnimatedDivider } from "@/components/marketing/animated-layer"
+
+// Slush-style sticker SVGs with thick black stroke
+function HouseSticker({ className = "" }: { className?: string }) {
+  return (
+    <svg className={`sticker-float ${className}`} viewBox="0 0 80 80" fill="none">
+      <rect x="2" y="2" width="76" height="76" rx="16" fill="#FFE566" stroke="black" strokeWidth="3"/>
+      <path d="M40 18L58 32V58H22V32L40 18Z" fill="white" stroke="black" strokeWidth="3" strokeLinejoin="round"/>
+      <rect x="34" y="42" width="12" height="16" fill="#FFE566" stroke="black" strokeWidth="2"/>
+      <circle cx="52" cy="26" r="6" fill="white" stroke="black" strokeWidth="2"/>
+    </svg>
+  )
+}
+
+function CameraSticker({ className = "" }: { className?: string }) {
+  return (
+    <svg className={`sticker-float ${className}`} viewBox="0 0 80 80" fill="none" style={{ animationDelay: '1s' }}>
+      <rect x="2" y="2" width="76" height="76" rx="16" fill="#5DADE2" stroke="black" strokeWidth="3"/>
+      <rect x="16" y="28" width="48" height="36" rx="4" fill="white" stroke="black" strokeWidth="3"/>
+      <circle cx="40" cy="46" r="12" fill="#5DADE2" stroke="black" strokeWidth="3"/>
+      <circle cx="40" cy="46" r="6" fill="white" stroke="black" strokeWidth="2"/>
+      <rect x="30" y="20" width="20" height="10" rx="2" fill="white" stroke="black" strokeWidth="2"/>
+    </svg>
+  )
+}
+
+function RocketSticker({ className = "" }: { className?: string }) {
+  return (
+    <svg className={`sticker-float ${className}`} viewBox="0 0 80 80" fill="none" style={{ animationDelay: '2s' }}>
+      <rect x="2" y="2" width="76" height="76" rx="16" fill="#DDA0DD" stroke="black" strokeWidth="3"/>
+      <path d="M40 14C40 14 52 26 52 42C52 54 40 66 40 66C40 66 28 54 28 42C28 26 40 14 40 14Z" fill="white" stroke="black" strokeWidth="3"/>
+      <circle cx="40" cy="38" r="6" fill="#5DADE2" stroke="black" strokeWidth="2"/>
+      <path d="M28 50L20 58L28 54" fill="#FF6B6B" stroke="black" strokeWidth="2" strokeLinejoin="round"/>
+      <path d="M52 50L60 58L52 54" fill="#FF6B6B" stroke="black" strokeWidth="2" strokeLinejoin="round"/>
+      <path d="M36 58L40 70L44 58" fill="#FF6B6B" stroke="black" strokeWidth="2" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
+// Pill navigation button
+function PillNav({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link 
+      href={href}
+      className="rounded-full border-2 border-white/30 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-white transition-all hover:border-white hover:bg-white hover:text-black"
+    >
+      {children}
+    </Link>
+  )
+}
 
 function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] overflow-hidden">
-      {/* Color fields */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute left-0 top-0 h-full w-[45%] bg-[#0066FF]" />
-        <div className="absolute right-0 top-0 h-full w-[55%] bg-[#FAFAFA]" />
+    <section className="relative min-h-screen bg-black pt-8">
+      {/* Pill nav row */}
+      <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-3 px-6 pb-12">
+        <PillNav href="/how-it-works">How It Works</PillNav>
+        <PillNav href="/hosts">Hosts</PillNav>
+        <PillNav href="/creators">Creators</PillNav>
+        <PillNav href="/help">Help</PillNav>
       </div>
-      
-      {/* Animated graphics on blue side */}
-      <AnimatedLayer variant="hero" className="z-0" />
-      
-      {/* Content grid */}
-      <div className="relative z-10 grid min-h-[90vh] grid-cols-1 lg:grid-cols-2">
-        {/* Left - headline on blue */}
-        <div className="flex flex-col justify-center px-6 py-20 lg:px-12 xl:px-20">
-          <h1 className="font-heading text-[3.5rem] font-black uppercase leading-[0.85] tracking-[-0.03em] text-white sm:text-[4.5rem] md:text-[5.5rem] lg:text-[4rem] xl:text-[5.5rem]">
-            <span className="block">Creator</span>
-            <span className="block">Marketing</span>
-            <span className="block opacity-60">For Rentals</span>
+
+      {/* Main hero grid */}
+      <div className="mx-auto grid max-w-7xl gap-6 px-6 pb-20 lg:grid-cols-2">
+        {/* Left - Headline */}
+        <div className="flex flex-col justify-center">
+          <h1 className="font-heading text-[4rem] leading-[0.9] tracking-tight text-white sm:text-[5.5rem] md:text-[7rem] lg:text-[6rem] xl:text-[8rem]">
+            <span className="block">CREATOR</span>
+            <span className="block">STAYS</span>
           </h1>
-          
-          <p className="mt-8 max-w-md text-[15px] leading-relaxed text-white/70">
-            Hire vetted creators to showcase your vacation property. They post, you get traffic and content.
+          <p className="mt-8 max-w-md text-[16px] leading-relaxed text-white/60">
+            The marketplace connecting vacation rental hosts with content creators. Get traffic, get content.
           </p>
+          
+          {/* Slush-style CTAs */}
+          <div className="mt-10 flex flex-wrap gap-4">
+            <Link 
+              href="/hosts"
+              className="inline-flex h-14 items-center gap-2 rounded-full bg-white px-8 text-[13px] font-semibold uppercase tracking-wide text-black transition-transform hover:scale-105"
+            >
+              Start as Host
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M7 17L17 7M17 7H7M17 7V17"/>
+              </svg>
+            </Link>
+            <Link 
+              href="/waitlist"
+              className="inline-flex h-14 items-center gap-2 rounded-full border-2 border-white px-8 text-[13px] font-semibold uppercase tracking-wide text-white transition-all hover:bg-white hover:text-black"
+            >
+              Join Creator Waitlist
+            </Link>
+          </div>
         </div>
-        
-        {/* Right - CTA area */}
-        <div className="flex flex-col justify-center px-6 py-20 lg:px-12 xl:px-20">
-          <div className="max-w-md">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#0066FF]">
-              Now in beta
+
+        {/* Right - Color blocks with guide */}
+        <div className="relative flex items-center justify-center lg:justify-end">
+          {/* Yellow block */}
+          <div className="relative h-[400px] w-full max-w-[400px] rounded-3xl border-[3px] border-black bg-[#FFE566] p-8 lg:h-[500px]">
+            <h2 className="font-heading text-[2.5rem] leading-[0.95] tracking-tight text-black sm:text-[3rem]">
+              GET MORE<br/>BOOKINGS
+            </h2>
+            <p className="mt-4 text-[14px] leading-relaxed text-black/70">
+              Hire vetted creators to showcase your property. They post, you get clicks.
             </p>
             
-            <h2 className="mt-4 text-[2rem] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[2.5rem]">
-              Get more bookings through authentic content
-            </h2>
-            
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link 
-                href="/hosts" 
-                className="inline-flex h-14 items-center justify-center bg-[#0066FF] px-8 text-[14px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#0052CC]"
-              >
-                Start as Host
+            {/* Guide menu */}
+            <div className="mt-8 space-y-3">
+              <Link href="/how-it-works" className="flex items-center justify-between border-b-2 border-black/20 pb-3 text-[13px] font-semibold uppercase tracking-wide text-black hover:border-black">
+                How it works
+                <span>→</span>
               </Link>
-              <Link 
-                href="/waitlist" 
-                className="inline-flex h-14 items-center justify-center border-2 border-foreground/20 px-8 text-[14px] font-semibold uppercase tracking-wide text-foreground transition-colors hover:border-foreground/40"
-              >
-                Join as Creator
+              <Link href="/creators" className="flex items-center justify-between border-b-2 border-black/20 pb-3 text-[13px] font-semibold uppercase tracking-wide text-black hover:border-black">
+                Browse creators
+                <span>→</span>
               </Link>
-            </div>
-            
-            <div className="mt-12 flex gap-8 text-[12px] text-muted-foreground">
-              <span>Free to start</span>
-              <span>No contracts</span>
-              <span>Pay per result</span>
+              <Link href="/pricing" className="flex items-center justify-between text-[13px] font-semibold uppercase tracking-wide text-black hover:opacity-70">
+                View pricing
+                <span>→</span>
+              </Link>
             </div>
           </div>
+          
+          {/* Floating stickers */}
+          <HouseSticker className="absolute -left-8 top-10 h-20 w-20 lg:-left-16 lg:h-24 lg:w-24" />
+          <CameraSticker className="absolute -right-4 top-1/3 h-16 w-16 lg:-right-10 lg:h-20 lg:w-20" />
+          <RocketSticker className="absolute -bottom-4 left-1/4 h-[72px] w-[72px] lg:h-[88px] lg:w-[88px]" />
         </div>
       </div>
     </section>
   )
 }
 
-function ValuePropsSection() {
+function ValueCardsSection() {
   return (
-    <section className="relative bg-foreground py-24 text-white">
-      {/* Animated layer for dark section */}
-      <AnimatedLayer variant="dark" />
-      
-      <Container className="relative z-10">
-        <div className="grid gap-16 lg:grid-cols-2 lg:gap-20">
-          {/* Left - section title */}
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
-              Why CreatorStays
+    <section className="bg-black px-6 py-20">
+      <div className="mx-auto max-w-7xl">
+        {/* Three color cards */}
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Card 1 - Yellow */}
+          <div className="relative overflow-hidden rounded-3xl border-[3px] border-black bg-[#FFE566] p-8">
+            <h3 className="font-heading text-[2rem] italic leading-[0.95] tracking-tight text-black">
+              REAL<br/>TRAFFIC
+            </h3>
+            <p className="mt-4 text-[13px] text-black/70">
+              Creators drive real clicks to your listing. Track every visit.
             </p>
-            <h2 className="mt-4 font-heading text-[2.5rem] font-bold uppercase leading-[0.9] tracking-tight sm:text-[3rem] md:text-[3.5rem]">
-              Real traffic.<br />Real content.
-            </h2>
+            <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-2xl border-[3px] border-black bg-white/50" />
           </div>
           
-          {/* Right - value list */}
-          <div className="space-y-10">
-            <div>
-              <h3 className="text-[18px] font-semibold">More clicks to your listing</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-white/60">
-                Creators drive real visitors to your Airbnb. Every click tracked and attributed.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-[18px] font-semibold">Professional content you own</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-white/60">
-                Photos and videos created for your property. Use them anywhere, forever.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-[18px] font-semibold">Targeted travel audience</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-white/60">
-                Reach real travelers who actually book, not random followers.
-              </p>
-            </div>
+          {/* Card 2 - Blue */}
+          <div className="relative overflow-hidden rounded-3xl border-[3px] border-black bg-[#5DADE2] p-8">
+            <RocketSticker className="absolute -right-6 -top-6 h-20 w-20 rotate-12" />
+            <h3 className="font-heading text-[2rem] italic leading-[0.95] tracking-tight text-black">
+              CONTENT<br/>YOU OWN
+            </h3>
+            <p className="mt-4 text-[13px] text-black/70">
+              Photos and videos created for your property. Yours forever.
+            </p>
+          </div>
+          
+          {/* Card 3 - Purple/Pink */}
+          <div className="relative overflow-hidden rounded-3xl border-[3px] border-black bg-[#DDA0DD] p-8">
+            <h3 className="font-heading text-[2rem] italic leading-[0.95] tracking-tight text-black">
+              TARGETED<br/>REACH
+            </h3>
+            <p className="mt-4 text-[13px] text-black/70">
+              Real travelers who actually book, not random followers.
+            </p>
+            <div className="absolute -bottom-2 -right-2 h-16 w-32 rounded-xl border-[3px] border-black bg-white/30" />
           </div>
         </div>
-      </Container>
+      </div>
     </section>
   )
 }
-
-function EdgeBlur({ className = "" }: { className?: string }) {
-  return (
-    <div 
-      className={`absolute inset-0 -z-10 overflow-hidden ${className}`}
-      aria-hidden="true"
-    >
-      <div className="absolute -top-1/4 right-0 h-[500px] w-[600px] rounded-full bg-accent/[0.04] blur-[120px]" />
-      <div className="absolute -bottom-1/4 left-0 h-[400px] w-[500px] rounded-full bg-primary/[0.03] blur-[100px]" />
-    </div>
-  )
-}
-
-const steps = [
-  { number: "1", title: "Add property", description: "Paste your Airbnb link to get started" },
-  { number: "2", title: "Find creators", description: "Browse by niche, audience size & location" },
-  { number: "3", title: "Track traffic", description: "Real-time click analytics on every link" },
-  { number: "4", title: "Pay & settle", description: "Direct payouts to creators through Stripe" },
-]
 
 function HowItWorksSection() {
+  const steps = [
+    { num: "01", title: "Add your property", desc: "Paste your Airbnb link to get started" },
+    { num: "02", title: "Find creators", desc: "Browse by niche, audience size & location" },
+    { num: "03", title: "Track traffic", desc: "Real-time click analytics on every link" },
+    { num: "04", title: "Pay & settle", desc: "Direct payouts to creators through Stripe" },
+  ]
+
   return (
-    <section className="py-8">
-      <Container>
-        <div className="mb-6 opacity-0 reveal">
-          <h2 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
-            How it works
-          </h2>
-        </div>
-        <div className="relative">
-          {/* Edge blur behind pills */}
-          <div className="pointer-events-none absolute -inset-16 -z-10" aria-hidden="true">
-            <div className="absolute left-0 top-1/2 h-[300px] w-[400px] -translate-y-1/2 rounded-full bg-[hsl(199,89%,48%)]/[0.07] blur-[160px]" />
-            <div className="absolute right-0 top-1/2 h-[280px] w-[380px] -translate-y-1/2 rounded-full bg-[hsl(213,94%,45%)]/[0.05] blur-[140px]" />
-          </div>
-          <div className="focus-group flex flex-col gap-2">
-            {steps.map((step, i) => (
-              <div 
-                key={step.number}
-                className="marketing-pill focus-card opacity-0 reveal"
-                style={{ animationDelay: `${(i + 1) * 80}ms` }}
-              >
-                <div className="marketing-pill-glow" aria-hidden="true" />
-                <div className="relative z-10 flex flex-1 items-center gap-4">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {step.number}
-                  </span>
-                  <div className="flex flex-1 items-center justify-between gap-4">
-                    <h3 className="text-[14px] font-semibold tracking-tight md:text-[15px]">{step.title}</h3>
-                    <p className="text-[11px] text-muted-foreground/60 md:text-[12px]">{step.description}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Container>
-    </section>
-  )
-}
-
-const creatorTypes = [
-  { category: "Travel", description: "Destination & adventure content" },
-  { category: "Lifestyle", description: "Home & living inspiration" },
-  { category: "Photography", description: "Stunning visual storytelling" },
-  { category: "Vlog", description: "Day-in-the-life experiences" },
-  { category: "Food & Hospitality", description: "Culinary & hosting content" },
-  { category: "Adventure", description: "Outdoor & exploration content" },
-]
-
-function BetaSection() {
-  return (
-    <section className="py-16">
-      <Container>
-        <div className="text-center opacity-0 reveal">
-          <span className="inline-block rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5 text-sm font-medium text-accent">
-            Now in Beta
-          </span>
-          <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">
-            CreatorStays is launching soon
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-            The marketplace connecting vacation rental hosts with content creators.
-          </p>
-        </div>
-
-        {/* For Hosts / For Creators - Clean two-column layout */}
-        <div className="relative mt-12">
-          {/* Background blur */}
-          <div className="pointer-events-none absolute -inset-10 -z-10" aria-hidden="true">
-            <div className="absolute left-1/4 top-1/2 h-[200px] w-[300px] -translate-y-1/2 rounded-full bg-[hsl(213,94%,45%)]/[0.05] blur-[100px]" />
-            <div className="absolute right-1/4 top-1/2 h-[180px] w-[280px] -translate-y-1/2 rounded-full bg-[hsl(199,89%,48%)]/[0.04] blur-[90px]" />
+    <section className="bg-white px-6 py-24">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-16 lg:grid-cols-2">
+          {/* Left - Title */}
+          <div>
+            <h2 className="font-heading text-[3.5rem] leading-[0.9] tracking-tight text-black sm:text-[4.5rem]">
+              HOW IT<br/>WORKS
+            </h2>
           </div>
           
-          <div className="beta-card-group grid gap-px overflow-hidden rounded-2xl border border-foreground/[0.04] bg-foreground/[0.02] md:grid-cols-2">
-            {/* Hosts - Primary */}
-            <div className="beta-card group relative p-8 opacity-0 reveal" style={{ animationDelay: '100ms' }}>
-              <div className="beta-card-glow" aria-hidden="true" />
-              <div className="relative z-10">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-primary/70">For property owners</span>
-                <h3 className="mt-2 text-xl font-semibold tracking-tight">Hosts</h3>
-                <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground/70">
-                  List your property and connect with creators who drive real traffic through authentic content.
-                </p>
-                <div className="mt-6">
-                  <Button size="sm" className="text-xs" asChild>
-                    <Link href="/hosts">Host Signup</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Creators - Secondary */}
-            <div className="beta-card group relative border-t border-foreground/[0.04] p-8 opacity-0 reveal md:border-l md:border-t-0" style={{ animationDelay: '200ms' }}>
-              <div className="beta-card-glow" aria-hidden="true" />
-              <div className="relative z-10">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-accent/70">For content creators</span>
-                <h3 className="mt-2 text-xl font-semibold tracking-tight">Creators</h3>
-                <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground/70">
-                  Get early access to browse properties and receive collaboration offers from hosts.
-                </p>
-                <div className="mt-6">
-                  <Button size="sm" variant="outline" className="text-xs" asChild>
-                    <Link href="/waitlist">Join Creator Waitlist</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Creator categories - Clean grid */}
-        <div className="mt-14">
-          <p className="mb-6 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50">
-            Creator categories we&apos;re recruiting
-          </p>
-          <div className="category-grid grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {creatorTypes.map((type, i) => (
-              <div 
-                key={type.category}
-                className="category-item group relative rounded-xl p-4 opacity-0 reveal"
-                style={{ animationDelay: `${(i + 1) * 50}ms` }}
-              >
-                <div className="category-item-glow" aria-hidden="true" />
-                <div className="relative z-10 flex items-start gap-3">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-accent/10 text-[9px] font-bold text-primary/70">
-                    {type.category[0]}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-medium leading-tight text-foreground/90">{type.category}</p>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground/50">{type.description}</p>
-                  </div>
+          {/* Right - Steps */}
+          <div className="space-y-8">
+            {steps.map((step) => (
+              <div key={step.num} className="flex gap-6 border-b-2 border-black/10 pb-6">
+                <span className="font-heading text-[2rem] text-black/30">{step.num}</span>
+                <div>
+                  <h3 className="text-[18px] font-semibold text-black">{step.title}</h3>
+                  <p className="mt-1 text-[14px] text-black/60">{step.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </Container>
+      </div>
     </section>
   )
 }
 
-function FinalCTASection() {
+function CTASection() {
   return (
-    <section className="relative overflow-hidden py-24">
-      <EdgeBlur />
-      <Container>
-        <div className="relative rounded-3xl border border-primary/10 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 p-12 text-center md:p-16 opacity-0 reveal">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            Get early access
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Be among the first to use CreatorStays when we launch.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="lg" asChild className="px-8">
-              <Link href="/hosts">Host Signup</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="px-8">
-              <Link href="/waitlist">Creator Waitlist</Link>
-            </Button>
+    <section className="bg-black px-6 py-20">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Subscribe / Hosts block - Yellow */}
+          <div className="relative overflow-hidden rounded-3xl border-[3px] border-black bg-[#FFE566] p-10">
+            <h3 className="font-heading text-[2.5rem] leading-[0.9] tracking-tight text-black sm:text-[3rem]">
+              LIST YOUR<br/><em>PROPERTY</em>
+            </h3>
+            <p className="mt-4 max-w-sm text-[14px] text-black/70">
+              Join hosts using creator marketing to drive more bookings to their vacation rentals.
+            </p>
+            <div className="mt-8">
+              <Link 
+                href="/hosts"
+                className="inline-flex h-12 items-center gap-2 rounded-full bg-black px-6 text-[12px] font-semibold uppercase tracking-wide text-white"
+              >
+                Host Signup
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                </svg>
+              </Link>
+            </div>
+            <HouseSticker className="absolute -bottom-6 -right-6 h-28 w-28 rotate-12" />
+          </div>
+          
+          {/* Support / Creators block - Blue */}
+          <div className="relative overflow-hidden rounded-3xl border-[3px] border-black bg-[#5DADE2] p-10">
+            <h3 className="font-heading text-[2.5rem] leading-[0.9] tracking-tight text-black sm:text-[3rem]">
+              ALWAYS <em>HERE</em><br/>TO HELP
+            </h3>
+            <p className="mt-4 max-w-sm text-[14px] text-black/70">
+              Whether you&apos;re a host or creator, our support team has you covered.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link 
+                href="/waitlist"
+                className="inline-flex h-12 items-center gap-2 rounded-full bg-black px-6 text-[12px] font-semibold uppercase tracking-wide text-white"
+              >
+                Creator Waitlist
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                </svg>
+              </Link>
+              <Link 
+                href="/help"
+                className="inline-flex h-12 items-center gap-2 rounded-full border-2 border-black px-6 text-[12px] font-semibold uppercase tracking-wide text-black"
+              >
+                Get Support
+              </Link>
+            </div>
+            <CameraSticker className="absolute -bottom-8 -right-8 h-32 w-32 -rotate-12" />
           </div>
         </div>
-      </Container>
+      </div>
+    </section>
+  )
+}
+
+function FooterMarquee() {
+  return (
+    <section className="overflow-hidden bg-[#5DADE2] py-6">
+      <div className="marquee-track flex whitespace-nowrap">
+        {[...Array(6)].map((_, i) => (
+          <span key={i} className="mx-8 font-heading text-[4rem] tracking-tight text-black sm:text-[6rem]">
+            CREATORSTAYS
+          </span>
+        ))}
+      </div>
     </section>
   )
 }
 
 export default function HomePage() {
   return (
-    <>
+    <div className="-mt-20">
       <HeroSection />
-      <ValuePropsSection />
+      <ValueCardsSection />
       <HowItWorksSection />
-      <BetaSection />
-      <FinalCTASection />
-    </>
+      <CTASection />
+      <FooterMarquee />
+    </div>
   )
 }

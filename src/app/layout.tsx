@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { DM_Sans, Fraunces } from "next/font/google"
+import { DM_Sans, Bebas_Neue } from "next/font/google"
 import "./globals.css"
 import { Navbar } from "@/components/navigation/navbar"
 import { Footer } from "@/components/navigation/footer"
@@ -10,7 +10,8 @@ const dmSans = DM_Sans({
   display: "swap",
 })
 
-const fraunces = Fraunces({
+const bebasNeue = Bebas_Neue({
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-heading",
   display: "swap",
@@ -27,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${fraunces.variable}`}>
-      <body className="hero-atmosphere flex min-h-screen flex-col font-body text-foreground antialiased">
+    <html lang="en" className={`${dmSans.variable} ${bebasNeue.variable}`}>
+      <body className="flex min-h-screen flex-col font-body text-foreground antialiased">
         <Navbar />
         <main className="flex-1 pt-20">{children}</main>
         <Footer />
