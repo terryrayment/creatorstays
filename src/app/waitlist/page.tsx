@@ -35,6 +35,8 @@ const audienceSizeOptions = [
 
 export default function WaitlistPage() {
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
   const [form, setForm] = useState({
     email: "",
     name: "",
@@ -47,10 +49,47 @@ export default function WaitlistPage() {
     youtube: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Waitlist submission:", form)
-    setSubmitted(true)
+    setLoading(true)
+    setError("")
+
+    try {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email,
+          name: form.name,
+          userType: 'creator',
+          handle: form.handle,
+          platform: form.platform,
+          niche: form.niche,
+          audienceSize: form.audienceSize,
+          instagramUrl: form.instagram,
+          tiktokUrl: form.tiktok,
+          youtubeUrl: form.youtube,
+          source: 'waitlist-page',
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (data.alreadyExists) {
+          setError("You're already on the waitlist! We'll be in touch soon.")
+        } else {
+          setError(data.error || 'Something went wrong. Please try again.')
+        }
+        return
+      }
+
+      setSubmitted(true)
+    } catch (err) {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (submitted) {
@@ -257,11 +296,17 @@ export default function WaitlistPage() {
               </div>
 
               {/* Submit */}
+              {error && (
+                <div className="rounded-lg border-2 border-red-500 bg-red-50 p-3 text-center">
+                  <p className="text-[12px] font-medium text-red-600">{error}</p>
+                </div>
+              )}
               <button 
-                type="submit" 
-                className="w-full rounded-full border-[3px] border-black bg-black py-3 text-[11px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-full border-[3px] border-black bg-black py-3 text-[11px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
-                Join Creator Waitlist
+                {loading ? 'Joining...' : 'Join Creator Waitlist'}
               </button>
               <p className="text-center text-[10px] text-black/50">
                 We'll never spam you. Unsubscribe anytime.

@@ -115,6 +115,8 @@ interface ListingPrefill {
 
 export function HostSignupForm() {
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -133,7 +135,8 @@ export function HostSignupForm() {
   const [prefillAttempted, setPrefillAttempted] = useState(false)
 
   const listingUrlError = form.listingUrl && !isValidAirbnbUrl(form.listingUrl)
-  const canSubmit = !listingUrlError
+  const passwordMismatch = form.password && form.confirmPassword && form.password !== form.confirmPassword
+  const canSubmit = !listingUrlError && !passwordMismatch && !loading
   const showPrefillButton = form.listingUrl && isValidAirbnbUrl(form.listingUrl) && form.listingUrl.includes("airbnb.com")
 
   const handleListingUrlBlur = () => {
@@ -172,11 +175,49 @@ export function HostSignupForm() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!canSubmit) return
-    console.log("Host signup:", form, prefill)
-    setSubmitted(true)
+    
+    setLoading(true)
+    setError("")
+
+    try {
+      // Save to waitlist as host (until full auth is built)
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email,
+          name: form.fullName,
+          userType: 'host',
+          propertyLocation: form.cityRegion,
+          listingUrl: form.listingUrl,
+          source: 'host-signup',
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (data.alreadyExists) {
+          setError("This email is already registered. Try logging in instead.")
+        } else {
+          setError(data.error || 'Something went wrong. Please try again.')
+        }
+        return
+      }
+
+      // Store in localStorage for demo dashboard access
+      localStorage.setItem('creatorstays_role', 'host')
+      localStorage.setItem('creatorstays_host_email', form.email)
+      
+      setSubmitted(true)
+    } catch (err) {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const inputClass = "h-10 w-full rounded-lg border-[2px] border-black bg-white px-3 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
@@ -365,12 +406,22 @@ export function HostSignupForm() {
           </label>
         </div>
 
+        {error && (
+          <div className="rounded-lg border-2 border-red-500 bg-red-50 p-3 text-center">
+            <p className="text-[12px] font-medium text-red-600">{error}</p>
+          </div>
+        )}
+
+        {passwordMismatch && (
+          <p className="text-[10px] font-medium text-[#FF6B6B]">Passwords don&apos;t match</p>
+        )}
+
         <button 
           type="submit" 
           disabled={!canSubmit}
-          className="w-full h-11 rounded-full bg-black text-[11px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+          className="w-full h-11 rounded-full bg-black text-[11px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
         >
-          Create Host Account
+          {loading ? 'Creating Account...' : 'Create Host Account'}
         </button>
       </form>
     </div>
