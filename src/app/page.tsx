@@ -72,6 +72,7 @@ function HeroBackground() {
 function HeroSection() {
   return (
     <section className="relative overflow-hidden py-16 md:py-20">
+      <HeroBackground />
       <Container>
         <div className="flex flex-col items-center text-center opacity-0 reveal">
           <span className="text-label mb-3 inline-block rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-primary backdrop-blur-sm">
