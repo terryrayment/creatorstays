@@ -1,39 +1,26 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
-
-function getCookie(name: string): string | null {
-  if (typeof document === 'undefined') return null
-  const value = `; ${document.cookie}`
-  const parts = value.split(`; ${name}=`)
-  if (parts.length === 2) {
-    const cookieValue = parts.pop()?.split(';').shift()
-    return cookieValue ? decodeURIComponent(cookieValue) : null
-  }
-  return null
-}
 
 export default function HostSettingsPage() {
   const router = useRouter()
-  const [user, setUser] = useState<{ email: string } | null>(null)
-  const [activeTab, setActiveTab] = useState<"profile" | "password" | "notifications">("profile")
+  const searchParams = useSearchParams()
+  const { data: session, status } = useSession()
+  const isSetup = searchParams.get("setup") === "true"
+  
+  const [activeTab, setActiveTab] = useState<"profile" | "notifications">("profile")
   const [toast, setToast] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
   
   // Profile form
   const [profile, setProfile] = useState({
-    fullName: "Demo Host",
+    fullName: "",
     email: "",
-    phone: "+1 (555) 123-4567",
-    company: "Mountain View Retreats",
-  })
-  
-  // Password form
-  const [passwords, setPasswords] = useState({
-    current: "",
-    new: "",
-    confirm: "",
+    phone: "",
+    company: "",
   })
   
   // Notifications
@@ -45,39 +32,52 @@ export default function HostSettingsPage() {
   })
 
   useEffect(() => {
-    const userCookie = getCookie('cs_user')
-    if (userCookie) {
-      try {
-        const userData = JSON.parse(userCookie)
-        setUser(userData)
-        setProfile(prev => ({ ...prev, email: userData.email }))
-      } catch {
-        router.push('/login/host')
+    if (status === "unauthenticated") {
+      router.push("/login")
+    }
+    if (session?.user) {
+      setProfile(prev => ({
+        ...prev,
+        fullName: session.user.name || "",
+        email: session.user.email || "",
+      }))
+    }
+  }, [session, status, router])
+
+  const handleProfileSave = async () => {
+    setSaving(true)
+    
+    // Create host profile via API
+    try {
+      const res = await fetch("/api/host/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: profile.fullName,
+          contactEmail: profile.email,
+          phone: profile.phone,
+          company: profile.company,
+        }),
+      })
+      
+      if (res.ok) {
+        setToast("Profile saved!")
+        setTimeout(() => setToast(null), 3000)
+        
+        // If this is setup flow, redirect to dashboard
+        if (isSetup) {
+          setTimeout(() => router.push("/dashboard/host"), 1500)
+        }
+      } else {
+        setToast("Error saving profile")
+        setTimeout(() => setToast(null), 3000)
       }
-    } else {
-      router.push('/login/host')
-    }
-  }, [router])
-
-  const handleProfileSave = () => {
-    setToast("Profile updated")
-    setTimeout(() => setToast(null), 3000)
-  }
-
-  const handlePasswordSave = () => {
-    if (passwords.new !== passwords.confirm) {
-      setToast("Passwords don't match")
+    } catch (error) {
+      setToast("Error saving profile")
       setTimeout(() => setToast(null), 3000)
-      return
     }
-    if (passwords.new.length < 8) {
-      setToast("Password must be at least 8 characters")
-      setTimeout(() => setToast(null), 3000)
-      return
-    }
-    setPasswords({ current: "", new: "", confirm: "" })
-    setToast("Password updated")
-    setTimeout(() => setToast(null), 3000)
+    
+    setSaving(false)
   }
 
   const handleNotificationsSave = () => {
@@ -85,16 +85,9 @@ export default function HostSettingsPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  const handleLogout = () => {
-    document.cookie = "cs_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
-    document.cookie = "cs_role=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
-    document.cookie = "cs_user=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
-    router.push("/login/host")
-  }
+  const inputClass = "h-12 w-full rounded-xl border-[2px] border-black bg-white px-4 text-[14px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
 
-  const inputClass = "h-10 w-full rounded-lg border-[2px] border-black bg-white px-3 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
-
-  if (!user) {
+  if (status === "loading") {
     return <div className="min-h-screen bg-black" />
   }
 
@@ -111,126 +104,124 @@ export default function HostSettingsPage() {
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-wider text-white/60">Host Settings</p>
-            <h1 className="font-heading text-[1.5rem] leading-[0.9] text-white" style={{ fontWeight: 900 }}>
-              ACCOUNT
+            <p className="text-[9px] font-black uppercase tracking-wider text-white/60">
+              {isSetup ? "Getting Started" : "Host Settings"}
+            </p>
+            <h1 className="font-heading text-[1.75rem] leading-[0.9] text-white" style={{ fontWeight: 900 }}>
+              {isSetup ? "SET UP YOUR PROFILE" : "ACCOUNT"}
             </h1>
           </div>
-          <Link
-            href="/dashboard/host"
-            className="inline-flex h-9 items-center rounded-full border-[2px] border-white/20 px-4 text-[10px] font-black uppercase tracking-wider text-white transition-colors hover:border-white/40"
-          >
-            ← Dashboard
-          </Link>
+          {!isSetup && (
+            <Link
+              href="/dashboard/host"
+              className="inline-flex h-9 items-center rounded-full border-[2px] border-white/20 px-4 text-[10px] font-black uppercase tracking-wider text-white transition-colors hover:border-white/40"
+            >
+              ← Dashboard
+            </Link>
+          )}
         </div>
 
-        {/* Tabs */}
-        <div className="mb-3 flex gap-1">
-          {(["profile", "password", "notifications"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
-                activeTab === tab
-                  ? "bg-[#FFD84A] text-black border-[2px] border-black"
-                  : "bg-white/10 text-white border-[2px] border-transparent hover:bg-white/20"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        {/* Setup intro */}
+        {isSetup && (
+          <div className="mb-4 rounded-xl border-[2px] border-white/20 bg-white/5 p-4">
+            <p className="text-[13px] font-medium text-white/80">
+              Welcome! Let's set up your host profile so creators can find and connect with you.
+            </p>
+          </div>
+        )}
+
+        {/* Tabs - only show if not in setup mode */}
+        {!isSetup && (
+          <div className="mb-3 flex gap-1">
+            {(["profile", "notifications"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
+                  activeTab === tab
+                    ? "bg-[#FFD84A] text-black border-[2px] border-black"
+                    : "bg-white/10 text-white border-[2px] border-transparent hover:bg-white/20"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Content */}
-        <div className="rounded-2xl border-[3px] border-black bg-white p-5">
-          {activeTab === "profile" && (
-            <div className="space-y-4">
+        <div className="rounded-2xl border-[3px] border-black bg-white p-6">
+          {(activeTab === "profile" || isSetup) && (
+            <div className="space-y-5">
               <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Full Name</label>
+                <label className="mb-1.5 block text-[11px] font-black uppercase tracking-wider text-black">
+                  Full Name
+                </label>
                 <input
                   value={profile.fullName}
                   onChange={e => setProfile({ ...profile, fullName: e.target.value })}
+                  placeholder="Your name"
                   className={inputClass}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Email</label>
+                <label className="mb-1.5 block text-[11px] font-black uppercase tracking-wider text-black">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={profile.email}
-                  onChange={e => setProfile({ ...profile, email: e.target.value })}
-                  className={inputClass}
+                  disabled
+                  className={`${inputClass} bg-black/5 cursor-not-allowed`}
                 />
+                <p className="mt-1 text-[10px] text-black/50">Email is linked to your login</p>
               </div>
               <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Phone</label>
+                <label className="mb-1.5 block text-[11px] font-black uppercase tracking-wider text-black">
+                  Phone <span className="font-medium text-black/40">(optional)</span>
+                </label>
                 <input
                   type="tel"
                   value={profile.phone}
                   onChange={e => setProfile({ ...profile, phone: e.target.value })}
+                  placeholder="+1 (555) 123-4567"
                   className={inputClass}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Company / Brand</label>
+                <label className="mb-1.5 block text-[11px] font-black uppercase tracking-wider text-black">
+                  Company / Brand <span className="font-medium text-black/40">(optional)</span>
+                </label>
                 <input
                   value={profile.company}
                   onChange={e => setProfile({ ...profile, company: e.target.value })}
+                  placeholder="Your property management company"
                   className={inputClass}
                 />
               </div>
-              <button
-                onClick={handleProfileSave}
-                className="h-10 rounded-full bg-black px-6 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
-              >
-                Save Changes
-              </button>
+              
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleProfileSave}
+                  disabled={saving || !profile.fullName}
+                  className="h-11 rounded-full bg-black px-8 text-[11px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : isSetup ? "Continue to Dashboard →" : "Save Changes"}
+                </button>
+                
+                {isSetup && (
+                  <button
+                    onClick={() => router.push("/dashboard/host")}
+                    className="h-11 rounded-full border-[2px] border-black px-6 text-[11px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
+                  >
+                    Skip for now
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
-          {activeTab === "password" && (
-            <div className="space-y-4">
-              <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Current Password</label>
-                <input
-                  type="password"
-                  value={passwords.current}
-                  onChange={e => setPasswords({ ...passwords, current: e.target.value })}
-                  placeholder="Enter current password"
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">New Password</label>
-                <input
-                  type="password"
-                  value={passwords.new}
-                  onChange={e => setPasswords({ ...passwords, new: e.target.value })}
-                  placeholder="Enter new password"
-                  className={inputClass}
-                />
-                <p className="mt-1 text-[10px] font-medium text-black/60">Minimum 8 characters</p>
-              </div>
-              <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Confirm New Password</label>
-                <input
-                  type="password"
-                  value={passwords.confirm}
-                  onChange={e => setPasswords({ ...passwords, confirm: e.target.value })}
-                  placeholder="Confirm new password"
-                  className={inputClass}
-                />
-              </div>
-              <button
-                onClick={handlePasswordSave}
-                className="h-10 rounded-full bg-black px-6 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
-              >
-                Update Password
-              </button>
-            </div>
-          )}
-
-          {activeTab === "notifications" && (
+          {activeTab === "notifications" && !isSetup && (
             <div className="space-y-3">
               {[
                 { key: "newOffers", label: "New creator offers", desc: "When a creator submits an offer" },
