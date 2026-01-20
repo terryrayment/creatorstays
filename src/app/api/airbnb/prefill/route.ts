@@ -98,17 +98,26 @@ export async function GET(request: NextRequest) {
 
     // Collect photos
     const photos: string[] = []
-    if (ogImage) {
+    if (ogImage && !isAirbnbLogo(ogImage)) {
       photos.push(ogImage)
     }
     
     // Find additional images from muscache CDN
+    // Filter out logos, icons, avatars, and small images
     const imageRegex = /["'](https:\/\/a0\.muscache\.com\/[^"']+\.(?:jpg|jpeg|webp|png)[^"']*)/gi
     let imageMatch: RegExpExecArray | null
     while ((imageMatch = imageRegex.exec(html)) !== null && photos.length < 10) {
-      const imgUrl = imageMatch[1].split('?')[0] // Remove query params for dedup
-      if (!photos.some(p => p.includes(imgUrl.split('/').pop() || ''))) {
-        photos.push(imageMatch[1])
+      const imgUrl = imageMatch[1]
+      
+      // Skip if it's a logo, icon, avatar, or known non-property image
+      if (isAirbnbLogo(imgUrl)) {
+        continue
+      }
+      
+      // Deduplicate by checking the filename
+      const filename = imgUrl.split('/').pop()?.split('?')[0] || ''
+      if (!photos.some(p => p.includes(filename))) {
+        photos.push(imgUrl)
       }
     }
     
@@ -215,4 +224,71 @@ function decodeHtmlEntities(str: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&#x27;/g, "'")
+}
+
+/**
+ * Detect if a URL is an Airbnb logo, icon, or non-property image
+ */
+function isAirbnbLogo(url: string): boolean {
+  const lowerUrl = url.toLowerCase()
+  
+  // Known logo/icon patterns
+  const logoPatterns = [
+    'airbnb-static',
+    'airbnb_logo',
+    'airbnb-logo',
+    '/logo',
+    '/icon',
+    '/favicon',
+    '/apple-touch',
+    'android-chrome',
+    'default_user',
+    'default-user',
+    'avatar',
+    'user_pic',
+    'profile_pic',
+    'host_pic',
+    'badge',
+    'superhost',
+    'verified',
+    'safety',
+    '/em/',           // Emoji/icon folder
+    '/social/',       // Social icons
+    '/experiences/',  // Not property images
+    'brandmark',
+    'symbol',
+  ]
+  
+  for (const pattern of logoPatterns) {
+    if (lowerUrl.includes(pattern)) {
+      return true
+    }
+  }
+  
+  // Check for very small image dimensions in URL (icons are usually small)
+  // Pattern: im/pictures or im/users followed by small dimensions
+  const dimensionMatch = url.match(/\/(\d+)x(\d+)/)
+  if (dimensionMatch) {
+    const width = parseInt(dimensionMatch[1])
+    const height = parseInt(dimensionMatch[2])
+    // Skip images smaller than 200px in either dimension (likely icons)
+    if (width < 200 || height < 200) {
+      return true
+    }
+  }
+  
+  // Airbnb logo has specific red/pink color scheme - check for known logo image IDs
+  // These are common Airbnb logo image identifiers
+  const logoImageIds = [
+    'airbnb-logo',
+    'rbw4n0bgz',  // Common Airbnb Bélo logo ID
+  ]
+  
+  for (const id of logoImageIds) {
+    if (lowerUrl.includes(id)) {
+      return true
+    }
+  }
+  
+  return false
 }
