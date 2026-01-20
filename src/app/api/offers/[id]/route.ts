@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { sendEmail, offerAcceptedEmail } from '@/lib/email'
+import { sendEmail, offerAcceptedEmail, offerCounteredEmail, offerDeclinedEmail } from '@/lib/email'
 import { nanoid } from 'nanoid'
 
 export const dynamic = 'force-dynamic'
@@ -121,6 +121,22 @@ export async function PATCH(
         },
       })
 
+      // Send email to host
+      const hostEmail = offer.hostProfile.user?.email || offer.hostProfile.contactEmail
+      if (hostEmail) {
+        const emailData = offerDeclinedEmail({
+          hostName: offer.hostProfile.displayName,
+          creatorName: creatorProfile.displayName,
+          creatorHandle: creatorProfile.handle,
+          propertyTitle: offer.property?.title || 'your property',
+        })
+
+        sendEmail({
+          to: hostEmail,
+          ...emailData,
+        }).catch(err => console.error('[Offer Decline] Email error:', err))
+      }
+
       return NextResponse.json({
         success: true,
         message: 'Offer declined.',
@@ -143,7 +159,25 @@ export async function PATCH(
         },
       })
 
-      // TODO: Send email to host about counter offer
+      // Send email to host about counter offer
+      const hostEmail = offer.hostProfile.user?.email || offer.hostProfile.contactEmail
+      if (hostEmail) {
+        const emailData = offerCounteredEmail({
+          hostName: offer.hostProfile.displayName,
+          creatorName: creatorProfile.displayName,
+          creatorHandle: creatorProfile.handle,
+          propertyTitle: offer.property?.title || 'your property',
+          originalAmount: offer.cashCents,
+          counterAmount: counterCashCents,
+          counterMessage,
+          offerId: offer.id,
+        })
+
+        sendEmail({
+          to: hostEmail,
+          ...emailData,
+        }).catch(err => console.error('[Offer Counter] Email error:', err))
+      }
 
       return NextResponse.json({
         success: true,

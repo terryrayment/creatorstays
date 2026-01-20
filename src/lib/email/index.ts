@@ -444,3 +444,128 @@ View: ${BASE_URL}/dashboard/creator/settings
 
   return { subject, html, text }
 }
+
+/**
+ * Offer Countered Email (to Host)
+ */
+export function offerCounteredEmail(data: {
+  hostName: string
+  creatorName: string
+  creatorHandle: string
+  propertyTitle: string
+  originalAmount: number // in cents
+  counterAmount: number // in cents
+  counterMessage?: string
+  offerId: string
+}): { subject: string; html: string; text: string } {
+  const { hostName, creatorName, creatorHandle, propertyTitle, originalAmount, counterAmount, counterMessage } = data
+
+  const originalFormatted = `$${(originalAmount / 100).toLocaleString()}`
+  const counterFormatted = `$${(counterAmount / 100).toLocaleString()}`
+  const difference = counterAmount - originalAmount
+  const differenceFormatted = difference > 0 ? `+$${(difference / 100).toLocaleString()}` : `-$${(Math.abs(difference) / 100).toLocaleString()}`
+
+  const subject = `💬 ${creatorName} countered your offer`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Counter Offer Received</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${hostName},</p>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 18px; font-weight: 700; margin: 0 0 4px;">${creatorName}</p>
+      <p style="font-size: 14px; color: #666; margin: 0 0 16px;">@${creatorHandle}</p>
+      <p style="margin: 0 0 16px;">has countered your offer for <strong>${propertyTitle}</strong></p>
+      
+      <table style="width: 100%; margin-top: 16px;">
+        <tr>
+          <td style="padding: 12px; background: #f0f0f0; border-radius: 8px; width: 48%;">
+            <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 4px;">Your offer</p>
+            <p style="font-size: 20px; font-weight: 700; margin: 0; text-decoration: line-through; color: #999;">${originalFormatted}</p>
+          </td>
+          <td style="width: 4%;"></td>
+          <td style="padding: 12px; background: #4AA3FF; border-radius: 8px; border: 2px solid #000; width: 48%;">
+            <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #000; margin: 0 0 4px;">Counter</p>
+            <p style="font-size: 20px; font-weight: 900; margin: 0;">${counterFormatted}</p>
+            <p style="font-size: 12px; margin: 4px 0 0; color: #000;">${differenceFormatted}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+    
+    ${counterMessage ? `
+    <div style="${styles.card}; background: #fff;">
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Their message</p>
+      <p style="margin: 0; font-style: italic;">"${counterMessage}"</p>
+    </div>
+    ` : ''}
+    
+    <p style="margin: 24px 0;">
+      You can <strong>accept</strong> the counter offer, <strong>decline</strong> it, or send a new offer with different terms.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/host/offers" style="${styles.buttonYellow}">Respond to Counter →</a>
+    </div>
+  `)
+
+  const text = `
+Counter Offer Received
+
+Hi ${hostName},
+
+${creatorName} (@${creatorHandle}) has countered your offer for ${propertyTitle}.
+
+Your offer: ${originalFormatted}
+Counter offer: ${counterFormatted} (${differenceFormatted})
+${counterMessage ? `\nTheir message: "${counterMessage}"` : ''}
+
+Respond: ${BASE_URL}/dashboard/host/offers
+`
+
+  return { subject, html, text }
+}
+
+/**
+ * Offer Declined Email (to Host)
+ */
+export function offerDeclinedEmail(data: {
+  hostName: string
+  creatorName: string
+  creatorHandle: string
+  propertyTitle: string
+}): { subject: string; html: string; text: string } {
+  const { hostName, creatorName, creatorHandle, propertyTitle } = data
+
+  const subject = `${creatorName} declined your offer`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Offer Declined</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${hostName},</p>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 18px; font-weight: 700; margin: 0 0 4px;">${creatorName}</p>
+      <p style="font-size: 14px; color: #666; margin: 0 0 16px;">@${creatorHandle}</p>
+      <p style="margin: 0;">has declined your offer for <strong>${propertyTitle}</strong></p>
+    </div>
+    
+    <p style="margin: 24px 0;">
+      Don't worry! You can browse other creators or adjust your offer terms and try again.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/host/search-creators" style="${styles.button}">Find Creators →</a>
+    </div>
+  `)
+
+  const text = `
+Offer Declined
+
+Hi ${hostName},
+
+${creatorName} (@${creatorHandle}) has declined your offer for ${propertyTitle}.
+
+Find other creators: ${BASE_URL}/dashboard/host/search-creators
+`
+
+  return { subject, html, text }
+}
