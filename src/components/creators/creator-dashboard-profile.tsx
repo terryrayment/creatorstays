@@ -10,6 +10,7 @@ import { Panel, PanelHeader, PanelContent } from "@/components/ui/panel"
 import { Metric } from "@/components/ui/metric"
 import { EdgeBlur } from "@/components/ui/edge-blur"
 import { UGCGalleryManager } from "@/components/creators/ugc-gallery"
+import { CreatorDashboardStats } from "@/components/dashboard/dashboard-stats"
 
 // Platform connection types
 type Platform = 'instagram' | 'tiktok' | 'youtube'
@@ -964,6 +965,11 @@ export function CreatorDashboardProfile() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </Link>
+        </div>
+
+        {/* Stats Section */}
+        <div className="mb-6">
+          <CreatorDashboardStats />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_300px]">

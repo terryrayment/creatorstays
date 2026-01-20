@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { HostDashboard } from "@/components/hosts/host-dashboard"
+import { HostDashboardStats } from "@/components/dashboard/dashboard-stats"
 
 function NextStepStrip() {
   return (
@@ -36,6 +37,14 @@ function NextStepStrip() {
           </Link>
         </div>
       </div>
+    </div>
+  )
+}
+
+function StatsSection() {
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6">
+      <HostDashboardStats />
     </div>
   )
 }
@@ -86,6 +95,7 @@ export default function HostDashboardPage() {
   return (
     <div className="dashboard min-h-screen bg-[#FAFAFA]">
       <NextStepStrip />
+      <StatsSection />
       <SetupChecklist />
       <HostDashboard />
     </div>
