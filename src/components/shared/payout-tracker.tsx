@@ -117,14 +117,32 @@ export function PayoutTracker({ collaborationId, compact = false }: PayoutTracke
         {payoutStatus.amountCents && (
           <div className="text-right">
             <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">
-              Amount
+              Your Payout
             </p>
             <p className="text-xl font-black text-black">
               {formatCurrency(payoutStatus.amountCents)}
             </p>
+            <p className="text-[10px] text-black/50">after 15% fee</p>
           </div>
         )}
       </div>
+
+      {/* Prominent timeline message for in_transit or processing */}
+      {(payoutStatus.status === 'in_transit' || payoutStatus.status === 'processing') && (
+        <div className="mt-4 rounded-lg border-2 border-black bg-white p-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#4AA3FF]">
+              <svg className="h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-black">Funds typically arrive in 2-5 business days</p>
+              <p className="text-xs text-black/60">Payouts are processed through Stripe to your connected bank account.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Timeline */}
       {payoutStatus.timeline.length > 0 && (

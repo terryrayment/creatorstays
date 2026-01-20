@@ -173,7 +173,7 @@ function buildPayoutStatus(
     return {
       status: 'processing',
       statusLabel: 'Processing',
-      statusDescription: 'Host has initiated payment. Processing now.',
+      statusDescription: 'Payment received! Your payout is being processed.',
       timeline: [
         {
           label: 'Connect Stripe',
@@ -182,21 +182,21 @@ function buildPayoutStatus(
         },
         {
           label: 'Host Pays',
-          description: 'Payment initiated',
+          description: 'Payment received',
           status: 'completed',
         },
         {
           label: 'Funds Transfer',
-          description: 'Processing payment',
+          description: 'Processing now',
           status: 'current',
         },
         {
           label: 'Bank Deposit',
-          description: 'Arrives in 2-3 business days',
+          description: 'Arrives in 2-5 business days',
           status: 'upcoming',
         },
       ],
-      estimatedArrival: getEstimatedArrival(new Date(), 1),
+      estimatedArrival: getEstimatedArrival(new Date(), 3),
       amountCents: collaboration.paymentAmount || creatorNetCents,
       paidAt: null,
     }
@@ -205,17 +205,17 @@ function buildPayoutStatus(
   // Payment completed
   if (collaboration.paymentStatus === 'completed' && collaboration.paidAt) {
     const paidDate = new Date(collaboration.paidAt)
-    const estimatedArrival = getEstimatedArrival(paidDate, 2)
+    const estimatedArrival = getEstimatedArrival(paidDate, 3) // 2-5 business days, avg 3
     const now = new Date()
     const arrivalDate = new Date(estimatedArrival)
     const hasArrived = now >= arrivalDate
 
     return {
       status: hasArrived ? 'paid' : 'in_transit',
-      statusLabel: hasArrived ? 'Paid' : 'In Transit',
+      statusLabel: hasArrived ? 'Deposited' : 'On the Way',
       statusDescription: hasArrived 
-        ? 'Funds have been deposited to your bank account.'
-        : 'Funds are on the way to your bank account.',
+        ? 'Your payout has been deposited to your bank account.'
+        : 'Your payout is on the way! Funds typically arrive in 2-5 business days.',
       timeline: [
         {
           label: 'Connect Stripe',
@@ -230,12 +230,12 @@ function buildPayoutStatus(
         },
         {
           label: 'Funds Transfer',
-          description: 'Transferred to Stripe',
+          description: 'Sent to your bank',
           status: 'completed',
         },
         {
           label: 'Bank Deposit',
-          description: hasArrived ? 'Deposited' : `Expected ${formatDate(arrivalDate)}`,
+          description: hasArrived ? 'Deposited' : `Expected by ${formatDate(arrivalDate)}`,
           status: hasArrived ? 'completed' : 'current',
           date: hasArrived ? formatDate(arrivalDate) : undefined,
         },

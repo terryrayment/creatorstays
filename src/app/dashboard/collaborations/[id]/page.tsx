@@ -1046,14 +1046,56 @@ export default function CollaborationDetailPage() {
           )}
 
           {/* Completed (show payment confirmation) */}
-          {collaboration.status === "completed" && (
+          {collaboration.status === "completed" && userRole === "host" && (
+            <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-white">
+                    <span className="text-xl">✓</span>
+                  </div>
+                  <p className="mt-3 text-lg font-black text-black">Collaboration Complete!</p>
+                  <p className="mt-1 text-sm text-black/70">
+                    Payment has been processed. Thank you for using CreatorStays.
+                  </p>
+                </div>
+                <a
+                  href={`/api/collaborations/${collaboration.id}/receipt`}
+                  download
+                  className="flex items-center gap-2 rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Download Receipt
+                </a>
+              </div>
+              
+              {collaboration.paidAt && (
+                <div className="mt-4 rounded-lg border-2 border-black bg-white/50 p-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-black/70">Paid on</span>
+                    <span className="font-bold text-black">
+                      {new Date(collaboration.paidAt).toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                      })}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Completed for Creator (simpler view, payout tracker below handles details) */}
+          {collaboration.status === "completed" && userRole === "creator" && (
             <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-5 text-center">
               <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-2 border-black bg-white">
                 <span className="text-2xl">✓</span>
               </div>
               <p className="text-lg font-black text-black">Collaboration Complete!</p>
-              <p className="mt-1 text-sm text-black">
-                Payment has been processed. Thank you for using CreatorStays.
+              <p className="mt-1 text-sm text-black/70">
+                Payment has been initiated. See payout status below.
               </p>
             </div>
           )}
