@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// Master beta codes - always valid, unlimited uses
-const MASTER_BETA_CODES = [
-  "CREATOR2025",
-  "BETACREATOR", 
-  "CREATORSTAYS",
-]
+// Master beta codes - read from environment variable (comma-separated)
+// Set in .env: MASTER_BETA_CODES=CREATOR2025,BETACREATOR,CREATORSTAYS
+const MASTER_BETA_CODES = (process.env.MASTER_BETA_CODES || '')
+  .split(',')
+  .map(code => code.trim().toUpperCase())
+  .filter(code => code.length > 0)
 
 /**
  * GET /api/invites/validate?token=xxxx
@@ -14,7 +14,7 @@ const MASTER_BETA_CODES = [
  * Validates a creator invite token for private beta access.
  * 
  * Validation rules:
- * 1. If token is a master beta code, always valid
+ * 1. If token is a master beta code (from env), always valid
  * 2. Otherwise, token must exist in database
  * 3. Token must not be revoked
  * 4. Token must not be expired (if expiresAt is set)

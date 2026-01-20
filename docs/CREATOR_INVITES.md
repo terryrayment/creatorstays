@@ -4,6 +4,28 @@
 
 Creator access to CreatorStays is invite-only during private beta. This document explains how to create, manage, and revoke invite tokens.
 
+## Master Beta Codes
+
+Master beta codes are unlimited-use codes stored in environment variables. They're useful for marketing campaigns or team testing.
+
+### Configuration
+
+Set in your `.env` file:
+```
+MASTER_BETA_CODES=CREATOR2025,BETACREATOR,CREATORSTAYS
+```
+
+- Codes are comma-separated
+- Case-insensitive (automatically uppercased)
+- No database entry needed
+- Unlimited uses
+
+### Usage URLs
+
+Users can access via:
+- `/join/CREATOR2025` - Direct join page
+- `/creators/signup?invite=CREATOR2025` - Signup with invite
+
 ## Invite Token Format
 
 Recommended format: `cs_beta_` + random string

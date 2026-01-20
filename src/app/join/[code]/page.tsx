@@ -5,14 +5,6 @@ import { signIn } from "next-auth/react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 
-// Master beta codes - add more as needed
-const VALID_BETA_CODES = [
-  "CREATOR2025",
-  "BETACREATOR", 
-  "CREATORSTAYS",
-  // Add more codes here as needed
-]
-
 export default function JoinBetaPage() {
   const params = useParams()
   const router = useRouter()
@@ -21,12 +13,25 @@ export default function JoinBetaPage() {
   const [isValid, setIsValid] = useState<boolean | null>(null)
   const [signingIn, setSigningIn] = useState(false)
 
-  // Validate code on mount
+  // Validate code on mount via API
   useEffect(() => {
-    if (code) {
-      const valid = VALID_BETA_CODES.includes(code)
-      setIsValid(valid)
+    async function validateCode() {
+      if (!code) {
+        setIsValid(false)
+        return
+      }
+      
+      try {
+        const res = await fetch(`/api/invites/validate?token=${encodeURIComponent(code)}`)
+        const data = await res.json()
+        setIsValid(data.valid === true)
+      } catch (error) {
+        console.error('Error validating invite code:', error)
+        setIsValid(false)
+      }
     }
+    
+    validateCode()
   }, [code])
 
   // Handle Google sign in
