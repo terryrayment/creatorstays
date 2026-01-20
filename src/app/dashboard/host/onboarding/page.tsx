@@ -16,6 +16,7 @@ interface OnboardingData {
   propertyTitle: string
   propertyType: string
   cityRegion: string
+  priceRange: string
   bedrooms: string
   bathrooms: string
   maxGuests: string
@@ -187,6 +188,7 @@ export default function HostOnboardingPage() {
     propertyTitle: "",
     propertyType: "",
     cityRegion: "",
+    priceRange: "",
     bedrooms: "",
     bathrooms: "",
     maxGuests: "",
@@ -273,9 +275,10 @@ export default function HostOnboardingPage() {
           propertyTitle: result.title || prev.propertyTitle,
           propertyType: result.propertyType || prev.propertyType,
           cityRegion: result.cityRegion || prev.cityRegion,
-          bedrooms: result.beds?.toString() || prev.bedrooms,
+          bedrooms: result.bedrooms?.toString() || prev.bedrooms,
           bathrooms: result.baths?.toString() || prev.bathrooms,
           maxGuests: result.guests?.toString() || prev.maxGuests,
+          priceRange: result.price || prev.priceRange,
           amenities: prev.amenities,
           photos: result.photos || [],
           heroImageUrl: result.photos?.[0] || "",
@@ -562,6 +565,67 @@ export default function HostOnboardingPage() {
                   <p className="text-xs text-black/60 mt-1">
                     We pulled {data.photos.length} photos and your property details. Review below.
                   </p>
+                </div>
+              )}
+
+              {/* Imported Data Preview - Read-only summary */}
+              {importSuccess && (
+                <div className="space-y-3">
+                  {/* Title & City Row */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/60">
+                        Title *
+                      </label>
+                      <div className="rounded-lg border-2 border-black/20 bg-white px-3 py-2.5 text-sm text-black">
+                        {data.propertyTitle || "—"}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/60">
+                        City / Region *
+                      </label>
+                      <div className="rounded-lg border-2 border-black/20 bg-white px-3 py-2.5 text-sm text-black">
+                        {data.cityRegion || "—"}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Price, Guests, Beds, Baths Row */}
+                  <div className="grid grid-cols-4 gap-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/60">
+                        Price/night
+                      </label>
+                      <div className="rounded-lg border-2 border-black/20 bg-white px-3 py-2.5 text-sm text-black">
+                        {data.priceRange || "—"}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/60">
+                        Guests
+                      </label>
+                      <div className="rounded-lg border-2 border-black/20 bg-white px-3 py-2.5 text-sm text-black">
+                        {data.maxGuests || "—"}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/60">
+                        Beds
+                      </label>
+                      <div className="rounded-lg border-2 border-black/20 bg-white px-3 py-2.5 text-sm text-black">
+                        {data.bedrooms || "—"}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black/60">
+                        Baths
+                      </label>
+                      <div className="rounded-lg border-2 border-black/20 bg-white px-3 py-2.5 text-sm text-black">
+                        {data.bathrooms || "—"}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 

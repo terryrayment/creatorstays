@@ -10,6 +10,7 @@ interface PrefillResult {
   price?: string
   photos?: string[]
   guests?: number
+  bedrooms?: number
   beds?: number
   baths?: number
   propertyType?: string
@@ -81,10 +82,12 @@ export async function GET(request: NextRequest) {
     if (ogDescription) {
       // "4 guests · 2 bedrooms · 3 beds · 1 bath"
       const guestsMatch = ogDescription.match(/(\d+)\s*guests?/i)
+      const bedroomsMatch = ogDescription.match(/(\d+)\s*bedrooms?/i)
       const bedsMatch = ogDescription.match(/(\d+)\s*beds?(?!room)/i)
       const bathsMatch = ogDescription.match(/(\d+(?:\.\d+)?)\s*baths?/i)
       
       if (guestsMatch) result.guests = parseInt(guestsMatch[1])
+      if (bedroomsMatch) result.bedrooms = parseInt(bedroomsMatch[1])
       if (bedsMatch) result.beds = parseInt(bedsMatch[1])
       if (bathsMatch) result.baths = parseFloat(bathsMatch[1])
 
