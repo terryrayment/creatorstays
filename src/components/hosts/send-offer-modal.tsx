@@ -202,20 +202,24 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
               <h2 className="font-heading text-xl font-black text-black">SELECT DEAL TYPE</h2>
               
               <div className="space-y-2">
-                {DEAL_TYPES.map(type => (
-                  <button
-                    key={type.value}
-                    onClick={() => setDealType(type.value)}
-                    className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
-                      dealType === type.value
-                        ? "border-black bg-[#FFD84A]"
-                        : "border-black/20 hover:border-black"
-                    }`}
-                  >
-                    <p className="font-bold text-black">{type.label}</p>
-                    <p className="text-xs text-black/70">{type.description}</p>
-                  </button>
-                ))}
+                {DEAL_TYPES.map(type => {
+                  const isSelected = dealType === type.value
+                  return (
+                    <button
+                      key={type.value}
+                      type="button"
+                      onClick={() => setDealType(type.value)}
+                      className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
+                        isSelected
+                          ? "border-black bg-[#FFD84A]"
+                          : "border-black/20 hover:border-black"
+                      }`}
+                    >
+                      <p className="font-bold text-black">{type.label}</p>
+                      <p className="text-xs text-black/70">{type.description}</p>
+                    </button>
+                  )
+                })}
               </div>
 
               <button
