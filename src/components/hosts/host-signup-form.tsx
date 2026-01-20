@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { signIn } from "next-auth/react"
 import Link from "next/link"
 
 // Mock city data
@@ -115,6 +116,7 @@ interface ListingPrefill {
 
 export function HostSignupForm() {
   const [submitted, setSubmitted] = useState(false)
+  const [submittedEmail, setSubmittedEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [form, setForm] = useState({
@@ -124,8 +126,6 @@ export function HostSignupForm() {
     companyName: "",
     cityRegion: "",
     listingUrl: "",
-    password: "",
-    confirmPassword: "",
     agreeTerms: false,
   })
   
@@ -135,8 +135,7 @@ export function HostSignupForm() {
   const [prefillAttempted, setPrefillAttempted] = useState(false)
 
   const listingUrlError = form.listingUrl && !isValidAirbnbUrl(form.listingUrl)
-  const passwordMismatch = form.password && form.confirmPassword && form.password !== form.confirmPassword
-  const canSubmit = !listingUrlError && !passwordMismatch && !loading
+  const canSubmit = !listingUrlError && !loading && form.agreeTerms
   const showPrefillButton = form.listingUrl && isValidAirbnbUrl(form.listingUrl) && form.listingUrl.includes("airbnb.com")
 
   const handleListingUrlBlur = () => {
@@ -183,17 +182,19 @@ export function HostSignupForm() {
     setError("")
 
     try {
-      // Save to waitlist as host (until full auth is built)
-      const response = await fetch('/api/waitlist', {
+      // Create real User + HostProfile + Property
+      const response = await fetch('/api/host/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: form.email,
-          name: form.fullName,
-          userType: 'host',
-          propertyLocation: form.cityRegion,
+          fullName: form.fullName,
+          phone: form.phone,
+          companyName: form.companyName,
+          cityRegion: form.cityRegion,
           listingUrl: form.listingUrl,
-          source: 'host-signup',
+          listingTitle: prefill?.title,
+          listingPhotos: prefill?.photos,
         }),
       })
 
@@ -201,17 +202,14 @@ export function HostSignupForm() {
 
       if (!response.ok) {
         if (data.alreadyExists) {
-          setError("This email is already registered. Try logging in instead.")
+          setError("This email is already registered. Please sign in instead.")
         } else {
           setError(data.error || 'Something went wrong. Please try again.')
         }
         return
       }
 
-      // Store in localStorage for demo dashboard access
-      localStorage.setItem('creatorstays_role', 'host')
-      localStorage.setItem('creatorstays_host_email', form.email)
-      
+      setSubmittedEmail(form.email)
       setSubmitted(true)
     } catch (err) {
       setError('Network error. Please try again.')
@@ -222,25 +220,33 @@ export function HostSignupForm() {
 
   const inputClass = "h-10 w-full rounded-lg border-[2px] border-black bg-white px-3 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
 
+  // Success state - show email confirmation
   if (submitted) {
     return (
       <div className="text-center py-6">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border-[2px] border-black bg-[#28D17C]">
-          <svg className="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-black bg-[#28D17C]">
+          <svg className="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
           </svg>
         </div>
-        <h2 className="text-[16px] font-black uppercase tracking-wide text-black">Account Created</h2>
-        <p className="mt-2 text-[12px] font-medium text-black">Next: build your profile and add listing details.</p>
-        <Link 
-          href="/dashboard/host"
-          className="mt-4 inline-flex h-10 items-center gap-2 rounded-full bg-black px-5 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
-        >
-          Go to Dashboard
-          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-            <path d="M7 17L17 7M17 7H7M17 7V17" />
-          </svg>
-        </Link>
+        <h2 className="text-[16px] font-black uppercase tracking-wide text-black">Check Your Email!</h2>
+        <p className="mt-3 text-[13px] font-medium text-black">
+          We sent a sign-in link to <strong>{submittedEmail}</strong>
+        </p>
+        <p className="mt-2 text-[11px] text-black/60">
+          Click the link in the email to access your host dashboard and complete your setup. The link expires in 24 hours.
+        </p>
+        <div className="mt-5 space-y-2">
+          <Link 
+            href="/login/host"
+            className="inline-flex h-10 items-center gap-2 rounded-full border-[2px] border-black bg-white px-5 text-[10px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
+          >
+            Sign in with different email
+          </Link>
+        </div>
+        <p className="mt-4 text-[10px] text-black/50">
+          Didn't receive the email? Check your spam folder or <button onClick={() => setSubmitted(false)} className="underline font-bold">try again</button>.
+        </p>
       </div>
     )
   }
@@ -248,6 +254,28 @@ export function HostSignupForm() {
   return (
     <div>
       <p className="text-[9px] font-black uppercase tracking-wider text-black mb-3">Start as Host</p>
+      
+      {/* Google Sign Up - Quick option */}
+      <button
+        type="button"
+        onClick={() => signIn("google", { callbackUrl: "/onboarding" })}
+        className="mb-4 flex w-full items-center justify-center gap-3 rounded-full border-[2px] border-black bg-white py-3 text-[11px] font-bold text-black transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-50"
+      >
+        <svg className="h-5 w-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      {/* Divider */}
+      <div className="mb-4 flex items-center gap-3">
+        <div className="h-[2px] flex-1 bg-black/10" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-black/40">or sign up with email</span>
+        <div className="h-[2px] flex-1 bg-black/10" />
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="grid gap-3 sm:grid-cols-2">
@@ -367,31 +395,6 @@ export function HostSignupForm() {
           </div>
         )}
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Password *</label>
-            <input
-              required
-              type="password"
-              placeholder="Create a password"
-              value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Confirm *</label>
-            <input
-              required
-              type="password"
-              placeholder="Confirm password"
-              value={form.confirmPassword}
-              onChange={e => setForm({ ...form, confirmPassword: e.target.value })}
-              className={inputClass}
-            />
-          </div>
-        </div>
-
         <div className="flex items-start gap-2 pt-1">
           <input
             type="checkbox"
@@ -412,10 +415,6 @@ export function HostSignupForm() {
           </div>
         )}
 
-        {passwordMismatch && (
-          <p className="text-[10px] font-medium text-[#FF6B6B]">Passwords don&apos;t match</p>
-        )}
-
         <button 
           type="submit" 
           disabled={!canSubmit}
@@ -423,6 +422,10 @@ export function HostSignupForm() {
         >
           {loading ? 'Creating Account...' : 'Create Host Account'}
         </button>
+
+        <p className="text-center text-[10px] text-black/50">
+          We'll send you a magic link to sign in. No password needed.
+        </p>
       </form>
     </div>
   )
