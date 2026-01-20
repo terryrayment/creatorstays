@@ -127,6 +127,12 @@ model CreatorProfile {
   isBeta            Boolean  @default(false)    // True if signed up via invite
   inviteTokenUsed   String?                     // The invite token that was used
   
+  // Stripe Connect
+  stripeAccountId          String?   // Stripe Connect account ID
+  stripeOnboardingComplete Boolean   @default(false)
+  stripeChargesEnabled     Boolean   @default(false)
+  stripePayoutsEnabled     Boolean   @default(false)
+  
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -199,9 +205,10 @@ model HostProfile {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  properties  Property[]
-  sentMessages Message[] @relation("HostMessages")
-  offers      Offer[]
+  properties     Property[]
+  sentMessages   Message[] @relation("HostMessages")
+  offers         Offer[]
+  collaborations Collaboration[]
 
   @@map("host_profiles")
 }
@@ -434,18 +441,29 @@ model Offer {
   messageId       String?  @unique
   message         Message? @relation(fields: [messageId], references: [id])
   
-  // Offer details
-  offerType       String   // "flat", "percent", "post-for-stay"
-  flatAmount      Int?     // In cents
+  // Deal type: "flat", "flat-with-bonus", "post-for-stay"
+  offerType       String   
+  
+  // Cash portion (in cents, 0 for stay-only deals)
+  cashCents       Int      @default(0)
+  
+  // Legacy field (use cashCents instead)
+  flatAmount      Int?     
   percentAmount   Float?
+  
+  // Stay details (for post-for-stay deals)
+  stayNights      Int?
+  stayStartDate   DateTime?
+  stayEndDate     DateTime?
+  
+  // Traffic bonus (for flat-with-bonus deals)
+  trafficBonusEnabled   Boolean @default(false)
+  trafficBonusThreshold Int?    // Click/view threshold to unlock bonus
+  trafficBonusCents     Int?    // Bonus amount in cents
   
   // Requirements
   requirements    String?  @db.Text
   deliverables    String[] // ["2 Reels", "5 Stories", "1 Feed Post"]
-  
-  // Stay details (if applicable)
-  stayStartDate   DateTime?
-  stayEndDate     DateTime?
   
   // Status
   status          String   @default("pending") // "pending", "accepted", "declined", "expired", "completed"
@@ -473,8 +491,11 @@ model Collaboration {
   offerId         String   @unique
   offer           Offer    @relation(fields: [offerId], references: [id])
   
-  creatorProfileId String
-  creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id])
+  creatorId       String
+  creator         CreatorProfile @relation(fields: [creatorId], references: [id])
+  
+  hostId          String
+  host            HostProfile @relation(fields: [hostId], references: [id])
   
   propertyId      String
   property        Property @relation(fields: [propertyId], references: [id])
@@ -490,9 +511,14 @@ model Collaboration {
   clicksGenerated Int      @default(0)
   
   // Payment (tracked, but settled off-platform)
-  paymentStatus   String   @default("pending") // "pending", "settled"
+  paymentStatus   String   @default("pending") // "pending", "completed", "failed"
   paymentNotes    String?  @db.Text
   settledAt       DateTime?
+  
+  // Stripe payment
+  paymentIntentId String?   // Stripe PaymentIntent ID
+  paymentAmount   Int?      // Amount in cents
+  paidAt          DateTime?
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

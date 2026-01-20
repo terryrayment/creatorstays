@@ -8,6 +8,7 @@ import {
   type CollaborationRequest,
   type Collaboration,
 } from '@/lib/collaboration-types'
+import { calculatePaymentBreakdown, isValidDealType, type DealType } from '@/lib/payments/calc'
 
 // GET - List collaboration requests (for creator or host)
 export async function GET(request: NextRequest) {
@@ -50,6 +51,11 @@ export async function POST(request: NextRequest) {
     proposedType,
     proposedPercent,
     proposedFlatFee,
+    cashCents,        // New: cash portion in cents
+    stayNights,       // New: number of nights for stay
+    trafficBonusEnabled,
+    trafficBonusThreshold,
+    trafficBonusCents,
     message,
     deliverables,
   } = body
@@ -66,15 +72,54 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Host not found' }, { status: 404 })
   }
 
+  // Normalize deal type (map legacy "affiliate" to "flat-with-bonus")
+  let normalizedType: DealType = 'flat'
+  if (proposedType === 'affiliate' || proposedType === 'flat-with-bonus') {
+    normalizedType = 'flat-with-bonus'
+  } else if (proposedType === 'post-for-stay') {
+    normalizedType = 'post-for-stay'
+  } else if (proposedType === 'flat') {
+    normalizedType = 'flat'
+  }
+
+  // Determine cash amount
+  let finalCashCents = 0
+  if (cashCents !== undefined) {
+    finalCashCents = cashCents
+  } else if (proposedFlatFee !== undefined) {
+    // Legacy support: convert flatFee (dollars) to cents
+    finalCashCents = Math.round(proposedFlatFee * 100)
+  } else if (normalizedType === 'post-for-stay') {
+    // Post-for-stay defaults to $0 cash
+    finalCashCents = 0
+  } else {
+    // Default to creator's base rate
+    finalCashCents = Math.round((creator.baseRatePerPost || 0) * 100)
+  }
+
+  // Validate cashCents >= 0
+  if (finalCashCents < 0) {
+    return NextResponse.json({ error: 'cashCents must be >= 0' }, { status: 400 })
+  }
+
+  // Calculate payment breakdown
+  const paymentBreakdown = calculatePaymentBreakdown(finalCashCents)
+
   // Create request
   const newRequest: CollaborationRequest = {
     id: `req-${generateToken()}`,
     hostId,
     creatorId,
     propertyId,
-    proposedType: proposedType || 'flat',
-    proposedPercent: proposedPercent ?? creator.trafficBonusPercent ?? 10, // fallback to 10% if not set
+    proposedType: normalizedType,
+    proposedPercent: proposedPercent ?? creator.trafficBonusPercent ?? 10,
     proposedFlatFee: proposedFlatFee ?? creator.baseRatePerPost,
+    // New Pay-for-Stay fields
+    cashCents: finalCashCents,
+    stayNights: stayNights ?? null,
+    trafficBonusEnabled: trafficBonusEnabled ?? (normalizedType === 'flat-with-bonus'),
+    trafficBonusThreshold: trafficBonusThreshold ?? null,
+    trafficBonusCents: trafficBonusCents ?? null,
     message: message || '',
     deliverables: deliverables || creator.deliverables,
     status: 'pending',
@@ -86,6 +131,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ 
     success: true, 
     request: newRequest,
+    paymentBreakdown,
     message: `Request sent to ${creator.displayName}. They will review and respond.`
   })
 }
@@ -99,6 +145,7 @@ export async function PATCH(request: NextRequest) {
     action, // 'approve' | 'counter' | 'decline'
     counterPercent,
     counterFlatFee,
+    counterCashCents,
     counterMessage,
   } = body
 
@@ -123,6 +170,7 @@ export async function PATCH(request: NextRequest) {
     req.status = 'countered'
     req.counterPercent = counterPercent
     req.counterFlatFee = counterFlatFee
+    req.counterCashCents = counterCashCents
     req.counterMessage = counterMessage
     req.respondedAt = new Date()
     return NextResponse.json({ 
@@ -140,15 +188,14 @@ export async function PATCH(request: NextRequest) {
     const trackingToken = generateToken()
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     
-    // Map old "affiliate" type to new "flat-with-bonus" type
-    let dealType: 'flat' | 'flat-with-bonus' | 'post-for-stay' = 'flat'
-    if (req.proposedType === 'affiliate') {
-      dealType = 'flat-with-bonus'
-    } else if (req.proposedType === 'flat') {
-      dealType = 'flat'
-    } else if (req.proposedType === 'post-for-stay') {
-      dealType = 'post-for-stay'
-    }
+    // Use normalized deal type from request
+    const dealType = (req.proposedType as DealType) || 'flat'
+    
+    // Get final cash amount (use counter if provided, otherwise original)
+    const finalCashCents = req.counterCashCents ?? req.cashCents ?? 0
+    
+    // Calculate payment breakdown for the collaboration
+    const paymentBreakdown = calculatePaymentBreakdown(finalCashCents)
 
     const newCollab: Collaboration = {
       id: `collab-${generateToken()}`,
@@ -157,6 +204,18 @@ export async function PATCH(request: NextRequest) {
       creatorId: req.creatorId,
       propertyId: req.propertyId,
       dealType,
+      // Payment fields
+      cashCents: finalCashCents,
+      hostTotalCents: paymentBreakdown.hostTotalCents,
+      creatorNetCents: paymentBreakdown.creatorNetCents,
+      platformRevenueCents: paymentBreakdown.platformRevenueCents,
+      // Stay fields
+      stayNights: req.stayNights ?? null,
+      // Bonus fields
+      trafficBonusEnabled: req.trafficBonusEnabled ?? false,
+      trafficBonusThreshold: req.trafficBonusThreshold ?? null,
+      trafficBonusCents: req.trafficBonusCents ?? null,
+      // Legacy fields (for backward compatibility)
       trafficBonusPercent: req.proposedPercent,
       flatFee: req.proposedFlatFee,
       deliverables: req.deliverables,
@@ -164,7 +223,7 @@ export async function PATCH(request: NextRequest) {
       trackingUrl: `${baseUrl}/r/${trackingToken}`,
       status: 'active',
       contentLinks: [],
-      paymentStatus: 'pending',
+      paymentStatus: finalCashCents > 0 ? 'pending' : 'not-applicable',
       createdAt: new Date(),
     }
 
@@ -174,7 +233,10 @@ export async function PATCH(request: NextRequest) {
       success: true, 
       request: req,
       collaboration: newCollab,
-      message: `Collaboration approved! Tracking link: ${newCollab.trackingUrl}`
+      paymentBreakdown,
+      message: paymentBreakdown.isStayOnly 
+        ? `Collaboration approved! This is a stay-only deal.`
+        : `Collaboration approved! Host will pay ${paymentBreakdown.displayMessage}`
     })
   }
 
