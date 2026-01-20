@@ -207,6 +207,15 @@ function getNextStep(
     }
   }
 
+  // Disputed
+  if (status === "disputed") {
+    return {
+      title: "Dispute Under Review",
+      description: "A dispute has been filed. Our team is reviewing the case and will be in touch within 48 hours.",
+      waiting: true,
+    }
+  }
+
   return null
 }
 
@@ -302,6 +311,9 @@ export default function CollaborationDetailPage() {
 
   // Reminder state (for hosts)
   const [sendingReminder, setSendingReminder] = useState(false)
+  
+  // Content review state (for hosts)
+  const [reviewingContent, setReviewingContent] = useState(false)
 
   // Handle sending reminder to creator
   const handleSendReminder = async () => {
@@ -371,8 +383,9 @@ export default function CollaborationDetailPage() {
         setToast(data.message)
         setShowCancelModal(false)
         setCancelReason("")
-        // Refresh
-        window.location.reload()
+        // Update status locally, then reload for full refresh
+        setCollaboration(prev => prev ? { ...prev, status: "cancellation-requested" } : prev)
+        setTimeout(() => window.location.reload(), 1500)
       } else {
         setToast(data.error || "Failed to request cancellation")
       }
@@ -400,7 +413,10 @@ export default function CollaborationDetailPage() {
       const data = await res.json()
       if (res.ok) {
         setToast(data.message)
-        window.location.reload()
+        // Update status locally
+        const newStatus = action === "accept" ? "cancelled" : "active"
+        setCollaboration(prev => prev ? { ...prev, status: newStatus } : prev)
+        setTimeout(() => window.location.reload(), 1500)
       } else {
         setToast(data.error || "Failed to respond to cancellation")
       }
@@ -1063,38 +1079,63 @@ export default function CollaborationDetailPage() {
               )}
               <div className="mt-4 flex gap-2">
                 <Button 
-                  className="flex-1 bg-[#28D17C] text-black hover:bg-[#28D17C]/90"
+                  className="flex-1 bg-[#28D17C] text-black hover:bg-[#28D17C]/90 disabled:opacity-50"
+                  disabled={reviewingContent}
                   onClick={async () => {
-                    const res = await fetch(`/api/collaborations/${collaboration.id}/content`, {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ action: "approve" }),
-                    })
-                    if (res.ok) {
-                      setToast("Content approved!")
-                      // Refresh page
-                      window.location.reload()
+                    setReviewingContent(true)
+                    try {
+                      const res = await fetch(`/api/collaborations/${collaboration.id}/content`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ action: "approve" }),
+                      })
+                      const data = await res.json()
+                      if (res.ok) {
+                        setToast(data.message || "Content approved!")
+                        // Refresh collaboration data
+                        setCollaboration(prev => prev ? { ...prev, status: collaboration.offer.cashCents === 0 ? "approved" : "approved" } : prev)
+                        setTimeout(() => window.location.reload(), 1500)
+                      } else {
+                        setToast(data.error || "Failed to approve content")
+                      }
+                    } catch {
+                      setToast("Network error. Please try again.")
                     }
+                    setReviewingContent(false)
                   }}
                 >
-                  Approve Content
+                  {reviewingContent ? "Processing..." : "✓ Approve Content"}
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="flex-1"
+                  className="flex-1 disabled:opacity-50"
+                  disabled={reviewingContent}
                   onClick={async () => {
                     const feedback = prompt("What changes do you need?")
-                    if (feedback !== null) {
+                    if (feedback === null) return
+                    if (feedback.trim().length < 10) {
+                      setToast("Please provide more specific feedback (at least 10 characters)")
+                      return
+                    }
+                    setReviewingContent(true)
+                    try {
                       const res = await fetch(`/api/collaborations/${collaboration.id}/content`, {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ action: "request-changes", feedback }),
                       })
+                      const data = await res.json()
                       if (res.ok) {
                         setToast("Change request sent to creator")
-                        window.location.reload()
+                        setCollaboration(prev => prev ? { ...prev, status: "active" } : prev)
+                        setTimeout(() => window.location.reload(), 1500)
+                      } else {
+                        setToast(data.error || "Failed to send request")
                       }
+                    } catch {
+                      setToast("Network error. Please try again.")
                     }
+                    setReviewingContent(false)
                   }}
                 >
                   Request Changes
@@ -1158,7 +1199,8 @@ export default function CollaborationDetailPage() {
                     const data = await res.json()
                     if (res.ok) {
                       setToast(data.message || "Collaboration completed!")
-                      window.location.reload()
+                      setCollaboration(prev => prev ? { ...prev, status: "completed" } : prev)
+                      setTimeout(() => window.location.reload(), 1500)
                     } else {
                       setToast(data.error || "Failed to complete")
                     }
@@ -1313,6 +1355,37 @@ export default function CollaborationDetailPage() {
             </div>
           )}
 
+          {/* Disputed Status - Under Review */}
+          {collaboration.status === "disputed" && (
+            <div className="rounded-2xl border-[3px] border-red-400 bg-red-50 p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-red-400 bg-white">
+                  <span className="text-lg">⚖️</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-lg font-black text-black">Dispute Under Review</p>
+                  <p className="mt-1 text-sm text-black/70">
+                    A dispute has been filed for this collaboration. Our team is reviewing the case and will contact both parties within 48 hours.
+                  </p>
+                  <div className="mt-4 rounded-lg border border-red-200 bg-white p-3">
+                    <p className="text-xs font-bold text-black/60">What happens next:</p>
+                    <ul className="mt-2 space-y-1 text-xs text-black/70">
+                      <li>• Our team will review all collaboration details</li>
+                      <li>• Both parties may be contacted for additional information</li>
+                      <li>• A resolution will be provided within 5-7 business days</li>
+                    </ul>
+                  </div>
+                  <a
+                    href="mailto:support@creatorstays.com"
+                    className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-red-600 hover:underline"
+                  >
+                    Contact Support →
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Request Cancellation Button (show when collaboration can be cancelled) */}
           {!["completed", "cancelled", "cancellation-requested"].includes(collaboration.status) && (
             <div className="rounded-2xl border-2 border-black/10 bg-white p-5">
@@ -1331,8 +1404,8 @@ export default function CollaborationDetailPage() {
             </div>
           )}
 
-          {/* Report an Issue / File Dispute (show for active collaborations) */}
-          {!["cancelled", "completed"].includes(collaboration.status) && (
+          {/* Report an Issue / File Dispute (show for active collaborations, not already disputed) */}
+          {!["cancelled", "completed", "disputed"].includes(collaboration.status) && (
             <div className="rounded-2xl border-2 border-black/10 bg-white p-5">
               <p className="text-[10px] font-bold uppercase tracking-wider text-black/40">
                 Having an Issue?

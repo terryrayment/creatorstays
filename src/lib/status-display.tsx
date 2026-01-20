@@ -290,6 +290,22 @@ export function getCollaborationStatusDisplay(
         actionRequired: true,
       },
     },
+    disputed: {
+      host: {
+        label: "Under Review",
+        description: "A dispute has been filed. Our team is reviewing the case.",
+        color: "bg-red-100",
+        textColor: "text-red-700",
+        actionRequired: false,
+      },
+      creator: {
+        label: "Under Review",
+        description: "A dispute has been filed. Our team is reviewing the case.",
+        color: "bg-red-100",
+        textColor: "text-red-700",
+        actionRequired: false,
+      },
+    },
   }
 
   const roleConfig = configs[status]?.[role]

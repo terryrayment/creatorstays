@@ -104,8 +104,34 @@ export default function MessagesPage() {
 
     if (session?.user) {
       fetchConversations()
+      // Poll for new messages every 10 seconds
+      const interval = setInterval(fetchConversations, 10000)
+      return () => clearInterval(interval)
     }
   }, [session])
+
+  // Poll selected conversation for new messages
+  useEffect(() => {
+    if (!selectedConversation) return
+    
+    const pollMessages = async () => {
+      try {
+        const res = await fetch(`/api/messages/${selectedConversation.id}`)
+        if (res.ok) {
+          const data = await res.json()
+          // Only update if there are new messages
+          if (data.conversation.messages.length !== selectedConversation.messages.length) {
+            setSelectedConversation(data.conversation)
+          }
+        }
+      } catch (e) {
+        // Silent fail on poll
+      }
+    }
+    
+    const interval = setInterval(pollMessages, 5000)
+    return () => clearInterval(interval)
+  }, [selectedConversation?.id, selectedConversation?.messages.length])
 
   // Scroll to bottom when messages change
   useEffect(() => {
