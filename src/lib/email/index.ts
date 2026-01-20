@@ -776,6 +776,62 @@ Questions? Contact us at support@creatorstays.com
 }
 
 /**
+ * Collaboration Completed Email (to both parties)
+ * Sent when collaboration is marked complete, prompts for review
+ */
+export function collaborationCompletedEmail(data: {
+  recipientName: string
+  recipientRole: 'host' | 'creator'
+  otherPartyName: string
+  propertyTitle: string
+  collaborationId: string
+}): { subject: string; html: string; text: string } {
+  const { recipientName, recipientRole, otherPartyName, propertyTitle, collaborationId } = data
+
+  const subject = `✅ Collaboration complete — share your experience!`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Collaboration Complete! 🎉</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${recipientName},</p>
+    
+    <p style="margin: 0 0 16px;">
+      Your collaboration with <strong>${otherPartyName}</strong> for <strong>${propertyTitle}</strong> is now complete.
+    </p>
+    
+    <div style="${styles.card}; background: #FFD84A;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 8px;">⭐ How was your experience?</p>
+      <p style="font-size: 13px; color: #333; margin: 0;">
+        Your review helps build trust in the CreatorStays community and helps ${recipientRole === 'host' ? 'other hosts find great creators' : 'creators find great hosts'}.
+      </p>
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/collaborations/${collaborationId}" style="${styles.button}">Leave a Review →</a>
+    </div>
+    
+    <p style="color: #666; font-size: 14px;">
+      Thank you for using CreatorStays. We hope to see you again soon!
+    </p>
+  `)
+
+  const text = `
+Collaboration Complete! 🎉
+
+Hi ${recipientName},
+
+Your collaboration with ${otherPartyName} for ${propertyTitle} is now complete.
+
+How was your experience? Your review helps build trust in the CreatorStays community.
+
+Leave a review: ${BASE_URL}/dashboard/collaborations/${collaborationId}
+
+Thank you for using CreatorStays!
+`
+
+  return { subject, html, text }
+}
+
+/**
  * Offer Countered Email (to Host)
  */
 export function offerCounteredEmail(data: {
@@ -1047,6 +1103,57 @@ ${cancelReason}
 We hope you'll find other great opportunities on CreatorStays!
 
 Dashboard: ${BASE_URL}/dashboard
+`
+
+  return { subject, html, text }
+}
+
+/**
+ * Cancellation Declined Email (to requester)
+ */
+export function cancellationDeclinedEmail(data: {
+  recipientName: string
+  otherPartyName: string
+  propertyTitle: string
+  collaborationId: string
+}): { subject: string; html: string; text: string } {
+  const { recipientName, otherPartyName, propertyTitle, collaborationId } = data
+
+  const subject = `Cancellation declined — ${propertyTitle}`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Cancellation Request Declined</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${recipientName},</p>
+    
+    <p style="margin: 0 0 16px;">
+      <strong>${otherPartyName}</strong> has declined your cancellation request for <strong>${propertyTitle}</strong>.
+    </p>
+    
+    <div style="${styles.card}; background: #FFD84A;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0;">The collaboration remains active.</p>
+    </div>
+    
+    <p style="margin: 24px 0; color: #666; font-size: 14px;">
+      If you're having issues with this collaboration, consider reaching out to ${otherPartyName} directly to discuss, or contact our support team for assistance.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/collaborations/${collaborationId}" style="${styles.button}">View Collaboration →</a>
+    </div>
+  `)
+
+  const text = `
+Cancellation Request Declined
+
+Hi ${recipientName},
+
+${otherPartyName} has declined your cancellation request for ${propertyTitle}.
+
+The collaboration remains active.
+
+If you're having issues, consider reaching out to ${otherPartyName} directly or contact our support team.
+
+View: ${BASE_URL}/dashboard/collaborations/${collaborationId}
 `
 
   return { subject, html, text }

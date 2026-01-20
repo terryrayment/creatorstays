@@ -56,12 +56,7 @@ export default function CollaborationsListPage() {
         if (res.ok) {
           const data = await res.json()
           setCollaborations(data.collaborations || [])
-          // Determine role based on first collaboration
-          if (data.collaborations?.[0]?.creator) {
-            setUserRole("host")
-          } else if (data.collaborations?.[0]?.host) {
-            setUserRole("creator")
-          }
+          setUserRole(data.userRole || null)
         }
       } catch (e) {
         console.error("Failed to fetch collaborations:", e)
@@ -153,6 +148,14 @@ export default function CollaborationsListPage() {
                   className="mt-4 inline-block rounded-full border-2 border-black bg-black px-6 py-2 text-xs font-bold text-white transition-transform hover:-translate-y-1"
                 >
                   Find Creators
+                </Link>
+              )}
+              {userRole === "creator" && (
+                <Link
+                  href="/dashboard/creator/offers"
+                  className="mt-4 inline-block rounded-full border-2 border-black bg-black px-6 py-2 text-xs font-bold text-white transition-transform hover:-translate-y-1"
+                >
+                  View Offers
                 </Link>
               )}
             </div>

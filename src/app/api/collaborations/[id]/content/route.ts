@@ -146,19 +146,11 @@ export async function PATCH(
     }
 
     if (action === 'approve') {
-      // Check if this is a $0 cash deal (post-for-stay) - auto-complete without payment
-      const isZeroCashDeal = collaboration.offer.cashCents === 0
-      
       const updated = await prisma.collaboration.update({
         where: { id: params.id },
         data: {
-          status: isZeroCashDeal ? 'completed' : 'approved',
+          status: 'approved',
           contentApprovedAt: new Date(),
-          ...(isZeroCashDeal && { 
-            completedAt: new Date(),
-            paymentStatus: 'completed',
-            paymentNotes: 'Post-for-stay deal - no payment required',
-          }),
         },
       })
 
@@ -177,10 +169,12 @@ export async function PATCH(
         }).catch(err => console.error('[Content API] Email error:', err))
       }
 
+      // Different message for post-for-stay vs paid deals
+      const isPostForStay = collaboration.offer.cashCents === 0
       return NextResponse.json({
         success: true,
-        message: isZeroCashDeal 
-          ? 'Content approved! Collaboration complete. Thank you for the great content!'
+        message: isPostForStay 
+          ? 'Content approved! Please confirm the stay is complete to finalize.'
           : 'Content approved! Tracking link is now active. Payment will be processed.',
         collaboration: updated,
       })

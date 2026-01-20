@@ -88,7 +88,10 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ collaborations })
+    return NextResponse.json({ 
+      collaborations,
+      userRole: hostProfile ? 'host' : creatorProfile ? 'creator' : null,
+    })
   } catch (error) {
     console.error('[Collaborations List API] GET error:', error)
     return NextResponse.json({ error: 'Failed to fetch collaborations' }, { status: 500 })

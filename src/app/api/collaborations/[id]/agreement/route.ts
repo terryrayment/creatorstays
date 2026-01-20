@@ -181,6 +181,29 @@ export async function POST(
           ...emailData,
         }).catch(err => console.error('[Agreement API] Email error:', err))
       }
+
+      // When fully executed, ALSO notify the person who just signed (they see it's now active)
+      if (isFullyExecuted) {
+        const signerEmail = isHost 
+          ? fullCollab.host.user?.email || fullCollab.host.contactEmail
+          : fullCollab.creator.user.email
+        
+        if (signerEmail) {
+          const signerEmailData = agreementSignedEmail({
+            recipientName: isHost ? fullCollab.host.displayName : fullCollab.creator.displayName,
+            signerName: isHost ? fullCollab.creator.displayName : fullCollab.host.displayName, // The other party
+            signerRole: isHost ? 'creator' : 'host',
+            propertyTitle: fullCollab.property.title || 'Property',
+            collaborationId: params.id,
+            isFullyExecuted: true,
+          })
+          
+          sendEmail({
+            to: signerEmail,
+            ...signerEmailData,
+          }).catch(err => console.error('[Agreement API] Signer email error:', err))
+        }
+      }
     }
 
     if (isFullyExecuted) {

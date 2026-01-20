@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { sendEmail, cancellationRequestEmail, collaborationCancelledEmail } from '@/lib/email'
+import { sendEmail, cancellationRequestEmail, collaborationCancelledEmail, cancellationDeclinedEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -193,6 +193,31 @@ export async function POST(
           paymentNotes: `${collaboration.paymentNotes || ''}\nCancellation declined by ${userRole} on ${new Date().toISOString()}`,
         },
       })
+
+      // Send email to the person who requested cancellation
+      const requesterEmail = userRole === 'host' 
+        ? collaboration.creator.user?.email 
+        : collaboration.host.user?.email
+      const requesterName = userRole === 'host' 
+        ? collaboration.creator.displayName 
+        : collaboration.host.displayName
+      const declinerName = userRole === 'host' 
+        ? collaboration.host.displayName 
+        : collaboration.creator.displayName
+
+      if (requesterEmail) {
+        const emailData = cancellationDeclinedEmail({
+          recipientName: requesterName,
+          otherPartyName: declinerName,
+          propertyTitle: collaboration.property.title || 'Property',
+          collaborationId: params.id,
+        })
+        
+        sendEmail({
+          to: requesterEmail,
+          ...emailData,
+        }).catch(err => console.error('[Cancel API] Decline email error:', err))
+      }
 
       return NextResponse.json({
         success: true,

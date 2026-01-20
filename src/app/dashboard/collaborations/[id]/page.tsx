@@ -280,6 +280,14 @@ export default function CollaborationDetailPage() {
   const [cancelling, setCancelling] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancelReason, setCancelReason] = useState("")
+
+  // Auto-dismiss toast after 4 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(""), 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [toast])
   
   // Dispute state
   const [showDisputeModal, setShowDisputeModal] = useState(false)
@@ -1121,6 +1129,47 @@ export default function CollaborationDetailPage() {
               >
                 Pay Now →
               </Link>
+            </div>
+          )}
+
+          {/* Confirm Stay Complete (for hosts with post-for-stay deals) */}
+          {collaboration.status === "approved" && userRole === "host" && collaboration.offer.cashCents === 0 && (
+            <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">
+                Content Approved — Confirm Stay
+              </p>
+              <p className="mt-1 text-sm text-black">
+                Great content! Once the creator's stay is complete, mark this collaboration as finished.
+              </p>
+              <div className="mt-4 rounded-xl border-2 border-black bg-white p-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A] text-lg">🏠</span>
+                  <div>
+                    <p className="font-bold text-black">Post-for-Stay Deal</p>
+                    <p className="text-xs text-black/60">No payment required — confirm when stay is complete</p>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={async () => {
+                  if (!confirm("Confirm the creator's stay is complete? This will finalize the collaboration.")) return
+                  try {
+                    const res = await fetch(`/api/collaborations/${collaboration.id}/complete`, { method: "POST" })
+                    const data = await res.json()
+                    if (res.ok) {
+                      setToast(data.message || "Collaboration completed!")
+                      window.location.reload()
+                    } else {
+                      setToast(data.error || "Failed to complete")
+                    }
+                  } catch (e) {
+                    setToast("Network error. Please try again.")
+                  }
+                }}
+                className="mt-4 block w-full rounded-full border-2 border-black bg-black py-4 text-center text-sm font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-1"
+              >
+                ✓ Confirm Stay Complete
+              </button>
             </div>
           )}
 

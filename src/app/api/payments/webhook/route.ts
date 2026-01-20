@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import Stripe from 'stripe'
-import { sendEmail, paymentCompleteEmail, paymentReceiptEmail } from '@/lib/email'
+import { sendEmail, paymentCompleteEmail, paymentReceiptEmail, collaborationCompletedEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -178,6 +178,36 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         to: collaboration.host.user.email,
         ...receiptData,
       }).catch(err => console.error('[Webhook] Host receipt email error:', err))
+
+      // Send review prompt to host
+      const hostReviewData = collaborationCompletedEmail({
+        recipientName: collaboration.host.displayName,
+        recipientRole: 'host',
+        otherPartyName: collaboration.creator.displayName,
+        propertyTitle: collaboration.property.title || 'Property',
+        collaborationId,
+      })
+      
+      sendEmail({
+        to: collaboration.host.user.email,
+        ...hostReviewData,
+      }).catch(err => console.error('[Webhook] Host review email error:', err))
+    }
+
+    // Send review prompt to creator (separate from payment notification)
+    if (collaboration.creator.user.email) {
+      const creatorReviewData = collaborationCompletedEmail({
+        recipientName: collaboration.creator.displayName,
+        recipientRole: 'creator',
+        otherPartyName: collaboration.host.displayName,
+        propertyTitle: collaboration.property.title || 'Property',
+        collaborationId,
+      })
+      
+      sendEmail({
+        to: collaboration.creator.user.email,
+        ...creatorReviewData,
+      }).catch(err => console.error('[Webhook] Creator review email error:', err))
     }
 
   } catch (error) {
