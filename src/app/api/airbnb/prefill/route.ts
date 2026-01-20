@@ -114,10 +114,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Try to extract JSON-LD data (structured data)
-    const jsonLdMatches = html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)
-    for (const match of jsonLdMatches) {
+    const jsonLdRegex = /<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
+    let jsonLdMatch: RegExpExecArray | null
+    while ((jsonLdMatch = jsonLdRegex.exec(html)) !== null) {
       try {
-        const jsonLd = JSON.parse(match[1])
+        const jsonLd = JSON.parse(jsonLdMatch[1])
         const data = Array.isArray(jsonLd) ? jsonLd[0] : jsonLd
         
         // Get title if not already set
