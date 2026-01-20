@@ -569,3 +569,153 @@ Find other creators: ${BASE_URL}/dashboard/host/search-creators
 
   return { subject, html, text }
 }
+
+/**
+ * Counter Offer Accepted Email (to Creator)
+ */
+export function counterAcceptedEmail(data: {
+  creatorName: string
+  hostName: string
+  propertyTitle: string
+  acceptedAmount: number // in cents
+  collaborationId: string
+}): { subject: string; html: string; text: string } {
+  const { creatorName, hostName, propertyTitle, acceptedAmount, collaborationId } = data
+
+  const formattedAmount = `$${(acceptedAmount / 100).toLocaleString()}`
+  const subject = `✅ ${hostName} accepted your counter offer!`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Counter Offer Accepted!</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${creatorName}, great news!</p>
+    
+    <div style="${styles.card}; background: #28D17C;">
+      <p style="font-size: 14px; margin: 0 0 8px;"><strong>${hostName}</strong> accepted your counter offer</p>
+      <p style="font-size: 24px; font-weight: 900; margin: 0 0 8px;">${formattedAmount}</p>
+      <p style="font-size: 14px; margin: 0;">for <strong>${propertyTitle}</strong></p>
+    </div>
+    
+    <p style="margin: 24px 0;">
+      <strong>Next step:</strong> Both parties need to sign the collaboration agreement before work begins.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/collaborations/${collaborationId}" style="${styles.button}">View & Sign Agreement →</a>
+    </div>
+  `)
+
+  const text = `
+Counter Offer Accepted!
+
+Hi ${creatorName}, great news!
+
+${hostName} accepted your counter offer of ${formattedAmount} for ${propertyTitle}.
+
+Next step: Sign the collaboration agreement to get started.
+
+View: ${BASE_URL}/dashboard/collaborations/${collaborationId}
+`
+
+  return { subject, html, text }
+}
+
+/**
+ * Counter Offer Declined Email (to Creator)
+ */
+export function counterDeclinedEmail(data: {
+  creatorName: string
+  hostName: string
+  propertyTitle: string
+  counterAmount: number // in cents
+}): { subject: string; html: string; text: string } {
+  const { creatorName, hostName, propertyTitle, counterAmount } = data
+
+  const formattedAmount = `$${(counterAmount / 100).toLocaleString()}`
+  const subject = `${hostName} declined your counter offer`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Counter Offer Declined</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${creatorName},</p>
+    
+    <div style="${styles.card}">
+      <p style="margin: 0 0 8px;"><strong>${hostName}</strong> has declined your counter offer of <strong>${formattedAmount}</strong> for:</p>
+      <p style="font-size: 18px; font-weight: 700; margin: 0;">${propertyTitle}</p>
+    </div>
+    
+    <p style="margin: 24px 0;">
+      Don't be discouraged! You may receive new offers from other hosts, or ${hostName} may reach out with a revised offer.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/creator/offers" style="${styles.button}">View Your Offers →</a>
+    </div>
+  `)
+
+  const text = `
+Counter Offer Declined
+
+Hi ${creatorName},
+
+${hostName} has declined your counter offer of ${formattedAmount} for ${propertyTitle}.
+
+You may receive new offers from other hosts, or ${hostName} may reach out with a revised offer.
+
+View your offers: ${BASE_URL}/dashboard/creator/offers
+`
+
+  return { subject, html, text }
+}
+
+/**
+ * Content Changes Requested Email (to Creator)
+ */
+export function changesRequestedEmail(data: {
+  creatorName: string
+  hostName: string
+  propertyTitle: string
+  feedback?: string
+  collaborationId: string
+}): { subject: string; html: string; text: string } {
+  const { creatorName, hostName, propertyTitle, feedback, collaborationId } = data
+
+  const subject = `📝 ${hostName} requested changes to your content`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Changes Requested</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${creatorName},</p>
+    
+    <p style="margin: 0 0 24px;">
+      <strong>${hostName}</strong> has reviewed your content for <strong>${propertyTitle}</strong> and requested some changes.
+    </p>
+    
+    ${feedback ? `
+    <div style="${styles.card}">
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Feedback</p>
+      <p style="margin: 0; font-style: italic;">"${feedback}"</p>
+    </div>
+    ` : ''}
+    
+    <p style="margin: 24px 0;">
+      Please review the feedback and resubmit your updated content when ready.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/collaborations/${collaborationId}" style="${styles.buttonYellow}">View & Resubmit →</a>
+    </div>
+  `)
+
+  const text = `
+Changes Requested
+
+Hi ${creatorName},
+
+${hostName} has reviewed your content for ${propertyTitle} and requested some changes.
+${feedback ? `\nFeedback: "${feedback}"` : ''}
+
+Please review and resubmit your updated content.
+
+View: ${BASE_URL}/dashboard/collaborations/${collaborationId}
+`
+
+  return { subject, html, text }
+}

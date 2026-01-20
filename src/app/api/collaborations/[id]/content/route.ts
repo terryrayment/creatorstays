@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { sendEmail, contentSubmittedEmail, contentApprovedEmail } from '@/lib/email'
+import { sendEmail, contentSubmittedEmail, contentApprovedEmail, changesRequestedEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -183,6 +183,22 @@ export async function PATCH(
           paymentNotes: feedback ? `Host requested changes: ${feedback}` : 'Host requested changes',
         },
       })
+
+      // Send email to creator about requested changes
+      if (collaboration.creator.user.email) {
+        const emailData = changesRequestedEmail({
+          creatorName: collaboration.creator.displayName,
+          hostName: collaboration.host.displayName,
+          propertyTitle: collaboration.property.title || 'Property',
+          feedback: feedback,
+          collaborationId: params.id,
+        })
+
+        sendEmail({
+          to: collaboration.creator.user.email,
+          ...emailData,
+        }).catch(err => console.error('[Content API] Changes email error:', err))
+      }
 
       return NextResponse.json({
         success: true,

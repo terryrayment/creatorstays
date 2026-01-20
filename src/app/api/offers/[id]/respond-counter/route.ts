@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { nanoid } from 'nanoid'
+import { sendEmail, counterAcceptedEmail, counterDeclinedEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,6 +71,22 @@ export async function POST(
           respondedAt: new Date(),
         },
       })
+
+      // Send email to creator
+      const creatorEmail = offer.creatorProfile.user?.email
+      if (creatorEmail) {
+        const emailData = counterDeclinedEmail({
+          creatorName: offer.creatorProfile.displayName,
+          hostName: offer.hostProfile.displayName,
+          propertyTitle: offer.property?.title || 'Property',
+          counterAmount: offer.counterCashCents || 0,
+        })
+
+        sendEmail({
+          to: creatorEmail,
+          ...emailData,
+        }).catch(err => console.error('[Counter Decline] Email error:', err))
+      }
 
       return NextResponse.json({
         success: true,
@@ -171,7 +188,22 @@ By signing below, both parties agree to these terms.
       },
     })
 
-    // TODO: Send email notification to creator
+    // Send email notification to creator
+    const creatorEmail = offer.creatorProfile.user?.email
+    if (creatorEmail) {
+      const emailData = counterAcceptedEmail({
+        creatorName: offer.creatorProfile.displayName,
+        hostName: offer.hostProfile.displayName,
+        propertyTitle: property.title || 'Property',
+        acceptedAmount: acceptedAmount,
+        collaborationId: collaboration.id,
+      })
+
+      sendEmail({
+        to: creatorEmail,
+        ...emailData,
+      }).catch(err => console.error('[Counter Accept] Email error:', err))
+    }
 
     return NextResponse.json({
       success: true,
