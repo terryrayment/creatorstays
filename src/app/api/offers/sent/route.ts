@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
             id: true,
             title: true,
             cityRegion: true,
-            imageUrl: true,
+            heroImageUrl: true,
             photos: true,
           },
         },

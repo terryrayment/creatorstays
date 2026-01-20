@@ -31,7 +31,7 @@ interface Offer {
     id: string
     title: string | null
     cityRegion: string | null
-    imageUrl: string | null
+    heroImageUrl: string | null
     photos: string[]
   } | null
 }
@@ -290,11 +290,11 @@ export default function HostSentOffersPage() {
                     {isSelected && (
                       <div className="mt-2 rounded-xl border-2 border-black bg-black/5 p-4 space-y-4">
                         {/* Property Gallery */}
-                        {offer.property && (offer.property.imageUrl || offer.property.photos?.length > 0) && (
+                        {offer.property && (offer.property.heroImageUrl || offer.property.photos?.length > 0) && (
                           <div className="rounded-lg overflow-hidden">
                             <PropertyGallery 
                               photos={offer.property.photos || []}
-                              heroImage={offer.property.imageUrl || undefined}
+                              heroImage={offer.property.heroImageUrl || undefined}
                               title={offer.property.title || undefined}
                               size="sm"
                             />
