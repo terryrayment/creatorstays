@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import Stripe from 'stripe'
+import { sendEmail, paymentCompleteEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -114,8 +115,9 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     const collaboration = await prisma.collaboration.findUnique({
       where: { id: collaborationId },
       include: {
-        creator: true,
+        creator: { include: { user: true } },
         host: true,
+        property: true,
       },
     })
 
@@ -126,8 +128,21 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     console.log(`  - Amount paid: $${((cashCents + hostFeeCents) / 100).toFixed(2)}`)
     console.log(`  - Creator receives: $${(creatorNetCents / 100).toFixed(2)}`)
 
-    // TODO: Send email notifications to host and creator
-    // TODO: If creator doesn't have Stripe connected, hold funds
+    // Send email notification to creator
+    if (collaboration?.creator.user.email) {
+      const emailData = paymentCompleteEmail({
+        creatorName: collaboration.creator.displayName,
+        hostName: collaboration.host.displayName,
+        propertyTitle: collaboration.property.title || 'Property',
+        amount: creatorNetCents,
+        collaborationId,
+      })
+      
+      sendEmail({
+        to: collaboration.creator.user.email,
+        ...emailData,
+      }).catch(err => console.error('[Webhook] Email error:', err))
+    }
 
   } catch (error) {
     console.error('[Webhook] Failed to update collaboration:', error)

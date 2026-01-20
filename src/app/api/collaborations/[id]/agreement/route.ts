@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail, agreementSignedEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -84,8 +85,14 @@ export async function POST(
 
     // Verify user is party to this collaboration
     const [hostProfile, creatorProfile] = await Promise.all([
-      prisma.hostProfile.findUnique({ where: { userId: session.user.id } }),
-      prisma.creatorProfile.findUnique({ where: { userId: session.user.id } }),
+      prisma.hostProfile.findUnique({ 
+        where: { userId: session.user.id },
+        include: { user: true },
+      }),
+      prisma.creatorProfile.findUnique({ 
+        where: { userId: session.user.id },
+        include: { user: true },
+      }),
     ])
 
     const isHost = hostProfile?.id === collaboration.hostId
@@ -94,6 +101,16 @@ export async function POST(
     if (!isHost && !isCreator) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
+
+    // Get full collaboration data for emails
+    const fullCollab = await prisma.collaboration.findUnique({
+      where: { id: params.id },
+      include: {
+        host: { include: { user: true } },
+        creator: { include: { user: true } },
+        property: true,
+      },
+    })
 
     const now = new Date()
     const updateData: Record<string, unknown> = {}
@@ -115,7 +132,9 @@ export async function POST(
     })
 
     // Check if both parties have signed
-    if (updatedAgreement.hostAcceptedAt && updatedAgreement.creatorAcceptedAt) {
+    const isFullyExecuted = !!(updatedAgreement.hostAcceptedAt && updatedAgreement.creatorAcceptedAt)
+    
+    if (isFullyExecuted) {
       // Mark agreement as fully executed
       await prisma.collaborationAgreement.update({
         where: { collaborationId: params.id },
@@ -130,7 +149,32 @@ export async function POST(
         where: { id: params.id },
         data: { status: 'active' },
       })
+    }
 
+    // Send email notification to the OTHER party
+    if (fullCollab) {
+      const recipientEmail = isHost 
+        ? fullCollab.creator.user.email 
+        : fullCollab.host.user?.email || fullCollab.host.contactEmail
+      
+      if (recipientEmail) {
+        const emailData = agreementSignedEmail({
+          recipientName: isHost ? fullCollab.creator.displayName : fullCollab.host.displayName,
+          signerName: isHost ? fullCollab.host.displayName : fullCollab.creator.displayName,
+          signerRole: isHost ? 'host' : 'creator',
+          propertyTitle: fullCollab.property.title || 'Property',
+          collaborationId: params.id,
+          isFullyExecuted,
+        })
+        
+        sendEmail({
+          to: recipientEmail,
+          ...emailData,
+        }).catch(err => console.error('[Agreement API] Email error:', err))
+      }
+    }
+
+    if (isFullyExecuted) {
       return NextResponse.json({
         success: true,
         message: 'Agreement fully executed! Collaboration is now active.',

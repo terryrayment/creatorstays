@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail, contentSubmittedEmail, contentApprovedEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +35,12 @@ export async function POST(
 
     const collaboration = await prisma.collaboration.findUnique({
       where: { id: params.id },
-      include: { agreement: true },
+      include: { 
+        agreement: true,
+        host: { include: { user: true } },
+        creator: true,
+        property: true,
+      },
     })
 
     if (!collaboration) {
@@ -67,6 +73,23 @@ export async function POST(
       },
     })
 
+    // Send email to host
+    const hostEmail = collaboration.host.user?.email || collaboration.host.contactEmail
+    if (hostEmail) {
+      const emailData = contentSubmittedEmail({
+        hostName: collaboration.host.displayName,
+        creatorName: collaboration.creator.displayName,
+        propertyTitle: collaboration.property.title || 'Property',
+        contentLinks,
+        collaborationId: params.id,
+      })
+      
+      sendEmail({
+        to: hostEmail,
+        ...emailData,
+      }).catch(err => console.error('[Content API] Email error:', err))
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Content submitted! Waiting for host review.',
@@ -94,6 +117,11 @@ export async function PATCH(
 
     const collaboration = await prisma.collaboration.findUnique({
       where: { id: params.id },
+      include: {
+        host: true,
+        creator: { include: { user: true } },
+        property: true,
+      },
     })
 
     if (!collaboration) {
@@ -124,6 +152,21 @@ export async function PATCH(
           contentApprovedAt: new Date(),
         },
       })
+
+      // Send email to creator
+      if (collaboration.creator.user.email) {
+        const emailData = contentApprovedEmail({
+          creatorName: collaboration.creator.displayName,
+          hostName: collaboration.host.displayName,
+          propertyTitle: collaboration.property.title || 'Property',
+          collaborationId: params.id,
+        })
+        
+        sendEmail({
+          to: collaboration.creator.user.email,
+          ...emailData,
+        }).catch(err => console.error('[Content API] Email error:', err))
+      }
 
       return NextResponse.json({
         success: true,

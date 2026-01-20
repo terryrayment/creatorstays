@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail, newOfferEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -141,11 +142,17 @@ export async function POST(request: NextRequest) {
     // Validate creator exists
     const creatorProfile = await prisma.creatorProfile.findUnique({
       where: { id: creatorProfileId },
+      include: { user: true },
     })
 
     if (!creatorProfile) {
       return NextResponse.json({ error: 'Creator not found' }, { status: 404 })
     }
+
+    // Get property for email
+    const property = await prisma.property.findFirst({
+      where: { hostProfileId: hostProfile.id },
+    })
 
     // Create the offer
     const offer = await prisma.offer.create({
@@ -164,6 +171,26 @@ export async function POST(request: NextRequest) {
         expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
       },
     })
+
+    // Send email notification to creator
+    if (creatorProfile.user.email) {
+      const emailData = newOfferEmail({
+        creatorName: creatorProfile.displayName,
+        hostName: hostProfile.displayName,
+        propertyTitle: property?.title || 'Property',
+        propertyLocation: property?.cityRegion || '',
+        dealType: offerType || 'flat',
+        cashAmount: cashCents || 0,
+        stayNights: stayNights,
+        deliverables: deliverables || [],
+        offerId: offer.id,
+      })
+      
+      sendEmail({
+        to: creatorProfile.user.email,
+        ...emailData,
+      }).catch(err => console.error('[Offers API] Email error:', err))
+    }
 
     return NextResponse.json({
       success: true,
