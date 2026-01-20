@@ -314,6 +314,8 @@ export default function CollaborationDetailPage() {
   
   // Content review state (for hosts)
   const [reviewingContent, setReviewingContent] = useState(false)
+  const [showChangeRequestModal, setShowChangeRequestModal] = useState(false)
+  const [changeRequestFeedback, setChangeRequestFeedback] = useState("")
 
   // Handle sending reminder to creator
   const handleSendReminder = async () => {
@@ -364,6 +366,35 @@ export default function CollaborationDetailPage() {
       setToast("Network error. Please try again.")
     }
     setFilingDispute(false)
+  }
+
+  // Handle content change request
+  const handleRequestChanges = async () => {
+    if (changeRequestFeedback.trim().length < 10) {
+      setToast("Please provide more specific feedback (at least 10 characters)")
+      return
+    }
+    setReviewingContent(true)
+    try {
+      const res = await fetch(`/api/collaborations/${collaborationId}/content`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "request-changes", feedback: changeRequestFeedback.trim() }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setToast("Change request sent to creator")
+        setShowChangeRequestModal(false)
+        setChangeRequestFeedback("")
+        setCollaboration(prev => prev ? { ...prev, status: "active" } : prev)
+        setTimeout(() => window.location.reload(), 1500)
+      } else {
+        setToast(data.error || "Failed to send request")
+      }
+    } catch {
+      setToast("Network error. Please try again.")
+    }
+    setReviewingContent(false)
   }
 
   // Handle cancel request
@@ -1110,33 +1141,7 @@ export default function CollaborationDetailPage() {
                   variant="outline" 
                   className="flex-1 disabled:opacity-50"
                   disabled={reviewingContent}
-                  onClick={async () => {
-                    const feedback = prompt("What changes do you need?")
-                    if (feedback === null) return
-                    if (feedback.trim().length < 10) {
-                      setToast("Please provide more specific feedback (at least 10 characters)")
-                      return
-                    }
-                    setReviewingContent(true)
-                    try {
-                      const res = await fetch(`/api/collaborations/${collaboration.id}/content`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ action: "request-changes", feedback }),
-                      })
-                      const data = await res.json()
-                      if (res.ok) {
-                        setToast("Change request sent to creator")
-                        setCollaboration(prev => prev ? { ...prev, status: "active" } : prev)
-                        setTimeout(() => window.location.reload(), 1500)
-                      } else {
-                        setToast(data.error || "Failed to send request")
-                      }
-                    } catch {
-                      setToast("Network error. Please try again.")
-                    }
-                    setReviewingContent(false)
-                  }}
+                  onClick={() => setShowChangeRequestModal(true)}
                 >
                   Request Changes
                 </Button>
@@ -1547,6 +1552,66 @@ export default function CollaborationDetailPage() {
                 setToast("Review submitted successfully!")
               }}
             />
+          )}
+
+          {/* Change Request Modal */}
+          {showChangeRequestModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <div className="w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-black text-black">Request Changes</h3>
+                    <p className="mt-1 text-sm text-black/60">
+                      Let the creator know what needs to be updated.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setShowChangeRequestModal(false)
+                      setChangeRequestFeedback("")
+                    }}
+                    className="text-black/40 hover:text-black"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="mt-4">
+                  <label className="text-xs font-bold uppercase tracking-wider text-black/60">
+                    What changes are needed?
+                  </label>
+                  <textarea
+                    value={changeRequestFeedback}
+                    onChange={(e) => setChangeRequestFeedback(e.target.value)}
+                    placeholder="Be specific about what needs to change (e.g., 'Please add the property link in your caption' or 'The video quality is too low')"
+                    rows={4}
+                    className="mt-2 w-full rounded-xl border-2 border-black p-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
+                  />
+                  <p className="mt-1 text-xs text-black/40">
+                    {changeRequestFeedback.length}/10 minimum characters
+                  </p>
+                </div>
+
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowChangeRequestModal(false)
+                      setChangeRequestFeedback("")
+                    }}
+                    className="flex-1 rounded-full border-2 border-black bg-white py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRequestChanges}
+                    disabled={reviewingContent || changeRequestFeedback.trim().length < 10}
+                    className="flex-1 rounded-full border-2 border-black bg-[#FFD84A] py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                  >
+                    {reviewingContent ? "Sending..." : "Send Request"}
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </Container>

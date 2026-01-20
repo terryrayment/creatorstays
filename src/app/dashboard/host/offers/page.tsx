@@ -75,6 +75,15 @@ export default function HostSentOffersPage() {
   const [showReCounter, setShowReCounter] = useState(false)
   const [reCounterAmount, setReCounterAmount] = useState("")
   const [reCounterMessage, setReCounterMessage] = useState("")
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null)
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [toast])
 
   // Mark offer as viewed when host selects a responded offer
   const handleSelectOffer = async (offer: Offer | null) => {
@@ -117,12 +126,12 @@ export default function HostSentOffersPage() {
           setOffers(refreshData.offers || [])
         }
         setSelectedOffer(null)
-        alert("Offer resent successfully! The creator has been notified.")
+        setToast({ message: "Offer resent! The creator has been notified.", type: "success" })
       } else {
-        alert(data.error || "Failed to resend offer")
+        setToast({ message: data.error || "Failed to resend offer", type: "error" })
       }
     } catch (e) {
-      alert("Network error. Please try again.")
+      setToast({ message: "Network error. Please try again.", type: "error" })
     }
     setResending(null)
   }
@@ -148,11 +157,12 @@ export default function HostSentOffersPage() {
           o.id === offerId ? { ...o, status: "withdrawn" } : o
         ))
         setSelectedOffer(null)
+        setToast({ message: "Offer withdrawn successfully.", type: "success" })
       } else {
-        alert(data.error || "Failed to withdraw offer")
+        setToast({ message: data.error || "Failed to withdraw offer", type: "error" })
       }
     } catch (e) {
-      alert("Network error. Please try again.")
+      setToast({ message: "Network error. Please try again.", type: "error" })
     }
     setWithdrawing(null)
   }
@@ -163,7 +173,7 @@ export default function HostSentOffersPage() {
     if (action === "re-counter") {
       const amount = parseFloat(reCounterAmount)
       if (!amount || amount <= 0) {
-        alert("Please enter a valid counter amount")
+        setToast({ message: "Please enter a valid counter amount", type: "error" })
         return
       }
     }
@@ -196,7 +206,7 @@ export default function HostSentOffersPage() {
           setShowReCounter(false)
           setReCounterAmount("")
           setReCounterMessage("")
-          alert("Re-counter sent! The creator has 7 days to respond.")
+          setToast({ message: "Re-counter sent! The creator has 7 days to respond.", type: "success" })
         } else {
           // Update the offer in state
           setOffers(prev => prev.map(o => 
@@ -206,16 +216,22 @@ export default function HostSentOffersPage() {
           ))
           setSelectedOffer(null)
           
-          // Redirect to collaborations if accepted
-          if (action === "accept" && data.collaborationId) {
-            window.location.href = "/dashboard/collaborations"
+          // Show success message
+          if (action === "accept") {
+            setToast({ message: "Counter accepted! Setting up collaboration...", type: "success" })
+            // Redirect to collaborations if accepted
+            if (data.collaborationId) {
+              setTimeout(() => { window.location.href = "/dashboard/collaborations" }, 1500)
+            }
+          } else {
+            setToast({ message: "Counter offer declined.", type: "success" })
           }
         }
       } else {
-        alert(data.error || "Failed to respond to counter offer")
+        setToast({ message: data.error || "Failed to respond to counter offer", type: "error" })
       }
     } catch (e) {
-      alert("Network error. Please try again.")
+      setToast({ message: "Network error. Please try again.", type: "error" })
     }
     setResponding(null)
   }
@@ -655,6 +671,25 @@ export default function HostSentOffersPage() {
           )}
         </div>
       </Container>
+
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
+          <div className={`rounded-xl border-2 border-black px-4 py-3 shadow-lg ${
+            toast.type === "error" ? "bg-red-50" : "bg-[#28D17C]"
+          }`}>
+            <div className="flex items-center gap-2">
+              {toast.type === "error" ? (
+                <span className="text-red-600">⚠️</span>
+              ) : (
+                <span>✓</span>
+              )}
+              <span className="text-sm font-bold text-black">{toast.message}</span>
+              <button onClick={() => setToast(null)} className="ml-2 text-black/60 hover:text-black">×</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
