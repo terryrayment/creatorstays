@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -394,11 +395,23 @@ const AVAILABLE_DELIVERABLES = ['Feed posts', 'Reels', 'Stories', 'TikTok', 'You
 
 export function CreatorDashboardProfile() {
   const searchParams = useSearchParams()
+  const { data: session } = useSession()
+  
+  // Generate handle from email or name
+  const generateHandle = (email?: string | null, name?: string | null): string => {
+    if (name) {
+      return name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20)
+    }
+    if (email) {
+      return email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20)
+    }
+    return 'creator' + Math.random().toString(36).slice(2, 8)
+  }
   
   // Toast state
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   
-  // Profile state (editable)
+  // Profile state (editable) - initialized from session
   const [profile, setProfile] = useState({
     displayName: "Your Profile",
     handle: "yourhandle",
@@ -411,6 +424,17 @@ export function CreatorDashboardProfile() {
       postForStay: true,
     },
   })
+  
+  // Update profile from session when available
+  useEffect(() => {
+    if (session?.user) {
+      setProfile(prev => ({
+        ...prev,
+        displayName: session.user.name || prev.displayName,
+        handle: generateHandle(session.user.email, session.user.name),
+      }))
+    }
+  }, [session])
   
   // Modal states
   const [editAboutOpen, setEditAboutOpen] = useState(false)
