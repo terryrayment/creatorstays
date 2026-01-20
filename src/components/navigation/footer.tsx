@@ -81,6 +81,8 @@ export function Footer() {
           <span>·</span>
           <Link href="/privacy" className="hover:text-white/50 transition-colors">Privacy Policy</Link>
           <span>·</span>
+          <Link href="/careers" className="hover:text-white/50 transition-colors">Careers</Link>
+          <span>·</span>
           <span>Not affiliated with Airbnb, Inc.</span>
         </div>
       </div>

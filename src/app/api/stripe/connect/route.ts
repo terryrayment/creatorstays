@@ -101,6 +101,22 @@ export async function GET(request: NextRequest) {
     // Get account details from Stripe
     const account = await stripe.accounts.retrieve(creator.stripeAccountId)
 
+    // Sync status to database if changed
+    if (
+      creator.stripeOnboardingComplete !== account.details_submitted ||
+      creator.stripeChargesEnabled !== account.charges_enabled ||
+      creator.stripePayoutsEnabled !== account.payouts_enabled
+    ) {
+      await prisma.creatorProfile.update({
+        where: { id: creator.id },
+        data: {
+          stripeOnboardingComplete: account.details_submitted,
+          stripeChargesEnabled: account.charges_enabled,
+          stripePayoutsEnabled: account.payouts_enabled,
+        },
+      })
+    }
+
     return NextResponse.json({
       connected: true,
       onboardingComplete: account.details_submitted,

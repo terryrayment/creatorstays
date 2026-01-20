@@ -37,10 +37,84 @@ interface Offer {
   }
 }
 
+interface StripeStatus {
+  connected: boolean
+  onboardingComplete: boolean
+  chargesEnabled: boolean
+  payoutsEnabled: boolean
+}
+
 const DEAL_TYPE_LABELS: Record<string, string> = {
   "flat": "Flat Fee",
   "flat-with-bonus": "Flat Fee + Bonus",
   "post-for-stay": "Post-for-Stay",
+}
+
+// Modal for Stripe Connect requirement
+function StripeConnectModal({ onClose, onConnect }: { onClose: () => void; onConnect: () => void }) {
+  const [connecting, setConnecting] = useState(false)
+
+  const handleConnect = async () => {
+    setConnecting(true)
+    try {
+      const res = await fetch('/api/stripe/connect', { method: 'POST' })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        setConnecting(false)
+      }
+    } catch (e) {
+      console.error('Stripe connect error:', e)
+      setConnecting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="mx-4 w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6 shadow-2xl">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A]">
+          <svg className="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-black text-black">Set Up Payments First</h3>
+        <p className="mt-2 text-sm text-black/70">
+          To accept paid offers and receive payments, you need to connect your bank account through Stripe. This only takes a few minutes.
+        </p>
+        <ul className="mt-4 space-y-2 text-sm text-black">
+          <li className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-xs font-bold text-black">✓</span>
+            Secure payments via Stripe
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-xs font-bold text-black">✓</span>
+            Direct deposit to your bank
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-xs font-bold text-black">✓</span>
+            Automatic tax documents (1099)
+          </li>
+        </ul>
+        <div className="mt-6 flex gap-3">
+          <Button
+            onClick={handleConnect}
+            disabled={connecting}
+            className="flex-1 rounded-full border-2 border-black bg-black py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+          >
+            {connecting ? 'Connecting...' : 'Connect Stripe →'}
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            className="text-black/60 hover:text-black"
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function CreatorOffersInbox() {
@@ -53,6 +127,26 @@ export function CreatorOffersInbox() {
   const [counterMessage, setCounterMessage] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
   const [toast, setToast] = useState({ message: '', type: '' as 'success' | 'error' | '' })
+  const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null)
+  const [showStripeModal, setShowStripeModal] = useState(false)
+
+  // Fetch Stripe status
+  useEffect(() => {
+    async function fetchStripeStatus() {
+      try {
+        const res = await fetch('/api/stripe/connect')
+        if (res.ok) {
+          const data = await res.json()
+          setStripeStatus(data)
+        }
+      } catch (e) {
+        console.error('Failed to fetch Stripe status:', e)
+      }
+    }
+    if (session?.user) {
+      fetchStripeStatus()
+    }
+  }, [session])
 
   // Fetch offers
   useEffect(() => {
@@ -77,6 +171,17 @@ export function CreatorOffersInbox() {
   // Handle offer response
   const handleRespond = async (action: 'accept' | 'counter' | 'decline') => {
     if (!selectedOffer) return
+    
+    // Check if this is a paid offer and Stripe isn't set up
+    if (action === 'accept') {
+      const isPaidOffer = selectedOffer.cashCents > 0 || selectedOffer.trafficBonusEnabled
+      const stripeReady = stripeStatus?.connected && stripeStatus?.onboardingComplete
+      
+      if (isPaidOffer && !stripeReady) {
+        setShowStripeModal(true)
+        return
+      }
+    }
     
     setActionLoading(true)
     try {
@@ -112,7 +217,12 @@ export function CreatorOffersInbox() {
           setToast({ message: 'Offer declined.', type: 'success' })
         }
       } else {
-        setToast({ message: data.error || 'Failed to respond', type: 'error' })
+        // Check for Stripe not connected error
+        if (data.code === 'STRIPE_NOT_CONNECTED') {
+          setShowStripeModal(true)
+        } else {
+          setToast({ message: data.error || 'Failed to respond', type: 'error' })
+        }
       }
     } catch (e) {
       console.error('Failed to respond:', e)
@@ -144,6 +254,14 @@ export function CreatorOffersInbox() {
 
   return (
     <div className="space-y-4">
+      {/* Stripe Connect Modal */}
+      {showStripeModal && (
+        <StripeConnectModal
+          onClose={() => setShowStripeModal(false)}
+          onConnect={() => setShowStripeModal(false)}
+        />
+      )}
+
       {/* Toast */}
       {toast.message && (
         <div className={`rounded-xl border-2 border-black px-4 py-3 text-sm font-bold ${

@@ -497,6 +497,50 @@ export function CreatorDashboardProfile() {
   const [connectError, setConnectError] = useState<string | null>(null)
   const [platformSyncData, setPlatformSyncData] = useState<Partial<Record<Platform, PlatformSyncData>>>({})
 
+  // Stripe Connect status
+  const [stripeStatus, setStripeStatus] = useState<{
+    connected: boolean
+    onboardingComplete: boolean
+    chargesEnabled: boolean
+    payoutsEnabled: boolean
+  } | null>(null)
+  const [stripeConnecting, setStripeConnecting] = useState(false)
+
+  // Fetch Stripe status on mount
+  useEffect(() => {
+    async function fetchStripeStatus() {
+      try {
+        const res = await fetch('/api/stripe/connect')
+        if (res.ok) {
+          const data = await res.json()
+          setStripeStatus(data)
+        }
+      } catch (e) {
+        console.error('Failed to fetch Stripe status:', e)
+      }
+    }
+    if (session?.user) {
+      fetchStripeStatus()
+    }
+  }, [session])
+
+  // Handle Stripe Connect
+  const handleStripeConnect = async () => {
+    setStripeConnecting(true)
+    try {
+      const res = await fetch('/api/stripe/connect', { method: 'POST' })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        setStripeConnecting(false)
+      }
+    } catch (e) {
+      console.error('Stripe connect error:', e)
+      setStripeConnecting(false)
+    }
+  }
+
   // Check for Instagram OAuth connection on mount
   useEffect(() => {
     const connected = searchParams.get('connected')
@@ -733,6 +777,30 @@ export function CreatorDashboardProfile() {
                 </svg>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stripe Connect Banner - shows when Stripe is not set up */}
+      {stripeStatus && !stripeStatus.onboardingComplete && !showOnboardingBanner && (
+        <div className="fixed left-0 right-0 top-16 z-40 border-b-2 border-black bg-[#4AA3FF] px-4 py-3">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <svg className="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+              </svg>
+              <div>
+                <p className="text-sm font-bold text-black">Set up payments to accept paid offers</p>
+                <p className="text-xs text-black/70">Connect your bank account via Stripe to receive payments from hosts</p>
+              </div>
+            </div>
+            <button
+              onClick={handleStripeConnect}
+              disabled={stripeConnecting}
+              className="rounded-full border-2 border-black bg-black px-4 py-1.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+            >
+              {stripeConnecting ? 'Connecting...' : 'Connect Stripe →'}
+            </button>
           </div>
         </div>
       )}

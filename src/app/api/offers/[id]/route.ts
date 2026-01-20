@@ -209,6 +209,16 @@ export async function PATCH(
 
     // Handle ACCEPT
     if (action === 'accept') {
+      // Check if creator has Stripe Connect set up (required for paid offers)
+      if (offer.cashCents > 0 || offer.trafficBonusEnabled) {
+        if (!creatorProfile.stripeAccountId || !creatorProfile.stripeOnboardingComplete) {
+          return NextResponse.json({ 
+            error: 'Please set up your payment account before accepting paid offers.',
+            code: 'STRIPE_NOT_CONNECTED',
+          }, { status: 400 })
+        }
+      }
+
       // Use property from offer, or fall back to finding one
       let property = offer.property
       if (!property) {
