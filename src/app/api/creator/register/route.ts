@@ -4,14 +4,20 @@ import { sendEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
+// Master beta codes from environment variable
+const MASTER_BETA_CODES = (process.env.MASTER_BETA_CODES || '')
+  .split(',')
+  .map(code => code.trim().toUpperCase())
+  .filter(code => code.length > 0)
+
 /**
  * POST /api/creator/register
  * 
  * Creates a new creator account (beta invite required):
- * 1. Validates invite token
+ * 1. Validates invite token (master code or database)
  * 2. Creates User record
  * 3. Creates CreatorProfile linked to User
- * 4. Marks invite as used
+ * 4. Marks invite as used (if database token)
  * 5. Sends magic link email for authentication
  */
 export async function POST(request: NextRequest) {
@@ -36,37 +42,45 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate invite token if provided
+    let isMasterCode = false
     if (inviteToken) {
-      const invite = await prisma.creatorInvite.findUnique({
-        where: { token: inviteToken },
-      })
+      // Check if it's a master beta code first
+      if (MASTER_BETA_CODES.includes(inviteToken.toUpperCase())) {
+        isMasterCode = true
+        // Master codes are always valid, no further checks needed
+      } else {
+        // Check database for invite token
+        const invite = await prisma.creatorInvite.findUnique({
+          where: { token: inviteToken },
+        })
 
-      if (!invite) {
-        return NextResponse.json(
-          { error: 'Invalid invite token' },
-          { status: 400 }
-        )
-      }
+        if (!invite) {
+          return NextResponse.json(
+            { error: 'Invalid invite token' },
+            { status: 400 }
+          )
+        }
 
-      if (invite.revoked) {
-        return NextResponse.json(
-          { error: 'This invite has been revoked' },
-          { status: 400 }
-        )
-      }
+        if (invite.revoked) {
+          return NextResponse.json(
+            { error: 'This invite has been revoked' },
+            { status: 400 }
+          )
+        }
 
-      if (invite.expiresAt && new Date() > invite.expiresAt) {
-        return NextResponse.json(
-          { error: 'This invite has expired' },
-          { status: 400 }
-        )
-      }
+        if (invite.expiresAt && new Date() > invite.expiresAt) {
+          return NextResponse.json(
+            { error: 'This invite has expired' },
+            { status: 400 }
+          )
+        }
 
-      if (invite.uses >= invite.maxUses) {
-        return NextResponse.json(
-          { error: 'This invite has reached its usage limit' },
-          { status: 400 }
-        )
+        if (invite.uses >= invite.maxUses) {
+          return NextResponse.json(
+            { error: 'This invite has reached its usage limit' },
+            { status: 400 }
+          )
+        }
       }
     }
 
@@ -146,8 +160,8 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      // 3. Mark invite as used (if provided)
-      if (inviteToken) {
+      // 3. Mark invite as used (only for database tokens, not master codes)
+      if (inviteToken && !isMasterCode) {
         await tx.creatorInvite.update({
           where: { token: inviteToken },
           data: { uses: { increment: 1 } },
