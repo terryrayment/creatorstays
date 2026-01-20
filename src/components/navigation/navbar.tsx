@@ -47,8 +47,8 @@ export function Navbar() {
           <span className="text-[13px] font-bold">CS</span>
         </Link>
 
-        {/* Center - Pill nav buttons */}
-        <div className="hidden items-center gap-1.5 md:flex">
+        {/* Center - Pill nav buttons (absolutely centered) */}
+        <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 md:flex">
           {[
             { href: "/how-it-works", label: "How It Works" },
             { href: "/hosts", label: "For Hosts" },
