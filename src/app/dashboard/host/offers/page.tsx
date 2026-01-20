@@ -79,6 +79,40 @@ export default function HostSentOffersPage() {
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null)
   const [responding, setResponding] = useState<string | null>(null)
   const [withdrawing, setWithdrawing] = useState<string | null>(null)
+  const [resending, setResending] = useState<string | null>(null)
+
+  // Handle resend offer
+  const handleResend = async (offerId: string) => {
+    if (!confirm("Resend this offer? The creator will receive a new notification and have 14 days to respond.")) {
+      return
+    }
+    
+    setResending(offerId)
+    try {
+      const res = await fetch(`/api/offers/${offerId}/resend`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+      
+      const data = await res.json()
+      
+      if (res.ok) {
+        // Refresh offers to show the new one
+        const refreshRes = await fetch("/api/offers/sent")
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json()
+          setOffers(refreshData.offers || [])
+        }
+        setSelectedOffer(null)
+        alert("Offer resent successfully! The creator has been notified.")
+      } else {
+        alert(data.error || "Failed to resend offer")
+      }
+    } catch (e) {
+      alert("Network error. Please try again.")
+    }
+    setResending(null)
+  }
 
   // Handle withdraw offer
   const handleWithdraw = async (offerId: string) => {
@@ -422,6 +456,48 @@ export default function HostSentOffersPage() {
                           >
                             {withdrawing === offer.id ? "Withdrawing..." : "Withdraw Offer"}
                           </button>
+                        )}
+
+                        {/* Resend option for expired offers */}
+                        {offer.status === "expired" && (
+                          <div className="space-y-3">
+                            <div className="rounded-lg border-2 border-gray-300 bg-gray-50 p-3 text-center">
+                              <p className="text-xs text-black/60">
+                                This offer expired on {offer.expiresAt ? formatDate(offer.expiresAt) : "N/A"}
+                              </p>
+                              <p className="mt-1 text-xs text-black/50">
+                                The creator didn't respond in time.
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleResend(offer.id)}
+                              disabled={resending === offer.id}
+                              className="w-full rounded-full border-2 border-black bg-[#FFD84A] py-3 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                            >
+                              {resending === offer.id ? "Resending..." : "🔄 Resend Offer"}
+                            </button>
+                            <p className="text-center text-[10px] text-black/40">
+                              Creates a new offer with the same terms
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Resend option for declined offers */}
+                        {offer.status === "declined" && (
+                          <div className="space-y-3">
+                            <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-center">
+                              <p className="text-xs text-red-600">
+                                This offer was declined by the creator.
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleResend(offer.id)}
+                              disabled={resending === offer.id}
+                              className="w-full rounded-full border-2 border-black bg-white py-2 text-xs font-bold text-black/70 transition-all hover:bg-[#FFD84A] disabled:opacity-50"
+                            >
+                              {resending === offer.id ? "Resending..." : "Try Again with Same Terms"}
+                            </button>
+                          </div>
                         )}
                       </div>
                     )}

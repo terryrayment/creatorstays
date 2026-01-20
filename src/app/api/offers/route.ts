@@ -30,6 +30,34 @@ export async function GET(request: NextRequest) {
     const isHost = role === 'host' || (!role && hostProfile && !creatorProfile)
     const isCreator = role === 'creator' || (!role && creatorProfile)
 
+    // Helper: Check and update expired offers in real-time
+    const checkAndExpireOffers = async (offerList: any[]) => {
+      const now = new Date()
+      const expiredOfferIds: string[] = []
+      
+      for (const offer of offerList) {
+        if (offer.status === 'pending' && offer.expiresAt && new Date(offer.expiresAt) < now) {
+          expiredOfferIds.push(offer.id)
+        }
+      }
+      
+      // Batch update expired offers
+      if (expiredOfferIds.length > 0) {
+        await prisma.offer.updateMany({
+          where: { id: { in: expiredOfferIds } },
+          data: { status: 'expired', respondedAt: now },
+        })
+      }
+      
+      // Return offers with corrected status
+      return offerList.map(offer => {
+        if (expiredOfferIds.includes(offer.id)) {
+          return { ...offer, status: 'expired', respondedAt: now }
+        }
+        return offer
+      })
+    }
+
     if (isCreator && creatorProfile) {
       // Fetch offers sent TO this creator
       offers = await prisma.offer.findMany({
@@ -49,10 +77,18 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
       })
 
+      // Check for expired offers in real-time
+      offers = await checkAndExpireOffers(offers)
+      
+      // If filtering by status, re-filter after expiration check
+      if (status) {
+        offers = offers.filter((o: any) => o.status === status)
+      }
+
       // Enrich with property data (get first property from host for now)
       // In a full implementation, offers would have a propertyId
       const enrichedOffers = await Promise.all(
-        offers.map(async (offer) => {
+        offers.map(async (offer: any) => {
           const property = await prisma.property.findFirst({
             where: { hostProfileId: offer.hostProfileId },
             select: {

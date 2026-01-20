@@ -871,3 +871,258 @@ View: ${BASE_URL}/dashboard/collaborations/${collaborationId}
 
   return { subject, html, text }
 }
+
+/**
+ * Offer Expiring Soon Email (to Creator) - sent 2 days before expiration
+ */
+export function offerExpiringSoonEmail(data: {
+  creatorName: string
+  hostName: string
+  propertyTitle: string
+  propertyLocation: string
+  cashAmount: number
+  expiresAt: Date
+  offerId: string
+}): { subject: string; html: string; text: string } {
+  const { creatorName, hostName, propertyTitle, propertyLocation, cashAmount, expiresAt, offerId } = data
+
+  const expiresDate = expiresAt.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    month: 'long', 
+    day: 'numeric' 
+  })
+  const formattedAmount = cashAmount > 0 
+    ? (cashAmount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+    : null
+
+  const subject = `⏰ Offer expires soon: ${propertyTitle}`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Your Offer Expires Soon</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${creatorName},</p>
+    
+    <div style="${styles.card}; border-color: #FFD84A; background: #FFFDF0;">
+      <p style="margin: 0 0 4px; font-size: 12px; color: #666;">EXPIRING ${expiresDate.toUpperCase()}</p>
+      <p style="font-size: 18px; font-weight: 700; margin: 0 0 4px;">${propertyTitle}</p>
+      <p style="color: #666; margin: 0 0 12px;">${propertyLocation}</p>
+      <p style="margin: 0;">
+        <strong>From:</strong> ${hostName}
+        ${formattedAmount ? `<br><strong>Offer:</strong> ${formattedAmount}` : ''}
+      </p>
+    </div>
+    
+    <p style="margin: 24px 0;">
+      Don't miss out! This offer will expire on <strong>${expiresDate}</strong>. 
+      Review and respond before it's too late.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/creator/offers" style="${styles.buttonYellow}">Review Offer →</a>
+    </div>
+  `)
+
+  const text = `
+Your Offer Expires Soon
+
+Hi ${creatorName},
+
+You have an offer from ${hostName} for ${propertyTitle} that expires on ${expiresDate}.
+${formattedAmount ? `Offer amount: ${formattedAmount}` : ''}
+
+Don't miss out — review and respond before it's too late!
+
+Review offer: ${BASE_URL}/dashboard/creator/offers
+`
+
+  return { subject, html, text }
+}
+
+/**
+ * Offer Expired Email (to Creator)
+ */
+export function offerExpiredToCreatorEmail(data: {
+  creatorName: string
+  hostName: string
+  propertyTitle: string
+}): { subject: string; html: string; text: string } {
+  const { creatorName, hostName, propertyTitle } = data
+
+  const subject = `Offer expired: ${propertyTitle}`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Offer Expired</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${creatorName},</p>
+    
+    <div style="${styles.card}; border-color: #999; background: #f5f5f5;">
+      <p style="margin: 0 0 8px;"><strong>${hostName}'s</strong> offer for:</p>
+      <p style="font-size: 18px; font-weight: 700; margin: 0;">${propertyTitle}</p>
+      <p style="margin: 8px 0 0; color: #666;">has expired.</p>
+    </div>
+    
+    <p style="margin: 24px 0;">
+      If you're still interested, the host may choose to send a new offer. 
+      You'll receive a notification if they do.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/creator" style="${styles.button}">View Dashboard →</a>
+    </div>
+  `)
+
+  const text = `
+Offer Expired
+
+Hi ${creatorName},
+
+The offer from ${hostName} for ${propertyTitle} has expired.
+
+If you're still interested, the host may choose to send a new offer. You'll receive a notification if they do.
+
+View dashboard: ${BASE_URL}/dashboard/creator
+`
+
+  return { subject, html, text }
+}
+
+/**
+ * Offer Expired Email (to Host)
+ */
+export function offerExpiredToHostEmail(data: {
+  hostName: string
+  creatorName: string
+  creatorHandle: string
+  propertyTitle: string
+  offerId: string
+}): { subject: string; html: string; text: string } {
+  const { hostName, creatorName, creatorHandle, propertyTitle, offerId } = data
+
+  const subject = `Your offer to @${creatorHandle} has expired`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Offer Expired</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${hostName},</p>
+    
+    <div style="${styles.card}; border-color: #999; background: #f5f5f5;">
+      <p style="margin: 0 0 8px;">Your offer to <strong>@${creatorHandle}</strong> for:</p>
+      <p style="font-size: 18px; font-weight: 700; margin: 0;">${propertyTitle}</p>
+      <p style="margin: 8px 0 0; color: #666;">has expired without a response.</p>
+    </div>
+    
+    <p style="margin: 24px 0;">
+      No worries — you can resend this offer to give ${creatorName} another chance to respond, 
+      or find other creators who might be a great fit.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/host/offers" style="${styles.buttonYellow}">Resend Offer →</a>
+    </div>
+    
+    <p style="text-align: center; margin: 16px 0;">
+      <a href="${BASE_URL}/dashboard/host/search-creators" style="color: #000; text-decoration: underline;">Or find new creators</a>
+    </p>
+  `)
+
+  const text = `
+Offer Expired
+
+Hi ${hostName},
+
+Your offer to @${creatorHandle} for ${propertyTitle} has expired without a response.
+
+No worries — you can resend this offer to give ${creatorName} another chance to respond, or find other creators.
+
+Resend offer: ${BASE_URL}/dashboard/host/offers
+Find creators: ${BASE_URL}/dashboard/host/search-creators
+`
+
+  return { subject, html, text }
+}
+
+/**
+ * Offer Resent Email (to Creator)
+ */
+export function offerResentEmail(data: {
+  creatorName: string
+  hostName: string
+  propertyTitle: string
+  propertyLocation: string
+  dealType: string
+  cashAmount: number
+  stayNights: number | null
+  deliverables: string[]
+  offerId: string
+}): { subject: string; html: string; text: string } {
+  const { creatorName, hostName, propertyTitle, propertyLocation, dealType, cashAmount, stayNights, deliverables, offerId } = data
+
+  const formattedAmount = cashAmount > 0 
+    ? (cashAmount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+    : null
+  
+  const dealTypeLabel = dealType === 'post-for-stay' ? 'Post-for-Stay' :
+                        dealType === 'flat-with-bonus' ? 'Flat Fee + Bonus' : 'Flat Fee'
+
+  const compensationLine = dealType === 'post-for-stay'
+    ? `<strong>Complimentary Stay:</strong> ${stayNights} nights`
+    : formattedAmount
+    ? `<strong>Payment:</strong> ${formattedAmount}${stayNights ? ` + ${stayNights} nights stay` : ''}`
+    : `<strong>Stay:</strong> ${stayNights} nights`
+
+  const subject = `🔄 ${hostName} resent their offer for ${propertyTitle}`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">You Have Another Chance!</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${creatorName},</p>
+    
+    <p style="margin: 0 0 24px;">
+      Great news! <strong>${hostName}</strong> has resent their offer for a collaboration. 
+      They're still interested in working with you!
+    </p>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 18px; font-weight: 700; margin: 0 0 4px;">${propertyTitle}</p>
+      <p style="color: #666; margin: 0 0 16px;">${propertyLocation}</p>
+      
+      <p style="margin: 0 0 8px;">
+        <span style="background: #FFD84A; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 700;">${dealTypeLabel}</span>
+      </p>
+      
+      <p style="margin: 16px 0 8px;">${compensationLine}</p>
+      
+      ${deliverables.length > 0 ? `
+        <p style="margin: 16px 0 8px; font-size: 14px; color: #666;"><strong>Deliverables:</strong></p>
+        <ul style="margin: 0; padding-left: 20px;">
+          ${deliverables.map(d => `<li style="margin: 4px 0;">${d}</li>`).join('')}
+        </ul>
+      ` : ''}
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/creator/offers" style="${styles.buttonGreen}">Review Offer →</a>
+    </div>
+    
+    <p style="text-align: center; font-size: 14px; color: #666;">
+      This offer expires in 14 days.
+    </p>
+  `)
+
+  const text = `
+You Have Another Chance!
+
+Hi ${creatorName},
+
+${hostName} has resent their offer for ${propertyTitle}. They're still interested in working with you!
+
+Property: ${propertyTitle}
+Location: ${propertyLocation}
+Deal Type: ${dealTypeLabel}
+${formattedAmount ? `Payment: ${formattedAmount}` : ''}
+${stayNights ? `Stay: ${stayNights} nights` : ''}
+${deliverables.length > 0 ? `Deliverables: ${deliverables.join(', ')}` : ''}
+
+This offer expires in 14 days.
+
+Review offer: ${BASE_URL}/dashboard/creator/offers
+`
+
+  return { subject, html, text }
+}

@@ -47,7 +47,25 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     })
 
-    // Format response
+    // Check and update expired offers in real-time
+    const now = new Date()
+    const expiredOfferIds: string[] = []
+    
+    for (const offer of offers) {
+      if (offer.status === 'pending' && offer.expiresAt && offer.expiresAt < now) {
+        expiredOfferIds.push(offer.id)
+      }
+    }
+    
+    // Batch update expired offers
+    if (expiredOfferIds.length > 0) {
+      await prisma.offer.updateMany({
+        where: { id: { in: expiredOfferIds } },
+        data: { status: 'expired', respondedAt: now },
+      })
+    }
+
+    // Format response with corrected status
     const formattedOffers = offers.map(offer => ({
       id: offer.id,
       offerType: offer.offerType,
@@ -58,10 +76,10 @@ export async function GET(request: NextRequest) {
       trafficBonusCents: offer.trafficBonusCents,
       deliverables: offer.deliverables,
       requirements: offer.requirements,
-      status: offer.status,
+      status: expiredOfferIds.includes(offer.id) ? 'expired' : offer.status,
       createdAt: offer.createdAt.toISOString(),
       expiresAt: offer.expiresAt?.toISOString() || null,
-      respondedAt: offer.respondedAt?.toISOString() || null,
+      respondedAt: expiredOfferIds.includes(offer.id) ? now.toISOString() : (offer.respondedAt?.toISOString() || null),
       counterCashCents: offer.counterCashCents,
       counterMessage: offer.counterMessage,
       creator: offer.creatorProfile,
