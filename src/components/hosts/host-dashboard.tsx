@@ -383,13 +383,13 @@ export function HostDashboard() {
   return (
     <div className="min-h-screen bg-white">
       {/* Top bar */}
-      <div className="border-b border-black bg-white">
+      <div className="border-b-2 border-black bg-white">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">BETA</span>
-            <span className="text-xs text-black">Host Dashboard</span>
+            <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
+            <span className="text-sm font-bold text-black">Host Dashboard</span>
           </div>
-          <Link href="/" className="text-xs text-black hover:text-black">← Back to site</Link>
+          <Link href="/" className="text-sm font-bold text-black hover:underline">← Back to site</Link>
         </div>
       </div>
 

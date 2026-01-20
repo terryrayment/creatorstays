@@ -295,7 +295,7 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                       </div>
                     )}
                   </>
-                )}}
+                )}
               </div>
 
               {/* Cash Amount (for flat and flat-with-bonus) */}
