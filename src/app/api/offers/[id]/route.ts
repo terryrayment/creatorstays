@@ -239,7 +239,7 @@ export async function PATCH(
           hostName: offer.hostProfile.displayName,
           creatorName: creatorProfile.displayName,
           creatorHandle: creatorProfile.handle,
-          propertyTitle: property.title,
+          propertyTitle: property.title || 'Property',
           collaborationId: collaboration.id,
         })
 
