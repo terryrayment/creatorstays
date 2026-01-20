@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { StyledSelect } from "@/components/ui/styled-select"
 
 interface Creator {
-  id: number
+  id: string | number
   name: string
   handle: string
   avatar: string
@@ -15,6 +15,7 @@ interface Creator {
   rate: string
   bio: string
   engagementRate: string
+  displayName?: string
 }
 
 interface Property {
@@ -123,7 +124,7 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          creatorProfileId: creator.id.toString(),
+          creatorProfileId: String(creator.id),
           propertyId: selectedProperty,
           offerType: dealType,
           cashCents: dealType === 'post-for-stay' ? 0 : cashCents,
@@ -152,6 +153,9 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
 
   const selectedPropertyData = properties.find(p => p.id === selectedProperty)
 
+  // Get creator name (handle both displayName and name)
+  const creatorName = creator.displayName || creator.name
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border-[3px] border-black bg-white">
@@ -162,7 +166,7 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
               {creator.avatar}
             </div>
             <div>
-              <p className="font-bold text-black">{creator.name}</p>
+              <p className="font-bold text-black">{creatorName}</p>
               <p className="text-xs text-black">@{creator.handle} • {creator.audienceSize} followers</p>
             </div>
           </div>
@@ -456,7 +460,7 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Sending to</p>
-                    <p className="font-bold text-black">{creator.name} (@{creator.handle})</p>
+                    <p className="font-bold text-black">{creatorName} (@{creator.handle})</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Property</p>

@@ -75,88 +75,6 @@ function formatFollowers(count: number): string {
   return count.toString()
 }
 
-// Mock approved creators database
-const APPROVED_CREATORS = [
-  { 
-    id: 1, 
-    name: "Sarah Chen", 
-    handle: "sarahexplores", 
-    avatar: "SC",
-    niches: ["Travel", "Photography"], 
-    audienceSize: "85K", 
-    location: "Los Angeles, CA", 
-    platforms: ["Instagram", "TikTok"],
-    rate: "$400-600",
-    bio: "Travel photographer capturing hidden gems across the West Coast.",
-    engagementRate: "4.2%",
-  },
-  { 
-    id: 2, 
-    name: "Marcus Johnson", 
-    handle: "marcusjtravel", 
-    avatar: "MJ",
-    niches: ["Lifestyle", "Adventure"], 
-    audienceSize: "120K", 
-    location: "Austin, TX", 
-    platforms: ["YouTube", "Instagram"],
-    rate: "$600-900",
-    bio: "Adventure lifestyle creator focusing on unique stays and outdoor experiences.",
-    engagementRate: "3.8%",
-  },
-  { 
-    id: 3, 
-    name: "Emily Rodriguez", 
-    handle: "emilystays", 
-    avatar: "ER",
-    niches: ["Luxury", "Design"], 
-    audienceSize: "65K", 
-    location: "Miami, FL", 
-    platforms: ["Instagram"],
-    rate: "$350-500",
-    bio: "Interior design enthusiast showcasing beautiful vacation rentals.",
-    engagementRate: "5.1%",
-  },
-  { 
-    id: 4, 
-    name: "Jake Williams", 
-    handle: "jakewanders", 
-    avatar: "JW",
-    niches: ["Vlog", "Family"], 
-    audienceSize: "250K", 
-    location: "Denver, CO", 
-    platforms: ["YouTube", "TikTok"],
-    rate: "$800-1200",
-    bio: "Family travel vlogger documenting adventures with kids.",
-    engagementRate: "3.5%",
-  },
-  { 
-    id: 5, 
-    name: "Mia Thompson", 
-    handle: "miafoodtravel", 
-    avatar: "MT",
-    niches: ["Food", "Travel"], 
-    audienceSize: "95K", 
-    location: "Portland, OR", 
-    platforms: ["Instagram", "TikTok"],
-    rate: "$450-650",
-    bio: "Food and travel content creator exploring local cuisines.",
-    engagementRate: "4.8%",
-  },
-  { 
-    id: 6, 
-    name: "Alex Kim", 
-    handle: "alexkimphoto", 
-    avatar: "AK",
-    niches: ["Photography", "Minimal"], 
-    audienceSize: "45K", 
-    location: "Seattle, WA", 
-    platforms: ["Instagram"],
-    rate: "$300-450",
-    bio: "Minimalist photography focusing on architecture and interiors.",
-    engagementRate: "6.2%",
-  },
-]
-
 const PLATFORM_OPTIONS = ["All Platforms", "Instagram", "TikTok", "YouTube"]
 const NICHE_OPTIONS = ["All Niches", "Travel", "Lifestyle", "Photography", "Vlog", "Food", "Adventure", "Luxury", "Design", "Family", "Minimal"]
 const AUDIENCE_OPTIONS = ["All Sizes", "Under 50K", "50K-100K", "100K-250K", "250K+"]
@@ -327,8 +245,9 @@ export default function SearchCreatorsPage() {
   const displayCreators = creators.map(c => ({
     id: c.id,
     name: c.displayName,
+    displayName: c.displayName,
     handle: c.handle,
-    avatar: c.avatarUrl || c.displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
+    avatar: c.avatarUrl || (c.displayName ? c.displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : 'CR'),
     niches: c.niches || [],
     audienceSize: c.totalFollowers ? formatFollowers(c.totalFollowers) : 'N/A',
     location: c.location || 'Unknown',
@@ -341,8 +260,8 @@ export default function SearchCreatorsPage() {
     distance: null,
   }))
 
-  // Also show mock creators if no real creators found (for demo)
-  const allCreators = displayCreators.length > 0 ? displayCreators : APPROVED_CREATORS.map(c => ({ ...c, distance: null }))
+  // Use only real creators from the database
+  const allCreators = displayCreators
 
   if (status === "loading") {
     return (
@@ -528,8 +447,32 @@ export default function SearchCreatorsPage() {
           {/* Empty State */}
           {!loading && allCreators.length === 0 && (
             <div className="rounded-xl border-2 border-dashed border-black/30 p-8 text-center">
-              <p className="text-sm font-bold text-black">No creators match your filters</p>
-              <p className="mt-1 text-xs text-black/60">Try adjusting your search criteria or clearing filters</p>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-black/30 bg-black/5">
+                <svg className="h-8 w-8 text-black/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                </svg>
+              </div>
+              <p className="text-sm font-bold text-black">No creators available yet</p>
+              <p className="mt-2 text-xs text-black/60">
+                {search || niche !== 'All Niches' || platform !== 'All Platforms' || location 
+                  ? "Try adjusting your search criteria or clearing filters"
+                  : "We're onboarding creators in beta. Check back soon!"}
+              </p>
+              {(search || niche !== 'All Niches' || platform !== 'All Platforms' || location) && (
+                <button
+                  onClick={() => {
+                    setSearch("")
+                    setNiche("All Niches")
+                    setPlatform("All Platforms")
+                    setLocation("")
+                    setAudienceSize("All Sizes")
+                    setOpenToGiftedStays(false)
+                  }}
+                  className="mt-4 rounded-full border-2 border-black px-4 py-2 text-xs font-bold text-black hover:bg-black/5"
+                >
+                  Clear all filters
+                </button>
+              )}
             </div>
           )}
         </Container>
