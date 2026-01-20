@@ -25,6 +25,11 @@ interface Offer {
     handle: string
     avatarUrl: string | null
   }
+  property: {
+    id: string
+    title: string | null
+    cityRegion: string | null
+  } | null
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
@@ -219,12 +224,18 @@ export default function HostSentOffersPage() {
                               </span>
                             </div>
                             <p className="text-xs text-black/60">@{offer.creator.handle}</p>
-                            <div className="mt-1 flex items-center gap-2 text-xs">
+                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
                               <span className="font-bold text-black">
                                 {offer.cashCents > 0 ? formatCurrency(offer.cashCents) : `${offer.stayNights} nights`}
                               </span>
                               <span className="text-black/40">·</span>
                               <span className="text-black/60">{DEAL_TYPE_LABELS[offer.offerType]}</span>
+                              {offer.property && (
+                                <>
+                                  <span className="text-black/40">·</span>
+                                  <span className="text-black/60">{offer.property.title || offer.property.cityRegion || 'Property'}</span>
+                                </>
+                              )}
                               <span className="text-black/40">·</span>
                               <span className="text-black/60">{timeAgo(offer.createdAt)}</span>
                             </div>

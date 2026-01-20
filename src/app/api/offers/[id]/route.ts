@@ -93,6 +93,7 @@ export async function PATCH(
         hostProfile: {
           include: { user: true },
         },
+        property: true,
       },
     })
 
@@ -152,10 +153,13 @@ export async function PATCH(
 
     // Handle ACCEPT
     if (action === 'accept') {
-      // Get property for the collaboration
-      const property = await prisma.property.findFirst({
-        where: { hostProfileId: offer.hostProfileId },
-      })
+      // Use property from offer, or fall back to finding one
+      let property = offer.property
+      if (!property) {
+        property = await prisma.property.findFirst({
+          where: { hostProfileId: offer.hostProfileId },
+        })
+      }
 
       if (!property) {
         return NextResponse.json({ error: 'Host has no property configured' }, { status: 400 })

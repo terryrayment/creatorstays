@@ -149,16 +149,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Creator not found' }, { status: 404 })
     }
 
-    // Get property for email
-    const property = await prisma.property.findFirst({
-      where: { hostProfileId: hostProfile.id },
-    })
+    // Get property - use selected propertyId or fall back to first property
+    let property
+    if (propertyId) {
+      property = await prisma.property.findUnique({
+        where: { id: propertyId },
+      })
+      // Verify property belongs to host
+      if (property && property.hostProfileId !== hostProfile.id) {
+        return NextResponse.json({ error: 'Property not found' }, { status: 404 })
+      }
+    }
+    if (!property) {
+      property = await prisma.property.findFirst({
+        where: { hostProfileId: hostProfile.id },
+      })
+    }
+
+    if (!property) {
+      return NextResponse.json({ error: 'No property found. Please add a property first.' }, { status: 400 })
+    }
 
     // Create the offer
     const offer = await prisma.offer.create({
       data: {
         hostProfileId: hostProfile.id,
         creatorProfileId: creatorProfileId,
+        propertyId: property.id,
         offerType: offerType || 'flat',
         cashCents: cashCents || 0,
         stayNights: stayNights || null,

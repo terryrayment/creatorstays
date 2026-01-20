@@ -261,6 +261,7 @@ model Property {
   // Relations
   trackingLinks   TrackingLink[]
   collaborations  Collaboration[]
+  offers          Offer[]
 
   @@unique([hostProfileId, airbnbUrl])
   @@index([hostProfileId])
@@ -438,6 +439,9 @@ model Offer {
   
   creatorProfileId String
   creatorProfile  CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+  
+  propertyId      String?
+  property        Property? @relation(fields: [propertyId], references: [id])
   
   messageId       String?  @unique
   message         Message? @relation(fields: [messageId], references: [id])

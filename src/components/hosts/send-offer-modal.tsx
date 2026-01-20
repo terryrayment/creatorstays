@@ -119,16 +119,13 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
 
     setLoading(true)
     try {
-      // For now, we'll use the mock API
-      // In production, this would create a real offer in the database
-      const res = await fetch('/api/collaborations', {
+      const res = await fetch('/api/offers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          hostId: 'current-host', // Will be replaced with session
-          creatorId: creator.id.toString(),
+          creatorProfileId: creator.id.toString(),
           propertyId: selectedProperty,
-          proposedType: dealType,
+          offerType: dealType,
           cashCents: dealType === 'post-for-stay' ? 0 : cashCents,
           stayNights: dealType === 'post-for-stay' ? parseInt(stayNights) : null,
           trafficBonusEnabled: bonusEnabled,

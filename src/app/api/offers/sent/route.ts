@@ -34,6 +34,13 @@ export async function GET(request: NextRequest) {
             avatarUrl: true,
           },
         },
+        property: {
+          select: {
+            id: true,
+            title: true,
+            cityRegion: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     })
@@ -56,6 +63,7 @@ export async function GET(request: NextRequest) {
       counterCashCents: offer.counterCashCents,
       counterMessage: offer.counterMessage,
       creator: offer.creatorProfile,
+      property: offer.property,
     }))
 
     return NextResponse.json({ offers: formattedOffers })
