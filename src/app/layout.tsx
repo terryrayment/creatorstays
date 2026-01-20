@@ -19,72 +19,9 @@ const bebasNeue = Bebas_Neue({
   display: "swap",
 })
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://creatorstays.com'
-
 export const metadata: Metadata = {
-  title: {
-    default: "CreatorStays - Influencer Marketing for Vacation Rentals",
-    template: "%s | CreatorStays",
-  },
-  description: "Connect vacation rental hosts with content creators. Get more bookings through creator marketing. Pay per post, track every click, own the content forever.",
-  keywords: ["vacation rental marketing", "airbnb marketing", "influencer marketing", "content creators", "STR marketing", "vacation rental bookings"],
-  authors: [{ name: "CreatorStays" }],
-  creator: "CreatorStays",
-  publisher: "Wolfpup, Inc.",
-  
-  // Favicon
-  icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/apple-touch-icon.svg", type: "image/svg+xml" },
-    ],
-  },
-  
-  // Open Graph
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: siteUrl,
-    siteName: "CreatorStays",
-    title: "CreatorStays - Influencer Marketing for Vacation Rentals",
-    description: "Connect vacation rental hosts with content creators. Get more bookings through creator marketing.",
-    images: [
-      {
-        url: `${siteUrl}/og-image.svg`,
-        width: 1200,
-        height: 630,
-        alt: "CreatorStays - Influencer Marketing for Vacation Rentals",
-      },
-    ],
-  },
-  
-  // Twitter
-  twitter: {
-    card: "summary_large_image",
-    title: "CreatorStays - Influencer Marketing for Vacation Rentals",
-    description: "Connect vacation rental hosts with content creators. Get more bookings through creator marketing.",
-    images: [`${siteUrl}/og-image.svg`],
-  },
-  
-  // Robots
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  
-  // Verification (add your IDs when ready)
-  // verification: {
-  //   google: "your-google-verification-code",
-  // },
+  title: "CreatorStays - Influencer Marketing for Vacation Rentals",
+  description: "Connect vacation rental hosts with content creators. Get more bookings through creator marketing.",
 }
 
 export default function RootLayout({

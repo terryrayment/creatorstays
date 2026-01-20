@@ -1,0 +1,1156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Blue Horizon Palette */
+    --background: 210 20% 99%;
+    --foreground: 215 25% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+    --primary: 213 94% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 215 25% 15%;
+    --muted: 210 30% 95%;
+    --muted-foreground: 215 15% 45%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 25% 90%;
+    --input: 214 25% 90%;
+    --ring: 213 94% 45%;
+    --radius: 0.75rem;
+
+    /* Typography */
+    --font-body: var(--font-body), system-ui, sans-serif;
+    --font-heading: var(--font-heading), Georgia, serif;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Default heading styles */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    @apply font-normal tracking-tight text-foreground;
+  }
+}
+
+@layer components {
+  /* Typography Scale - Product Grade */
+  
+  /* Display: Hero headlines, massive impact */
+  .text-display {
+    font-family: var(--font-heading);
+    @apply text-5xl font-normal leading-[1.05] tracking-tight;
+  }
+  @media (min-width: 768px) {
+    .text-display {
+      @apply text-6xl;
+    }
+  }
+  @media (min-width: 1024px) {
+    .text-display {
+      @apply text-7xl;
+    }
+  }
+
+  /* H1: Page titles */
+  .text-h1 {
+    font-family: var(--font-heading);
+    @apply text-4xl font-normal leading-[1.1] tracking-tight;
+  }
+  @media (min-width: 768px) {
+    .text-h1 {
+      @apply text-5xl;
+    }
+  }
+
+  /* H2: Section headings */
+  .text-h2 {
+    font-family: var(--font-heading);
+    @apply text-2xl font-normal leading-[1.15] tracking-tight;
+  }
+  @media (min-width: 768px) {
+    .text-h2 {
+      @apply text-3xl;
+    }
+  }
+
+  /* H3: Card titles, subsections */
+  .text-h3 {
+    font-family: var(--font-heading);
+    @apply text-xl font-normal leading-[1.2] tracking-tight;
+  }
+
+  /* Body: Default readable text */
+  .text-body {
+    font-family: var(--font-body);
+    @apply text-base leading-relaxed;
+  }
+
+  /* Body Large: Subheads, intros */
+  .text-body-lg {
+    font-family: var(--font-body);
+    @apply text-lg leading-relaxed;
+  }
+  @media (min-width: 768px) {
+    .text-body-lg {
+      @apply text-xl;
+    }
+  }
+
+  /* Small: Secondary info, captions */
+  .text-small {
+    font-family: var(--font-body);
+    @apply text-sm leading-normal;
+  }
+
+  /* Label: UI labels, form labels, metrics */
+  .text-label {
+    font-family: var(--font-body);
+    @apply text-xs font-medium uppercase tracking-wider;
+  }
+
+  /* Metric: Big numbers in dashboards */
+  .text-metric {
+    font-family: var(--font-body);
+    @apply text-3xl font-bold leading-none tracking-tight;
+  }
+  @media (min-width: 768px) {
+    .text-metric {
+      @apply text-4xl;
+    }
+  }
+
+  /* Prose container for long-form text */
+  .prose-container {
+    @apply max-w-prose;
+  }
+  
+  .prose-container p {
+    @apply text-body text-muted-foreground;
+  }
+  
+  .prose-container p + p {
+    @apply mt-4;
+  }
+}
+
+@layer utilities {
+  /* Font family utilities */
+  .font-body {
+    font-family: var(--font-body);
+  }
+  
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  /* Reveal animations */
+  .reveal {
+    animation: reveal 0.8s ease-out forwards;
+  }
+  
+  .reveal-delay-1 { animation-delay: 0.1s; }
+  .reveal-delay-2 { animation-delay: 0.2s; }
+  .reveal-delay-3 { animation-delay: 0.3s; }
+  .reveal-delay-4 { animation-delay: 0.4s; }
+  .reveal-delay-5 { animation-delay: 0.5s; }
+}
+
+@keyframes reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Hero atmosphere - warm grey/pink gradient matching reference */
+.hero-atmosphere {
+  background-attachment: fixed;
+  background: 
+    /* Main warm center - pinkish grey */
+    radial-gradient(1400px 900px at 50% 40%, 
+      rgba(225, 215, 210, 0.6) 0%, 
+      rgba(235, 225, 220, 0.3) 40%, 
+      transparent 70%
+    ),
+    /* Top right cool tint */
+    radial-gradient(800px 600px at 85% 15%, 
+      rgba(200, 210, 220, 0.25) 0%, 
+      transparent 60%
+    ),
+    /* Bottom left subtle warmth */
+    radial-gradient(600px 500px at 10% 90%, 
+      rgba(215, 205, 200, 0.2) 0%, 
+      transparent 50%
+    ),
+    /* Base wash */
+    linear-gradient(165deg, 
+      rgba(240, 235, 232, 1) 0%, 
+      rgba(235, 228, 225, 1) 35%,
+      rgba(230, 225, 222, 1) 65%,
+      rgba(238, 233, 230, 1) 100%
+    );
+}
+
+/* ============================================================================
+   Panel Surface System - Cards with hover glow
+   ============================================================================ */
+
+/* Base panel surface */
+.panel-surface {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(0, 0, 0, 1);
+  backdrop-filter: blur(8px);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.02),
+    0 0 0 1px rgba(0, 0, 0, 0.02);
+}
+
+.panel-surface:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.03),
+    0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+
+/* Elevated panel (more prominent) */
+.panel-surface-elevated {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(0, 0, 0, 1);
+  backdrop-filter: blur(12px);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    0 8px 24px rgba(0, 0, 0, 0.02);
+}
+
+.panel-surface-elevated:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 12px 32px rgba(0, 0, 0, 0.03);
+}
+
+/* Hover glow element - light bleeding effect */
+.panel-glow {
+  position: absolute;
+  inset: -20px;
+  z-index: 0;
+  border-radius: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease-out;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(199 89% 48% / 0.08) 0%,
+    hsl(213 94% 45% / 0.04) 40%,
+    transparent 70%
+  );
+  filter: blur(30px);
+}
+
+.panel-surface:hover .panel-glow,
+.panel-surface-elevated:hover .panel-glow {
+  opacity: 1;
+}
+
+/* Metric card hover enhancement */
+.panel-surface .text-3xl,
+.panel-surface-elevated .text-3xl {
+  transition: transform 200ms ease-out;
+}
+
+.panel-surface:hover .text-3xl,
+.panel-surface-elevated:hover .text-3xl {
+  transform: scale(1.02);
+}
+
+/* ============================================================================
+   Surface Card - Homepage cards with Airbnb-inspired styling
+   ============================================================================ */
+
+.surface-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(12px);
+  transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.surface-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px rgba(0, 0, 0, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+/* Hover glow for surface cards */
+.surface-card-glow {
+  position: absolute;
+  inset: -16px;
+  z-index: 0;
+  border-radius: 28px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms ease-out;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(199 89% 48% / 0.06) 0%,
+    hsl(213 94% 45% / 0.03) 50%,
+    transparent 70%
+  );
+  filter: blur(24px);
+}
+
+.surface-card:hover .surface-card-glow {
+  opacity: 1;
+}
+
+/* ============================================================================
+   Focus Group - Hover blur effect for card groups
+   ============================================================================ */
+
+.focus-card {
+  transition: 
+    filter 250ms ease-out,
+    opacity 250ms ease-out,
+    transform 250ms ease-out,
+    background 250ms ease-out;
+}
+
+/* Desktop only: blur siblings on hover */
+@media (min-width: 768px) {
+  .focus-group:hover .focus-card {
+    filter: blur(10px);
+    opacity: 0.35;
+  }
+  
+  .focus-group:hover .focus-card:hover {
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+  
+  /* Stronger glow on focused card */
+  .focus-group:hover .focus-card:hover .surface-card-glow {
+    opacity: 1;
+    filter: blur(32px);
+  }
+}
+
+/* ============================================================================
+   Marketing Pill Cards - Full width pill with micro-animations
+   ============================================================================ */
+
+.marketing-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.02),
+    0 4px 12px rgba(0, 0, 0, 0.01);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  transition: 
+    filter 250ms ease-out,
+    opacity 250ms ease-out,
+    transform 250ms ease-out,
+    box-shadow 280ms ease-out,
+    background 280ms ease-out;
+}
+
+/* Animated gradient sweep pseudo-element */
+.marketing-pill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(199 89% 48% / 0.06) 25%,
+    hsl(213 94% 45% / 0.08) 50%,
+    hsl(199 89% 48% / 0.06) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: -100% 0;
+  opacity: 0;
+  transition: opacity 300ms ease-out, background-position 600ms ease-out;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .marketing-pill:hover {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.03),
+      0 8px 24px hsl(213 94% 45% / 0.08);
+  }
+  
+  .marketing-pill:hover::before {
+    opacity: 1;
+    background-position: 100% 0;
+  }
+}
+
+/* Pill glow element */
+.marketing-pill-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(199 89% 48% / 0.12) 0%,
+    hsl(213 94% 45% / 0.06) 40%,
+    transparent 70%
+  );
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (min-width: 768px) {
+  .focus-group:hover .marketing-pill:hover .marketing-pill-glow {
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   Beta Section Cards - Clean layout with micro blur animations
+   ============================================================================ */
+
+.beta-card {
+  background: rgba(255, 255, 255, 0.4);
+  transition: 
+    background 280ms ease-out,
+    filter 280ms ease-out,
+    opacity 280ms ease-out;
+}
+
+.beta-card-glow {
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(213 94% 45% / 0.08) 0%,
+    hsl(199 89% 48% / 0.04) 50%,
+    transparent 70%
+  );
+  filter: blur(60px);
+  opacity: 0;
+  transition: opacity 320ms ease-out, filter 320ms ease-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (min-width: 768px) {
+  .beta-card-group:hover .beta-card {
+    filter: blur(1px);
+    opacity: 0.7;
+  }
+  
+  .beta-card-group:hover .beta-card:hover {
+    filter: blur(0);
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.65);
+  }
+  
+  .beta-card:hover .beta-card-glow {
+    opacity: 1;
+    filter: blur(80px);
+  }
+}
+
+/* ============================================================================
+   Category Items - Soft rows with micro blur on hover
+   ============================================================================ */
+
+.category-item {
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  transition: 
+    background 260ms ease-out,
+    filter 260ms ease-out,
+    opacity 260ms ease-out,
+    transform 260ms ease-out,
+    box-shadow 260ms ease-out;
+}
+
+.category-item-glow {
+  position: absolute;
+  inset: -30px;
+  border-radius: 20px;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(199 89% 48% / 0.1) 0%,
+    hsl(213 94% 45% / 0.05) 50%,
+    transparent 70%
+  );
+  filter: blur(40px);
+  opacity: 0;
+  transition: opacity 280ms ease-out, filter 280ms ease-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (min-width: 768px) {
+  .category-grid:hover .category-item {
+    filter: blur(2px);
+    opacity: 0.5;
+  }
+  
+  .category-grid:hover .category-item:hover {
+    filter: blur(0);
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px hsl(213 94% 45% / 0.06);
+  }
+  
+  .category-item:hover .category-item-glow {
+    opacity: 1;
+    filter: blur(60px);
+  }
+}
+
+/* ============================================================================
+   Help Scenario Cards - With micro blur hover
+   ============================================================================ */
+
+.help-scenario-card {
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  transition: 
+    background 250ms ease-out,
+    filter 250ms ease-out,
+    opacity 250ms ease-out,
+    transform 250ms ease-out,
+    box-shadow 250ms ease-out;
+}
+
+.help-scenario-glow {
+  position: absolute;
+  inset: -25px;
+  border-radius: 16px;
+  background: radial-gradient(
+    ellipse at center,
+    hsl(199 89% 48% / 0.08) 0%,
+    hsl(213 94% 45% / 0.04) 50%,
+    transparent 70%
+  );
+  filter: blur(35px);
+  opacity: 0;
+  transition: opacity 280ms ease-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (min-width: 768px) {
+  .help-scenario-grid:hover .help-scenario-card {
+    filter: blur(1.5px);
+    opacity: 0.55;
+  }
+  
+  .help-scenario-grid:hover .help-scenario-card:hover {
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px hsl(213 94% 45% / 0.06);
+  }
+  
+  .help-scenario-card:hover .help-scenario-glow {
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   Hero Image Mask - Feathered edges for atmospheric effect
+   ============================================================================ */
+
+.hero-image-mask {
+  -webkit-mask-image: radial-gradient(
+    ellipse 85% 80% at 50% 45%,
+    black 40%,
+    rgba(0, 0, 0, 0.6) 60%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 90%
+  );
+  mask-image: radial-gradient(
+    ellipse 85% 80% at 50% 45%,
+    black 40%,
+    rgba(0, 0, 0, 0.6) 60%,
+    rgba(0, 0, 0, 0.2) 75%,
+    transparent 90%
+  );
+}
+
+/* ============================================================================
+   Creator Profile Panel Hover
+   ============================================================================ */
+
+.creator-panel {
+  position: relative;
+}
+
+.creator-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    hsl(199 89% 48% / 0.04) 0%,
+    hsl(213 94% 45% / 0.02) 50%,
+    transparent 80%
+  );
+  opacity: 0;
+  transition: opacity 280ms ease-out;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(20px);
+}
+
+@media (min-width: 768px) {
+  .creator-panel:hover {
+    transform: translateY(-1px);
+    background-color: hsl(0 0% 100% / 0.65);
+    box-shadow: 0 4px 16px hsl(213 94% 45% / 0.04);
+  }
+  
+  .creator-panel:hover::before {
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   Marketing Animations - Slush-style slow drift, fade, blur
+   ============================================================================ */
+
+/* Slow vertical float */
+@keyframes anim-float {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-25px);
+    opacity: 0.7;
+  }
+}
+
+/* Reverse float direction */
+@keyframes anim-float-reverse {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(20px);
+    opacity: 1;
+  }
+}
+
+/* Fade in/out with slight scale */
+@keyframes anim-fade {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Blur pulse */
+@keyframes anim-blur {
+  0%, 100% {
+    opacity: 0.4;
+    filter: blur(8px);
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    filter: blur(12px);
+    transform: scale(1.1);
+  }
+}
+
+/* Horizontal slide */
+@keyframes anim-slide {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Apply animations */
+.anim-float {
+  animation: anim-float 10s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.anim-float-reverse {
+  animation: anim-float-reverse 12s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.anim-fade {
+  animation: anim-fade 8s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.anim-blur {
+  animation: anim-blur 14s ease-in-out infinite;
+  will-change: opacity, filter, transform;
+}
+
+.anim-slide {
+  animation: anim-slide 20s linear infinite;
+  will-change: transform, opacity;
+}
+
+/* Hero drift (existing) */
+@keyframes hero-drift {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.hero-drift {
+  animation: hero-drift 8s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .anim-float,
+  .anim-float-reverse,
+  .anim-fade,
+  .anim-blur,
+  .anim-slide,
+  .hero-drift,
+  .sticker-float,
+  .marquee-track {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* ============================================================================
+   Slush-style Sticker Float Animation - Slower, subtler
+   ============================================================================ */
+
+@keyframes sticker-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.sticker-float {
+  animation: sticker-float 8s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ============================================================================
+   Marquee Animation
+   ============================================================================ */
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee 25s linear infinite;
+  will-change: transform;
+}
+
+/* ============================================================================
+   Scrollbar Hide Utility
+   ============================================================================ */
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================================
+   Block Hover Animation
+   ============================================================================ */
+
+.block-hover {
+  transition: transform 200ms ease-out;
+}
+
+.block-hover:hover {
+  transform: translateY(-6px);
+}
+
+/* Illustration micro-animation */
+.illus-float {
+  animation: illus-float 4s ease-in-out infinite;
+}
+
+@keyframes illus-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.illus-wiggle:hover {
+  animation: illus-wiggle 0.4s ease-in-out;
+}
+
+@keyframes illus-wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+/* ============================================================================
+   Dashboard Design System - Slush-style parity (black outlines, flat fills)
+   ============================================================================ */
+
+.dashboard {
+  /* Flat white background - no gradients */
+  background: #FAFAFA;
+  min-height: 100vh;
+  
+  /* Border system */
+  --db-border: #000;
+  --db-border-width: 2px;
+  --db-radius: 0.75rem;
+  --db-radius-lg: 1rem;
+  
+  /* Accent colors (same as homepage, sparingly) */
+  --db-yellow: #FFD84A;
+  --db-blue: #4AA3FF;
+  --db-green: #28D17C;
+  --db-purple: #D7B6FF;
+  --db-orange: #FF5A1F;
+}
+
+/* Remove any gradient backgrounds in dashboard */
+.dashboard,
+.dashboard > *,
+.dashboard .bg-gradient-to-br,
+.dashboard .bg-gradient-to-r,
+.dashboard .bg-gradient-to-b {
+  background-image: none !important;
+}
+
+/* Dashboard panels/cards - black outline, no shadow, flat white */
+.dashboard .rounded-xl,
+.dashboard .rounded-lg,
+.dashboard [class*="panel"],
+.dashboard [class*="card"] {
+  background: #fff;
+  border: var(--db-border-width) solid var(--db-border);
+  border-radius: var(--db-radius-lg);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* Dashboard section containers */
+.dashboard .border {
+  border-color: var(--db-border);
+  border-width: var(--db-border-width);
+}
+
+.dashboard .border-foreground\/5,
+.dashboard .border-foreground\/10 {
+  border-color: var(--db-border);
+}
+
+/* Dashboard headings - clean, not poster-style */
+.dashboard h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #000;
+}
+
+.dashboard h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #000;
+}
+
+.dashboard h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000;
+}
+
+/* Dashboard section labels */
+.dashboard .text-sm.font-semibold.uppercase,
+.dashboard .text-xs.font-semibold.uppercase {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #000;
+}
+
+/* Dashboard buttons - pill with black outline */
+.dashboard button,
+.dashboard [role="button"],
+.dashboard a[class*="btn"],
+.dashboard .inline-flex[class*="rounded"] {
+  border-radius: 9999px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: transform 150ms ease-out, background-color 150ms ease-out;
+}
+
+/* Primary button - solid black, white text */
+.dashboard .bg-primary,
+.dashboard [class*="bg-primary"] {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard .bg-primary:hover,
+.dashboard [class*="bg-primary"]:hover {
+  transform: translateY(-1px);
+}
+
+/* Secondary button - white with black outline */
+.dashboard .bg-secondary,
+.dashboard [class*="bg-white"],
+.dashboard [class*="bg-background"] {
+  background-color: #fff !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard .bg-secondary:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* Dashboard inputs - black outline */
+.dashboard input,
+.dashboard textarea,
+.dashboard select,
+.dashboard [class*="input"] {
+  background: #fff;
+  border: var(--db-border-width) solid var(--db-border);
+  border-radius: 0.5rem;
+  box-shadow: none;
+}
+
+.dashboard input:focus,
+.dashboard textarea:focus,
+.dashboard select:focus {
+  border-color: var(--db-border);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard metric values */
+.dashboard .text-3xl,
+.dashboard .text-4xl,
+.dashboard [class*="text-metric"] {
+  color: #000;
+  font-weight: 700;
+}
+
+/* Status chips - accent colors (sparingly) */
+.dashboard [class*="bg-green"],
+.dashboard [class*="bg-emerald"] {
+  background-color: var(--db-green) !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard [class*="bg-yellow"],
+.dashboard [class*="bg-amber"] {
+  background-color: var(--db-yellow) !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard [class*="bg-blue"] {
+  background-color: var(--db-blue) !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard [class*="bg-purple"],
+.dashboard [class*="bg-violet"] {
+  background-color: var(--db-purple) !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+.dashboard [class*="bg-orange"],
+.dashboard [class*="bg-red"] {
+  background-color: var(--db-orange) !important;
+  color: #000 !important;
+  border: var(--db-border-width) solid #000;
+}
+
+/* Remove muted foreground colors - use pure black */
+.dashboard .text-muted-foreground {
+  color: #000;
+  opacity: 0.6;
+}
+
+/* Dashboard card hover - subtle lift, no glow */
+.dashboard .rounded-xl:hover,
+.dashboard .rounded-lg:hover {
+  transform: translateY(-2px);
+}
+
+/* Remove any blur/glow effects */
+.dashboard .panel-glow,
+.dashboard .surface-card-glow,
+.dashboard [class*="glow"],
+.dashboard [class*="blur"] {
+  display: none !important;
+}
+
+/* Dashboard dividers */
+.dashboard hr,
+.dashboard .border-t,
+.dashboard .border-b {
+  border-color: #000;
+  opacity: 0.15;
+}
+
+/* Dashboard loading spinner */
+.dashboard .animate-spin {
+  border-color: #000;
+  border-top-color: transparent;
+}
+
+/* Homepage Get Started micro-animations */
+@keyframes arrow-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(8deg); }
+  75% { transform: rotate(-8deg); }
+}
+
+@keyframes arrow-pop {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.animate-arrow-wiggle {
+  animation: arrow-wiggle 0.3s ease-in-out;
+}
+
+.animate-arrow-pop {
+  animation: arrow-pop 0.25s ease-out;
+}
+
+/* Floating illustration animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-4px) rotate(-1deg);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Slower variant */
+.animate-float-slow {
+  animation: float 10s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-arrow-wiggle,
+  .animate-arrow-pop {
+    animation: none;
+  }
+}
