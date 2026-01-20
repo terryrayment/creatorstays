@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,9 +10,9 @@ import { Select } from "@/components/ui/select"
 // Section wrapper
 function Section({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-black bg-white p-5 shadow-sm">
+    <div className="rounded-xl border-2 border-black bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-black">{title}</h2>
+        <h2 className="font-heading text-lg font-black uppercase tracking-wider text-black">{title}</h2>
         {action}
       </div>
       {children}
@@ -200,6 +201,8 @@ const locationSuggestions = [
 ]
 
 export function HostDashboard() {
+  const { data: session } = useSession()
+  
   // Host profile state
   const [hostProfile, setHostProfile] = useState({
     displayName: "",
@@ -208,6 +211,8 @@ export function HostDashboard() {
     bio: "",
     styleTags: [] as string[],
   })
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileSaved, setProfileSaved] = useState(false)
 
   // Listing state
   const [listing, setListing] = useState({
@@ -220,6 +225,69 @@ export function HostDashboard() {
   const [showPriceDropdown, setShowPriceDropdown] = useState(false)
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false)
   const [listingSaved, setListingSaved] = useState(false)
+  const [listingSaving, setListingSaving] = useState(false)
+
+  // Load profile from session on mount
+  useEffect(() => {
+    if (session?.user) {
+      // Pre-fill from session
+      setHostProfile(prev => ({
+        ...prev,
+        displayName: session.user.name || prev.displayName,
+        email: session.user.email || prev.email,
+      }))
+      
+      // Fetch full profile from database
+      fetchHostProfile()
+    }
+  }, [session])
+
+  const fetchHostProfile = async () => {
+    try {
+      const res = await fetch('/api/host/profile')
+      if (res.ok) {
+        const { profile } = await res.json()
+        if (profile) {
+          setHostProfile({
+            displayName: profile.displayName || session?.user?.name || "",
+            location: profile.location || "",
+            email: profile.contactEmail || session?.user?.email || "",
+            bio: profile.bio || "",
+            styleTags: profile.styleTags || [],
+          })
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch profile:', e)
+    }
+  }
+
+  // Save host profile to database
+  const saveHostProfile = async () => {
+    setProfileSaving(true)
+    try {
+      const res = await fetch('/api/host/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          displayName: hostProfile.displayName,
+          contactEmail: hostProfile.email,
+          location: hostProfile.location,
+          bio: hostProfile.bio,
+          styleTags: hostProfile.styleTags,
+        }),
+      })
+      if (res.ok) {
+        setProfileSaved(true)
+        setToast("Profile saved!")
+        setTimeout(() => setProfileSaved(false), 2000)
+      }
+    } catch (e) {
+      console.error('Failed to save profile:', e)
+      setToast("Failed to save profile")
+    }
+    setProfileSaving(false)
+  }
 
   // Taste optimizer state
   const [taste, setTaste] = useState({
@@ -334,10 +402,25 @@ export function HostDashboard() {
           {/* Main column */}
           <div className="space-y-6">
             {/* Host Profile */}
-            <Section title="Host Profile">
+            <Section 
+              title="Host Profile" 
+              action={
+                <button
+                  onClick={saveHostProfile}
+                  disabled={profileSaving}
+                  className={`rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all ${
+                    profileSaved 
+                      ? "bg-[#28D17C] text-black" 
+                      : "bg-black text-white hover:-translate-y-0.5"
+                  }`}
+                >
+                  {profileSaving ? "Saving..." : profileSaved ? "✓ Saved!" : "Save Profile"}
+                </button>
+              }
+            >
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-black">Display Name</label>
+                  <label className="mb-1.5 block text-xs font-bold text-black">Display Name</label>
                   <Input 
                     placeholder="Your name or brand" 
                     value={hostProfile.displayName}
@@ -345,7 +428,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-black">Location</label>
+                  <label className="mb-1.5 block text-xs font-bold text-black">Location</label>
                   <Input 
                     placeholder="City, Region" 
                     value={hostProfile.location}
@@ -353,7 +436,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-black">Contact Email</label>
+                  <label className="mb-1.5 block text-xs font-bold text-black">Contact Email</label>
                   <Input 
                     type="email" 
                     placeholder="you@example.com" 
@@ -362,7 +445,7 @@ export function HostDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-black">About (short bio)</label>
+                  <label className="mb-1.5 block text-xs font-bold text-black">About (short bio)</label>
                   <Input 
                     placeholder="A few words about you" 
                     value={hostProfile.bio}
@@ -371,7 +454,7 @@ export function HostDashboard() {
                 </div>
               </div>
               <div className="mt-4">
-                <label className="mb-2 block text-xs font-medium text-black">Style Tags (select up to 3)</label>
+                <label className="mb-2 block text-xs font-bold text-black">Style Tags (select up to 3)</label>
                 <ChipSelect 
                   options={styleTagOptions} 
                   selected={hostProfile.styleTags} 

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { displayName, contactEmail, phone, company } = body
+    const { displayName, contactEmail, location, bio, styleTags } = body
 
     // Upsert host profile
     const hostProfile = await prisma.hostProfile.upsert({
@@ -23,13 +23,17 @@ export async function POST(request: NextRequest) {
       update: {
         displayName: displayName || session.user.name || 'Host',
         contactEmail: contactEmail || session.user.email,
-        bio: company ? `${company}` : null,
+        location: location || null,
+        bio: bio || null,
+        styleTags: styleTags || [],
       },
       create: {
         userId: session.user.id,
         displayName: displayName || session.user.name || 'Host',
         contactEmail: contactEmail || session.user.email,
-        bio: company ? `${company}` : null,
+        location: location || null,
+        bio: bio || null,
+        styleTags: styleTags || [],
       },
     })
 
