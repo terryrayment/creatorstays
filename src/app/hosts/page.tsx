@@ -3,18 +3,6 @@
 import Link from "next/link"
 import { HostSignupForm } from "@/components/hosts/host-signup-form"
 import { RevealStack } from "@/components/marketing/reveal-stack"
-import { ImageBlock, MARKETING_IMAGES } from "@/components/marketing/image-block"
-
-// Select images for this page (seed based on page name)
-const pageImages = (() => {
-  const seed = 7 // unique seed for hosts page
-  const shuffled = [...MARKETING_IMAGES]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = (seed * (i + 1) * 13) % (i + 1)
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled.slice(0, 2)
-})()
 
 function HeroSection() {
   return (
@@ -158,11 +146,21 @@ function ImageSection() {
     <section className="bg-black px-3 py-2 lg:px-4">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-2 md:grid-cols-2">
-          <ImageBlock src={pageImages[0]} aspectRatio="aspect-[16/9]" />
-          {/* Video block */}
+          {/* Video block - Creator Support */}
           <div className="block-hover relative overflow-hidden rounded-2xl border-[3px] border-black bg-[#F5F5F0] aspect-[16/9]">
             <video
-              src="/images/coffee-sunrise.mp4"
+              src="/images/creator-support.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="h-full w-full object-cover transition-transform duration-200 hover:scale-[1.03]"
+            />
+          </div>
+          {/* Video block - Map Cluster */}
+          <div className="block-hover relative overflow-hidden rounded-2xl border-[3px] border-black bg-[#F5F5F0] aspect-[16/9]">
+            <video
+              src="/images/map-cluster.mp4"
               autoPlay
               loop
               muted
