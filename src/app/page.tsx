@@ -89,7 +89,7 @@ function HeroSection() {
             {/* CTAs */}
             <div className="mt-5 flex flex-wrap gap-2">
               <Link
-                href="/hosts"
+                href="/hosts#signup"
                 className="inline-flex h-10 items-center gap-2 rounded-full bg-black px-5 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
               >
                 Start as Host
