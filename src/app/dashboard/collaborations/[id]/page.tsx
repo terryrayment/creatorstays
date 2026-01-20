@@ -187,6 +187,25 @@ function getNextStep(
     }
   }
 
+  // Deadline passed
+  if (status === "deadline-passed") {
+    if (userRole === "creator") {
+      return {
+        title: "Deadline Passed — Submit ASAP",
+        description: "The content deadline has passed. Submit your content now or message the host about an extension.",
+        action: "Submit Content",
+        actionHref: `/dashboard/collaborations/${collaborationId}/submit`,
+      }
+    }
+    if (userRole === "host") {
+      return {
+        title: "Deadline Passed",
+        description: "The creator missed the deadline. You can grant an extension, wait, or request cancellation.",
+        action: "Message Creator",
+      }
+    }
+  }
+
   return null
 }
 
@@ -260,6 +279,44 @@ export default function CollaborationDetailPage() {
   const [cancelling, setCancelling] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancelReason, setCancelReason] = useState("")
+  
+  // Dispute state
+  const [showDisputeModal, setShowDisputeModal] = useState(false)
+  const [disputeReason, setDisputeReason] = useState("")
+  const [disputeCategory, setDisputeCategory] = useState("")
+  const [filingDispute, setFilingDispute] = useState(false)
+
+  // Handle filing a dispute
+  const handleFileDispute = async () => {
+    if (disputeReason.trim().length < 20) {
+      setToast("Please provide more detail about your concern (at least 20 characters)")
+      return
+    }
+    
+    setFilingDispute(true)
+    try {
+      const res = await fetch(`/api/collaborations/${collaborationId}/dispute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          reason: disputeReason.trim(),
+          category: disputeCategory || "other",
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setToast(data.message)
+        setShowDisputeModal(false)
+        setDisputeReason("")
+        setDisputeCategory("")
+      } else {
+        setToast(data.error || "Failed to file dispute")
+      }
+    } catch (e) {
+      setToast("Network error. Please try again.")
+    }
+    setFilingDispute(false)
+  }
 
   // Handle cancel request
   const handleCancelRequest = async () => {
@@ -1043,6 +1100,27 @@ export default function CollaborationDetailPage() {
             </div>
           )}
 
+          {/* Report an Issue / File Dispute (show for active collaborations) */}
+          {!["cancelled", "completed"].includes(collaboration.status) && (
+            <div className="rounded-2xl border-2 border-black/10 bg-white p-5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-black/40">
+                Having an Issue?
+              </p>
+              <p className="mt-1 text-sm text-black/60">
+                If something isn't right, our team can help mediate and resolve issues.
+              </p>
+              <button
+                onClick={() => setShowDisputeModal(true)}
+                className="mt-3 rounded-full border-2 border-black/20 bg-white px-4 py-2 text-xs font-bold text-black/60 transition-all hover:border-amber-400 hover:text-amber-600"
+              >
+                Report an Issue
+              </button>
+              <p className="mt-2 text-[10px] text-black/40">
+                Protected by CreatorStays — We're here to help both parties.
+              </p>
+            </div>
+          )}
+
           {/* Cancel Modal */}
           {showCancelModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -1076,6 +1154,76 @@ export default function CollaborationDetailPage() {
                     className="flex-1 rounded-full border-2 border-black bg-white py-3 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
                   >
                     Never Mind
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Dispute Modal */}
+          {showDisputeModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <div className="w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6">
+                <h3 className="text-xl font-black text-black">Report an Issue</h3>
+                <p className="mt-2 text-sm text-black/70">
+                  Our team will review your concern and work with both parties toward a resolution.
+                </p>
+                
+                <div className="mt-4">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-black/60">
+                    What type of issue?
+                  </label>
+                  <select
+                    value={disputeCategory}
+                    onChange={(e) => setDisputeCategory(e.target.value)}
+                    className="w-full rounded-lg border-2 border-black px-3 py-2 text-sm text-black"
+                  >
+                    <option value="">Select a category...</option>
+                    <option value="non-delivery">Content not delivered</option>
+                    <option value="quality">Quality concerns</option>
+                    <option value="payment">Payment issue</option>
+                    <option value="communication">Communication breakdown</option>
+                    <option value="terms">Terms disagreement</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                
+                <div className="mt-4">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-black/60">
+                    Describe your concern *
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="Please provide details about what happened and what you'd like resolved..."
+                    value={disputeReason}
+                    onChange={(e) => setDisputeReason(e.target.value)}
+                    className="w-full rounded-lg border-2 border-black px-3 py-2 text-sm text-black placeholder:text-black/40"
+                  />
+                  <p className="mt-1 text-[10px] text-black/40">
+                    Minimum 20 characters. Be specific about dates, actions, and desired outcome.
+                  </p>
+                </div>
+
+                <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3">
+                  <p className="text-xs text-amber-800">
+                    <strong>What happens next:</strong> We'll review your case within 1-2 business days, 
+                    may contact both parties, and work toward a fair resolution. You'll receive email updates.
+                  </p>
+                </div>
+                
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={handleFileDispute}
+                    disabled={filingDispute || disputeReason.trim().length < 20}
+                    className="flex-1 rounded-full border-2 border-amber-500 bg-amber-500 py-3 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                  >
+                    {filingDispute ? "Submitting..." : "Submit Report"}
+                  </button>
+                  <button
+                    onClick={() => { setShowDisputeModal(false); setDisputeReason(""); setDisputeCategory(""); }}
+                    className="flex-1 rounded-full border-2 border-black bg-white py-3 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
+                  >
+                    Cancel
                   </button>
                 </div>
               </div>

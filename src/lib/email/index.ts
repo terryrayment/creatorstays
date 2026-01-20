@@ -1609,3 +1609,376 @@ View in dashboard: ${BASE_URL}/dashboard/collaborations/${collaborationId}
 
   return { subject, html, text }
 }
+
+
+// =============================================================================
+// CONTENT DEADLINE EMAILS
+// =============================================================================
+
+/**
+ * Email to creator when content deadline is approaching (3 days warning)
+ */
+export function contentDeadlineWarningEmail(data: {
+  creatorName: string
+  hostName: string
+  propertyTitle: string
+  deadline: Date
+  daysLeft: number
+  collaborationId: string
+}): { subject: string; html: string; text: string } {
+  const { creatorName, hostName, propertyTitle, deadline, daysLeft, collaborationId } = data
+
+  const deadlineStr = deadline.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+
+  const subject = `⏰ ${daysLeft} days left to submit content for ${propertyTitle}`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Content Deadline Approaching</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${creatorName}, this is a friendly reminder about your upcoming deadline.</p>
+    
+    <div style="${styles.card}; background: #FFF3CD; border-color: #FFD84A;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 8px;">⏰ ${daysLeft} Days Remaining</p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        Your content for <strong>${propertyTitle}</strong> is due by <strong>${deadlineStr}</strong>.
+      </p>
+    </div>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Collaboration Details</p>
+      <p style="font-size: 16px; font-weight: 600; margin: 0 0 4px;">${propertyTitle}</p>
+      <p style="font-size: 14px; color: #666; margin: 0;">with ${hostName}</p>
+    </div>
+    
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 12px;">Need more time?</p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        If you need an extension, message ${hostName} directly through the platform to discuss. 
+        Extensions require mutual agreement.
+      </p>
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/collaborations/${collaborationId}/submit" style="${styles.buttonYellow}">Submit Content Now →</a>
+    </div>
+  `)
+
+  const text = `Content Deadline Approaching
+
+Hi ${creatorName},
+
+This is a friendly reminder that your content for "${propertyTitle}" is due in ${daysLeft} days.
+
+DEADLINE: ${deadlineStr}
+
+Collaboration with: ${hostName}
+
+Need more time? Message ${hostName} through the platform to discuss an extension.
+
+Submit your content: ${BASE_URL}/dashboard/collaborations/${collaborationId}/submit`
+
+  return { subject, html, text }
+}
+
+/**
+ * Email to creator when content deadline has passed
+ */
+export function contentDeadlinePassedToCreatorEmail(data: {
+  creatorName: string
+  hostName: string
+  propertyTitle: string
+  deadline: Date
+  collaborationId: string
+}): { subject: string; html: string; text: string } {
+  const { creatorName, hostName, propertyTitle, deadline, collaborationId } = data
+
+  const deadlineStr = deadline.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+
+  const subject = `⚠️ Content deadline passed for ${propertyTitle}`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Content Deadline Has Passed</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${creatorName}, the deadline for your collaboration has passed.</p>
+    
+    <div style="${styles.card}; background: #FEE2E2; border-color: #EF4444;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 8px;">⚠️ Deadline Passed</p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        Content for <strong>${propertyTitle}</strong> was due on <strong>${deadlineStr}</strong>.
+      </p>
+    </div>
+    
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 12px;">What happens now?</p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        <strong>1.</strong> ${hostName} has been notified and may request to cancel the collaboration
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        <strong>2.</strong> You can still submit content if the collaboration remains active
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        <strong>3.</strong> We recommend messaging ${hostName} immediately to discuss next steps
+      </p>
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/collaborations/${collaborationId}" style="${styles.button}">View Collaboration →</a>
+    </div>
+    
+    <p style="font-size: 12px; color: #999; text-align: center;">
+      Repeated deadline misses may affect your standing on CreatorStays.
+    </p>
+  `)
+
+  const text = `Content Deadline Has Passed
+
+Hi ${creatorName},
+
+The deadline for your collaboration with ${hostName} for "${propertyTitle}" has passed.
+
+The deadline was: ${deadlineStr}
+
+WHAT HAPPENS NOW:
+1. ${hostName} has been notified and may request to cancel
+2. You can still submit content if the collaboration remains active
+3. We recommend messaging ${hostName} immediately to discuss next steps
+
+View collaboration: ${BASE_URL}/dashboard/collaborations/${collaborationId}`
+
+  return { subject, html, text }
+}
+
+/**
+ * Email to host when content deadline has passed
+ */
+export function contentDeadlinePassedToHostEmail(data: {
+  hostName: string
+  creatorName: string
+  creatorHandle: string
+  propertyTitle: string
+  deadline: Date
+  collaborationId: string
+}): { subject: string; html: string; text: string } {
+  const { hostName, creatorName, creatorHandle, propertyTitle, deadline, collaborationId } = data
+
+  const deadlineStr = deadline.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+
+  const subject = `⚠️ @${creatorHandle} missed the content deadline`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Content Deadline Passed</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${hostName}, the creator has not submitted content by the deadline.</p>
+    
+    <div style="${styles.card}; background: #FEE2E2; border-color: #EF4444;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 8px;">⚠️ Deadline Missed</p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        <strong>${creatorName}</strong> (@${creatorHandle}) has not submitted content for <strong>${propertyTitle}</strong>.
+        <br>The deadline was <strong>${deadlineStr}</strong>.
+      </p>
+    </div>
+    
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 12px;">Your options:</p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        <strong>1. Grant an extension</strong> — Message the creator to agree on a new deadline
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        <strong>2. Request cancellation</strong> — If you'd like to cancel, you can request it from the collaboration page
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        <strong>3. Wait</strong> — The creator may still submit; you'll be notified when they do
+      </p>
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/collaborations/${collaborationId}" style="${styles.button}">View Collaboration →</a>
+    </div>
+    
+    <p style="font-size: 12px; color: #999; text-align: center;">
+      No payment is required until you approve submitted content.
+    </p>
+  `)
+
+  const text = `Content Deadline Passed
+
+Hi ${hostName},
+
+${creatorName} (@${creatorHandle}) has not submitted content for "${propertyTitle}" by the deadline.
+
+The deadline was: ${deadlineStr}
+
+YOUR OPTIONS:
+1. Grant an extension - Message the creator to agree on a new deadline
+2. Request cancellation - You can request it from the collaboration page
+3. Wait - The creator may still submit; you'll be notified when they do
+
+View collaboration: ${BASE_URL}/dashboard/collaborations/${collaborationId}
+
+No payment is required until you approve submitted content.`
+
+  return { subject, html, text }
+}
+
+// =============================================================================
+// DISPUTE / ESCALATION EMAILS
+// =============================================================================
+
+/**
+ * Email confirming dispute has been submitted
+ */
+export function disputeSubmittedEmail(data: {
+  recipientName: string
+  disputeId: string
+  collaborationId: string
+  propertyTitle: string
+  otherPartyName: string
+  reason: string
+}): { subject: string; html: string; text: string } {
+  const { recipientName, disputeId, collaborationId, propertyTitle, otherPartyName, reason } = data
+
+  const subject = `Your dispute has been submitted — Case #${disputeId.slice(0, 8)}`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Dispute Submitted</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${recipientName}, we've received your dispute and will review it promptly.</p>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Case ID</p>
+      <p style="font-size: 18px; font-weight: 700; font-family: monospace; margin: 0 0 16px;">#${disputeId.slice(0, 8).toUpperCase()}</p>
+      
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Collaboration</p>
+      <p style="font-size: 16px; font-weight: 600; margin: 0 0 4px;">${propertyTitle}</p>
+      <p style="font-size: 14px; color: #666; margin: 0 0 16px;">with ${otherPartyName}</p>
+      
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Your Concern</p>
+      <p style="font-size: 14px; margin: 0; white-space: pre-wrap;">${reason}</p>
+    </div>
+    
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 12px;">What happens next?</p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        <strong>1.</strong> Our team will review your case within 1-2 business days
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        <strong>2.</strong> We may reach out to both parties for additional information
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        <strong>3.</strong> You'll receive updates via email as we work toward resolution
+      </p>
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/collaborations/${collaborationId}" style="${styles.button}">View Collaboration →</a>
+    </div>
+    
+    <p style="font-size: 12px; color: #999; text-align: center;">
+      Questions? Reply to this email or contact support@creatorstays.com
+    </p>
+  `)
+
+  const text = `Dispute Submitted
+
+Hi ${recipientName},
+
+We've received your dispute and will review it promptly.
+
+CASE ID: #${disputeId.slice(0, 8).toUpperCase()}
+
+COLLABORATION: ${propertyTitle} with ${otherPartyName}
+
+YOUR CONCERN:
+${reason}
+
+WHAT HAPPENS NEXT:
+1. Our team will review your case within 1-2 business days
+2. We may reach out to both parties for additional information
+3. You'll receive updates via email as we work toward resolution
+
+View collaboration: ${BASE_URL}/dashboard/collaborations/${collaborationId}
+
+Questions? Reply to this email or contact support@creatorstays.com`
+
+  return { subject, html, text }
+}
+
+/**
+ * Email notifying other party of dispute
+ */
+export function disputeNotificationEmail(data: {
+  recipientName: string
+  disputeId: string
+  collaborationId: string
+  propertyTitle: string
+  filedByName: string
+  filedByRole: 'host' | 'creator'
+}): { subject: string; html: string; text: string } {
+  const { recipientName, disputeId, collaborationId, propertyTitle, filedByName, filedByRole } = data
+
+  const subject = `A dispute has been filed — Case #${disputeId.slice(0, 8)}`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Dispute Notice</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${recipientName}, a dispute has been filed regarding your collaboration.</p>
+    
+    <div style="${styles.card}; background: #FEF3C7; border-color: #F59E0B;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 8px;">⚠️ Dispute Filed</p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        <strong>${filedByName}</strong> (${filedByRole}) has filed a dispute regarding the collaboration for <strong>${propertyTitle}</strong>.
+      </p>
+    </div>
+    
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 12px;">What this means:</p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        • The collaboration is now under review by CreatorStays
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        • Our team may contact you for your side of the story
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        • Please keep any relevant documentation (screenshots, messages, etc.)
+      </p>
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/collaborations/${collaborationId}" style="${styles.button}">View Collaboration →</a>
+    </div>
+    
+    <p style="font-size: 12px; color: #999; text-align: center;">
+      Case ID: #${disputeId.slice(0, 8).toUpperCase()}<br>
+      Questions? Contact support@creatorstays.com
+    </p>
+  `)
+
+  const text = `Dispute Notice
+
+Hi ${recipientName},
+
+A dispute has been filed regarding your collaboration.
+
+${filedByName} (${filedByRole}) has filed a dispute for "${propertyTitle}".
+
+Case ID: #${disputeId.slice(0, 8).toUpperCase()}
+
+WHAT THIS MEANS:
+• The collaboration is now under review by CreatorStays
+• Our team may contact you for your side of the story
+• Please keep any relevant documentation (screenshots, messages, etc.)
+
+View collaboration: ${BASE_URL}/dashboard/collaborations/${collaborationId}
+
+Questions? Contact support@creatorstays.com`
+
+  return { subject, html, text }
+}

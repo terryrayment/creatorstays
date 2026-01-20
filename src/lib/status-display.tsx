@@ -274,6 +274,22 @@ export function getCollaborationStatusDisplay(
         actionRequired: true,
       },
     },
+    "deadline-passed": {
+      host: {
+        label: "Deadline Passed",
+        description: "The content deadline has passed. You can grant an extension or request cancellation.",
+        color: "bg-[#FF6B6B]",
+        textColor: "text-black",
+        actionRequired: true,
+      },
+      creator: {
+        label: "Deadline Passed",
+        description: "The content deadline has passed. Submit content ASAP or message the host.",
+        color: "bg-[#FF6B6B]",
+        textColor: "text-black",
+        actionRequired: true,
+      },
+    },
   }
 
   const roleConfig = configs[status]?.[role]

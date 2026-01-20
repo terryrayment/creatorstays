@@ -550,6 +550,8 @@ model Collaboration {
   // Timeline
   contentDeadline DateTime? // When content must be posted
   linkActiveUntil DateTime? // How long the tracking link stays active
+  deadlineWarningAt DateTime? // When we sent the 3-day warning email
+  deadlinePassedAt DateTime? // When we marked the deadline as passed
   
   // Results
   clicksGenerated Int      @default(0)
@@ -572,6 +574,7 @@ model Collaboration {
   agreement       CollaborationAgreement?
   conversation    Conversation?
   reviews         Review[]
+  disputes        Dispute[]
 
   @@map("collaborations")
 }
@@ -714,4 +717,41 @@ model WaitlistEntry {
 
   @@index([userType, createdAt])
   @@map("waitlist_entries")
+}
+
+// ============================================================================
+// DISPUTES
+// ============================================================================
+
+model Dispute {
+  id              String   @id @default(cuid())
+  
+  collaborationId String
+  collaboration   Collaboration @relation(fields: [collaborationId], references: [id])
+  
+  // Who filed the dispute
+  filedByType     String   // "host" or "creator"
+  filedById       String   // hostProfileId or creatorProfileId
+  filedByName     String   // Cached name for emails/admin
+  
+  // Dispute details
+  reason          String   @db.Text
+  category        String?  // "non-delivery", "quality", "payment", "communication", "other"
+  evidence        String[] // URLs to screenshots, etc.
+  
+  // Status tracking
+  status          String   @default("open") // "open", "under-review", "resolved", "closed"
+  resolution      String?  @db.Text // How it was resolved
+  resolvedBy      String?  // Admin who resolved it
+  resolvedAt      DateTime?
+  
+  // Internal notes (admin only)
+  internalNotes   String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([collaborationId])
+  @@index([status])
+  @@map("disputes")
 }
