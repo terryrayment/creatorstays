@@ -33,7 +33,7 @@ interface SendOfferModalProps {
 const DEAL_TYPES = [
   { value: "flat", label: "Flat Fee", description: "One-time payment for content" },
   { value: "flat-with-bonus", label: "Flat Fee + Performance Bonus", description: "Base pay + bonus when clicks hit threshold" },
-  { value: "post-for-stay", label: "Post-for-Stay", description: "Complimentary stay in exchange for content" },
+  { value: "post-for-stay", label: "Post-for-Stay", description: "Complimentary stay in exchange for content • $99 platform fee" },
 ]
 
 const DELIVERABLE_OPTIONS = [
@@ -286,19 +286,42 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
 
               {/* Stay Nights (for post-for-stay) */}
               {dealType === "post-for-stay" && (
-                <div>
-                  <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-black">
-                    Complimentary Stay (Nights) *
-                  </label>
-                  <StyledSelect
-                    value={stayNights}
-                    onChange={setStayNights}
-                    options={[1, 2, 3, 4, 5, 6, 7].map(n => ({
-                      value: n.toString(),
-                      label: `${n} night${n > 1 ? 's' : ''}`
-                    }))}
-                    placeholder="Select nights..."
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-black">
+                      Complimentary Stay (Nights) *
+                    </label>
+                    <StyledSelect
+                      value={stayNights}
+                      onChange={setStayNights}
+                      options={[1, 2, 3, 4, 5, 6, 7].map(n => ({
+                        value: n.toString(),
+                        label: `${n} night${n > 1 ? 's' : ''}`
+                      }))}
+                      placeholder="Select nights..."
+                    />
+                  </div>
+                  
+                  {/* Platform fee notice */}
+                  <div className="rounded-lg border-2 border-black bg-[#4AA3FF]/10 p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-black">Platform Fee</span>
+                      <span className="text-lg font-black text-black">$99</span>
+                    </div>
+                    <p className="mt-1 text-[10px] text-black/60">
+                      One-time fee for post-for-stay collaborations, charged upon offer acceptance.
+                    </p>
+                  </div>
+
+                  {/* Date coordination notice */}
+                  <div className="rounded-lg border-2 border-[#FFD84A] bg-[#FFD84A]/20 p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-black">Important: Coordinate Dates Directly</p>
+                    <p className="mt-1 text-xs text-black/80">
+                      CreatorStays facilitates the collaboration, but you and the creator are responsible for 
+                      coordinating stay dates directly. Book the creator through your preferred platform 
+                      (Airbnb, direct booking, etc.) once you have agreed on dates.
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -476,10 +499,19 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                   )}
 
                   {dealType === "post-for-stay" && (
-                    <div className="flex justify-between">
-                      <span className="text-black/70">Complimentary Stay</span>
-                      <span className="font-bold text-black">{stayNights} nights</span>
-                    </div>
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-black/70">Complimentary Stay</span>
+                        <span className="font-bold text-black">{stayNights} nights</span>
+                      </div>
+                      <div className="flex justify-between border-t border-black/10 pt-2">
+                        <span className="text-black/70">Platform Fee</span>
+                        <span className="font-bold text-black">$99</span>
+                      </div>
+                      <div className="mt-2 rounded bg-[#FFD84A]/30 p-2 text-[10px] text-black/70">
+                        You and the creator will coordinate stay dates directly after acceptance.
+                      </div>
+                    </>
                   )}
 
                   {bonusEnabled && (
@@ -517,8 +549,9 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
               {/* Legal Notice */}
               <div className="rounded-lg bg-black/5 p-3 text-[10px] text-black/60">
                 By sending this offer, you agree that if accepted, both parties will sign a 
-                Collaboration Agreement outlining all terms. Payment is processed via Stripe 
-                upon content approval. 15% platform fee applies.
+                Collaboration Agreement outlining all terms. {dealType === "post-for-stay" 
+                  ? "A $99 platform fee will be charged upon acceptance. Stay dates are coordinated directly between you and the creator." 
+                  : "Payment is processed via Stripe upon content approval. 15% platform fee applies."}
               </div>
 
               <div className="flex gap-2">

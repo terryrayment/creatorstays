@@ -22,6 +22,28 @@ function generateAgreementText(data: {
   const cashAmount = (cashCents / 100).toFixed(2)
   const deliverablesList = deliverables.map((d, i) => `  ${i + 1}. ${d}`).join('\n')
   
+  const isPostForStay = dealType === 'post-for-stay'
+  
+  const compensationSection = isPostForStay
+    ? `- Complimentary Stay: ${stayNights} nights
+- Platform Fee: $99 (charged to Host)`
+    : `${cashCents > 0 ? `- Cash Payment: $${cashAmount}` : ''}
+${stayNights ? `- Complimentary Stay: ${stayNights} nights` : ''}`
+
+  const stayCoordinationSection = isPostForStay || stayNights
+    ? `
+
+STAY COORDINATION:
+Host and Creator are responsible for coordinating stay dates directly. CreatorStays 
+facilitates the collaboration but does not manage property calendars or bookings. 
+The Host will arrange the complimentary stay through their preferred booking method 
+(Airbnb, direct booking, etc.) once dates are mutually agreed upon.`
+    : ''
+
+  const feeSection = isPostForStay
+    ? '6. Platform fee of $99 applies to this Post-for-Stay collaboration (charged to Host).'
+    : '6. Platform fee of 15% applies to both parties.'
+  
   return `
 CREATORSTAYS COLLABORATION AGREEMENT
 
@@ -35,11 +57,11 @@ PROPERTY: ${propertyTitle}
 DEAL TYPE: ${dealType === 'post-for-stay' ? 'Post-for-Stay' : dealType === 'flat-with-bonus' ? 'Flat Fee + Performance Bonus' : 'Flat Fee'}
 
 COMPENSATION:
-${cashCents > 0 ? `- Cash Payment: $${cashAmount}` : ''}
-${stayNights ? `- Complimentary Stay: ${stayNights} nights` : ''}
+${compensationSection}
 
 DELIVERABLES:
 ${deliverablesList}
+${stayCoordinationSection}
 
 TERMS:
 1. Creator agrees to produce and publish the deliverables listed above.
@@ -47,7 +69,7 @@ TERMS:
 3. Content must comply with FTC disclosure requirements (#ad or #sponsored).
 4. Creator retains ownership of content but grants Host perpetual license to use.
 5. Host agrees to provide compensation as outlined above upon content approval.
-6. Platform fee of 15% applies to both parties.
+${feeSection}
 
 CONTENT DEADLINE: 30 days from agreement execution.
 
