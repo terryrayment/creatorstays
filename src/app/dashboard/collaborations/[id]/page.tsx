@@ -8,6 +8,7 @@ import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import { PropertyGallery } from "@/components/properties/property-gallery"
 import { TrafficBonusTracker } from "@/components/shared/traffic-bonus-tracker"
+import { getCollaborationStatusDisplay, type UserRole } from "@/lib/status-display"
 
 interface Collaboration {
   id: string
@@ -68,44 +69,6 @@ const DEAL_TYPE_LABELS: Record<string, string> = {
   "flat": "Flat Fee",
   "flat-with-bonus": "Flat Fee + Performance Bonus",
   "post-for-stay": "Post-for-Stay",
-}
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; description: string }> = {
-  "pending-agreement": { 
-    label: "Pending Signatures", 
-    color: "bg-[#FFD84A]", 
-    description: "Both parties must sign the agreement" 
-  },
-  "active": { 
-    label: "Active", 
-    color: "bg-[#4AA3FF]", 
-    description: "Agreement signed. Creator is working on content." 
-  },
-  "content-submitted": { 
-    label: "Content Submitted", 
-    color: "bg-[#FFD84A]", 
-    description: "Waiting for host review" 
-  },
-  "approved": { 
-    label: "Approved", 
-    color: "bg-[#28D17C]", 
-    description: "Content approved. Payment processing." 
-  },
-  "completed": { 
-    label: "Completed", 
-    color: "bg-[#28D17C]", 
-    description: "Collaboration complete!" 
-  },
-  "cancelled": { 
-    label: "Cancelled", 
-    color: "bg-red-100", 
-    description: "This collaboration was cancelled." 
-  },
-  "cancellation-requested": { 
-    label: "Cancellation Pending", 
-    color: "bg-orange-200", 
-    description: "A cancellation request is pending approval." 
-  },
 }
 
 interface NextStepInfo {
@@ -430,7 +393,6 @@ export default function CollaborationDetailPage() {
   }
 
   const agreement = collaboration.agreement
-  const statusConfig = STATUS_CONFIG[collaboration.status] || STATUS_CONFIG["pending-agreement"]
   const hasUserSigned = userRole === "host" 
     ? !!agreement?.hostAcceptedAt 
     : !!agreement?.creatorAcceptedAt
@@ -438,6 +400,12 @@ export default function CollaborationDetailPage() {
     ? !!agreement?.creatorAcceptedAt
     : !!agreement?.hostAcceptedAt
   const isFullyExecuted = agreement?.isFullyExecuted
+  
+  const statusDisplay = getCollaborationStatusDisplay(
+    collaboration.status,
+    userRole as UserRole,
+    { hasUserSigned, isFullyExecuted: isFullyExecuted || false }
+  )
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
@@ -445,9 +413,14 @@ export default function CollaborationDetailPage() {
       <div className="border-b-2 border-black bg-white">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <span className={`rounded-full border-2 border-black px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-black ${statusConfig.color}`}>
-              {statusConfig.label}
+            <span className={`rounded-full border-2 border-black px-3 py-0.5 text-[10px] font-black uppercase tracking-wider ${statusDisplay.textColor} ${statusDisplay.color}`}>
+              {statusDisplay.label}
             </span>
+            {statusDisplay.actionRequired && (
+              <span className="rounded-full bg-[#FF6B6B] px-2 py-0.5 text-[9px] font-bold text-white">
+                Action Required
+              </span>
+            )}
           </div>
           <Link 
             href={userRole === "host" ? "/dashboard/host" : "/dashboard/creator"} 
@@ -472,7 +445,7 @@ export default function CollaborationDetailPage() {
             <h1 className="font-heading text-[2rem] font-black tracking-tight text-black">
               COLLABORATION
             </h1>
-            <p className="mt-1 text-sm text-black/70">{statusConfig.description}</p>
+            <p className="mt-1 text-sm text-black/70">{statusDisplay.description}</p>
           </div>
 
           {/* Next Step Banner */}

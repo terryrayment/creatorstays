@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { Container } from "@/components/layout/container"
+import { getCollaborationStatusDisplay, type UserRole } from "@/lib/status-display"
 
 interface Collaboration {
   id: string
@@ -29,16 +30,9 @@ interface Collaboration {
   }
   agreement?: {
     isFullyExecuted: boolean
+    hostSignedAt?: string
+    creatorSignedAt?: string
   }
-}
-
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  "pending-agreement": { label: "Pending Signatures", color: "bg-[#FFD84A]" },
-  "active": { label: "Active", color: "bg-[#4AA3FF]" },
-  "content-submitted": { label: "Content Submitted", color: "bg-[#FFD84A]" },
-  "approved": { label: "Approved", color: "bg-[#28D17C]" },
-  "completed": { label: "Completed", color: "bg-[#28D17C]" },
-  "cancelled": { label: "Cancelled", color: "bg-red-100" },
 }
 
 function formatCurrency(cents: number): string {
@@ -165,8 +159,21 @@ export default function CollaborationsListPage() {
           ) : (
             <div className="space-y-3">
               {collaborations.map((collab) => {
-                const statusConfig = STATUS_CONFIG[collab.status] || STATUS_CONFIG["pending-agreement"]
                 const otherParty = userRole === "host" ? collab.creator : collab.host
+                
+                // Determine if current user has signed
+                const hasUserSigned = userRole === "host" 
+                  ? !!collab.agreement?.hostSignedAt 
+                  : !!collab.agreement?.creatorSignedAt
+                
+                const statusDisplay = getCollaborationStatusDisplay(
+                  collab.status, 
+                  userRole as UserRole,
+                  { 
+                    hasUserSigned, 
+                    isFullyExecuted: collab.agreement?.isFullyExecuted 
+                  }
+                )
 
                 return (
                   <Link
@@ -177,9 +184,14 @@ export default function CollaborationsListPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className={`rounded-full border border-black px-2 py-0.5 text-[9px] font-bold text-black ${statusConfig.color}`}>
-                            {statusConfig.label}
+                          <span className={`rounded-full border border-black px-2 py-0.5 text-[9px] font-bold ${statusDisplay.textColor} ${statusDisplay.color}`}>
+                            {statusDisplay.label}
                           </span>
+                          {statusDisplay.actionRequired && (
+                            <span className="rounded-full bg-[#FF6B6B] px-2 py-0.5 text-[9px] font-bold text-white">
+                              Action Required
+                            </span>
+                          )}
                           <span className="text-[10px] text-black/50">
                             {formatDate(collab.createdAt)}
                           </span>
@@ -220,15 +232,10 @@ export default function CollaborationsListPage() {
                       )}
                     </div>
 
-                    {/* Action hint */}
-                    {collab.status === "pending-agreement" && !collab.agreement?.isFullyExecuted && (
+                    {/* Action hint - now driven by statusDisplay */}
+                    {statusDisplay.actionRequired && statusDisplay.description && (
                       <div className="mt-3 rounded-lg bg-[#FFD84A]/30 px-3 py-2 text-xs font-bold text-black">
-                        ⚠️ Agreement needs signatures
-                      </div>
-                    )}
-                    {collab.status === "content-submitted" && userRole === "host" && (
-                      <div className="mt-3 rounded-lg bg-[#4AA3FF]/30 px-3 py-2 text-xs font-bold text-black">
-                        📱 Content ready for review
+                        ⚠️ {statusDisplay.description}
                       </div>
                     )}
                   </Link>

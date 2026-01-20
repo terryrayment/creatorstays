@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Container } from "@/components/layout/container"
 import { PropertyGallery } from "@/components/properties/property-gallery"
+import { getOfferStatusDisplay } from "@/lib/status-display"
 
 interface Offer {
   id: string
@@ -34,15 +35,6 @@ interface Offer {
     heroImageUrl: string | null
     photos: string[]
   } | null
-}
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  pending: { label: "Pending", color: "text-black", bgColor: "bg-[#FFD84A]" },
-  accepted: { label: "Accepted", color: "text-black", bgColor: "bg-[#28D17C]" },
-  declined: { label: "Declined", color: "text-white", bgColor: "bg-red-500" },
-  countered: { label: "Countered", color: "text-black", bgColor: "bg-[#4AA3FF]" },
-  expired: { label: "Expired", color: "text-white", bgColor: "bg-gray-500" },
-  withdrawn: { label: "Withdrawn", color: "text-white", bgColor: "bg-gray-600" },
 }
 
 const DEAL_TYPE_LABELS: Record<string, string> = {
@@ -302,7 +294,7 @@ export default function HostSentOffersPage() {
           ) : (
             <div className="space-y-3">
               {filteredOffers.map((offer) => {
-                const statusConfig = STATUS_CONFIG[offer.status] || STATUS_CONFIG.pending
+                const statusDisplay = getOfferStatusDisplay(offer.status, "host")
                 const isSelected = selectedOffer?.id === offer.id
 
                 return (
@@ -324,9 +316,14 @@ export default function HostSentOffersPage() {
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="font-bold text-black">{offer.creator.displayName}</p>
-                              <span className={`rounded-full border border-black px-2 py-0.5 text-[9px] font-bold ${statusConfig.bgColor} ${statusConfig.color}`}>
-                                {statusConfig.label}
+                              <span className={`rounded-full border border-black px-2 py-0.5 text-[9px] font-bold ${statusDisplay.color} ${statusDisplay.textColor}`}>
+                                {statusDisplay.label}
                               </span>
+                              {statusDisplay.actionRequired && (
+                                <span className="rounded-full bg-[#FF6B6B] px-2 py-0.5 text-[9px] font-bold text-white">
+                                  Action Required
+                                </span>
+                              )}
                             </div>
                             <p className="text-xs text-black/60">@{offer.creator.handle}</p>
                             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
