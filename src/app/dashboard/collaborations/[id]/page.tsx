@@ -502,13 +502,86 @@ export default function CollaborationDetailPage() {
                 </div>
               )}
               <div className="mt-4 flex gap-2">
-                <Button className="flex-1 bg-[#28D17C] text-black hover:bg-[#28D17C]/90">
+                <Button 
+                  className="flex-1 bg-[#28D17C] text-black hover:bg-[#28D17C]/90"
+                  onClick={async () => {
+                    const res = await fetch(`/api/collaborations/${collaboration.id}/content`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ action: "approve" }),
+                    })
+                    if (res.ok) {
+                      setToast("Content approved!")
+                      // Refresh page
+                      window.location.reload()
+                    }
+                  }}
+                >
                   Approve Content
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={async () => {
+                    const feedback = prompt("What changes do you need?")
+                    if (feedback !== null) {
+                      const res = await fetch(`/api/collaborations/${collaboration.id}/content`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ action: "request-changes", feedback }),
+                      })
+                      if (res.ok) {
+                        setToast("Change request sent to creator")
+                        window.location.reload()
+                      }
+                    }
+                  }}
+                >
                   Request Changes
                 </Button>
               </div>
+            </div>
+          )}
+
+          {/* Pay Now (for hosts when content is approved) */}
+          {collaboration.status === "approved" && userRole === "host" && collaboration.offer.cashCents > 0 && (
+            <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">
+                Ready for Payment
+              </p>
+              <p className="mt-1 text-sm text-black">
+                Content has been approved. Complete payment to finalize this collaboration.
+              </p>
+              <div className="mt-4 rounded-xl border-2 border-black bg-white p-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-black">Total Due</span>
+                  <span className="text-2xl font-black text-black">
+                    {formatCurrency(Math.round(collaboration.offer.cashCents * 1.15))}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-black/60">
+                  Includes 15% platform fee
+                </p>
+              </div>
+              <Link
+                href={`/dashboard/host/pay/${collaboration.id}`}
+                className="mt-4 block rounded-full border-2 border-black bg-black py-4 text-center text-sm font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-1"
+              >
+                Pay Now →
+              </Link>
+            </div>
+          )}
+
+          {/* Completed (show payment confirmation) */}
+          {collaboration.status === "completed" && (
+            <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-5 text-center">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-2 border-black bg-white">
+                <span className="text-2xl">✓</span>
+              </div>
+              <p className="text-lg font-black text-black">Collaboration Complete!</p>
+              <p className="mt-1 text-sm text-black">
+                Payment has been processed. Thank you for using CreatorStays.
+              </p>
             </div>
           )}
         </div>
