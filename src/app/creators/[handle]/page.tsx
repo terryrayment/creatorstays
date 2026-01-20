@@ -53,11 +53,11 @@ export default async function CreatorProfilePage({
       youtube: creator.youtubeHandle,
     },
     stats: {
-      followers: creator.followerCount,
+      followers: creator.totalFollowers,
       engagementRate: creator.engagementRate,
     },
     dealPreferences: {
-      baseRate: creator.baseRatePerPost,
+      baseRate: creator.minimumFlatFee,
       openToGiftedStays: creator.openToGiftedStays,
     },
     deliverables: creator.deliverables,
@@ -66,7 +66,7 @@ export default async function CreatorProfilePage({
       propertyTitle: c.property.title || 'Property',
       location: c.property.cityRegion || '',
     })),
-    portfolioUrls: creator.portfolioUrls,
+    portfolioUrls: creator.mediaKitUrl ? [creator.mediaKitUrl] : [],
   }
 
   return <CreatorPublicProfile creator={profileData} />
