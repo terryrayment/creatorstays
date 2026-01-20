@@ -102,6 +102,163 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; description:
   },
 }
 
+interface NextStepInfo {
+  title: string
+  description: string
+  action?: string
+  actionHref?: string
+  waiting?: boolean
+  waitingFor?: string
+}
+
+function getNextStep(
+  status: string,
+  userRole: "host" | "creator",
+  hasUserSigned: boolean,
+  hasOtherSigned: boolean,
+  isFullyExecuted: boolean,
+  cashCents: number,
+  collaborationId: string
+): NextStepInfo | null {
+  // Pending agreement phase
+  if (status === "pending-agreement") {
+    if (!hasUserSigned) {
+      return {
+        title: "Sign the Agreement",
+        description: "Review and sign the collaboration agreement below to proceed.",
+        action: "Sign Agreement",
+      }
+    }
+    if (hasUserSigned && !hasOtherSigned) {
+      const otherParty = userRole === "host" ? "creator" : "host"
+      return {
+        title: "Waiting for Signature",
+        description: `You have signed. Waiting for the ${otherParty} to sign the agreement.`,
+        waiting: true,
+        waitingFor: otherParty,
+      }
+    }
+  }
+
+  // Active phase - agreement signed
+  if (status === "active") {
+    if (userRole === "creator") {
+      return {
+        title: "Create and Submit Content",
+        description: "Post your content using the tracking link, then submit the links for review.",
+        action: "Submit Content",
+        actionHref: `/dashboard/collaborations/${collaborationId}/submit`,
+      }
+    }
+    if (userRole === "host") {
+      return {
+        title: "Waiting for Content",
+        description: "The creator is working on content. You will be notified when it is submitted for review.",
+        waiting: true,
+        waitingFor: "creator to submit content",
+      }
+    }
+  }
+
+  // Content submitted phase
+  if (status === "content-submitted") {
+    if (userRole === "host") {
+      return {
+        title: "Review Submitted Content",
+        description: "The creator has submitted content. Review it below and approve or request changes.",
+        action: "Review Content",
+      }
+    }
+    if (userRole === "creator") {
+      return {
+        title: "Waiting for Review",
+        description: "Your content has been submitted. Waiting for the host to review and approve.",
+        waiting: true,
+        waitingFor: "host to review",
+      }
+    }
+  }
+
+  // Approved phase
+  if (status === "approved") {
+    if (userRole === "host" && cashCents > 0) {
+      return {
+        title: "Complete Payment",
+        description: "Content has been approved. Complete payment to finalize the collaboration.",
+        action: "Pay Now",
+        actionHref: `/dashboard/host/pay/${collaborationId}`,
+      }
+    }
+    if (userRole === "creator") {
+      return {
+        title: "Payment Processing",
+        description: "Your content was approved! The host is completing payment.",
+        waiting: true,
+        waitingFor: "payment",
+      }
+    }
+  }
+
+  // Completed
+  if (status === "completed") {
+    return {
+      title: "Collaboration Complete",
+      description: "This collaboration has been successfully completed. Thank you!",
+    }
+  }
+
+  // Cancelled
+  if (status === "cancelled") {
+    return {
+      title: "Collaboration Cancelled",
+      description: "This collaboration was cancelled and is no longer active.",
+    }
+  }
+
+  return null
+}
+
+function NextStepBanner({ nextStep, collaborationId }: { nextStep: NextStepInfo; collaborationId: string }) {
+  const isWaiting = nextStep.waiting
+  const bgColor = isWaiting ? "bg-[#FFD84A]" : "bg-[#28D17C]"
+  
+  return (
+    <div className={`rounded-2xl border-[3px] border-black ${bgColor} p-5`}>
+      <div className="flex items-start gap-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-black bg-white">
+          {isWaiting ? (
+            <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          ) : (
+            <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          )}
+        </div>
+        <div className="flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">
+            {isWaiting ? "Waiting" : "Your Next Step"}
+          </p>
+          <p className="mt-1 text-lg font-black text-black">{nextStep.title}</p>
+          <p className="mt-1 text-sm text-black/80">{nextStep.description}</p>
+          {nextStep.action && nextStep.actionHref && (
+            <Link
+              href={nextStep.actionHref}
+              className="mt-3 inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-5 py-2 text-xs font-bold text-white transition-transform hover:-translate-y-0.5"
+            >
+              {nextStep.action}
+              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function formatCurrency(cents: number): string {
   return (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" })
 }
@@ -252,6 +409,20 @@ export default function CollaborationDetailPage() {
             </h1>
             <p className="mt-1 text-sm text-black/70">{statusConfig.description}</p>
           </div>
+
+          {/* Next Step Banner */}
+          {userRole && (() => {
+            const nextStep = getNextStep(
+              collaboration.status,
+              userRole,
+              hasUserSigned,
+              hasOtherSigned,
+              isFullyExecuted || false,
+              collaboration.offer.cashCents,
+              collaboration.id
+            )
+            return nextStep ? <NextStepBanner nextStep={nextStep} collaborationId={collaboration.id} /> : null
+          })()}
 
           {/* Parties Card */}
           <div className="rounded-2xl border-[3px] border-black bg-white overflow-hidden">
