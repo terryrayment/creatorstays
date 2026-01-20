@@ -23,10 +23,16 @@ function NextStepStrip() {
             Find Creators
           </Link>
           <Link 
-            href="/dashboard/host/collaborations"
+            href="/dashboard/host/offers"
             className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
           >
-            View Collaborations
+            Sent Offers
+          </Link>
+          <Link 
+            href="/dashboard/collaborations"
+            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+          >
+            Collaborations
           </Link>
         </div>
       </div>
