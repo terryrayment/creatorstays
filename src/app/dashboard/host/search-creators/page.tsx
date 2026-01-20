@@ -68,6 +68,13 @@ function parseEngagementRate(rate: string): number {
   return parseFloat(rate.replace('%', ''))
 }
 
+// Format follower count
+function formatFollowers(count: number): string {
+  if (count >= 1000000) return (count / 1000000).toFixed(1) + 'M'
+  if (count >= 1000) return (count / 1000).toFixed(0) + 'K'
+  return count.toString()
+}
+
 // Mock approved creators database
 const APPROVED_CREATORS = [
   { 
@@ -262,74 +269,80 @@ export default function SearchCreatorsPage() {
   const [audienceSize, setAudienceSize] = useState("All Sizes")
   const [location, setLocation] = useState("")
   const [sortBy, setSortBy] = useState("relevance")
+  const [openToGiftedStays, setOpenToGiftedStays] = useState(false)
+
+  // Data state
+  const [creators, setCreators] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 })
 
   // Modal state
-  const [selectedCreator, setSelectedCreator] = useState<typeof APPROVED_CREATORS[0] | null>(null)
+  const [selectedCreator, setSelectedCreator] = useState<any | null>(null)
   const [toast, setToast] = useState("")
 
-  // Calculate distance for a creator from selected location
-  const getCreatorDistance = (creatorLocation: string): number | null => {
-    if (!location || !CITY_COORDS[location] || !CITY_COORDS[creatorLocation]) return null
-    const [lat1, lon1] = CITY_COORDS[location]
-    const [lat2, lon2] = CITY_COORDS[creatorLocation]
-    return getDistance(lat1, lon1, lat2, lon2)
-  }
+  // Fetch creators from API
+  useEffect(() => {
+    async function fetchCreators() {
+      setLoading(true)
+      try {
+        const params = new URLSearchParams()
+        if (search) params.set('q', search)
+        if (niche !== 'All Niches') params.set('niche', niche)
+        if (platform !== 'All Platforms') params.set('platform', platform)
+        if (location) params.set('location', location)
+        if (openToGiftedStays) params.set('openToGiftedStays', 'true')
+        if (sortBy !== 'relevance') params.set('sortBy', sortBy)
+        
+        // Audience size filters
+        if (audienceSize === 'Under 50K') {
+          params.set('maxFollowers', '50000')
+        } else if (audienceSize === '50K-100K') {
+          params.set('minFollowers', '50000')
+          params.set('maxFollowers', '100000')
+        } else if (audienceSize === '100K-250K') {
+          params.set('minFollowers', '100000')
+          params.set('maxFollowers', '250000')
+        } else if (audienceSize === '250K+') {
+          params.set('minFollowers', '250000')
+        }
 
-  // Filter and sort creators
-  const filteredCreators = APPROVED_CREATORS
-    .map(creator => ({
-      ...creator,
-      distance: getCreatorDistance(creator.location)
-    }))
-    .filter(creator => {
-      // Search by name, handle, or location
-      if (search) {
-        const searchLower = search.toLowerCase()
-        const matchesName = creator.name.toLowerCase().includes(searchLower)
-        const matchesHandle = creator.handle.toLowerCase().includes(searchLower)
-        const matchesLocation = creator.location.toLowerCase().includes(searchLower)
-        if (!matchesName && !matchesHandle && !matchesLocation) return false
+        const res = await fetch(`/api/creators/search?${params.toString()}`)
+        if (res.ok) {
+          const data = await res.json()
+          setCreators(data.creators || [])
+          setPagination(data.pagination || { page: 1, pages: 1, total: 0 })
+        }
+      } catch (e) {
+        console.error('Failed to fetch creators:', e)
       }
-      // Platform
-      if (platform !== "All Platforms" && !creator.platforms.includes(platform)) {
-        return false
-      }
-      // Niche
-      if (niche !== "All Niches" && !creator.niches.includes(niche)) {
-        return false
-      }
-      // Location radius (150 miles)
-      if (location && creator.distance !== null && creator.distance > 150) {
-        return false
-      }
-      // Audience size
-      if (audienceSize !== "All Sizes") {
-        const size = parseAudienceSize(creator.audienceSize)
-        if (audienceSize === "Under 50K" && size >= 50000) return false
-        if (audienceSize === "50K-100K" && (size < 50000 || size > 100000)) return false
-        if (audienceSize === "100K-250K" && (size < 100000 || size > 250000)) return false
-        if (audienceSize === "250K+" && size < 250000) return false
-      }
-      return true
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "followers_high":
-          return parseAudienceSize(b.audienceSize) - parseAudienceSize(a.audienceSize)
-        case "followers_low":
-          return parseAudienceSize(a.audienceSize) - parseAudienceSize(b.audienceSize)
-        case "engagement_high":
-          return parseEngagementRate(b.engagementRate) - parseEngagementRate(a.engagementRate)
-        case "engagement_low":
-          return parseEngagementRate(a.engagementRate) - parseEngagementRate(b.engagementRate)
-        case "distance":
-          if (a.distance === null) return 1
-          if (b.distance === null) return -1
-          return a.distance - b.distance
-        default:
-          return 0
-      }
-    })
+      setLoading(false)
+    }
+
+    // Debounce search
+    const timer = setTimeout(fetchCreators, 300)
+    return () => clearTimeout(timer)
+  }, [search, platform, niche, audienceSize, location, sortBy, openToGiftedStays])
+
+  // Format creators for display (merge with mock data structure)
+  const displayCreators = creators.map(c => ({
+    id: c.id,
+    name: c.displayName,
+    handle: c.handle,
+    avatar: c.avatarUrl || c.displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
+    niches: c.niches || [],
+    audienceSize: c.totalFollowers ? formatFollowers(c.totalFollowers) : 'N/A',
+    location: c.location || 'Unknown',
+    platforms: c.platforms || [],
+    rate: c.minimumRate ? `$${(c.minimumRate / 100).toLocaleString()}+` : 'Contact',
+    bio: c.bio || '',
+    engagementRate: c.engagementRate ? `${c.engagementRate}%` : 'N/A',
+    openToGiftedStays: c.openToGiftedStays,
+    isVerified: c.isVerified,
+    distance: null,
+  }))
+
+  // Also show mock creators if no real creators found (for demo)
+  const allCreators = displayCreators.length > 0 ? displayCreators : APPROVED_CREATORS.map(c => ({ ...c, distance: null }))
 
   if (status === "loading") {
     return (
@@ -405,11 +418,21 @@ export default function SearchCreatorsPage() {
             {/* Sort row */}
             <div className="mt-3 flex items-center justify-between border-t border-black/10 pt-3">
               <p className="text-sm font-bold text-black">
-                {filteredCreators.length} creator{filteredCreators.length !== 1 ? 's' : ''} found
-                {location && ` within 150 miles of ${location}`}
+                {loading ? 'Searching...' : `${pagination.total || allCreators.length} creator${(pagination.total || allCreators.length) !== 1 ? 's' : ''} found`}
+                {location && ` near ${location}`}
               </p>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-black/50">Sort by:</span>
+                <label className="flex items-center gap-1.5 text-[10px] font-bold text-black/60">
+                  <input
+                    type="checkbox"
+                    checked={openToGiftedStays}
+                    onChange={e => setOpenToGiftedStays(e.target.checked)}
+                    className="h-3.5 w-3.5 rounded border-black"
+                  />
+                  Gifted stays only
+                </label>
+                <span className="text-black/30">|</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-black/50">Sort:</span>
                 <Select
                   className="w-44"
                   value={sortBy}
@@ -420,9 +443,19 @@ export default function SearchCreatorsPage() {
             </div>
           </div>
 
+          {/* Loading state */}
+          {loading && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="h-48 animate-pulse rounded-xl border-2 border-black/20 bg-black/5" />
+              ))}
+            </div>
+          )}
+
           {/* Creator Grid */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredCreators.map(creator => (
+          {!loading && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {allCreators.map(creator => (
               <div
                 key={creator.id}
                 className="rounded-xl border-2 border-black bg-white p-4 transition-transform hover:-translate-y-1"
@@ -490,12 +523,13 @@ export default function SearchCreatorsPage() {
               </div>
             ))}
           </div>
+          )}
 
           {/* Empty State */}
-          {filteredCreators.length === 0 && (
+          {!loading && allCreators.length === 0 && (
             <div className="rounded-xl border-2 border-dashed border-black/30 p-8 text-center">
               <p className="text-sm font-bold text-black">No creators match your filters</p>
-              <p className="mt-1 text-xs text-black">Try adjusting your search criteria or expanding your location radius</p>
+              <p className="mt-1 text-xs text-black/60">Try adjusting your search criteria or clearing filters</p>
             </div>
           )}
         </Container>
