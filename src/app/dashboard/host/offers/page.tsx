@@ -72,6 +72,41 @@ export default function HostSentOffersPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<string>("all")
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null)
+  const [responding, setResponding] = useState<string | null>(null)
+
+  // Handle counter offer response
+  const handleCounterResponse = async (offerId: string, action: "accept" | "decline") => {
+    setResponding(offerId)
+    try {
+      const res = await fetch(`/api/offers/${offerId}/respond-counter`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      })
+      
+      const data = await res.json()
+      
+      if (res.ok) {
+        // Update the offer in state
+        setOffers(prev => prev.map(o => 
+          o.id === offerId 
+            ? { ...o, status: action === "accept" ? "accepted" : "declined" }
+            : o
+        ))
+        setSelectedOffer(null)
+        
+        // Redirect to collaborations if accepted
+        if (action === "accept" && data.collaborationId) {
+          window.location.href = "/dashboard/collaborations"
+        }
+      } else {
+        alert(data.error || "Failed to respond to counter offer")
+      }
+    } catch (e) {
+      alert("Network error. Please try again.")
+    }
+    setResponding(null)
+  }
 
   // Fetch offers
   useEffect(() => {
@@ -284,13 +319,21 @@ export default function HostSentOffersPage() {
                             <p className="text-[10px] font-bold uppercase tracking-wider text-black/60 mb-1">Counter Offer</p>
                             <p className="text-xl font-black text-black">{formatCurrency(offer.counterCashCents)}</p>
                             {offer.counterMessage && (
-                              <p className="mt-2 text-sm text-black/80">{offer.counterMessage}</p>
+                              <p className="mt-2 text-sm text-black/80">&ldquo;{offer.counterMessage}&rdquo;</p>
                             )}
                             <div className="mt-3 flex gap-2">
-                              <button className="flex-1 rounded-full border-2 border-black bg-[#28D17C] py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5">
-                                Accept Counter
+                              <button 
+                                onClick={() => handleCounterResponse(offer.id, "accept")}
+                                disabled={responding === offer.id}
+                                className="flex-1 rounded-full border-2 border-black bg-[#28D17C] py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                              >
+                                {responding === offer.id ? "Processing..." : "Accept Counter"}
                               </button>
-                              <button className="flex-1 rounded-full border-2 border-black bg-white py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5">
+                              <button 
+                                onClick={() => handleCounterResponse(offer.id, "decline")}
+                                disabled={responding === offer.id}
+                                className="flex-1 rounded-full border-2 border-black bg-white py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                              >
                                 Decline
                               </button>
                             </div>
