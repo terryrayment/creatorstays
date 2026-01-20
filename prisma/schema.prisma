@@ -90,6 +90,10 @@ model CreatorProfile {
   // Niches/categories
   niches      String[] // ["Travel", "Lifestyle", "Photography"]
   
+  // Platform verticals this creator is interested in
+  // Empty array = available on all platforms (default behavior)
+  interestedVerticals  String[]  @default([]) // ["STR", "SPA", "FITNESS"]
+  
   // Social platforms
   instagramHandle   String?
   instagramUrl      String?
@@ -181,10 +185,24 @@ model CreatorInvite {
 // HOST
 // ============================================================================
 
+// Platform vertical - which marketplace the host belongs to
+enum Vertical {
+  STR         // Short-term rentals (CreatorStays)
+  SPA         // Spas & wellness centers
+  FITNESS     // Gyms, yoga studios, fitness centers
+  RESTAURANT  // Restaurants & cafes
+  HOTEL       // Hotels & resorts
+  EXPERIENCE  // Tours, activities, experiences
+}
+
 model HostProfile {
   id          String   @id @default(cuid())
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Platform vertical
+  vertical      Vertical  @default(STR)
+  businessType  String?   // Freeform: "yoga studio", "day spa", "CrossFit gym", etc.
   
   // Basic info
   displayName String
@@ -222,22 +240,26 @@ model Property {
   hostProfileId   String
   hostProfile     HostProfile @relation(fields: [hostProfileId], references: [id], onDelete: Cascade)
   
-  // Airbnb import
+  // Platform vertical (inherited from host, but can be overridden)
+  vertical        Vertical  @default(STR)
+  venueType       String?   // "cabin", "spa", "yoga studio", "gym", "restaurant"
+  
+  // Airbnb import (STR-specific, but kept for compatibility)
   airbnbUrl       String?
   lastImportedAt  DateTime?
   
   // Listing info
   title           String?
   cityRegion      String?
-  priceNightlyRange String?  // e.g. "$150-$250"
+  priceNightlyRange String?  // e.g. "$150-$250" (or price range for services)
   rating          Float?
   reviewCount     Int?
   
-  // Property details
-  guests          Int?
-  beds            Int?
-  baths           Int?
-  amenities       String[]  // ["WiFi", "Pool", "Hot Tub", ...]
+  // Property details (flexible for different verticals)
+  guests          Int?      // Capacity
+  beds            Int?      // STR-specific
+  baths           Int?      // STR-specific
+  amenities       String[]  // ["WiFi", "Pool", "Hot Tub", ...] or ["Sauna", "Steam Room", ...]
   vibeTags        String[]  // ["Cozy", "Modern", "Remote", ...]
   houseRules      Json?     // { "checkIn": "3pm", "checkOut": "11am", "noSmoking": true, ... }
   
