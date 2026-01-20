@@ -100,6 +100,16 @@ export async function POST(
         return NextResponse.json({ error: 'Re-counter amount required' }, { status: 400 })
       }
 
+      // Check negotiation rounds - warn after 3 rounds, block after 5
+      const currentRound = offer.negotiationRound || 1
+      const newRound = currentRound + 1
+      
+      if (newRound > 5) {
+        return NextResponse.json({ 
+          error: 'Maximum negotiation rounds reached (5). Please accept, decline, or withdraw this offer.' 
+        }, { status: 400 })
+      }
+
       // Update offer: reset status to pending, store host's re-counter
       // We reuse counterCashCents field but flip the negotiation back to creator
       await prisma.offer.update({
@@ -112,6 +122,8 @@ export async function POST(
           requirements: reCounterMessage || offer.requirements, // Update message if provided
           respondedAt: null, // Reset response timestamp
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days to respond
+          negotiationRound: newRound,
+          lastCounterBy: 'host',
         },
       })
 
@@ -141,10 +153,17 @@ export async function POST(
         })
       }
 
+      // Include warning if approaching limit
+      const warning = newRound >= 4 
+        ? `Note: This is round ${newRound} of 5 maximum. Consider accepting or finalizing terms soon.`
+        : null
+
       return NextResponse.json({
         success: true,
         message: 'Re-counter sent to creator',
         newAmount: reCounterCashCents,
+        negotiationRound: newRound,
+        warning,
       })
     }
 

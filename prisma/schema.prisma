@@ -499,6 +499,10 @@ model Offer {
   // Counter offer fields
   counterCashCents  Int?
   counterMessage    String?  @db.Text
+  
+  // Negotiation tracking
+  negotiationRound  Int      @default(1) // Tracks back-and-forth: 1=initial, 2=first counter, 3=re-counter, etc.
+  lastCounterBy     String?  // "host" or "creator" - who made the last counter
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

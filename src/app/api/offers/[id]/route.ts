@@ -171,6 +171,16 @@ export async function PATCH(
         return NextResponse.json({ error: 'Counter amount required' }, { status: 400 })
       }
 
+      // Check negotiation rounds - warn after 3 rounds, block after 5
+      const currentRound = offer.negotiationRound || 1
+      const newRound = currentRound + 1
+      
+      if (newRound > 5) {
+        return NextResponse.json({ 
+          error: 'Maximum negotiation rounds reached (5). Please accept or decline this offer.' 
+        }, { status: 400 })
+      }
+
       await prisma.offer.update({
         where: { id: params.id },
         data: {
@@ -178,6 +188,8 @@ export async function PATCH(
           counterCashCents,
           counterMessage,
           respondedAt: new Date(),
+          negotiationRound: newRound,
+          lastCounterBy: 'creator',
         },
       })
 
@@ -201,9 +213,16 @@ export async function PATCH(
         }).catch(err => console.error('[Offer Counter] Email error:', err))
       }
 
+      // Include warning if approaching limit
+      const warning = newRound >= 4 
+        ? `Note: This is negotiation round ${newRound} of 5 maximum. Consider finalizing terms soon.`
+        : null
+
       return NextResponse.json({
         success: true,
         message: 'Counter offer sent to host.',
+        negotiationRound: newRound,
+        warning,
       })
     }
 

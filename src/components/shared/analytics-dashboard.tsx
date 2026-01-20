@@ -307,13 +307,30 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
         </PanelContent>
       </Panel>
 
-      {/* Note about payments */}
+      {/* Important clarification about clicks vs bookings */}
+      {viewAs === 'host' && (
+        <div className="rounded-lg border-2 border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-bold text-amber-800">📊 Understanding Your Click Data</p>
+          <p className="mt-1 text-xs text-amber-700">
+            <strong>Clicks measure engagement, not bookings.</strong> CreatorStays tracks how many people 
+            clicked through to your Airbnb listing from creator content. We do not have access to your 
+            Airbnb booking data, so we cannot track conversions.
+          </p>
+          <p className="mt-2 text-xs text-amber-700">
+            <strong>Why this matters:</strong> High clicks indicate strong creator content and audience interest. 
+            Actual booking rates depend on many factors (pricing, availability, listing quality, seasonality) 
+            that are outside the creator's control.
+          </p>
+        </div>
+      )}
+
+      {/* Note about tracking */}
       <div className="rounded-lg border border-black/5 bg-black/[0.02] p-4 text-center text-xs text-black/60">
         <p>
           <strong>How tracking works:</strong> Each collaboration gets a unique link. 
           We track clicks and attribute them to the creator for performance bonuses.
           {viewAs === 'host' 
-            ? ' Approve bonuses manually based on performance.' 
+            ? ' Bonuses are based on verified clicks, not booking conversions.' 
             : ' Track your link performance to maximize earnings.'}
         </p>
       </div>

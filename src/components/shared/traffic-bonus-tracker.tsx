@@ -90,7 +90,7 @@ export function TrafficBonusTracker({
                 <li><strong>• Payout:</strong> If threshold is met at payment time, bonus is automatically included</li>
               </ul>
               <p className="mt-2 pt-2 border-t border-black/10 text-black/60">
-                <strong>Tip:</strong> Keep promoting your link until the host pays—more clicks = better chance of hitting the bonus!
+                <strong>Note:</strong> Clicks measure traffic to the listing, not actual bookings. CreatorStays doesn't have access to Airbnb booking data.
               </p>
             </InfoTooltip>
           </div>

@@ -913,6 +913,22 @@ export default function CollaborationDetailPage() {
                   <p className="text-[10px] font-bold text-black/60">Days Left</p>
                 </div>
               </div>
+
+              {/* Zero clicks troubleshooting - only show for creators with 0 clicks */}
+              {userRole === "creator" && collaboration.clicksGenerated === 0 && collaboration.status === "active" && (
+                <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3">
+                  <p className="text-xs font-bold text-amber-800">📊 No clicks yet? Here's what to check:</p>
+                  <ul className="mt-2 space-y-1 text-xs text-amber-700">
+                    <li>• <strong>Link in bio:</strong> Make sure the tracking link is clickable (not just displayed as text)</li>
+                    <li>• <strong>Content is live:</strong> The post/reel/story with your link must be published</li>
+                    <li>• <strong>Correct link:</strong> Double-check you're using <em>this</em> collaboration's link, not another</li>
+                    <li>• <strong>Give it time:</strong> Clicks may take a few minutes to appear after your audience engages</li>
+                  </ul>
+                  <p className="mt-2 text-[10px] text-amber-600">
+                    Tip: Test the link yourself to confirm it redirects to the Airbnb listing correctly.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
