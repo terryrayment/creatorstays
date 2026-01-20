@@ -448,6 +448,18 @@ export default function CareersPage() {
                 We're defining a new marketplace for vacation rental marketing by connecting hosts directly with content creators. 
                 The opportunity is large, the product is early, and the team is small. Your work will ship quickly and matter immediately.
               </p>
+              <p className="mt-3 text-[13px] text-black/70">
+                CreatorStays is a{" "}
+                <a 
+                  href="https://wolfpup.xyz" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-bold text-black hover:underline"
+                >
+                  WOLFPUP
+                </a>
+                {" "}project.
+              </p>
             </Panel>
 
             {/* Open positions */}
