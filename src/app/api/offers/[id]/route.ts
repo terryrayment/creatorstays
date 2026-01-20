@@ -200,7 +200,7 @@ export async function PATCH(
           agreementText,
           // Parties
           hostName: offer.hostProfile.displayName,
-          hostEmail: offer.hostProfile.user?.email || offer.hostProfile.contactEmail,
+          hostEmail: offer.hostProfile.user?.email || offer.hostProfile.contactEmail || '',
           creatorName: creatorProfile.displayName,
           creatorHandle: creatorProfile.handle,
           creatorEmail: creatorProfile.user.email || '',
