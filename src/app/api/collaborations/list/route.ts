@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       prisma.creatorProfile.findUnique({ where: { userId: session.user.id } }),
     ])
 
-    let collaborations = []
+    let collaborations: unknown[] = []
 
     if (hostProfile) {
       collaborations = await prisma.collaboration.findMany({
