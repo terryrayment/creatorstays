@@ -121,6 +121,7 @@ export async function PATCH(
         host: true,
         creator: { include: { user: true } },
         property: true,
+        offer: true,
       },
     })
 
@@ -145,11 +146,19 @@ export async function PATCH(
     }
 
     if (action === 'approve') {
+      // Check if this is a $0 cash deal (post-for-stay) - auto-complete without payment
+      const isZeroCashDeal = collaboration.offer.cashCents === 0
+      
       const updated = await prisma.collaboration.update({
         where: { id: params.id },
         data: {
-          status: 'approved',
+          status: isZeroCashDeal ? 'completed' : 'approved',
           contentApprovedAt: new Date(),
+          ...(isZeroCashDeal && { 
+            completedAt: new Date(),
+            paymentStatus: 'completed',
+            paymentNotes: 'Post-for-stay deal - no payment required',
+          }),
         },
       })
 
@@ -170,7 +179,9 @@ export async function PATCH(
 
       return NextResponse.json({
         success: true,
-        message: 'Content approved! Tracking link is now active. Payment will be processed.',
+        message: isZeroCashDeal 
+          ? 'Content approved! Collaboration complete. Thank you for the great content!'
+          : 'Content approved! Tracking link is now active. Payment will be processed.',
         collaboration: updated,
       })
     }

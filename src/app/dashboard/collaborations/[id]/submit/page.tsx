@@ -16,6 +16,7 @@ export default function SubmitContentPage() {
   const [links, setLinks] = useState<string[]>([""])
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState({ message: "", type: "" as "success" | "error" | "" })
+  const [checklist, setChecklist] = useState([false, false, false, false])
 
   // Add another link field
   const addLink = () => {
@@ -188,8 +189,17 @@ export default function SubmitContentPage() {
                 "FTC disclosure is included (#ad, #sponsored)",
                 "All deliverables are completed",
               ].map((item, i) => (
-                <label key={i} className="flex items-center gap-3 text-sm text-black">
-                  <input type="checkbox" className="h-4 w-4 rounded border-2 border-black" />
+                <label key={i} className="flex items-center gap-3 text-sm text-black cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={checklist[i]}
+                    onChange={(e) => {
+                      const newChecklist = [...checklist]
+                      newChecklist[i] = e.target.checked
+                      setChecklist(newChecklist)
+                    }}
+                    className="h-4 w-4 rounded border-2 border-black" 
+                  />
                   <span>{item}</span>
                 </label>
               ))}
@@ -197,13 +207,30 @@ export default function SubmitContentPage() {
           </div>
 
           {/* Submit Button */}
-          <Button
-            onClick={handleSubmit}
-            disabled={submitting || links.filter(l => l.trim()).length === 0}
-            className="w-full rounded-full border-[3px] border-black bg-black py-6 text-sm font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-1 hover:bg-black/90 disabled:opacity-50"
-          >
-            {submitting ? "Submitting..." : "Submit for Review"}
-          </Button>
+          {(() => {
+            const hasLinks = links.filter(l => l.trim()).length > 0
+            const allChecked = checklist.every(Boolean)
+            const canSubmit = hasLinks && allChecked && !submitting
+            
+            return (
+              <>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!canSubmit}
+                  className="w-full rounded-full border-[3px] border-black bg-black py-6 text-sm font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-1 hover:bg-black/90 disabled:opacity-50"
+                >
+                  {submitting ? "Submitting..." : "Submit for Review"}
+                </Button>
+                
+                {!canSubmit && !submitting && (
+                  <p className="text-center text-xs text-red-600 font-medium">
+                    {!hasLinks && "Add at least one content link"}
+                    {hasLinks && !allChecked && "Complete all checklist items above"}
+                  </p>
+                )}
+              </>
+            )
+          })()}
 
           <p className="text-center text-xs text-black/60">
             The host will review your content and approve or request changes.

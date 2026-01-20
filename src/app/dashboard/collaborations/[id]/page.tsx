@@ -10,6 +10,7 @@ import { PropertyGallery } from "@/components/properties/property-gallery"
 import { TrafficBonusTracker } from "@/components/shared/traffic-bonus-tracker"
 import { PayoutTracker } from "@/components/shared/payout-tracker"
 import { getCollaborationStatusDisplay, type UserRole } from "@/lib/status-display"
+import { ReviewModal } from "@/components/reviews/review-modal"
 
 interface Collaboration {
   id: string
@@ -286,6 +287,33 @@ export default function CollaborationDetailPage() {
   const [disputeCategory, setDisputeCategory] = useState("")
   const [filingDispute, setFilingDispute] = useState(false)
 
+  // Review state
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  const [hasReviewed, setHasReviewed] = useState(false)
+  const [checkingReview, setCheckingReview] = useState(false)
+
+  // Reminder state (for hosts)
+  const [sendingReminder, setSendingReminder] = useState(false)
+
+  // Handle sending reminder to creator
+  const handleSendReminder = async () => {
+    setSendingReminder(true)
+    try {
+      const res = await fetch(`/api/collaborations/${collaborationId}/reminder`, {
+        method: "POST",
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setToast(data.message || "Reminder sent!")
+      } else {
+        setToast(data.error || "Failed to send reminder")
+      }
+    } catch (e) {
+      setToast("Network error. Please try again.")
+    }
+    setSendingReminder(false)
+  }
+
   // Handle filing a dispute
   const handleFileDispute = async () => {
     if (disputeReason.trim().length < 20) {
@@ -396,6 +424,33 @@ export default function CollaborationDetailPage() {
       fetchCollaboration()
     }
   }, [session, collaborationId, router])
+
+  // Check if user has already reviewed (when collaboration is completed)
+  useEffect(() => {
+    async function checkExistingReview() {
+      if (!collaboration || collaboration.status !== "completed") return
+      
+      setCheckingReview(true)
+      try {
+        const res = await fetch(`/api/reviews?collaborationId=${collaborationId}`)
+        if (res.ok) {
+          const data = await res.json()
+          const reviews = data.reviews || []
+          // Check if current user (based on role) has already reviewed
+          const userReviewType = userRole === "host" ? "host" : "creator"
+          const existingReview = reviews.find((r: { reviewerType: string }) => r.reviewerType === userReviewType)
+          setHasReviewed(!!existingReview)
+        }
+      } catch (e) {
+        console.error("Failed to check existing review:", e)
+      }
+      setCheckingReview(false)
+    }
+
+    if (collaboration?.status === "completed" && userRole) {
+      checkExistingReview()
+    }
+  }, [collaboration, collaborationId, userRole])
 
   // Sign agreement
   const handleSign = async () => {
@@ -548,6 +603,30 @@ export default function CollaborationDetailPage() {
             )
             return nextStep ? <NextStepBanner nextStep={nextStep} collaborationId={collaboration.id} /> : null
           })()}
+
+          {/* Send Reminder (for hosts waiting for content) */}
+          {userRole === "host" && (collaboration.status === "active" || collaboration.status === "deadline-passed") && (
+            <div className="rounded-2xl border-2 border-black/20 bg-white p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold text-black">Need a status update?</p>
+                  <p className="text-xs text-black/60">
+                    Send a friendly reminder to {collaboration.creator.displayName}
+                  </p>
+                </div>
+                <button
+                  onClick={handleSendReminder}
+                  disabled={sendingReminder}
+                  className="shrink-0 rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-bold text-black transition-all hover:bg-[#FFD84A] disabled:opacity-50"
+                >
+                  {sendingReminder ? "Sending..." : "📧 Send Reminder"}
+                </button>
+              </div>
+              <p className="mt-2 text-[10px] text-black/40">
+                Limited to one reminder per 24 hours
+              </p>
+            </div>
+          )}
 
           {/* Parties Card */}
           <div className="rounded-2xl border-[3px] border-black bg-white overflow-hidden">
@@ -1107,6 +1186,51 @@ export default function CollaborationDetailPage() {
             <PayoutTracker collaborationId={collaboration.id} />
           )}
 
+          {/* Review Prompt (show when collaboration is completed) */}
+          {collaboration.status === "completed" && !checkingReview && (
+            <div className="rounded-2xl border-[3px] border-black bg-[#FFD84A] p-5">
+              {hasReviewed ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-black bg-white">
+                    <span className="text-lg">✓</span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-black">Review Submitted</p>
+                    <p className="text-sm text-black/70">
+                      Thanks for sharing your experience!
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-black bg-white">
+                    <span className="text-2xl">⭐</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">
+                      Share Your Experience
+                    </p>
+                    <p className="mt-1 text-lg font-black text-black">
+                      How was working with {userRole === "host" ? collaboration.creator.displayName : collaboration.host.displayName}?
+                    </p>
+                    <p className="mt-1 text-sm text-black/70">
+                      Your review helps build trust in the CreatorStays community.
+                    </p>
+                    <button
+                      onClick={() => setShowReviewModal(true)}
+                      className="mt-3 inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-5 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+                    >
+                      Leave a Review
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Cancellation Request Pending (show to other party) */}
           {collaboration.status === "cancellation-requested" && (
             <div className="rounded-2xl border-[3px] border-orange-400 bg-orange-50 p-5">
@@ -1286,6 +1410,21 @@ export default function CollaborationDetailPage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Review Modal */}
+          {showReviewModal && collaboration && userRole && (
+            <ReviewModal
+              collaborationId={collaboration.id}
+              revieweeName={userRole === "host" ? collaboration.creator.displayName : collaboration.host.displayName}
+              revieweeType={userRole === "host" ? "creator" : "host"}
+              propertyTitle={collaboration.property.title}
+              onClose={() => setShowReviewModal(false)}
+              onSuccess={() => {
+                setHasReviewed(true)
+                setToast("Review submitted successfully!")
+              }}
+            />
           )}
         </div>
       </Container>
