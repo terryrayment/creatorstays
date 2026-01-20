@@ -280,7 +280,7 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
               {dealType !== "post-for-stay" && (
                 <div>
                   <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-black">
-                    Payment Amount *
+                    Creator Payment Amount *
                   </label>
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-bold text-black">$</span>
@@ -300,24 +300,28 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
 
                   {/* Fee Preview - shows when amount is entered */}
                   {cashAmount && parseFloat(cashAmount) > 0 && (
-                    <div className="mt-3 rounded-lg border-2 border-black/20 bg-black/5 p-3">
-                      <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-black/60">Fee Preview</p>
-                      <div className="space-y-1 text-sm">
+                    <div className="mt-3 overflow-hidden rounded-lg border-2 border-black">
+                      {/* Your Total - Most prominent */}
+                      <div className="flex items-center justify-between bg-black px-3 py-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-white">Your Total</span>
+                        <span className="text-lg font-black text-white">${(hostTotal / 100).toFixed(2)}</span>
+                      </div>
+                      
+                      {/* Breakdown */}
+                      <div className="space-y-1.5 bg-black/5 p-3 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-black/70">Base amount</span>
+                          <span className="text-black/70">Creator payment</span>
                           <span className="font-medium text-black">${parseFloat(cashAmount).toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between text-[#4AA3FF]">
-                          <span>+ Your platform fee (15%)</span>
-                          <span className="font-medium">${(hostFee / 100).toFixed(2)}</span>
+                        <div className="flex justify-between">
+                          <span className="text-black/70">Platform fee (15%)</span>
+                          <span className="font-medium text-black/70">+${(hostFee / 100).toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between border-t border-black/10 pt-1">
-                          <span className="font-bold text-black">You'll pay</span>
-                          <span className="font-bold text-black">${(hostTotal / 100).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between text-black/50">
-                          <span>Creator receives (after 15% fee)</span>
-                          <span className="font-medium">${(creatorNet / 100).toFixed(2)}</span>
+                        <div className="border-t border-black/10 pt-1.5">
+                          <div className="flex justify-between text-[12px] text-black/50">
+                            <span>Creator receives (after their 15% fee)</span>
+                            <span>${(creatorNet / 100).toFixed(2)}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -521,19 +525,19 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                   {dealType !== "post-for-stay" && (
                     <>
                       <div className="flex justify-between">
-                        <span className="text-black/70">Base Payment</span>
+                        <span className="text-black/70">Creator Payment</span>
                         <span className="font-bold text-black">${cashAmount}</span>
                       </div>
-                      <div className="flex justify-between text-[#4AA3FF]">
-                        <span>+ Platform Fee (15%)</span>
-                        <span className="font-bold">${(hostFee / 100).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between border-t border-black/10 pt-2">
-                        <span className="font-bold text-black">You Pay</span>
-                        <span className="font-bold text-black">${(hostTotal / 100).toFixed(2)}</span>
-                      </div>
                       <div className="flex justify-between text-black/50">
-                        <span>Creator Receives</span>
+                        <span>Platform Fee (15%)</span>
+                        <span>+${(hostFee / 100).toFixed(2)}</span>
+                      </div>
+                      <div className="-mx-4 mt-2 flex justify-between border-t-2 border-black bg-black px-4 py-2">
+                        <span className="font-bold text-white">You Pay</span>
+                        <span className="text-lg font-black text-white">${(hostTotal / 100).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between pt-2 text-[12px] text-black/50">
+                        <span>Creator receives (after their 15% fee)</span>
                         <span>${(creatorNet / 100).toFixed(2)}</span>
                       </div>
                     </>
