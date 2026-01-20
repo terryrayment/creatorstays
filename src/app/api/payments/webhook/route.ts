@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import Stripe from 'stripe'
-import { sendEmail, paymentCompleteEmail } from '@/lib/email'
+import { sendEmail, paymentCompleteEmail, paymentReceiptEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -89,6 +89,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   const cashCents = parseInt(session.metadata?.cashCents || '0')
   const hostFeeCents = parseInt(session.metadata?.hostFeeCents || '0')
   const creatorNetCents = parseInt(session.metadata?.creatorNetCents || '0')
+  const creatorFeeCents = parseInt(session.metadata?.creatorFeeCents || '0')
 
   if (!collaborationId) {
     console.error('[Webhook] No collaborationId in session metadata')
@@ -98,6 +99,8 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   console.log(`[Webhook] Processing payment for collaboration: ${collaborationId}`)
 
   try {
+    const paidAt = new Date()
+    
     // Update collaboration
     await prisma.collaboration.update({
       where: { id: collaborationId },
@@ -105,31 +108,37 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         paymentStatus: 'completed',
         paymentIntentId: session.payment_intent as string,
         paymentAmount: cashCents + hostFeeCents,
-        paidAt: new Date(),
+        paidAt,
         status: 'completed',
-        completedAt: new Date(),
+        completedAt: paidAt,
       },
     })
 
-    // Get collaboration details for logging
+    // Get collaboration details for emails
     const collaboration = await prisma.collaboration.findUnique({
       where: { id: collaborationId },
       include: {
         creator: { include: { user: true } },
-        host: true,
+        host: { include: { user: true } },
         property: true,
+        offer: true,
       },
     })
 
+    if (!collaboration) {
+      console.error('[Webhook] Collaboration not found after update')
+      return
+    }
+
     console.log(`[Webhook] Payment completed:`)
     console.log(`  - Collaboration: ${collaborationId}`)
-    console.log(`  - Host: ${collaboration?.host.displayName}`)
-    console.log(`  - Creator: ${collaboration?.creator.displayName}`)
+    console.log(`  - Host: ${collaboration.host.displayName}`)
+    console.log(`  - Creator: ${collaboration.creator.displayName}`)
     console.log(`  - Amount paid: $${((cashCents + hostFeeCents) / 100).toFixed(2)}`)
     console.log(`  - Creator receives: $${(creatorNetCents / 100).toFixed(2)}`)
 
-    // Send email notification to creator
-    if (collaboration?.creator.user.email) {
+    // Send payment notification to creator
+    if (collaboration.creator.user.email) {
       const emailData = paymentCompleteEmail({
         creatorName: collaboration.creator.displayName,
         hostName: collaboration.host.displayName,
@@ -141,7 +150,34 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       sendEmail({
         to: collaboration.creator.user.email,
         ...emailData,
-      }).catch(err => console.error('[Webhook] Email error:', err))
+      }).catch(err => console.error('[Webhook] Creator email error:', err))
+    }
+
+    // Send payment receipt to host
+    if (collaboration.host.user.email) {
+      const receiptData = paymentReceiptEmail({
+        hostName: collaboration.host.displayName,
+        hostEmail: collaboration.host.user.email,
+        creatorName: collaboration.creator.displayName,
+        creatorHandle: collaboration.creator.handle,
+        propertyTitle: collaboration.property.title || 'Property',
+        propertyLocation: collaboration.property.cityRegion || undefined,
+        dealType: collaboration.offer?.offerType || 'flat',
+        baseCashCents: cashCents,
+        hostFeeCents: hostFeeCents,
+        totalPaidCents: cashCents + hostFeeCents,
+        creatorFeeCents: creatorFeeCents || Math.round(cashCents * 0.15),
+        creatorNetCents: creatorNetCents,
+        deliverables: collaboration.offer?.deliverables || [],
+        collaborationId,
+        paymentIntentId: session.payment_intent as string || undefined,
+        paidAt,
+      })
+      
+      sendEmail({
+        to: collaboration.host.user.email,
+        ...receiptData,
+      }).catch(err => console.error('[Webhook] Host receipt email error:', err))
     }
 
   } catch (error) {

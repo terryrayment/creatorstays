@@ -575,6 +575,207 @@ View: ${BASE_URL}/dashboard/creator/settings
 }
 
 /**
+ * Payment Receipt Email (to Host)
+ * Detailed receipt with breakdown for business records/taxes
+ */
+export function paymentReceiptEmail(data: {
+  hostName: string
+  hostEmail: string
+  creatorName: string
+  creatorHandle: string
+  propertyTitle: string
+  propertyLocation?: string
+  dealType: string
+  baseCashCents: number      // Base payment to creator
+  hostFeeCents: number       // 15% platform fee from host
+  totalPaidCents: number     // Total charged to host
+  creatorFeeCents: number    // 15% platform fee from creator (for transparency)
+  creatorNetCents: number    // What creator receives
+  deliverables: string[]
+  collaborationId: string
+  paymentIntentId?: string
+  paidAt: Date
+}): { subject: string; html: string; text: string } {
+  const { 
+    hostName, 
+    hostEmail,
+    creatorName, 
+    creatorHandle, 
+    propertyTitle, 
+    propertyLocation,
+    dealType,
+    baseCashCents, 
+    hostFeeCents, 
+    totalPaidCents,
+    creatorFeeCents,
+    creatorNetCents,
+    deliverables,
+    collaborationId,
+    paymentIntentId,
+    paidAt
+  } = data
+
+  const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`
+  const receiptDate = paidAt.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
+  const receiptNumber = `CS-${collaborationId.slice(-8).toUpperCase()}`
+  
+  const dealTypeLabel = dealType === 'post-for-stay' ? 'Post-for-Stay' :
+                        dealType === 'flat-with-bonus' ? 'Flat Fee + Bonus' : 'Flat Fee'
+
+  const subject = `Receipt: ${formatCurrency(totalPaidCents)} payment to @${creatorHandle}`
+
+  const html = emailWrapper(`
+    <div style="text-align: center; margin-bottom: 32px;">
+      <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Payment Receipt</h1>
+      <p style="color: #666; margin: 0;">Thank you for your payment</p>
+    </div>
+    
+    <!-- Receipt Header -->
+    <div style="background: #f9f9f9; border: 2px solid #000; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+      <table style="width: 100%;">
+        <tr>
+          <td>
+            <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 4px;">Receipt Number</p>
+            <p style="font-size: 14px; font-weight: 700; margin: 0;">${receiptNumber}</p>
+          </td>
+          <td style="text-align: right;">
+            <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 4px;">Date</p>
+            <p style="font-size: 14px; font-weight: 700; margin: 0;">${receiptDate}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+    
+    <!-- Bill To / Paid To -->
+    <table style="width: 100%; margin-bottom: 24px;">
+      <tr>
+        <td style="width: 48%; vertical-align: top;">
+          <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Billed To</p>
+          <p style="font-size: 14px; font-weight: 700; margin: 0;">${hostName}</p>
+          <p style="font-size: 13px; color: #666; margin: 4px 0 0;">${hostEmail}</p>
+        </td>
+        <td style="width: 4%;"></td>
+        <td style="width: 48%; vertical-align: top;">
+          <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Paid To</p>
+          <p style="font-size: 14px; font-weight: 700; margin: 0;">${creatorName}</p>
+          <p style="font-size: 13px; color: #666; margin: 4px 0 0;">@${creatorHandle}</p>
+        </td>
+      </tr>
+    </table>
+    
+    <!-- Service Details -->
+    <div style="${styles.card}; margin-bottom: 24px;">
+      <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 12px;">Service Details</p>
+      
+      <p style="font-size: 16px; font-weight: 700; margin: 0 0 4px;">${propertyTitle}</p>
+      ${propertyLocation ? `<p style="font-size: 13px; color: #666; margin: 0 0 12px;">${propertyLocation}</p>` : ''}
+      
+      <p style="margin: 12px 0 8px;">
+        <span style="background: #FFD84A; padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 700;">${dealTypeLabel}</span>
+      </p>
+      
+      ${deliverables.length > 0 ? `
+        <p style="font-size: 12px; color: #666; margin: 16px 0 8px;">Deliverables:</p>
+        <p style="font-size: 13px; margin: 0;">${deliverables.join(' · ')}</p>
+      ` : ''}
+    </div>
+    
+    <!-- Payment Breakdown -->
+    <div style="background: #fff; border: 2px solid #000; border-radius: 12px; overflow: hidden; margin-bottom: 24px;">
+      <div style="padding: 16px 20px; border-bottom: 1px solid #eee;">
+        <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 4px;">Payment Breakdown</p>
+      </div>
+      
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 12px 20px; border-bottom: 1px solid #eee;">Creator Payment</td>
+          <td style="padding: 12px 20px; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">${formatCurrency(baseCashCents)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px 20px; border-bottom: 1px solid #eee;">
+            Platform Fee (15%)
+            <span style="font-size: 11px; color: #666; display: block;">Service fee for payment processing & platform</span>
+          </td>
+          <td style="padding: 12px 20px; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">${formatCurrency(hostFeeCents)}</td>
+        </tr>
+        <tr style="background: #000;">
+          <td style="padding: 16px 20px; color: #fff; font-weight: 700;">Total Paid</td>
+          <td style="padding: 16px 20px; text-align: right; color: #fff; font-weight: 900; font-size: 18px;">${formatCurrency(totalPaidCents)}</td>
+        </tr>
+      </table>
+    </div>
+    
+    <!-- Creator Payment Info (for transparency) -->
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+      <p style="font-size: 12px; color: #666; margin: 0 0 8px;">
+        <strong>Creator receives:</strong> ${formatCurrency(creatorNetCents)} (after 15% creator platform fee)
+      </p>
+      <p style="font-size: 11px; color: #999; margin: 0;">
+        Funds are transferred to ${creatorName}'s connected Stripe account within 2-3 business days.
+      </p>
+    </div>
+    
+    <!-- Reference Info -->
+    <div style="font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 16px; margin-bottom: 24px;">
+      <p style="margin: 0 0 4px;"><strong>Collaboration ID:</strong> ${collaborationId}</p>
+      ${paymentIntentId ? `<p style="margin: 0;"><strong>Stripe Reference:</strong> ${paymentIntentId}</p>` : ''}
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/host/collaborations" style="${styles.button}">View Collaboration →</a>
+    </div>
+    
+    <p style="font-size: 12px; color: #999; text-align: center; margin-top: 24px;">
+      This receipt serves as confirmation of your payment. For tax purposes, please consult with your accountant.<br>
+      Questions? Contact us at support@creatorstays.com
+    </p>
+  `)
+
+  const text = `
+PAYMENT RECEIPT
+================
+
+Receipt Number: ${receiptNumber}
+Date: ${receiptDate}
+
+BILLED TO
+${hostName}
+${hostEmail}
+
+PAID TO
+${creatorName} (@${creatorHandle})
+
+SERVICE DETAILS
+Property: ${propertyTitle}${propertyLocation ? ` - ${propertyLocation}` : ''}
+Deal Type: ${dealTypeLabel}
+${deliverables.length > 0 ? `Deliverables: ${deliverables.join(', ')}` : ''}
+
+PAYMENT BREAKDOWN
+Creator Payment:     ${formatCurrency(baseCashCents)}
+Platform Fee (15%):  ${formatCurrency(hostFeeCents)}
+---------------------------------
+TOTAL PAID:          ${formatCurrency(totalPaidCents)}
+
+Creator receives ${formatCurrency(creatorNetCents)} (after 15% creator platform fee).
+
+REFERENCE
+Collaboration ID: ${collaborationId}
+${paymentIntentId ? `Stripe Reference: ${paymentIntentId}` : ''}
+
+View collaboration: ${BASE_URL}/dashboard/host/collaborations
+
+This receipt serves as confirmation of your payment. For tax purposes, please consult with your accountant.
+Questions? Contact us at support@creatorstays.com
+`
+
+  return { subject, html, text }
+}
+
+/**
  * Offer Countered Email (to Host)
  */
 export function offerCounteredEmail(data: {

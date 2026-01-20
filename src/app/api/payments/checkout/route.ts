@@ -116,6 +116,7 @@ export async function POST(request: NextRequest) {
         creatorProfileId: collaboration.creatorId,
         cashCents: cashCents.toString(),
         hostFeeCents: breakdown.hostFeeCents.toString(),
+        creatorFeeCents: breakdown.creatorFeeCents.toString(),
         creatorNetCents: breakdown.creatorNetCents.toString(),
       },
       // If creator has connected Stripe, set up for transfer
