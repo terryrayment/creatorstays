@@ -1,39 +1,26 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
+import { useSession, signOut } from "next-auth/react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
-function getCookie(name: string): string | null {
-  if (typeof document === 'undefined') return null
-  const value = `; ${document.cookie}`
-  const parts = value.split(`; ${name}=`)
-  if (parts.length === 2) {
-    const cookieValue = parts.pop()?.split(';').shift()
-    return cookieValue ? decodeURIComponent(cookieValue) : null
-  }
-  return null
-}
-
-export default function CreatorSettingsPage() {
+function CreatorSettingsContent() {
+  const { data: session, status } = useSession()
   const router = useRouter()
-  const [user, setUser] = useState<{ email: string } | null>(null)
-  const [activeTab, setActiveTab] = useState<"profile" | "password" | "payout" | "notifications">("profile")
+  const searchParams = useSearchParams()
+  
+  const [activeTab, setActiveTab] = useState<"profile" | "payout" | "notifications">("profile")
   const [toast, setToast] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
   
   // Profile form
   const [profile, setProfile] = useState({
-    displayName: "Demo Creator",
+    displayName: "",
     email: "",
-    phone: "+1 (555) 987-6543",
-    handle: "democreator",
-  })
-  
-  // Password form
-  const [passwords, setPasswords] = useState({
-    current: "",
-    new: "",
-    confirm: "",
+    handle: "",
+    bio: "",
+    location: "",
   })
   
   // Payout settings
@@ -42,7 +29,6 @@ export default function CreatorSettingsPage() {
     stripeOnboardingComplete: false,
     chargesEnabled: false,
     payoutsEnabled: false,
-    w9Completed: false,
   })
   const [connectingStripe, setConnectingStripe] = useState(false)
   
@@ -54,28 +40,68 @@ export default function CreatorSettingsPage() {
     marketingEmails: false,
   })
 
+  // Redirect if not logged in
   useEffect(() => {
-    const userCookie = getCookie('cs_user')
-    if (userCookie) {
+    if (status === "unauthenticated") {
+      router.push("/login/creator")
+    }
+  }, [status, router])
+
+  // Fetch profile and Stripe status
+  useEffect(() => {
+    if (status !== "authenticated") return
+
+    async function fetchData() {
       try {
-        const userData = JSON.parse(userCookie)
-        setUser(userData)
-        setProfile(prev => ({ ...prev, email: userData.email }))
-      } catch {
-        router.push('/login/creator')
+        // Fetch creator profile
+        const profileRes = await fetch('/api/creator/profile')
+        if (profileRes.ok) {
+          const data = await profileRes.json()
+          setProfile({
+            displayName: data.displayName || session?.user?.name || "",
+            email: session?.user?.email || "",
+            handle: data.handle || "",
+            bio: data.bio || "",
+            location: data.location || "",
+          })
+        }
+
+        // Fetch Stripe status
+        const stripeRes = await fetch('/api/stripe/connect')
+        if (stripeRes.ok) {
+          const data = await stripeRes.json()
+          setPayout({
+            stripeConnected: data.connected,
+            stripeOnboardingComplete: data.onboardingComplete,
+            chargesEnabled: data.chargesEnabled,
+            payoutsEnabled: data.payoutsEnabled,
+          })
+        }
+      } catch (e) {
+        console.error('Failed to fetch data:', e)
       }
-    } else {
-      router.push('/login/creator')
+      setLoading(false)
     }
 
-    // Check for Stripe return params
-    const urlParams = new URLSearchParams(window.location.search)
-    const stripeStatus = urlParams.get('stripe')
+    fetchData()
+  }, [status, session])
+
+  // Handle Stripe return params
+  useEffect(() => {
+    const stripeStatus = searchParams.get('stripe')
     if (stripeStatus === 'success') {
       setToast('Stripe account connected successfully!')
       setActiveTab('payout')
-      // Clean URL
       window.history.replaceState({}, '', '/dashboard/creator/settings')
+      // Refresh Stripe status
+      fetch('/api/stripe/connect').then(res => res.json()).then(data => {
+        setPayout({
+          stripeConnected: data.connected,
+          stripeOnboardingComplete: data.onboardingComplete,
+          chargesEnabled: data.chargesEnabled,
+          payoutsEnabled: data.payoutsEnabled,
+        })
+      })
       setTimeout(() => setToast(null), 5000)
     } else if (stripeStatus === 'refresh') {
       setToast('Please complete Stripe onboarding')
@@ -83,46 +109,27 @@ export default function CreatorSettingsPage() {
       window.history.replaceState({}, '', '/dashboard/creator/settings')
       setTimeout(() => setToast(null), 5000)
     }
+  }, [searchParams])
 
-    // Fetch Stripe status
-    async function fetchStripeStatus() {
-      try {
-        const res = await fetch('/api/stripe/connect')
-        if (res.ok) {
-          const data = await res.json()
-          setPayout(prev => ({
-            ...prev,
-            stripeConnected: data.connected,
-            stripeOnboardingComplete: data.onboardingComplete,
-            chargesEnabled: data.chargesEnabled,
-            payoutsEnabled: data.payoutsEnabled,
-          }))
-        }
-      } catch (e) {
-        console.error('Failed to fetch Stripe status:', e)
+  const handleProfileSave = async () => {
+    try {
+      const res = await fetch('/api/creator/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          displayName: profile.displayName,
+          bio: profile.bio,
+          location: profile.location,
+        }),
+      })
+      if (res.ok) {
+        setToast("Profile updated")
+      } else {
+        setToast("Failed to update profile")
       }
+    } catch (e) {
+      setToast("Error saving profile")
     }
-    fetchStripeStatus()
-  }, [router])
-
-  const handleProfileSave = () => {
-    setToast("Profile updated")
-    setTimeout(() => setToast(null), 3000)
-  }
-
-  const handlePasswordSave = () => {
-    if (passwords.new !== passwords.confirm) {
-      setToast("Passwords don't match")
-      setTimeout(() => setToast(null), 3000)
-      return
-    }
-    if (passwords.new.length < 8) {
-      setToast("Password must be at least 8 characters")
-      setTimeout(() => setToast(null), 3000)
-      return
-    }
-    setPasswords({ current: "", new: "", confirm: "" })
-    setToast("Password updated")
     setTimeout(() => setToast(null), 3000)
   }
 
@@ -138,7 +145,6 @@ export default function CreatorSettingsPage() {
       const data = await res.json()
       
       if (res.ok && data.url) {
-        // Redirect to Stripe onboarding
         window.location.href = data.url
       } else {
         setToast(data.error || 'Failed to connect Stripe')
@@ -152,17 +158,22 @@ export default function CreatorSettingsPage() {
     setConnectingStripe(false)
   }
 
-  const handleLogout = () => {
-    document.cookie = "cs_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
-    document.cookie = "cs_role=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
-    document.cookie = "cs_user=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
-    router.push("/login/creator")
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/login/creator" })
   }
 
   const inputClass = "h-10 w-full rounded-lg border-[2px] border-black bg-white px-3 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
 
-  if (!user) {
-    return <div className="min-h-screen bg-black" />
+  if (status === "loading" || loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <p className="text-white">Loading...</p>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
   }
 
   return (
@@ -193,7 +204,7 @@ export default function CreatorSettingsPage() {
 
         {/* Tabs */}
         <div className="mb-3 flex flex-wrap gap-1">
-          {(["profile", "password", "payout", "notifications"] as const).map((tab) => (
+          {(["profile", "payout", "notifications"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -226,8 +237,8 @@ export default function CreatorSettingsPage() {
                   <span className="text-[13px] font-medium text-black">@</span>
                   <input
                     value={profile.handle}
-                    onChange={e => setProfile({ ...profile, handle: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
-                    className={inputClass}
+                    disabled
+                    className={`${inputClass} bg-black/5 cursor-not-allowed`}
                   />
                 </div>
                 <p className="mt-1 text-[10px] font-medium text-black/60">creatorstays.com/c/{profile.handle}</p>
@@ -237,16 +248,27 @@ export default function CreatorSettingsPage() {
                 <input
                   type="email"
                   value={profile.email}
-                  onChange={e => setProfile({ ...profile, email: e.target.value })}
-                  className={inputClass}
+                  disabled
+                  className={`${inputClass} bg-black/5 cursor-not-allowed`}
+                />
+                <p className="mt-1 text-[10px] font-medium text-black/60">Email cannot be changed. Sign in with a different email to use another account.</p>
+              </div>
+              <div>
+                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Bio</label>
+                <textarea
+                  value={profile.bio}
+                  onChange={e => setProfile({ ...profile, bio: e.target.value })}
+                  rows={3}
+                  className="w-full rounded-lg border-[2px] border-black bg-white px-3 py-2 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
+                  placeholder="Tell hosts about yourself..."
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Phone</label>
+                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Location</label>
                 <input
-                  type="tel"
-                  value={profile.phone}
-                  onChange={e => setProfile({ ...profile, phone: e.target.value })}
+                  value={profile.location}
+                  onChange={e => setProfile({ ...profile, location: e.target.value })}
+                  placeholder="Los Angeles, CA"
                   className={inputClass}
                 />
               </div>
@@ -255,48 +277,6 @@ export default function CreatorSettingsPage() {
                 className="h-10 rounded-full bg-black px-6 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
               >
                 Save Changes
-              </button>
-            </div>
-          )}
-
-          {activeTab === "password" && (
-            <div className="space-y-4">
-              <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Current Password</label>
-                <input
-                  type="password"
-                  value={passwords.current}
-                  onChange={e => setPasswords({ ...passwords, current: e.target.value })}
-                  placeholder="Enter current password"
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">New Password</label>
-                <input
-                  type="password"
-                  value={passwords.new}
-                  onChange={e => setPasswords({ ...passwords, new: e.target.value })}
-                  placeholder="Enter new password"
-                  className={inputClass}
-                />
-                <p className="mt-1 text-[10px] font-medium text-black/60">Minimum 8 characters</p>
-              </div>
-              <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Confirm New Password</label>
-                <input
-                  type="password"
-                  value={passwords.confirm}
-                  onChange={e => setPasswords({ ...passwords, confirm: e.target.value })}
-                  placeholder="Confirm new password"
-                  className={inputClass}
-                />
-              </div>
-              <button
-                onClick={handlePasswordSave}
-                className="h-10 rounded-full bg-black px-6 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
-              >
-                Update Password
               </button>
             </div>
           )}
@@ -450,5 +430,21 @@ export default function CreatorSettingsPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <p className="text-white">Loading...</p>
+    </div>
+  )
+}
+
+export default function CreatorSettingsPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CreatorSettingsContent />
+    </Suspense>
   )
 }

@@ -1,10 +1,14 @@
 import Stripe from 'stripe'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set')
-}
+// Stripe instance - only created if STRIPE_SECRET_KEY is set
+export const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2023-10-16',
+      typescript: true,
+    })
+  : null as unknown as Stripe // Type assertion for development
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2023-10-16',
-  typescript: true,
-})
+// Helper to check if Stripe is configured
+export const isStripeConfigured = (): boolean => {
+  return !!process.env.STRIPE_SECRET_KEY
+}

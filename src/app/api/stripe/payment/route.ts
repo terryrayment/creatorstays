@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe'
+import { stripe, isStripeConfigured } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -9,6 +9,11 @@ export const dynamic = 'force-dynamic'
 // Create a payment from host to creator
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!isStripeConfigured()) {
+      return NextResponse.json({ error: 'Payment system is not configured' }, { status: 500 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {

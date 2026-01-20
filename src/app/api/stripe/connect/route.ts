@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe'
+import { stripe, isStripeConfigured } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if Stripe is configured
-    if (!process.env.STRIPE_SECRET_KEY) {
+    if (!isStripeConfigured()) {
       console.error('[Stripe Connect] STRIPE_SECRET_KEY not configured')
       return NextResponse.json({ error: 'Payment system is not configured. Please contact support.' }, { status: 500 })
     }
@@ -110,6 +110,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ 
         connected: false,
         onboardingComplete: false 
+      })
+    }
+
+    // If Stripe isn't configured, return cached status from DB
+    if (!isStripeConfigured()) {
+      return NextResponse.json({
+        connected: true,
+        onboardingComplete: creator.stripeOnboardingComplete,
+        chargesEnabled: creator.stripeChargesEnabled,
+        payoutsEnabled: creator.stripePayoutsEnabled,
       })
     }
 
