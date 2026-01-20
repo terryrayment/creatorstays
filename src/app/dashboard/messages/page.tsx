@@ -38,6 +38,12 @@ interface ConversationDetail {
   messages: Message[]
 }
 
+interface OutreachLimit {
+  used: number
+  limit: number
+  remaining: number
+}
+
 function formatTime(dateStr: string): string {
   const date = new Date(dateStr)
   const now = new Date()
@@ -67,6 +73,8 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState("")
   const [sending, setSending] = useState(false)
   const [role, setRole] = useState<"host" | "creator" | null>(null)
+  const [outreachLimit, setOutreachLimit] = useState<OutreachLimit | null>(null)
+  const [outreachLimitError, setOutreachLimitError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Fetch conversations
@@ -78,6 +86,10 @@ export default function MessagesPage() {
           const data = await res.json()
           setConversations(data.conversations || [])
           setRole(data.role)
+          // Capture outreach limit for creators
+          if (data.outreachLimit) {
+            setOutreachLimit(data.outreachLimit)
+          }
         }
       } catch (e) {
         console.error("Failed to fetch conversations:", e)
@@ -118,7 +130,10 @@ export default function MessagesPage() {
   const handleSend = async () => {
     if (!newMessage.trim() || !selectedConversation || sending) return
 
+    // Clear any previous outreach limit error
+    setOutreachLimitError(null)
     setSending(true)
+    
     try {
       const res = await fetch("/api/messages", {
         method: "POST",
@@ -129,8 +144,9 @@ export default function MessagesPage() {
         }),
       })
 
+      const data = await res.json()
+
       if (res.ok) {
-        const data = await res.json()
         // Add new message to the conversation
         setSelectedConversation(prev =>
           prev
@@ -159,6 +175,14 @@ export default function MessagesPage() {
           )
         )
         setNewMessage("")
+      } else if (data.code === 'OUTREACH_LIMIT_REACHED') {
+        // Handle outreach limit error
+        setOutreachLimitError(data.message)
+        if (data.outreachLimit) {
+          setOutreachLimit(data.outreachLimit)
+        }
+      } else {
+        console.error("Failed to send message:", data.error)
       }
     } catch (e) {
       console.error("Failed to send message:", e)
@@ -179,6 +203,22 @@ export default function MessagesPage() {
       <div className="w-80 shrink-0 border-r-2 border-black bg-white">
         <div className="border-b-2 border-black p-4">
           <h1 className="font-heading text-lg font-black text-black">MESSAGES</h1>
+          {/* Outreach limit indicator for creators */}
+          {role === "creator" && outreachLimit && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="h-1 flex-1 overflow-hidden rounded-full bg-black/10">
+                <div 
+                  className={`h-full rounded-full transition-all ${
+                    outreachLimit.remaining === 0 ? 'bg-amber-500' : 'bg-black'
+                  }`}
+                  style={{ width: `${(outreachLimit.used / outreachLimit.limit) * 100}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-medium text-black/60">
+                {outreachLimit.used}/{outreachLimit.limit} outreach
+              </span>
+            </div>
+          )}
         </div>
 
         {loading ? (
@@ -351,6 +391,12 @@ export default function MessagesPage() {
 
             {/* Input */}
             <div className="border-t-2 border-black bg-white p-4">
+              {/* Outreach limit error message */}
+              {outreachLimitError && role === "creator" && (
+                <div className="mb-3 rounded-lg border-2 border-amber-300 bg-amber-50 px-3 py-2">
+                  <p className="text-xs text-amber-800">{outreachLimitError}</p>
+                </div>
+              )}
               <div className="flex gap-2">
                 <input
                   type="text"

@@ -158,6 +158,12 @@ export function CreatorOffersInbox() {
     }
   }, [session])
 
+  // Helper to check if an offer requires Stripe
+  const requiresStripe = (offer: Offer) => offer.cashCents > 0 || offer.trafficBonusEnabled
+  
+  // Helper to check if Stripe is ready for payments
+  const isStripeReady = stripeStatus?.connected && stripeStatus?.onboardingComplete
+
   // Fetch offers
   useEffect(() => {
     async function fetchOffers() {
@@ -183,11 +189,27 @@ export function CreatorOffersInbox() {
     if (!selectedOffer) return
     
     // Check if this is a paid offer and Stripe isn't set up
-    if (action === 'accept') {
-      const isPaidOffer = selectedOffer.cashCents > 0 || selectedOffer.trafficBonusEnabled
-      const stripeReady = stripeStatus?.connected && stripeStatus?.onboardingComplete
-      
-      if (isPaidOffer && !stripeReady) {
+    if (action === 'accept' && requiresStripe(selectedOffer)) {
+      // If Stripe status hasn't loaded yet, show loading state briefly then check
+      if (stripeStatus === null) {
+        setActionLoading(true)
+        // Fetch Stripe status and check
+        try {
+          const res = await fetch('/api/stripe/connect')
+          if (res.ok) {
+            const data = await res.json()
+            setStripeStatus(data)
+            if (!data.connected || !data.onboardingComplete) {
+              setShowStripeModal(true)
+              setActionLoading(false)
+              return
+            }
+          }
+        } catch (e) {
+          console.error('Failed to check Stripe status:', e)
+        }
+        setActionLoading(false)
+      } else if (!isStripeReady) {
         setShowStripeModal(true)
         return
       }
@@ -474,30 +496,51 @@ export function CreatorOffersInbox() {
 
             {/* Response actions */}
             {!responding && (
-              <div className="flex gap-2 pt-2">
-                <Button 
-                  onClick={() => handleRespond('accept')} 
-                  disabled={actionLoading}
-                  className="flex-1 bg-[#28D17C] hover:bg-[#28D17C]/90"
-                >
-                  {actionLoading ? 'Processing...' : 'Accept Offer'}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setResponding('counter')} 
-                  disabled={actionLoading}
-                  className="flex-1"
-                >
-                  Counter
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  onClick={() => handleRespond('decline')}
-                  disabled={actionLoading}
-                  className="text-black/60 hover:text-red-600"
-                >
-                  Decline
-                </Button>
+              <div className="space-y-3 pt-2">
+                {/* Stripe setup notice for paid offers */}
+                {requiresStripe(selectedOffer) && !isStripeReady && stripeStatus !== null && (
+                  <div className="flex items-start gap-3 rounded-lg border-2 border-amber-300 bg-amber-50 p-3">
+                    <svg className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-medium text-amber-800">Payment setup required</p>
+                      <p className="mt-0.5 text-xs text-amber-700">
+                        Connect your bank account via Stripe to accept this paid offer. You'll be guided through setup when you click Accept.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => handleRespond('accept')} 
+                    disabled={actionLoading}
+                    className="flex-1 bg-[#28D17C] hover:bg-[#28D17C]/90"
+                  >
+                    {actionLoading ? 'Processing...' : (
+                      requiresStripe(selectedOffer) && !isStripeReady && stripeStatus !== null
+                        ? 'Accept (Setup Payments) →'
+                        : 'Accept Offer'
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setResponding('counter')} 
+                    disabled={actionLoading}
+                    className="flex-1"
+                  >
+                    Counter
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleRespond('decline')}
+                    disabled={actionLoading}
+                    className="text-black/60 hover:text-red-600"
+                  >
+                    Decline
+                  </Button>
+                </div>
               </div>
             )}
 

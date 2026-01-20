@@ -506,6 +506,33 @@ export function CreatorDashboardProfile() {
   } | null>(null)
   const [stripeConnecting, setStripeConnecting] = useState(false)
 
+  // Host outreach limit state
+  const [outreachLimit, setOutreachLimit] = useState<{
+    used: number
+    limit: number
+    remaining: number
+  } | null>(null)
+
+  // Fetch outreach limit on mount
+  useEffect(() => {
+    async function fetchOutreachLimit() {
+      try {
+        const res = await fetch('/api/messages')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.outreachLimit) {
+            setOutreachLimit(data.outreachLimit)
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch outreach limit:', e)
+      }
+    }
+    if (session?.user) {
+      fetchOutreachLimit()
+    }
+  }, [session])
+
   // Fetch Stripe status on mount
   useEffect(() => {
     async function fetchStripeStatus() {
@@ -1376,6 +1403,40 @@ export function CreatorDashboardProfile() {
           <div className="space-y-4">
             {/* Earnings */}
             <EarningsPanel onComingSoon={(feature) => setComingSoonModal(feature)} />
+
+            {/* Host Outreach Limit */}
+            {outreachLimit && (
+              <Panel>
+                <PanelContent className="py-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <svg className="h-4 w-4 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                      </svg>
+                      <span className="text-xs font-medium text-black">Host outreach</span>
+                    </div>
+                    <span className="text-xs font-bold text-black">
+                      {outreachLimit.used} / {outreachLimit.limit}
+                    </span>
+                  </div>
+                  <div className="mt-2">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/10">
+                      <div 
+                        className={`h-full rounded-full transition-all ${
+                          outreachLimit.remaining === 0 ? 'bg-amber-500' : 'bg-black'
+                        }`}
+                        style={{ width: `${(outreachLimit.used / outreachLimit.limit) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-2 text-[10px] text-black/50">
+                    {outreachLimit.remaining > 0 
+                      ? `${outreachLimit.remaining} new conversation${outreachLimit.remaining !== 1 ? 's' : ''} remaining this month`
+                      : 'Resets next month. Hosts can still message you.'}
+                  </p>
+                </PanelContent>
+              </Panel>
+            )}
 
             {/* Offers */}
             <Panel>

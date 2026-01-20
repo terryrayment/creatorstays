@@ -5,6 +5,47 @@ import { authOptions } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
+// Creator outreach limit per month
+const CREATOR_MONTHLY_OUTREACH_LIMIT = 3
+
+/**
+ * Get the start of the current calendar month (UTC)
+ */
+function getMonthStart(): Date {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0))
+}
+
+/**
+ * Count how many new conversations a creator has initiated this month.
+ * A creator-initiated conversation is one where the first message was sent by the creator.
+ */
+async function getCreatorOutreachCountThisMonth(creatorProfileId: string): Promise<number> {
+  const monthStart = getMonthStart()
+  
+  // Find conversations created this month where the creator sent the first message
+  const conversations = await prisma.conversation.findMany({
+    where: {
+      creatorProfileId,
+      createdAt: { gte: monthStart },
+    },
+    include: {
+      messages: {
+        orderBy: { sentAt: 'asc' },
+        take: 1,
+      },
+    },
+  })
+  
+  // Count only those where creator sent the first message (creator-initiated)
+  const creatorInitiated = conversations.filter(conv => {
+    const firstMessage = conv.messages[0]
+    return firstMessage && firstMessage.senderType === 'creator'
+  })
+  
+  return creatorInitiated.length
+}
+
 // GET /api/messages - Get all conversations for current user
 export async function GET() {
   try {
@@ -70,6 +111,9 @@ export async function GET() {
         orderBy: { lastMessageAt: 'desc' },
       })
 
+      // Get creator's outreach count for this month
+      const outreachCount = await getCreatorOutreachCountThisMonth(creatorProfile.id)
+
       return NextResponse.json({
         role: 'creator',
         conversations: conversations.map(c => ({
@@ -80,6 +124,12 @@ export async function GET() {
           collaboration: c.collaboration,
           lastMessageAt: c.lastMessageAt,
         })),
+        // Include outreach limit info for creators
+        outreachLimit: {
+          used: outreachCount,
+          limit: CREATOR_MONTHLY_OUTREACH_LIMIT,
+          remaining: Math.max(0, CREATOR_MONTHLY_OUTREACH_LIMIT - outreachCount),
+        },
       })
     }
 
@@ -119,8 +169,9 @@ export async function POST(request: NextRequest) {
     }
 
     let conversation
+    let isNewCreatorInitiatedConversation = false
 
-    // If conversationId provided, use existing conversation
+    // If conversationId provided, use existing conversation (this is a reply, no limit check needed)
     if (conversationId) {
       conversation = await prisma.conversation.findUnique({
         where: { id: conversationId },
@@ -177,6 +228,27 @@ export async function POST(request: NextRequest) {
 
       // Create new conversation if doesn't exist
       if (!conversation) {
+        // This is a NEW conversation
+        // If creator is initiating, check the monthly outreach limit
+        if (!isHost) {
+          const outreachCount = await getCreatorOutreachCountThisMonth(creatorProfileId)
+          
+          if (outreachCount >= CREATOR_MONTHLY_OUTREACH_LIMIT) {
+            return NextResponse.json({
+              error: 'Monthly outreach limit reached',
+              code: 'OUTREACH_LIMIT_REACHED',
+              message: "You've reached your monthly outreach limit. Hosts can still message you, and you can continue existing conversations.",
+              outreachLimit: {
+                used: outreachCount,
+                limit: CREATOR_MONTHLY_OUTREACH_LIMIT,
+                remaining: 0,
+              },
+            }, { status: 429 })
+          }
+          
+          isNewCreatorInitiatedConversation = true
+        }
+
         conversation = await prisma.conversation.create({
           data: {
             hostProfileId,
