@@ -1,14 +1,25 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 
 export default function OnboardingPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const roleParam = searchParams.get("role")
+  const isBeta = searchParams.get("beta") === "true"
+  
   const [loading, setLoading] = useState<"host" | "creator" | null>(null)
+  const [creatorForm, setCreatorForm] = useState({
+    handle: "",
+    instagramHandle: "",
+    tiktokHandle: "",
+  })
+  const [showCreatorForm, setShowCreatorForm] = useState(false)
+  const [creatorError, setCreatorError] = useState("")
 
   // Redirect if already has a profile
   useEffect(() => {
@@ -27,6 +38,13 @@ export default function OnboardingPage() {
       router.push("/login")
     }
   }, [status, router])
+
+  // If coming from beta invite with Google OAuth, show creator form
+  useEffect(() => {
+    if (roleParam === "creator" && isBeta && status === "authenticated" && !session?.user?.hasProfile) {
+      setShowCreatorForm(true)
+    }
+  }, [roleParam, isBeta, status, session])
 
   const handleSelectRole = async (role: "host" | "creator") => {
     setLoading(role)
@@ -55,8 +73,71 @@ export default function OnboardingPage() {
         router.push("/dashboard/host/settings?setup=true")
       }
     } else {
-      // For creators, they need an invite or to join waitlist
-      router.push("/waitlist?from=onboarding")
+      // Check if user has a beta invite stored
+      const betaCode = typeof window !== 'undefined' ? localStorage.getItem("betaInviteCode") : null
+      if (betaCode || isBeta) {
+        // Show creator profile form
+        setShowCreatorForm(true)
+        setLoading(null)
+      } else {
+        // For creators without invite, redirect to waitlist
+        router.push("/waitlist?from=onboarding")
+      }
+    }
+  }
+
+  const handleCreateCreatorProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading("creator")
+    setCreatorError("")
+
+    // Validate
+    if (!creatorForm.handle) {
+      setCreatorError("Handle is required")
+      setLoading(null)
+      return
+    }
+
+    if (!creatorForm.instagramHandle && !creatorForm.tiktokHandle) {
+      setCreatorError("Please add at least one social platform")
+      setLoading(null)
+      return
+    }
+
+    try {
+      // Get beta code from localStorage
+      const betaCode = typeof window !== 'undefined' ? localStorage.getItem("betaInviteCode") : null
+
+      const res = await fetch("/api/creator/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: session?.user?.name || "Creator",
+          handle: creatorForm.handle.toLowerCase().replace(/[^a-z0-9_]/g, ""),
+          instagramHandle: creatorForm.instagramHandle,
+          tiktokHandle: creatorForm.tiktokHandle,
+          isBeta: true,
+          inviteTokenUsed: betaCode,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        // Clear the beta code from localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem("betaInviteCode")
+        }
+        // Redirect to creator dashboard
+        router.push("/dashboard/creator")
+      } else {
+        setCreatorError(data.error || "Failed to create profile")
+        setLoading(null)
+      }
+    } catch (error) {
+      console.error("Failed to create creator profile:", error)
+      setCreatorError("Network error. Please try again.")
+      setLoading(null)
     }
   }
 
@@ -65,6 +146,104 @@ export default function OnboardingPage() {
       <div className="min-h-screen bg-black px-3 py-20 lg:px-4">
         <div className="mx-auto max-w-md text-center">
           <p className="text-white">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  const inputClass = "h-11 w-full rounded-lg border-[2px] border-black bg-white px-4 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
+
+  // Show creator profile form for beta users
+  if (showCreatorForm) {
+    return (
+      <div className="min-h-screen bg-black px-3 py-20 lg:px-4">
+        <div className="mx-auto max-w-md">
+          {/* Beta Badge */}
+          <div className="mb-4 rounded-2xl border-[3px] border-black bg-[#28D17C] p-4 text-center">
+            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full border-[2px] border-black bg-white">
+              <span className="text-lg">🎉</span>
+            </div>
+            <p className="text-[9px] font-black uppercase tracking-wider text-black">Welcome to Beta</p>
+            <p className="mt-1 text-[12px] font-medium text-black">
+              Complete your creator profile to get started.
+            </p>
+          </div>
+
+          {/* Creator Profile Form */}
+          <div className="rounded-2xl border-[3px] border-black bg-white p-6">
+            <p className="text-[9px] font-black uppercase tracking-wider text-black">Creator Profile</p>
+            <h1 className="mt-1 font-heading text-[2rem] leading-[0.85] tracking-[-0.02em]" style={{ fontWeight: 900 }}>
+              <span className="block text-black">COMPLETE YOUR</span>
+              <span className="block text-black" style={{ fontWeight: 400 }}>PROFILE</span>
+            </h1>
+
+            <form onSubmit={handleCreateCreatorProfile} className="mt-5 space-y-3">
+              <div>
+                <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">
+                  Your Handle *
+                </label>
+                <div className="flex items-center">
+                  <span className="mr-1 text-sm font-medium text-black">@</span>
+                  <input
+                    required
+                    placeholder="yourhandle"
+                    value={creatorForm.handle}
+                    onChange={e => setCreatorForm({ ...creatorForm, handle: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "") })}
+                    className={inputClass}
+                  />
+                </div>
+                <p className="mt-1 text-[9px] text-black/50">Letters, numbers, underscores only</p>
+              </div>
+
+              <div className="border-t-2 border-black/10 pt-3">
+                <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-black">
+                  Social Platforms (at least one) *
+                </p>
+                
+                <div className="space-y-2">
+                  <div>
+                    <label className="mb-1 block text-[9px] font-medium text-black/60">Instagram</label>
+                    <input
+                      placeholder="@yourinstagram"
+                      value={creatorForm.instagramHandle}
+                      onChange={e => setCreatorForm({ ...creatorForm, instagramHandle: e.target.value })}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[9px] font-medium text-black/60">TikTok</label>
+                    <input
+                      placeholder="@yourtiktok"
+                      value={creatorForm.tiktokHandle}
+                      onChange={e => setCreatorForm({ ...creatorForm, tiktokHandle: e.target.value })}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {creatorError && (
+                <div className="rounded-lg border-2 border-red-500 bg-red-50 p-3 text-center">
+                  <p className="text-[11px] font-medium text-red-600">{creatorError}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading === "creator"}
+                className="w-full h-11 rounded-full bg-black text-[11px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+              >
+                {loading === "creator" ? "Creating Profile..." : "Complete Profile"}
+              </button>
+            </form>
+          </div>
+
+          <button
+            onClick={() => setShowCreatorForm(false)}
+            className="mt-4 block w-full text-center text-[10px] font-medium text-white/60 hover:text-white"
+          >
+            ← Back to role selection
+          </button>
         </div>
       </div>
     )
@@ -132,7 +311,7 @@ export default function OnboardingPage() {
               I create content and want to work with vacation rental hosts.
             </p>
             <div className="mt-4 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-black">
-              {loading === "creator" ? "Checking..." : "Join waitlist →"}
+              {loading === "creator" ? "Checking..." : "Continue →"}
             </div>
           </button>
 
@@ -141,7 +320,7 @@ export default function OnboardingPage() {
         {/* Info */}
         <div className="mt-4 rounded-xl border-[3px] border-black bg-white p-4 text-center">
           <p className="text-[12px] font-medium text-black">
-            <strong>Hosts</strong> can start immediately. <strong>Creators</strong> are onboarded from the waitlist.
+            <strong>Hosts</strong> can start immediately. <strong>Creators</strong> need a beta invite.
           </p>
         </div>
 

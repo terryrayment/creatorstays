@@ -28,6 +28,89 @@ export async function GET() {
   }
 }
 
+// POST /api/creator/profile - Create a new creator profile (for logged-in users without a profile)
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if user already has a creator profile
+    const existingProfile = await prisma.creatorProfile.findUnique({
+      where: { userId: session.user.id },
+    })
+
+    if (existingProfile) {
+      return NextResponse.json({ error: 'Creator profile already exists' }, { status: 409 })
+    }
+
+    const body = await request.json()
+    const {
+      displayName,
+      handle,
+      instagramHandle,
+      tiktokHandle,
+      youtubeHandle,
+      isBeta,
+      inviteTokenUsed,
+    } = body
+
+    // Validate required fields
+    if (!handle) {
+      return NextResponse.json({ error: 'Handle is required' }, { status: 400 })
+    }
+
+    const normalizedHandle = handle.toLowerCase().trim().replace(/[^a-z0-9_]/g, '')
+
+    // Check if handle is taken
+    const existingHandle = await prisma.creatorProfile.findUnique({
+      where: { handle: normalizedHandle },
+    })
+
+    if (existingHandle) {
+      return NextResponse.json({ error: 'This handle is already taken' }, { status: 409 })
+    }
+
+    // Create the profile
+    const profile = await prisma.creatorProfile.create({
+      data: {
+        userId: session.user.id,
+        displayName: displayName || session.user.name || 'Creator',
+        handle: normalizedHandle,
+        instagramHandle: instagramHandle || null,
+        tiktokHandle: tiktokHandle || null,
+        youtubeHandle: youtubeHandle || null,
+        isBeta: isBeta || false,
+        inviteTokenUsed: inviteTokenUsed || null,
+        niches: [],
+        dealTypes: ['flat', 'post-for-stay'],
+        deliverables: ['Instagram Reels', 'Stories'],
+        openToGiftedStays: true,
+        profileComplete: 30,
+      },
+    })
+
+    // If invite token was used, increment its usage
+    if (inviteTokenUsed) {
+      try {
+        await prisma.creatorInvite.update({
+          where: { token: inviteTokenUsed },
+          data: { uses: { increment: 1 } },
+        })
+      } catch (e) {
+        // Invite might not exist or already maxed, but profile is created so continue
+        console.warn('[Creator Profile API] Failed to update invite usage:', e)
+      }
+    }
+
+    return NextResponse.json(profile)
+  } catch (error) {
+    console.error('[Creator Profile API] POST error:', error)
+    return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 })
+  }
+}
+
 // PUT /api/creator/profile - Update creator profile
 export async function PUT(request: NextRequest) {
   try {
