@@ -5,13 +5,6 @@ import Stripe from 'stripe'
 
 export const dynamic = 'force-dynamic'
 
-// Disable body parsing for webhook (we need raw body for signature verification)
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
-
 async function getRawBody(req: NextRequest): Promise<Buffer> {
   const chunks: Uint8Array[] = []
   const reader = req.body?.getReader()
