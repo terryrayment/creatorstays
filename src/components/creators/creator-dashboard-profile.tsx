@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -397,6 +397,40 @@ const AVAILABLE_DELIVERABLES = ['Feed posts', 'Reels', 'Stories', 'TikTok', 'You
 export function CreatorDashboardProfile() {
   const searchParams = useSearchParams()
   const { data: session } = useSession()
+  const router = useRouter()
+  
+  // Profile loading state
+  const [profileLoaded, setProfileLoaded] = useState(false)
+  const [profileComplete, setProfileComplete] = useState(100)
+  const [showOnboardingBanner, setShowOnboardingBanner] = useState(false)
+  
+  // Check profile completeness on mount
+  useEffect(() => {
+    async function checkProfile() {
+      try {
+        const res = await fetch('/api/creator/profile')
+        if (res.ok) {
+          const data = await res.json()
+          setProfileComplete(data.profileComplete || 0)
+          // Show banner if profile is less than 80% complete
+          if (data.profileComplete < 80) {
+            setShowOnboardingBanner(true)
+          }
+        } else if (res.status === 404) {
+          // No profile yet, redirect to onboarding
+          router.push('/dashboard/creator/onboarding')
+          return
+        }
+      } catch (e) {
+        console.error('Failed to check profile:', e)
+      }
+      setProfileLoaded(true)
+    }
+    
+    if (session?.user) {
+      checkProfile()
+    }
+  }, [session, router])
   
   // Generate handle from email or name
   const generateHandle = (email?: string | null, name?: string | null): string => {
@@ -671,6 +705,37 @@ export function CreatorDashboardProfile() {
   return (
     <div className="relative min-h-screen bg-[hsl(210,20%,99%)]">
       <EdgeBlur />
+
+      {/* Onboarding Banner */}
+      {showOnboardingBanner && (
+        <div className="fixed left-0 right-0 top-16 z-40 border-b-2 border-black bg-[#FFD84A] px-4 py-3">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">👋</span>
+              <div>
+                <p className="text-sm font-bold text-black">Complete your profile to get discovered by hosts!</p>
+                <p className="text-xs text-black/70">Your profile is {profileComplete}% complete</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link 
+                href="/dashboard/creator/onboarding"
+                className="rounded-full border-2 border-black bg-black px-4 py-1.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5"
+              >
+                Complete Setup →
+              </Link>
+              <button
+                onClick={() => setShowOnboardingBanner(false)}
+                className="p-1 text-black/60 hover:text-black"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast */}
       {toastMessage && (
