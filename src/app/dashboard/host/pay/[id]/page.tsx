@@ -332,23 +332,39 @@ export default function PayCollaborationPage() {
             🔒 Secure payment via Stripe
           </p>
 
-          {/* Info */}
-          <div className="rounded-2xl border-[3px] border-black bg-white p-5 text-xs text-black/70">
+          {/* Payment Flow Explanation */}
+          <div className="rounded-2xl border-[3px] border-black bg-white p-5">
             <p className="font-bold text-black">How payments work:</p>
-            <ul className="mt-3 space-y-2">
+            <ul className="mt-3 space-y-3 text-xs text-black/70">
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-black bg-[#28D17C] text-[8px] font-bold text-black">1</span>
-                <span>You'll be redirected to Stripe's secure checkout</span>
+                <span>You pay via Stripe's secure checkout</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-black bg-[#28D17C] text-[8px] font-bold text-black">2</span>
-                <span>Payment is processed and held by Stripe</span>
+                <span>Funds transfer directly to the creator's Stripe account</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-black bg-[#28D17C] text-[8px] font-bold text-black">3</span>
-                <span>Creator receives payout within 2-3 business days</span>
+                <span>Creator receives payout to their bank within 2-3 business days</span>
               </li>
             </ul>
+
+            {/* Important: Dispute/Refund Info */}
+            <div className="mt-4 rounded-lg border-2 border-[#FFD84A] bg-[#FFD84A]/10 p-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-black">Important: Payment is Final</p>
+              <p className="mt-1 text-xs text-black/70">
+                By paying, you confirm that you've reviewed and approved the creator's submitted content. 
+                Payments transfer directly to the creator and cannot be automatically reversed.
+              </p>
+              <p className="mt-2 text-xs text-black/70">
+                <strong className="text-black">If there's a dispute:</strong> Contact us at{' '}
+                <a href="mailto:support@creatorstays.com" className="font-bold text-black underline">
+                  support@creatorstays.com
+                </a>
+                {' '}and we'll work with both parties to resolve the issue.
+              </p>
+            </div>
           </div>
         </div>
       </Container>

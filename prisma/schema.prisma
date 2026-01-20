@@ -504,6 +504,7 @@ model Offer {
   updatedAt       DateTime @updatedAt
   expiresAt       DateTime?
   respondedAt     DateTime?
+  hostViewedAt    DateTime?  // When host viewed creator's response (for read receipts)
 
   // Relations
   collaboration   Collaboration?

@@ -1456,3 +1456,156 @@ Review offer: ${BASE_URL}/dashboard/creator/offers
 
   return { subject, html, text }
 }
+
+/**
+ * Agreement Copy Email
+ * Sends a copy of the agreement to a party for their records
+ */
+export function agreementCopyEmail(data: {
+  recipientName: string
+  recipientRole: 'host' | 'creator'
+  agreementId: string
+  hostName: string
+  hostEmail: string
+  creatorName: string
+  creatorHandle: string
+  creatorEmail: string
+  propertyTitle: string
+  propertyLocation?: string
+  dealType: string
+  cashAmount: number
+  stayNights?: number | null
+  deliverables: string[]
+  isFullyExecuted: boolean
+  executedAt?: Date | null
+  collaborationId: string
+}): { subject: string; html: string; text: string } {
+  const {
+    recipientName,
+    recipientRole,
+    agreementId,
+    hostName,
+    hostEmail,
+    creatorName,
+    creatorHandle,
+    creatorEmail,
+    propertyTitle,
+    propertyLocation,
+    dealType,
+    cashAmount,
+    stayNights,
+    deliverables,
+    isFullyExecuted,
+    executedAt,
+    collaborationId,
+  } = data
+
+  const dealTypeLabel = dealType === 'post-for-stay' 
+    ? 'Post-for-Stay' 
+    : dealType === 'flat-with-bonus' 
+      ? 'Flat Fee + Performance Bonus' 
+      : 'Flat Fee'
+
+  const formattedAmount = cashAmount > 0 ? `$${(cashAmount / 100).toFixed(2)}` : null
+  const status = isFullyExecuted ? 'Fully Executed' : 'Pending Signatures'
+  const statusColor = isFullyExecuted ? '#28D17C' : '#FFD84A'
+
+  const subject = `Your Agreement Copy: ${propertyTitle} (${agreementId})`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Agreement Copy</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${recipientName}, here's a copy of your collaboration agreement for your records.</p>
+    
+    <div style="${styles.card}; background: #f9f9f9;">
+      <table style="width: 100%;">
+        <tr>
+          <td>
+            <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0;">Agreement ID</p>
+            <p style="font-size: 14px; font-weight: 700; margin: 4px 0 0;">${agreementId}</p>
+          </td>
+          <td style="text-align: right;">
+            <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0;">Status</p>
+            <p style="font-size: 14px; font-weight: 700; color: ${statusColor}; margin: 4px 0 0;">${status}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 12px;">Parties</p>
+      <p style="margin: 0;"><strong>Host:</strong> ${hostName} (${hostEmail})</p>
+      <p style="margin: 8px 0 0;"><strong>Creator:</strong> ${creatorName} @${creatorHandle} (${creatorEmail})</p>
+    </div>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 12px;">Property</p>
+      <p style="font-size: 16px; font-weight: 700; margin: 0;">${propertyTitle}</p>
+      ${propertyLocation ? `<p style="color: #666; margin: 4px 0 0;">${propertyLocation}</p>` : ''}
+    </div>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 12px;">Deal Terms</p>
+      <p style="margin: 0;"><strong>Type:</strong> ${dealTypeLabel}</p>
+      ${formattedAmount ? `<p style="margin: 8px 0 0;"><strong>Payment:</strong> ${formattedAmount}</p>` : ''}
+      ${stayNights ? `<p style="margin: 8px 0 0;"><strong>Stay:</strong> ${stayNights} nights</p>` : ''}
+      
+      ${deliverables.length > 0 ? `
+        <p style="margin: 16px 0 8px;"><strong>Deliverables:</strong></p>
+        <ul style="margin: 0; padding-left: 20px;">
+          ${deliverables.map(d => `<li style="margin: 4px 0;">${d}</li>`).join('')}
+        </ul>
+      ` : ''}
+    </div>
+    
+    ${isFullyExecuted && executedAt ? `
+      <div style="${styles.card}; background: ${statusColor};">
+        <p style="font-weight: 700; margin: 0;">✓ Agreement Fully Executed</p>
+        <p style="font-size: 14px; margin: 8px 0 0;">Signed on ${new Date(executedAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}</p>
+      </div>
+    ` : ''}
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/api/collaborations/${collaborationId}/agreement/pdf" style="${styles.button}">Download PDF →</a>
+    </div>
+    
+    <p style="font-size: 12px; color: #666; text-align: center;">
+      This email serves as your copy of the agreement. You can also download the PDF at any time from your dashboard.
+    </p>
+  `)
+
+  const text = `
+Agreement Copy
+
+Hi ${recipientName},
+
+Here's a copy of your collaboration agreement for your records.
+
+Agreement ID: ${agreementId}
+Status: ${status}
+
+PARTIES
+Host: ${hostName} (${hostEmail})
+Creator: ${creatorName} @${creatorHandle} (${creatorEmail})
+
+PROPERTY
+${propertyTitle}
+${propertyLocation || ''}
+
+DEAL TERMS
+Type: ${dealTypeLabel}
+${formattedAmount ? `Payment: ${formattedAmount}` : ''}
+${stayNights ? `Stay: ${stayNights} nights` : ''}
+${deliverables.length > 0 ? `Deliverables: ${deliverables.join(', ')}` : ''}
+
+${isFullyExecuted && executedAt ? `✓ Agreement fully executed on ${new Date(executedAt).toLocaleDateString()}` : 'Status: Pending signatures'}
+
+Download PDF: ${BASE_URL}/api/collaborations/${collaborationId}/agreement/pdf
+View in dashboard: ${BASE_URL}/dashboard/collaborations/${collaborationId}
+`
+
+  return { subject, html, text }
+}

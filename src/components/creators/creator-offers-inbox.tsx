@@ -23,6 +23,8 @@ interface Offer {
   status: string
   createdAt: string
   expiresAt: string | null
+  respondedAt: string | null
+  hostViewedAt: string | null  // When host viewed creator's response
   // Enriched data
   host?: {
     displayName: string
@@ -419,6 +421,41 @@ export function CreatorOffersInbox() {
                 {DEAL_TYPE_LABELS[selectedOffer.offerType] || selectedOffer.offerType}
               </span>
             </div>
+
+            {/* Response Status (for offers you've responded to) */}
+            {selectedOffer.status !== 'pending' && selectedOffer.respondedAt && (
+              <div className={`rounded-lg border-2 p-3 ${
+                selectedOffer.hostViewedAt 
+                  ? 'border-[#28D17C] bg-[#28D17C]/10' 
+                  : 'border-[#FFD84A] bg-[#FFD84A]/10'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {selectedOffer.hostViewedAt ? (
+                      <>
+                        <svg className="h-4 w-4 text-[#28D17C]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm font-bold text-black">Host viewed your response</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="h-4 w-4 text-[#FFD84A]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm font-bold text-black">Waiting for host to view</span>
+                      </>
+                    )}
+                  </div>
+                  <span className="text-xs text-black/50">
+                    {selectedOffer.hostViewedAt 
+                      ? formatDate(selectedOffer.hostViewedAt)
+                      : `Sent ${formatDate(selectedOffer.respondedAt)}`
+                    }
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Pay breakdown */}
             <div className="rounded-xl border-2 border-black bg-black/5 p-4">

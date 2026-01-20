@@ -689,12 +689,47 @@ export default function CollaborationDetailPage() {
                   </p>
                   <p className="text-xs text-black/60">Version {agreement.version}</p>
                 </div>
-                <button
-                  onClick={() => setShowAgreement(!showAgreement)}
-                  className="rounded-full border-2 border-black bg-black/5 px-3 py-1 text-[10px] font-bold text-black hover:bg-black/10"
-                >
-                  {showAgreement ? "Hide" : "View Full Agreement"}
-                </button>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`/api/collaborations/${collaboration.id}/agreement/pdf`}
+                    download
+                    className="rounded-full border-2 border-black bg-black px-3 py-1 text-[10px] font-bold text-white hover:bg-black/80 flex items-center gap-1"
+                  >
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    PDF
+                  </a>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/collaborations/${collaboration.id}/agreement/email`, {
+                          method: 'POST',
+                        })
+                        const data = await res.json()
+                        if (res.ok) {
+                          setToast('Agreement copy sent to your email!')
+                        } else {
+                          setToast(data.error || 'Failed to send email')
+                        }
+                      } catch (e) {
+                        setToast('Failed to send email')
+                      }
+                    }}
+                    className="rounded-full border-2 border-black bg-[#4AA3FF] px-3 py-1 text-[10px] font-bold text-black hover:bg-[#4AA3FF]/80 flex items-center gap-1"
+                  >
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                    </svg>
+                    Email
+                  </button>
+                  <button
+                    onClick={() => setShowAgreement(!showAgreement)}
+                    className="rounded-full border-2 border-black bg-black/5 px-3 py-1 text-[10px] font-bold text-black hover:bg-black/10"
+                  >
+                    {showAgreement ? "Hide" : "View"}
+                  </button>
+                </div>
               </div>
 
               {showAgreement && (

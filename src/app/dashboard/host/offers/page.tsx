@@ -73,6 +73,21 @@ export default function HostSentOffersPage() {
   const [withdrawing, setWithdrawing] = useState<string | null>(null)
   const [resending, setResending] = useState<string | null>(null)
 
+  // Mark offer as viewed when host selects a responded offer
+  const handleSelectOffer = async (offer: Offer | null) => {
+    setSelectedOffer(offer)
+    
+    // If selecting an offer that has been responded to, mark it as viewed
+    if (offer && offer.status !== 'pending' && offer.respondedAt) {
+      try {
+        await fetch(`/api/offers/${offer.id}/view`, { method: 'POST' })
+      } catch (e) {
+        // Silent fail - view tracking is not critical
+        console.error('Failed to mark offer as viewed:', e)
+      }
+    }
+  }
+
   // Handle resend offer
   const handleResend = async (offerId: string) => {
     if (!confirm("Resend this offer? The creator will receive a new notification and have 14 days to respond.")) {
@@ -300,7 +315,7 @@ export default function HostSentOffersPage() {
                 return (
                   <div key={offer.id}>
                     <button
-                      onClick={() => setSelectedOffer(isSelected ? null : offer)}
+                      onClick={() => handleSelectOffer(isSelected ? null : offer)}
                       className={`w-full rounded-2xl border-[3px] border-black bg-white p-4 text-left transition-transform hover:-translate-y-0.5 ${isSelected ? "ring-2 ring-black ring-offset-2" : ""}`}
                     >
                       <div className="flex items-start justify-between gap-4">
