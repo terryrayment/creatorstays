@@ -180,7 +180,7 @@ export async function PATCH(
       const agreementText = generateAgreementText({
         hostName: offer.hostProfile.displayName,
         creatorName: creatorProfile.displayName,
-        propertyTitle: property.title,
+        propertyTitle: property.title || 'Property',
         dealType: offer.offerType,
         cashCents: offer.cashCents,
         stayNights: offer.stayNights,
