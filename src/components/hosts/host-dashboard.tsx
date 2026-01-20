@@ -56,10 +56,13 @@ function ChipSelect({ options, selected, onChange, max = 3 }: {
 
 // Toast notification
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
+  if (!message) return null
+  
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg bg-black px-4 py-3 text-sm text-white shadow-lg">
+    <div className="fixed bottom-4 right-4 z-[9999] flex items-center gap-3 rounded-xl border-2 border-black bg-[#28D17C] px-5 py-4 text-sm font-bold text-black shadow-xl">
+      <span>✓</span>
       <span>{message}</span>
-      <button onClick={onClose} className="ml-2 text-white/60 hover:text-white">✕</button>
+      <button onClick={onClose} className="ml-2 text-black/60 hover:text-black">✕</button>
     </div>
   )
 }
@@ -277,16 +280,20 @@ export function HostDashboard() {
           styleTags: hostProfile.styleTags,
         }),
       })
+      const data = await res.json()
       if (res.ok) {
         setProfileSaved(true)
         setToast("Profile saved!")
         setTimeout(() => setProfileSaved(false), 2000)
+      } else {
+        setToast(data.error || "Failed to save profile")
       }
     } catch (e) {
       console.error('Failed to save profile:', e)
-      setToast("Failed to save profile")
+      setToast("Failed to save profile. Please try again.")
     }
     setProfileSaving(false)
+    setTimeout(() => setToast(""), 4000)
   }
 
   // Taste optimizer state
