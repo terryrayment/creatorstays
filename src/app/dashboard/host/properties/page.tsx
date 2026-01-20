@@ -191,14 +191,30 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess }: {
     setImportError(null)
     try {
       const res = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(form.airbnbUrl)}`)
-      if (res.ok) {
-        const data = await res.json()
-        setForm(prev => ({ ...prev, title: data.title || prev.title, heroImageUrl: data.imageUrl || prev.heroImageUrl, cityRegion: data.cityRegion || prev.cityRegion, lastImportedAt: new Date().toISOString() }))
+      const data = await res.json()
+      
+      if (data.ok) {
+        setForm(prev => ({
+          ...prev,
+          title: data.title || prev.title,
+          heroImageUrl: data.imageUrl || prev.heroImageUrl,
+          cityRegion: data.cityRegion || prev.cityRegion,
+          rating: data.rating || prev.rating,
+          reviewCount: data.reviewCount || prev.reviewCount,
+          priceNightlyRange: data.price || prev.priceNightlyRange,
+          guests: data.guests || prev.guests,
+          beds: data.beds || prev.beds,
+          baths: data.baths || prev.baths,
+          photos: data.photos || prev.photos,
+          lastImportedAt: new Date().toISOString(),
+        }))
         setStep(2)
       } else {
-        setImportError('Could not fetch listing. Check URL and try again.')
+        setImportError(data.error || 'Could not fetch listing. Check URL and try again.')
       }
-    } catch { setImportError('Import failed. Enter details manually.') }
+    } catch { 
+      setImportError('Import failed. Enter details manually.') 
+    }
     finally { setIsImporting(false) }
   }
 
