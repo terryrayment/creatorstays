@@ -186,6 +186,135 @@ View and respond: ${BASE_URL}/dashboard/creator/offers
 }
 
 /**
+ * Offer Sent Confirmation Email (to Host)
+ * Confirms to the host that their offer was successfully sent
+ */
+export function offerSentConfirmationEmail(data: {
+  hostName: string
+  creatorName: string
+  creatorHandle: string
+  propertyTitle: string
+  propertyLocation: string
+  dealType: string
+  cashAmount: number
+  stayNights?: number | null
+  bonusEnabled?: boolean
+  bonusAmount?: number
+  bonusThreshold?: number
+  deliverables: string[]
+  offerId: string
+}): { subject: string; html: string; text: string } {
+  const { 
+    hostName, 
+    creatorName, 
+    creatorHandle, 
+    propertyTitle, 
+    propertyLocation,
+    dealType, 
+    cashAmount, 
+    stayNights, 
+    bonusEnabled,
+    bonusAmount,
+    bonusThreshold,
+    deliverables, 
+    offerId 
+  } = data
+
+  const dealTypeLabel = dealType === 'post-for-stay' ? 'Post-for-Stay' :
+                        dealType === 'flat-with-bonus' ? 'Flat Fee + Bonus' : 'Flat Fee'
+
+  const formattedAmount = cashAmount > 0 
+    ? `$${(cashAmount / 100).toFixed(0)}`
+    : null
+
+  const compensationLine = dealType === 'post-for-stay'
+    ? `${stayNights || 3} nights complimentary stay`
+    : formattedAmount || 'Custom deal'
+
+  const subject = `✓ Offer sent to @${creatorHandle}`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Offer Sent Successfully!</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${hostName}, your offer has been delivered.</p>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Sent To</p>
+      <p style="font-size: 18px; font-weight: 700; margin: 0 0 4px;">${creatorName}</p>
+      <p style="font-size: 14px; color: #666; margin: 0 0 16px;">@${creatorHandle}</p>
+      
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Property</p>
+      <p style="font-size: 16px; font-weight: 600; margin: 0;">${propertyTitle}</p>
+      ${propertyLocation ? `<p style="font-size: 14px; color: #666; margin: 4px 0 16px;">${propertyLocation}</p>` : ''}
+      
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Deal</p>
+      <p style="margin: 0 0 4px;">
+        <span style="background: #FFD84A; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 700;">${dealTypeLabel}</span>
+      </p>
+      <p style="font-size: 20px; font-weight: 900; margin: 8px 0 0;">${compensationLine}</p>
+      ${bonusEnabled && bonusAmount && bonusThreshold ? `
+        <p style="font-size: 14px; color: #28D17C; margin: 8px 0 0;">+ $${bonusAmount / 100} bonus at ${bonusThreshold.toLocaleString()} clicks</p>
+      ` : ''}
+      
+      ${deliverables.length > 0 ? `
+        <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 16px 0 8px;">Deliverables</p>
+        <p style="margin: 0;">${deliverables.join(' · ')}</p>
+      ` : ''}
+    </div>
+    
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 12px;">What happens next?</p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        <strong>1.</strong> ${creatorName} will receive an email notification
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        <strong>2.</strong> They have 14 days to accept, counter, or decline
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        <strong>3.</strong> You'll be notified as soon as they respond
+      </p>
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/host/offers" style="${styles.button}">View All Offers →</a>
+    </div>
+    
+    <p style="font-size: 12px; color: #999; text-align: center;">
+      Offer ID: ${offerId}
+    </p>
+  `)
+
+  const text = `
+Offer Sent Successfully!
+
+Hi ${hostName}, your offer has been delivered.
+
+SENT TO
+${creatorName} (@${creatorHandle})
+
+PROPERTY
+${propertyTitle}${propertyLocation ? ` - ${propertyLocation}` : ''}
+
+DEAL
+${dealTypeLabel}: ${compensationLine}
+${bonusEnabled && bonusAmount && bonusThreshold ? `+ $${bonusAmount / 100} bonus at ${bonusThreshold.toLocaleString()} clicks` : ''}
+
+DELIVERABLES
+${deliverables.join(', ')}
+
+WHAT HAPPENS NEXT?
+1. ${creatorName} will receive an email notification
+2. They have 14 days to accept, counter, or decline
+3. You'll be notified as soon as they respond
+
+View all offers: ${BASE_URL}/dashboard/host/offers
+
+Offer ID: ${offerId}
+`
+
+  return { subject, html, text }
+}
+
+/**
  * Offer Accepted Email (to Host)
  */
 export function offerAcceptedEmail(data: {

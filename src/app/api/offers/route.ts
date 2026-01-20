@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { sendEmail, newOfferEmail } from '@/lib/email'
+import { sendEmail, newOfferEmail, offerSentConfirmationEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -156,6 +156,7 @@ export async function POST(request: NextRequest) {
 
     const hostProfile = await prisma.hostProfile.findUnique({
       where: { userId: session.user.id },
+      include: { user: true },
     })
 
     if (!hostProfile) {
@@ -243,7 +244,31 @@ export async function POST(request: NextRequest) {
       sendEmail({
         to: creatorProfile.user.email,
         ...emailData,
-      }).catch(err => console.error('[Offers API] Email error:', err))
+      }).catch(err => console.error('[Offers API] Creator email error:', err))
+    }
+
+    // Send confirmation email to host
+    if (hostProfile.user.email) {
+      const confirmationData = offerSentConfirmationEmail({
+        hostName: hostProfile.displayName,
+        creatorName: creatorProfile.displayName,
+        creatorHandle: creatorProfile.handle,
+        propertyTitle: property?.title || 'Property',
+        propertyLocation: property?.cityRegion || '',
+        dealType: offerType || 'flat',
+        cashAmount: cashCents || 0,
+        stayNights: stayNights,
+        bonusEnabled: trafficBonusEnabled || false,
+        bonusAmount: trafficBonusCents || undefined,
+        bonusThreshold: trafficBonusThreshold || undefined,
+        deliverables: deliverables || [],
+        offerId: offer.id,
+      })
+      
+      sendEmail({
+        to: hostProfile.user.email,
+        ...confirmationData,
+      }).catch(err => console.error('[Offers API] Host confirmation email error:', err))
     }
 
     return NextResponse.json({
