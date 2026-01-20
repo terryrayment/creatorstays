@@ -43,14 +43,17 @@ export default function LocationAutocomplete({
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const autocompleteRef = useRef<google.maps.places.AutocompleteService | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const autocompleteRef = useRef<any>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   // Check if Google Places API is available
   useEffect(() => {
     const checkGoogle = () => {
-      if (window.google?.maps?.places?.AutocompleteService) {
-        autocompleteRef.current = new window.google.maps.places.AutocompleteService()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const win = window as any
+      if (win.google?.maps?.places?.AutocompleteService) {
+        autocompleteRef.current = new win.google.maps.places.AutocompleteService()
         setIsGoogleLoaded(true)
       }
     }
@@ -88,9 +91,11 @@ export default function LocationAutocomplete({
           input: value,
           types: ["(cities)"],
         },
-        (predictions, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-            setSuggestions(predictions.map(p => p.description).slice(0, 5))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (predictions: any[] | null, status: string) => {
+          if (status === "OK" && predictions) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setSuggestions(predictions.map((p: any) => p.description).slice(0, 5))
           } else {
             setSuggestions([])
           }
@@ -166,11 +171,4 @@ export default function LocationAutocomplete({
       )}
     </div>
   )
-}
-
-// Add Google Maps types
-declare global {
-  interface Window {
-    google: typeof google
-  }
 }
