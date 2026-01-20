@@ -156,6 +156,7 @@ export default function CreatorBetaPage() {
             <p className="mb-6 text-[13px] font-medium text-black/60">
               These are illustrative examples based on typical deal structures, not promises. 
               Actual earnings depend on your rates, participation level, and host demand.
+              All amounts shown are after the 15% platform fee.
             </p>
             
             <div className="space-y-4">
@@ -166,10 +167,10 @@ export default function CreatorBetaPage() {
                   <span className="text-xs font-medium text-black/50">2–3 deals/month</span>
                 </div>
                 <div className="mt-2 text-sm text-black/70">
-                  <p>• 2 Instagram Reels @ $150 each = $300</p>
+                  <p>• 2 Instagram Reels @ $150 each = $255 net</p>
                   <p>• 1 post-for-stay (2-night value ~$400)</p>
                   <p className="mt-2 border-t border-black/10 pt-2 font-medium text-black">
-                    Range: $300–$700/month in cash + stays
+                    Range: $255–$650/month in cash + stays
                   </p>
                 </div>
               </div>
@@ -181,11 +182,11 @@ export default function CreatorBetaPage() {
                   <span className="text-xs font-medium text-black/50">4–6 deals/month</span>
                 </div>
                 <div className="mt-2 text-sm text-black/70">
-                  <p>• 4 Reels @ $250 each = $1,000</p>
-                  <p>• 2 traffic bonuses hit @ $75 each = $150</p>
+                  <p>• 4 Reels @ $250 each = $850 net</p>
+                  <p>• 2 traffic bonuses hit @ $75 each = $127 net</p>
                   <p>• 1 post-for-stay (3-night value ~$600)</p>
                   <p className="mt-2 border-t border-black/10 pt-2 font-medium text-black">
-                    Range: $1,150–$1,750/month in cash + stays
+                    Range: $975–$1,575/month in cash + stays
                   </p>
                 </div>
               </div>
@@ -197,11 +198,11 @@ export default function CreatorBetaPage() {
                   <span className="text-xs font-medium text-black/50">8–10 deals/month</span>
                 </div>
                 <div className="mt-2 text-sm text-black/70">
-                  <p>• 8 Reels @ $400 each = $3,200</p>
-                  <p>• 4 traffic bonuses hit @ $100 each = $400</p>
+                  <p>• 8 Reels @ $400 each = $2,720 net</p>
+                  <p>• 4 traffic bonuses hit @ $100 each = $340 net</p>
                   <p>• 2 premium stays (total value ~$2,000)</p>
                   <p className="mt-2 border-t border-black/10 pt-2 font-medium text-black">
-                    Range: $3,600–$5,600/month in cash + stays
+                    Range: $3,060–$5,060/month in cash + stays
                   </p>
                 </div>
               </div>
