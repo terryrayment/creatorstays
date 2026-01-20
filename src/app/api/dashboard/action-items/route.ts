@@ -67,18 +67,18 @@ export async function GET() {
         include: {
           creator: { select: { displayName: true, handle: true } },
           property: { select: { title: true } },
-          agreement: { select: { creatorSignedAt: true, hostSignedAt: true } },
+          agreement: { select: { creatorAcceptedAt: true, hostAcceptedAt: true } },
         },
       })
 
       for (const collab of pendingAgreements) {
         // Only show if host hasn't signed yet
-        if (collab.agreement && !collab.agreement.hostSignedAt) {
+        if (collab.agreement && !collab.agreement.hostAcceptedAt) {
           actionItems.push({
             id: collab.id,
             type: 'sign-agreement',
             title: `Sign agreement with @${collab.creator.handle}`,
-            description: collab.agreement?.creatorSignedAt 
+            description: collab.agreement?.creatorAcceptedAt 
               ? `Creator has signed - waiting for your signature`
               : `Agreement ready for signatures`,
             href: `/dashboard/collaborations/${collab.id}`,
@@ -197,18 +197,18 @@ export async function GET() {
         include: {
           host: { select: { displayName: true } },
           property: { select: { title: true } },
-          agreement: { select: { hostSignedAt: true, creatorSignedAt: true } },
+          agreement: { select: { hostAcceptedAt: true, creatorAcceptedAt: true } },
         },
       })
 
       for (const collab of pendingAgreements) {
         // Only show if creator hasn't signed yet
-        if (collab.agreement && !collab.agreement.creatorSignedAt) {
+        if (collab.agreement && !collab.agreement.creatorAcceptedAt) {
           actionItems.push({
             id: collab.id,
             type: 'sign-agreement',
             title: `Sign agreement for ${collab.property.title}`,
-            description: collab.agreement?.hostSignedAt 
+            description: collab.agreement?.hostAcceptedAt 
               ? `Host has signed - waiting for your signature`
               : `Agreement ready for signatures`,
             href: `/dashboard/collaborations/${collab.id}`,
