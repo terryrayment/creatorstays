@@ -131,7 +131,7 @@ function ChipSelector({ options, selected, onChange, label }: { options: string[
   )
 }
 
-function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: EditingProperty; onSave: (data: EditingProperty) => void; onDelete?: () => void; isSaving: boolean }) {
+function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess }: { property: EditingProperty; onSave: (data: EditingProperty) => void; onDelete?: () => void; isSaving: boolean; saveSuccess: boolean }) {
   const [form, setForm] = useState<EditingProperty>(property)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [isImporting, setIsImporting] = useState(false)
@@ -364,7 +364,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: Ed
               {checklist.map(item => (<div key={item.label} className="flex items-center gap-1.5 text-[11px]"><span className={item.done ? 'text-emerald-600 font-bold' : 'text-black'}>{item.done ? '✓' : '○'}</span><span className="text-black">{item.label}</span></div>))}
             </div>
           </div>
-          <div className="flex justify-between pt-2"><Button variant="outline" onClick={() => setStep(1)}>← Back</Button><Button onClick={() => setStep(3)}>Next: Creator Brief →</Button></div>
+          <div className="flex justify-between pt-2"><Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => setStep(1)}>← Back</Button><Button className="bg-black text-white hover:bg-black/90" onClick={() => setStep(3)}>Next: Creator Brief →</Button></div>
         </div>
       )}
 
@@ -376,8 +376,8 @@ function PropertyEditor({ property, onSave, onDelete, isSaving }: { property: Ed
             <p className="mt-1 text-[10px] text-black/60">This helps creators understand your property.</p>
           </div>
           <div className="flex items-center justify-between border-t border-black/5 pt-4">
-            <div className="flex gap-2"><Button variant="outline" onClick={() => setStep(2)}>← Back</Button>{onDelete && <Button variant="ghost" className="text-red-600 hover:bg-red-50" onClick={onDelete}>Delete</Button>}</div>
-            <div className="flex gap-2"><Button variant="outline" onClick={() => handleSave(true)} disabled={isSaving}>Save Draft</Button><Button onClick={() => handleSave(false)} disabled={isSaving || !canPublish}>{isSaving ? 'Saving...' : 'Save Property'}</Button></div>
+            <div className="flex gap-2"><Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => setStep(2)}>← Back</Button>{onDelete && <Button className="border-2 border-black bg-white text-red-600 hover:bg-red-50" onClick={onDelete}>Delete</Button>}</div>
+            <div className="flex gap-2"><Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => handleSave(true)} disabled={isSaving}>Save Draft</Button><Button className={`bg-black text-white hover:bg-black/90 transition-all duration-300 ${saveSuccess ? 'animate-pulse !bg-emerald-500' : ''}`} onClick={() => handleSave(false)} disabled={isSaving || !canPublish}>{isSaving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Save Property'}</Button></div>
           </div>
           {!canPublish && <p className="text-right text-[10px] text-amber-600">Complete at least 7 checklist items to publish</p>}
         </div>
@@ -463,7 +463,7 @@ export default function HostPropertiesPage() {
             
             {/* Right: Editor */}
             <div>
-              {editing ? <PropertyEditor property={editing} onSave={handleSave} onDelete={selectedId ? handleDelete : undefined} isSaving={isSaving} /> : (
+              {editing ? <PropertyEditor property={editing} onSave={handleSave} onDelete={selectedId ? handleDelete : undefined} isSaving={isSaving} saveSuccess={saveSuccess} /> : (
                 <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed border-black/30 bg-white">
                   <div className="text-center">
                     <p className="text-sm text-black/60">Select a property or add a new one</p>
