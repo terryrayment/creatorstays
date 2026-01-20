@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Container } from "@/components/layout/container"
+import { PropertyGallery } from "@/components/properties/property-gallery"
 
 interface Offer {
   id: string
@@ -29,6 +31,8 @@ interface Offer {
     id: string
     title: string | null
     cityRegion: string | null
+    imageUrl: string | null
+    photos: string[]
   } | null
 }
 
@@ -285,6 +289,18 @@ export default function HostSentOffersPage() {
                     {/* Expanded Details */}
                     {isSelected && (
                       <div className="mt-2 rounded-xl border-2 border-black bg-black/5 p-4 space-y-4">
+                        {/* Property Gallery */}
+                        {offer.property && (offer.property.imageUrl || offer.property.photos?.length > 0) && (
+                          <div className="rounded-lg overflow-hidden">
+                            <PropertyGallery 
+                              photos={offer.property.photos || []}
+                              heroImage={offer.property.imageUrl || undefined}
+                              title={offer.property.title || undefined}
+                              size="sm"
+                            />
+                          </div>
+                        )}
+
                         {/* Deliverables */}
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-wider text-black/60 mb-2">Deliverables</p>

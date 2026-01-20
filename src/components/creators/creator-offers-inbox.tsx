@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PropertyGallery } from "@/components/properties/property-gallery"
 
 interface Offer {
   id: string
@@ -30,6 +31,7 @@ interface Offer {
     title: string
     cityRegion: string
     airbnbUrl: string
+    heroImageUrl?: string
     photos: string[]
   }
 }
@@ -215,6 +217,18 @@ export function CreatorOffersInbox() {
       {/* Selected offer detail */}
       {selectedOffer && (
         <div className="rounded-2xl border-[3px] border-black bg-white overflow-hidden">
+          {/* Property Gallery */}
+          {selectedOffer.property && (selectedOffer.property.heroImageUrl || selectedOffer.property.photos?.length > 0) && (
+            <div className="border-b-2 border-black">
+              <PropertyGallery 
+                photos={selectedOffer.property.photos || []}
+                heroImage={selectedOffer.property.heroImageUrl}
+                title={selectedOffer.property.title}
+                size="md"
+              />
+            </div>
+          )}
+
           {/* Header */}
           <div className="border-b-2 border-black bg-[#4AA3FF] px-5 py-4">
             <div className="flex items-start justify-between">

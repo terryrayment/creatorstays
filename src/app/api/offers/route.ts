@@ -60,6 +60,7 @@ export async function GET(request: NextRequest) {
               title: true,
               cityRegion: true,
               airbnbUrl: true,
+              heroImageUrl: true,
               photos: true,
             },
           })

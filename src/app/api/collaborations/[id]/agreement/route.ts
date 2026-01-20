@@ -23,7 +23,16 @@ export async function GET(
         agreement: true,
         creator: { include: { user: true } },
         host: true,
-        property: true,
+        property: {
+          select: {
+            id: true,
+            title: true,
+            cityRegion: true,
+            airbnbUrl: true,
+            heroImageUrl: true,
+            photos: true,
+          },
+        },
         offer: true,
       },
     })

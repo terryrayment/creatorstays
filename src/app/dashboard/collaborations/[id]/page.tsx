@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
+import { PropertyGallery } from "@/components/properties/property-gallery"
 
 interface Collaboration {
   id: string
@@ -33,6 +34,8 @@ interface Collaboration {
     title: string
     cityRegion: string
     airbnbUrl: string | null
+    heroImageUrl?: string
+    photos?: string[]
   }
   offer: {
     offerType: string
@@ -290,6 +293,18 @@ export default function CollaborationDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Property Gallery */}
+          {collaboration.property && (collaboration.property.heroImageUrl || (collaboration.property.photos && collaboration.property.photos.length > 0)) && (
+            <div className="rounded-2xl border-[3px] border-black overflow-hidden">
+              <PropertyGallery 
+                photos={collaboration.property.photos || []}
+                heroImage={collaboration.property.heroImageUrl}
+                title={collaboration.property.title}
+                size="lg"
+              />
+            </div>
+          )}
 
           {/* Property & Deal Card */}
           <div className="rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-5">
