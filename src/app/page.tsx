@@ -72,7 +72,7 @@ function HeroSection() {
           >
             {/* Label */}
             <p className="text-[10px] font-black uppercase tracking-wider text-black">
-              The first marketplace of its kind
+              Finally.
             </p>
             
             {/* Headline - heaviest weight, pure black */}
@@ -83,7 +83,7 @@ function HeroSection() {
             
             {/* Subhead - pure black */}
             <p className="mt-3 max-w-sm text-[13px] font-medium leading-snug text-black">
-              The first creator marketplace built for short-term rentals. Hire creators to showcase your property. They post, you get clicks and content.
+              Real creators. Real content. Real traffic to your listing. We connect vacation rental hosts with creators who actually know what they're doing.
             </p>
             
             {/* CTAs */}
@@ -113,11 +113,11 @@ function HeroSection() {
           >
             <div>
               <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] sm:text-[2.5rem]" style={{ fontWeight: 900 }}>
-                <span className="block text-black">HUGE</span>
-                <span className="block text-black" style={{ fontWeight: 400 }}>OPPORTUNITY</span>
+                <span className="block text-black">THIS DIDN'T</span>
+                <span className="block text-black" style={{ fontWeight: 400 }}>EXIST UNTIL NOW</span>
               </h2>
               <p className="mt-2 text-[12px] font-medium text-black">
-                Untapped market. First-mover advantage for hosts and creators alike.
+                Hosts needed creators. Creators needed deals. We built the thing.
               </p>
             </div>
 
@@ -158,7 +158,7 @@ function HeroSection() {
             </div>
 
             <p className="mt-2 text-[9px] font-bold text-black">
-              Free to start • Pay per post • Track traffic
+              No subscriptions. No guesswork. Just posts and clicks.
             </p>
           </div>
         </div>
@@ -175,7 +175,7 @@ function HowItWorksSection() {
           {/* How It Works block */}
           <div className="block-hover rounded-2xl border-[3px] border-black bg-white p-4">
             <p className="text-[9px] font-black uppercase tracking-wider text-black">
-              Simple process
+              Four steps. That's it.
             </p>
             <h2 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[2rem]" style={{ fontWeight: 900 }}>
               <span className="block text-black">HOW IT</span>
@@ -223,11 +223,11 @@ function CTASection() {
               For property owners
             </p>
             <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]" style={{ fontWeight: 900 }}>
-              <span className="block text-black">BE AMONG</span>
-              <span className="block text-black" style={{ fontWeight: 400 }}>THE FIRST</span>
+              <span className="block text-black">LIST YOUR</span>
+              <span className="block text-black" style={{ fontWeight: 400 }}>PROPERTY</span>
             </h3>
             <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
-              First-mover advantage. Get creator content before your competitors.
+              You have a great place. Let creators show people why.
             </p>
             <Link
               href="/hosts"
@@ -256,11 +256,11 @@ function CTASection() {
               For content creators
             </p>
             <h3 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[1.75rem]" style={{ fontWeight: 900 }}>
-              <span className="block text-black">NEW REVENUE</span>
-              <span className="block text-black" style={{ fontWeight: 400 }}>STREAM</span>
+              <span className="block text-black">GET PAID</span>
+              <span className="block text-black" style={{ fontWeight: 400 }}>TO POST</span>
             </h3>
             <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
-              Untapped niche. Get paid to stay at amazing properties.
+              You make content. Hosts pay you. Sometimes there's a free stay involved.
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               <Link
