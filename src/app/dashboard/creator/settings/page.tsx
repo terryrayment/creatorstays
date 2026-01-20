@@ -39,8 +39,12 @@ export default function CreatorSettingsPage() {
   // Payout settings
   const [payout, setPayout] = useState({
     stripeConnected: false,
+    stripeOnboardingComplete: false,
+    chargesEnabled: false,
+    payoutsEnabled: false,
     w9Completed: false,
   })
+  const [connectingStripe, setConnectingStripe] = useState(false)
   
   // Notifications
   const [notifications, setNotifications] = useState({
@@ -63,6 +67,42 @@ export default function CreatorSettingsPage() {
     } else {
       router.push('/login/creator')
     }
+
+    // Check for Stripe return params
+    const urlParams = new URLSearchParams(window.location.search)
+    const stripeStatus = urlParams.get('stripe')
+    if (stripeStatus === 'success') {
+      setToast('Stripe account connected successfully!')
+      setActiveTab('payout')
+      // Clean URL
+      window.history.replaceState({}, '', '/dashboard/creator/settings')
+      setTimeout(() => setToast(null), 5000)
+    } else if (stripeStatus === 'refresh') {
+      setToast('Please complete Stripe onboarding')
+      setActiveTab('payout')
+      window.history.replaceState({}, '', '/dashboard/creator/settings')
+      setTimeout(() => setToast(null), 5000)
+    }
+
+    // Fetch Stripe status
+    async function fetchStripeStatus() {
+      try {
+        const res = await fetch('/api/stripe/connect')
+        if (res.ok) {
+          const data = await res.json()
+          setPayout(prev => ({
+            ...prev,
+            stripeConnected: data.connected,
+            stripeOnboardingComplete: data.onboardingComplete,
+            chargesEnabled: data.chargesEnabled,
+            payoutsEnabled: data.payoutsEnabled,
+          }))
+        }
+      } catch (e) {
+        console.error('Failed to fetch Stripe status:', e)
+      }
+    }
+    fetchStripeStatus()
   }, [router])
 
   const handleProfileSave = () => {
@@ -91,18 +131,25 @@ export default function CreatorSettingsPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  const handleConnectStripe = () => {
-    // Fake Stripe connect
-    setPayout({ ...payout, stripeConnected: true })
-    setToast("Stripe connected (demo)")
-    setTimeout(() => setToast(null), 3000)
-  }
-
-  const handleW9 = () => {
-    // Fake W9 completion
-    setPayout({ ...payout, w9Completed: true })
-    setToast("W-9 submitted (demo)")
-    setTimeout(() => setToast(null), 3000)
+  const handleConnectStripe = async () => {
+    setConnectingStripe(true)
+    try {
+      const res = await fetch('/api/stripe/connect', { method: 'POST' })
+      const data = await res.json()
+      
+      if (res.ok && data.url) {
+        // Redirect to Stripe onboarding
+        window.location.href = data.url
+      } else {
+        setToast(data.error || 'Failed to connect Stripe')
+        setTimeout(() => setToast(null), 3000)
+      }
+    } catch (e) {
+      console.error('Stripe connect error:', e)
+      setToast('Network error. Please try again.')
+      setTimeout(() => setToast(null), 3000)
+    }
+    setConnectingStripe(false)
   }
 
   const handleLogout = () => {
@@ -256,51 +303,95 @@ export default function CreatorSettingsPage() {
 
           {activeTab === "payout" && (
             <div className="space-y-4">
-              <div className="rounded-lg border-[2px] border-black p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[12px] font-bold text-black">Stripe Connect</p>
-                    <p className="text-[10px] font-medium text-black/60">Receive payouts to your bank account</p>
+              {/* Stripe Connect */}
+              <div className="rounded-xl border-[3px] border-black bg-white p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none">
+                        <rect width="24" height="24" rx="4" fill="#635BFF"/>
+                        <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z" fill="white"/>
+                      </svg>
+                      <p className="text-sm font-bold text-black">Stripe Connect</p>
+                    </div>
+                    <p className="mt-1 text-xs text-black/60">Connect your bank account to receive payouts</p>
                   </div>
-                  {payout.stripeConnected ? (
-                    <span className="rounded-full bg-[#28D17C] border-[2px] border-black px-3 py-1 text-[10px] font-black text-black">
-                      Connected
+                  
+                  {payout.stripeConnected && payout.payoutsEnabled ? (
+                    <span className="shrink-0 rounded-full border-2 border-black bg-[#28D17C] px-3 py-1 text-[10px] font-black text-black">
+                      ✓ Ready
                     </span>
+                  ) : payout.stripeConnected && !payout.stripeOnboardingComplete ? (
+                    <button
+                      onClick={handleConnectStripe}
+                      disabled={connectingStripe}
+                      className="shrink-0 rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1 text-[10px] font-black text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                    >
+                      {connectingStripe ? 'Loading...' : 'Complete Setup'}
+                    </button>
                   ) : (
                     <button
                       onClick={handleConnectStripe}
-                      className="h-9 rounded-full bg-black px-4 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
+                      disabled={connectingStripe}
+                      className="shrink-0 rounded-full border-2 border-black bg-black px-4 py-2 text-[10px] font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
                     >
-                      Connect
+                      {connectingStripe ? 'Loading...' : 'Connect'}
                     </button>
                   )}
                 </div>
+
+                {/* Status details */}
+                {payout.stripeConnected && (
+                  <div className="mt-4 grid grid-cols-2 gap-3 border-t-2 border-black/10 pt-4">
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2 w-2 rounded-full ${payout.stripeOnboardingComplete ? 'bg-[#28D17C]' : 'bg-[#FFD84A]'}`} />
+                      <span className="text-[10px] font-bold text-black">
+                        {payout.stripeOnboardingComplete ? 'Onboarding complete' : 'Onboarding pending'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2 w-2 rounded-full ${payout.payoutsEnabled ? 'bg-[#28D17C]' : 'bg-[#FFD84A]'}`} />
+                      <span className="text-[10px] font-bold text-black">
+                        {payout.payoutsEnabled ? 'Payouts enabled' : 'Payouts pending'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {!payout.stripeConnected && (
+                  <div className="mt-4 rounded-lg bg-[#4AA3FF]/10 p-3">
+                    <p className="text-[10px] font-bold text-black">Why connect Stripe?</p>
+                    <ul className="mt-2 space-y-1 text-[10px] text-black/70">
+                      <li>• Receive payments directly to your bank account</li>
+                      <li>• Fast payouts within 2-3 business days</li>
+                      <li>• Automatic 1099 tax forms for US creators</li>
+                      <li>• Secure, industry-standard payments</li>
+                    </ul>
+                  </div>
+                )}
               </div>
 
-              <div className="rounded-lg border-[2px] border-black p-4">
+              {/* Earnings Summary */}
+              <div className="rounded-xl border-[3px] border-black bg-[#28D17C] p-5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Lifetime Earnings</p>
+                <p className="mt-1 text-3xl font-black text-black">$0.00</p>
+                <p className="mt-1 text-xs text-black/70">Complete your first collaboration to start earning</p>
+              </div>
+
+              {/* Tax Info */}
+              <div className="rounded-xl border-[3px] border-black bg-white p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[12px] font-bold text-black">W-9 Tax Form</p>
-                    <p className="text-[10px] font-medium text-black/60">Required for US creators earning $600+</p>
+                    <p className="text-sm font-bold text-black">Tax Information</p>
+                    <p className="text-xs text-black/60">Stripe handles 1099 forms automatically for US creators</p>
                   </div>
-                  {payout.w9Completed ? (
-                    <span className="rounded-full bg-[#28D17C] border-[2px] border-black px-3 py-1 text-[10px] font-black text-black">
-                      Submitted
-                    </span>
-                  ) : (
-                    <button
-                      onClick={handleW9}
-                      className="h-9 rounded-full border-[2px] border-black bg-white px-4 text-[10px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
-                    >
-                      Fill Out
-                    </button>
-                  )}
+                  <span className="rounded-full border border-black/20 bg-black/5 px-3 py-1 text-[10px] font-bold text-black/60">
+                    Automatic
+                  </span>
                 </div>
-              </div>
-
-              <div className="rounded-lg border-[2px] border-black/20 bg-black/5 p-4">
-                <p className="text-[11px] font-medium text-black">
-                  Once you earn $600+ in a calendar year, we'll automatically generate your 1099 tax form via Stripe.
+                <p className="mt-3 text-[10px] text-black/60">
+                  If you earn $600+ in a calendar year, Stripe will issue a 1099-NEC form. 
+                  Make sure your legal name and SSN are correct in Stripe.
                 </p>
               </div>
             </div>
