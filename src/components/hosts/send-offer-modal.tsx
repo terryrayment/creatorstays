@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Select } from "@/components/ui/select"
+import { StyledSelect } from "@/components/ui/styled-select"
 
 interface Creator {
   id: number
@@ -248,17 +248,15 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                     </a>
                   </div>
                 ) : (
-                  <select
+                  <StyledSelect
                     value={selectedProperty}
-                    onChange={e => setSelectedProperty(e.target.value)}
-                    className="w-full rounded-lg border-2 border-black px-3 py-2 text-sm font-medium text-black"
-                  >
-                    {properties.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.title || "Untitled"} — {p.cityRegion || "No location"}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setSelectedProperty}
+                    options={properties.map(p => ({
+                      value: p.id,
+                      label: `${p.title || "Untitled"} — ${p.cityRegion || "No location"}`
+                    }))}
+                    placeholder="Select a property..."
+                  />
                 )}
               </div>
 
@@ -292,15 +290,15 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                   <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-black">
                     Complimentary Stay (Nights) *
                   </label>
-                  <select
+                  <StyledSelect
                     value={stayNights}
-                    onChange={e => setStayNights(e.target.value)}
-                    className="w-full rounded-lg border-2 border-black px-3 py-2 text-sm font-medium text-black"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7].map(n => (
-                      <option key={n} value={n}>{n} night{n > 1 ? 's' : ''}</option>
-                    ))}
-                  </select>
+                    onChange={setStayNights}
+                    options={[1, 2, 3, 4, 5, 6, 7].map(n => ({
+                      value: n.toString(),
+                      label: `${n} night${n > 1 ? 's' : ''}`
+                    }))}
+                    placeholder="Select nights..."
+                  />
                 </div>
               )}
 
@@ -380,16 +378,17 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                 <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-black">
                   Content Deadline
                 </label>
-                <select
+                <StyledSelect
                   value={contentDeadlineDays}
-                  onChange={e => setContentDeadlineDays(e.target.value)}
-                  className="w-full rounded-lg border-2 border-black px-3 py-2 text-sm font-medium text-black"
-                >
-                  <option value="7">7 days from acceptance</option>
-                  <option value="14">14 days from acceptance</option>
-                  <option value="21">21 days from acceptance</option>
-                  <option value="30">30 days from acceptance</option>
-                </select>
+                  onChange={setContentDeadlineDays}
+                  options={[
+                    { value: "7", label: "7 days from acceptance" },
+                    { value: "14", label: "14 days from acceptance" },
+                    { value: "21", label: "21 days from acceptance" },
+                    { value: "30", label: "30 days from acceptance" },
+                  ]}
+                  placeholder="Select deadline..."
+                />
               </div>
 
               {/* Message */}

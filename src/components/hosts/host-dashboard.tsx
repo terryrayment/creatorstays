@@ -484,7 +484,7 @@ export function HostDashboard() {
             >
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-bold text-black">Airbnb/VRBO Listing URL</label>
+                  <label className="mb-1.5 block text-xs font-bold text-black">Airbnb Listing URL</label>
                   <Input 
                     placeholder="https://airbnb.com/rooms/..." 
                     value={listing.url}

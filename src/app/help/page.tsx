@@ -134,8 +134,8 @@ Try copying the URL from an incognito browser window to get a clean link. If the
 Still not working? Your listing might be unlisted, paused, or in a region we don't yet support. Contact support with your URL and we'll investigate. Most import issues resolve within one business day.` 
       },
       { 
-        q: "Can I list properties from VRBO, Booking.com, or other platforms?", 
-        a: `Currently, we only support Airbnb listings. Our import system is built specifically for Airbnb's data format. We're actively developing support for VRBO and Booking.com—join our mailing list for updates.
+        q: "Can I list properties from other platforms?", 
+        a: `Currently, we only support Airbnb listings. Our import system is built specifically for Airbnb's data format. We're actively developing support for other platforms—join our mailing list for updates.
 
 In the meantime, if your property is on multiple platforms, use your Airbnb listing as the primary. Creators will link to Airbnb, but interested guests may find you on other platforms too.
 
