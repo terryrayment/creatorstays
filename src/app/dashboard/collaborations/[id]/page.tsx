@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import { PropertyGallery } from "@/components/properties/property-gallery"
+import { TrafficBonusTracker } from "@/components/shared/traffic-bonus-tracker"
 
 interface Collaboration {
   id: string
@@ -583,12 +584,24 @@ export default function CollaborationDetailPage() {
                       +{formatCurrency(collaboration.offer.trafficBonusCents)}
                     </span>
                     <span className="ml-1 text-xs">
-                      at {collaboration.offer.trafficBonusThreshold?.toLocaleString()} clicks
+                      bonus available
                     </span>
                   </div>
                 )}
               </div>
             </div>
+
+            {/* Traffic Bonus Tracker - Full Display */}
+            {collaboration.offer.trafficBonusEnabled && 
+             collaboration.offer.trafficBonusCents && 
+             collaboration.offer.trafficBonusThreshold && (
+              <TrafficBonusTracker
+                threshold={collaboration.offer.trafficBonusThreshold}
+                currentClicks={collaboration.clicksGenerated}
+                bonusCents={collaboration.offer.trafficBonusCents}
+                isActive={!['completed', 'cancelled'].includes(collaboration.status)}
+              />
+            )}
 
             {/* Deliverables */}
             <div className="mt-4">

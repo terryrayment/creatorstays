@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { PropertyGallery } from "@/components/properties/property-gallery"
+import { TrafficBonusExplainer } from "@/components/shared/traffic-bonus-tracker"
 
 interface Offer {
   id: string
@@ -435,12 +436,6 @@ export function CreatorOffersInbox() {
                     <span className="text-lg font-bold text-black">{selectedOffer.stayNights} nights</span>
                   </div>
                 )}
-                {selectedOffer.trafficBonusEnabled && selectedOffer.trafficBonusCents && (
-                  <div className="flex items-center justify-between border-t border-black/10 pt-2 text-[#28D17C]">
-                    <span className="text-sm">Performance Bonus at {selectedOffer.trafficBonusThreshold?.toLocaleString()} clicks</span>
-                    <span className="text-lg font-bold">+{formatCurrency(selectedOffer.trafficBonusCents)}</span>
-                  </div>
-                )}
                 {selectedOffer.cashCents > 0 && (
                   <div className="border-t border-black/10 pt-2">
                     <div className="flex items-center justify-between text-xs text-black/50">
@@ -457,6 +452,14 @@ export function CreatorOffersInbox() {
                 )}
               </div>
             </div>
+
+            {/* Traffic Bonus Explainer */}
+            {selectedOffer.trafficBonusEnabled && selectedOffer.trafficBonusCents && selectedOffer.trafficBonusThreshold && (
+              <TrafficBonusExplainer
+                threshold={selectedOffer.trafficBonusThreshold}
+                bonusCents={selectedOffer.trafficBonusCents}
+              />
+            )}
 
             {/* Deliverables */}
             {selectedOffer.deliverables && selectedOffer.deliverables.length > 0 && (

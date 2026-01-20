@@ -254,25 +254,29 @@ export default function HostOnboardingPage() {
     setError("")
 
     try {
-      const res = await fetch("/api/airbnb/scrape", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: data.airbnbUrl }),
-      })
+      const res = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(data.airbnbUrl)}`)
 
       if (res.ok) {
         const result = await res.json()
+        
+        // Check if prefill was successful
+        if (!result.ok) {
+          setError(result.error || "Failed to import. Please enter details manually.")
+          setManualEntry(true)
+          setImportingAirbnb(false)
+          return
+        }
         
         // Populate form with imported data
         setData(prev => ({
           ...prev,
           propertyTitle: result.title || prev.propertyTitle,
           propertyType: result.propertyType || prev.propertyType,
-          cityRegion: result.location || prev.cityRegion,
-          bedrooms: result.bedrooms?.toString() || prev.bedrooms,
-          bathrooms: result.bathrooms?.toString() || prev.bathrooms,
-          maxGuests: result.maxGuests?.toString() || prev.maxGuests,
-          amenities: result.amenities || prev.amenities,
+          cityRegion: result.cityRegion || prev.cityRegion,
+          bedrooms: result.beds?.toString() || prev.bedrooms,
+          bathrooms: result.baths?.toString() || prev.bathrooms,
+          maxGuests: result.guests?.toString() || prev.maxGuests,
+          amenities: prev.amenities,
           photos: result.photos || [],
           heroImageUrl: result.photos?.[0] || "",
         }))
