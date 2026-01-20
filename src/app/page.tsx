@@ -240,12 +240,18 @@ function CTASection() {
             </Link>
           </div>
 
-          {/* Visual block */}
-          <ImageBlock 
-            src={pageImages[1]} 
-            className="hidden md:block"
-            aspectRatio="aspect-auto min-h-[160px]"
-          />
+          {/* Video block */}
+          <div className="block-hover relative hidden overflow-hidden rounded-2xl border-[3px] border-black bg-[#FFB6C1] md:block">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="h-full w-full object-cover"
+            >
+              <source src="/images/creator-laptop.mp4" type="video/mp4" />
+            </video>
+          </div>
 
           {/* Creators */}
           <div 
