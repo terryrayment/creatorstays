@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 import { RevealStack } from "@/components/marketing/reveal-stack"
 import { ImageBlock, MARKETING_IMAGES } from "@/components/marketing/image-block"
 
@@ -44,6 +45,9 @@ function LinkSticker() {
 }
 
 function HeroSection() {
+  const { data: session } = useSession()
+  const isLoggedIn = !!session?.user
+  
   return (
     <section className="bg-black px-3 pb-2 pt-16 lg:px-4">
       <div className="mx-auto max-w-7xl">
@@ -63,25 +67,50 @@ function HeroSection() {
             </h1>
             
             <p className="mt-3 max-w-md text-[13px] font-medium leading-snug text-black">
-              Creator access is currently invite-only. Join the waitlist for early access.
+              {isLoggedIn 
+                ? "You're signed in! Head to your dashboard to manage your profile and view offers."
+                : "Creator access is currently invite-only. Join the waitlist for early access."
+              }
             </p>
             
             <div className="mt-5 flex flex-wrap gap-2">
-              <Link
-                href="/waitlist"
-                className="inline-flex h-10 items-center gap-2 rounded-full bg-black px-5 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
-              >
-                Join Creator Waitlist
-                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" />
-                </svg>
-              </Link>
-              <Link
-                href="/demo-login?role=creator"
-                className="inline-flex h-10 items-center gap-2 rounded-full border-[3px] border-black bg-white px-5 text-[10px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
-              >
-                View Dashboard Demo
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <Link
+                    href="/dashboard/creator"
+                    className="inline-flex h-10 items-center gap-2 rounded-full bg-black px-5 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
+                  >
+                    Go to Dashboard
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" />
+                    </svg>
+                  </Link>
+                  <Link
+                    href="/dashboard/creator/settings"
+                    className="inline-flex h-10 items-center gap-2 rounded-full border-[3px] border-black bg-white px-5 text-[10px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
+                  >
+                    Edit Profile
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/waitlist"
+                    className="inline-flex h-10 items-center gap-2 rounded-full bg-black px-5 text-[10px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5"
+                  >
+                    Join Creator Waitlist
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" />
+                    </svg>
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="inline-flex h-10 items-center gap-2 rounded-full border-[3px] border-black bg-white px-5 text-[10px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
+                  >
+                    Sign In
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Sticker decoration */}

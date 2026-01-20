@@ -33,7 +33,7 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col bg-black font-body text-foreground antialiased">
         <AuthProvider>
           <Navbar />
-          <main className="flex-1 bg-black pt-20">{children}</main>
+          <main className="flex-1 bg-black pt-14">{children}</main>
           <Footer />
         </AuthProvider>
       </body>
