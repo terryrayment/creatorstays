@@ -178,8 +178,34 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('[Host Register] Error:', error)
+    
+    // Check for specific Prisma errors
+    const prismaError = error as { code?: string; meta?: { target?: string[] } }
+    
+    if (prismaError.code === 'P2002') {
+      // Unique constraint violation
+      const target = prismaError.meta?.target?.[0] || 'field'
+      return NextResponse.json(
+        { error: `An account with this ${target} already exists.` },
+        { status: 409 }
+      )
+    }
+    
+    if (prismaError.code === 'P2003') {
+      // Foreign key constraint
+      return NextResponse.json(
+        { error: 'Database constraint error. Please contact support.' },
+        { status: 500 }
+      )
+    }
+    
+    // Return more specific error in development
+    const errorMessage = process.env.NODE_ENV === 'development' 
+      ? `Failed to create account: ${error instanceof Error ? error.message : 'Unknown error'}`
+      : 'Failed to create account. Please try again.'
+    
     return NextResponse.json(
-      { error: 'Failed to create account. Please try again.' },
+      { error: errorMessage },
       { status: 500 }
     )
   }
