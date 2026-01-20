@@ -392,7 +392,7 @@ export default function CreatorOnboardingPage() {
                   <input
                     type="text"
                     value={data.instagramHandle}
-                    onChange={e => updateField("instagramHandle", e.target.value.replace("@", ""))}
+                    onChange={e => updateField("instagramHandle", e.target.value.replace(/^@/, ""))}
                     placeholder="@username"
                     className={inputClass}
                   />
@@ -420,7 +420,7 @@ export default function CreatorOnboardingPage() {
                   <input
                     type="text"
                     value={data.tiktokHandle}
-                    onChange={e => updateField("tiktokHandle", e.target.value.replace("@", ""))}
+                    onChange={e => updateField("tiktokHandle", e.target.value.replace(/^@/, ""))}
                     placeholder="@username"
                     className={inputClass}
                   />
@@ -448,7 +448,7 @@ export default function CreatorOnboardingPage() {
                   <input
                     type="text"
                     value={data.youtubeHandle}
-                    onChange={e => updateField("youtubeHandle", e.target.value.replace("@", ""))}
+                    onChange={e => updateField("youtubeHandle", e.target.value.replace(/^@/, ""))}
                     placeholder="@channel or channel name"
                     className={inputClass}
                   />
@@ -515,7 +515,7 @@ export default function CreatorOnboardingPage() {
                     type="number"
                     value={data.minimumFlatFee}
                     onChange={e => updateField("minimumFlatFee", e.target.value)}
-                    placeholder="500"
+                    placeholder="250"
                     className={`${inputClass} rounded-l-none`}
                   />
                 </div>
