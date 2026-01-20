@@ -469,9 +469,6 @@ model Offer {
   propertyId      String?
   property        Property? @relation(fields: [propertyId], references: [id])
   
-  messageId       String?  @unique
-  message         Message? @relation(fields: [messageId], references: [id])
-  
   // Deal type: "flat", "flat-with-bonus", "post-for-stay"
   offerType       String   
   
