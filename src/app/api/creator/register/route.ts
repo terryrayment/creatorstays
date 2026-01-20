@@ -171,21 +171,13 @@ export async function POST(request: NextRequest) {
       return { user, creatorProfile }
     })
 
-    // 4. Create a verification token for magic link sign-in
-    const token = crypto.randomUUID()
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-
-    await prisma.verificationToken.create({
-      data: {
-        identifier: normalizedEmail,
-        token,
-        expires,
-      },
-    })
-
-    // 5. Send welcome email with magic link
+    // 4. Send welcome email with sign-in link
+    // Note: We'll redirect them to login where they can request a proper NextAuth magic link
     const baseUrl = process.env.NEXTAUTH_URL || 'https://creatorstays.com'
-    const magicLink = `${baseUrl}/api/auth/callback/email?callbackUrl=${encodeURIComponent('/dashboard/creator')}&token=${token}&email=${encodeURIComponent(normalizedEmail)}`
+    
+    // Instead of creating our own token, we'll send them to the login page
+    // where they can request a proper NextAuth magic link
+    const signInUrl = `${baseUrl}/login/creator?email=${encodeURIComponent(normalizedEmail)}&welcome=true`
 
     try {
       await sendEmail({
@@ -196,13 +188,15 @@ export async function POST(request: NextRequest) {
             <h1 style="color: #000;">Welcome to CreatorStays, ${displayName}!</h1>
             <p>Your creator profile has been created. You're now part of our beta community!</p>
             <p>Your profile: <strong>@${normalizedHandle}</strong></p>
-            <p>Click the button below to sign in and complete your setup:</p>
+            <p>Click the button below to sign in:</p>
             <div style="margin: 30px 0;">
-              <a href="${magicLink}" style="background: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block;">
-                Access Your Dashboard →
+              <a href="${signInUrl}" style="background: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block;">
+                Sign In to Your Dashboard →
               </a>
             </div>
-            <p style="color: #666; font-size: 14px;">This link expires in 24 hours.</p>
+            <p style="color: #666; font-size: 14px;">
+              You'll receive a magic link to your email to complete sign in.
+            </p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
             <p style="color: #666; font-size: 14px;">
               <strong>What's next?</strong><br/>
@@ -225,7 +219,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Account created! Check your email for a sign-in link.',
+      message: 'Account created! Check your email to sign in.',
       user: {
         id: result.user.id,
         email: result.user.email,
@@ -236,8 +230,8 @@ export async function POST(request: NextRequest) {
         handle: result.creatorProfile.handle,
         displayName: result.creatorProfile.displayName,
       },
-      // Include magic link in dev mode for easier testing
-      ...(process.env.NODE_ENV === 'development' ? { magicLink } : {}),
+      // Include sign-in URL for dev testing
+      ...(process.env.NODE_ENV === 'development' ? { signInUrl } : {}),
     })
 
   } catch (error) {

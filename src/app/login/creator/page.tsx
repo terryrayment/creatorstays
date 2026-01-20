@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -9,11 +9,20 @@ function CreatorLoginContent() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard/creator"
   const errorParam = searchParams.get("error")
+  const welcomeEmail = searchParams.get("email")
+  const isWelcome = searchParams.get("welcome") === "true"
   
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState(welcomeEmail || "")
   const [loading, setLoading] = useState<"google" | "email" | null>(null)
   const [emailSent, setEmailSent] = useState(false)
   const [error, setError] = useState("")
+
+  // Auto-send magic link for welcome flow
+  useEffect(() => {
+    if (isWelcome && welcomeEmail && !emailSent) {
+      handleEmailSignInDirect(welcomeEmail)
+    }
+  }, [isWelcome, welcomeEmail])
 
   const handleGoogleSignIn = async () => {
     setLoading("google")
@@ -21,16 +30,13 @@ function CreatorLoginContent() {
     await signIn("google", { callbackUrl })
   }
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
-    
+  const handleEmailSignInDirect = async (emailToUse: string) => {
     setLoading("email")
     setError("")
     
     try {
       const result = await signIn("email", { 
-        email, 
+        email: emailToUse, 
         callbackUrl,
         redirect: false,
       })
@@ -46,6 +52,12 @@ function CreatorLoginContent() {
     setLoading(null)
   }
 
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    await handleEmailSignInDirect(email)
+  }
+
   const inputClass = "h-11 w-full rounded-lg border-[2px] border-black bg-white px-4 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
 
   // Email sent confirmation
@@ -59,9 +71,11 @@ function CreatorLoginContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
               </svg>
             </div>
-            <p className="text-[9px] font-black uppercase tracking-wider text-black">Check Your Email</p>
+            <p className="text-[9px] font-black uppercase tracking-wider text-black">
+              {isWelcome ? "Account Created!" : "Check Your Email"}
+            </p>
             <h1 className="mt-2 font-heading text-[1.75rem] leading-[0.85] tracking-[-0.02em] text-black" style={{ fontWeight: 900 }}>
-              MAGIC LINK SENT
+              {isWelcome ? "CHECK YOUR EMAIL" : "MAGIC LINK SENT"}
             </h1>
             <p className="mt-3 text-[12px] font-medium text-black">
               We sent a sign-in link to <strong>{email}</strong>
