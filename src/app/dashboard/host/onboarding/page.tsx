@@ -574,7 +574,11 @@ export default function HostOnboardingPage() {
                   <div className="grid grid-cols-4 gap-2">
                     {data.photos.slice(0, 8).map((photo, i) => (
                       <div key={i} className="aspect-square rounded-lg overflow-hidden border-2 border-black">
-                        <img src={photo} alt="" className="w-full h-full object-cover" />
+                        <img 
+                          src={`/api/image-proxy?url=${encodeURIComponent(photo)}`} 
+                          alt="" 
+                          className="w-full h-full object-cover" 
+                        />
                       </div>
                     ))}
                     {data.photos.length > 8 && (
