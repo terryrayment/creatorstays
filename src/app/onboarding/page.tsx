@@ -32,8 +32,28 @@ export default function OnboardingPage() {
     setLoading(role)
     
     if (role === "host") {
-      // Redirect to host signup/profile creation
-      router.push("/dashboard/host/settings?setup=true")
+      try {
+        // Create the host profile immediately
+        const res = await fetch("/api/host/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            displayName: session?.user?.name || "Host",
+            contactEmail: session?.user?.email,
+          }),
+        })
+        
+        if (res.ok) {
+          // Profile created, redirect to host onboarding to add property
+          router.push("/dashboard/host/onboarding")
+        } else {
+          // Fallback to settings page
+          router.push("/dashboard/host/settings?setup=true")
+        }
+      } catch (error) {
+        console.error("Failed to create host profile:", error)
+        router.push("/dashboard/host/settings?setup=true")
+      }
     } else {
       // For creators, they need an invite or to join waitlist
       router.push("/waitlist?from=onboarding")
