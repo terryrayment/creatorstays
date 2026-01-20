@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
+import { ReviewCard, RatingSummary } from "@/components/reviews/review-modal"
 
 interface CreatorProfile {
   id: string
@@ -32,6 +33,21 @@ interface CreatorProfile {
     location: string
   }[]
   portfolioUrls: string[]
+}
+
+interface Review {
+  id: string
+  rating: number
+  title: string | null
+  body: string | null
+  communicationRating: number | null
+  professionalismRating: number | null
+  qualityRating: number | null
+  createdAt: string
+  collaboration: {
+    host: { displayName: string }
+    property: { title: string | null }
+  }
 }
 
 function formatFollowers(count: number | null): string {
@@ -74,6 +90,25 @@ function YouTubeIcon() {
 export function CreatorPublicProfile({ creator }: { creator: CreatorProfile }) {
   const { data: session } = useSession()
   const [contactModalOpen, setContactModalOpen] = useState(false)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [reviewStats, setReviewStats] = useState<{ count: number; avgRating: number | null }>({ count: 0, avgRating: null })
+
+  // Fetch reviews
+  useEffect(() => {
+    async function fetchReviews() {
+      try {
+        const res = await fetch(`/api/reviews?creatorId=${creator.id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setReviews(data.reviews || [])
+          setReviewStats(data.stats || { count: 0, avgRating: null })
+        }
+      } catch (e) {
+        console.error("Failed to fetch reviews:", e)
+      }
+    }
+    fetchReviews()
+  }, [creator.id])
 
   const hasPlatforms = creator.platforms.instagram || creator.platforms.tiktok || creator.platforms.youtube
 
@@ -278,6 +313,31 @@ export function CreatorPublicProfile({ creator }: { creator: CreatorProfile }) {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Reviews */}
+          {reviews.length > 0 && (
+            <div className="mt-6">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Reviews</p>
+                <RatingSummary avgRating={reviewStats.avgRating} count={reviewStats.count} />
+              </div>
+              <div className="space-y-3">
+                {reviews.slice(0, 3).map(review => (
+                  <ReviewCard 
+                    key={review.id}
+                    review={review}
+                    reviewerName={review.collaboration.host.displayName}
+                    propertyTitle={review.collaboration.property.title || undefined}
+                  />
+                ))}
+                {reviews.length > 3 && (
+                  <p className="text-center text-xs text-black/50">
+                    + {reviews.length - 3} more reviews
+                  </p>
+                )}
               </div>
             </div>
           )}

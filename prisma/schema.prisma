@@ -570,8 +570,47 @@ model Collaboration {
   // Relations
   agreement       CollaborationAgreement?
   conversation    Conversation?
+  reviews         Review[]
 
   @@map("collaborations")
+}
+
+// Reviews for completed collaborations
+model Review {
+  id              String   @id @default(cuid())
+  
+  collaborationId String
+  collaboration   Collaboration @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
+  
+  // Reviewer (who wrote this review)
+  reviewerType    String   // "host" or "creator"
+  reviewerId      String   // hostProfileId or creatorProfileId
+  
+  // Reviewee (who is being reviewed)
+  revieweeType    String   // "host" or "creator"
+  revieweeId      String   // hostProfileId or creatorProfileId
+  
+  // Rating (1-5 stars)
+  rating          Int      // 1-5
+  
+  // Review content
+  title           String?
+  body            String?  @db.Text
+  
+  // Specific ratings (optional)
+  communicationRating   Int?  // 1-5
+  professionalismRating Int?  // 1-5
+  qualityRating         Int?  // 1-5 (content quality for creators, property accuracy for hosts)
+  
+  // Status
+  isPublic        Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([collaborationId, reviewerType])
+  @@index([revieweeId, revieweeType])
+  @@map("reviews")
 }
 
 // Legal agreement stored for each collaboration
