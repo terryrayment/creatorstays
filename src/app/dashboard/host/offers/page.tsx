@@ -42,6 +42,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: str
   declined: { label: "Declined", color: "text-white", bgColor: "bg-red-500" },
   countered: { label: "Countered", color: "text-black", bgColor: "bg-[#4AA3FF]" },
   expired: { label: "Expired", color: "text-white", bgColor: "bg-gray-500" },
+  withdrawn: { label: "Withdrawn", color: "text-white", bgColor: "bg-gray-600" },
 }
 
 const DEAL_TYPE_LABELS: Record<string, string> = {
@@ -77,6 +78,37 @@ export default function HostSentOffersPage() {
   const [filter, setFilter] = useState<string>("all")
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null)
   const [responding, setResponding] = useState<string | null>(null)
+  const [withdrawing, setWithdrawing] = useState<string | null>(null)
+
+  // Handle withdraw offer
+  const handleWithdraw = async (offerId: string) => {
+    if (!confirm("Are you sure you want to withdraw this offer? This action cannot be undone.")) {
+      return
+    }
+    
+    setWithdrawing(offerId)
+    try {
+      const res = await fetch(`/api/offers/${offerId}/withdraw`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+      
+      const data = await res.json()
+      
+      if (res.ok) {
+        // Update the offer in state
+        setOffers(prev => prev.map(o => 
+          o.id === offerId ? { ...o, status: "withdrawn" } : o
+        ))
+        setSelectedOffer(null)
+      } else {
+        alert(data.error || "Failed to withdraw offer")
+      }
+    } catch (e) {
+      alert("Network error. Please try again.")
+    }
+    setWithdrawing(null)
+  }
 
   // Handle counter offer response
   const handleCounterResponse = async (offerId: string, action: "accept" | "decline") => {
@@ -367,9 +399,29 @@ export default function HostSentOffersPage() {
                         )}
 
                         {offer.status === "pending" && (
-                          <p className="text-center text-xs text-black/60">
-                            Sent {timeAgo(offer.createdAt)} · Expires {offer.expiresAt ? formatDate(offer.expiresAt) : "in 14 days"}
-                          </p>
+                          <div className="space-y-2">
+                            <p className="text-center text-xs text-black/60">
+                              Sent {timeAgo(offer.createdAt)} · Expires {offer.expiresAt ? formatDate(offer.expiresAt) : "in 14 days"}
+                            </p>
+                            <button
+                              onClick={() => handleWithdraw(offer.id)}
+                              disabled={withdrawing === offer.id}
+                              className="w-full rounded-full border-2 border-black/30 bg-white py-2 text-xs font-bold text-black/60 transition-all hover:border-red-500 hover:text-red-500 disabled:opacity-50"
+                            >
+                              {withdrawing === offer.id ? "Withdrawing..." : "Withdraw Offer"}
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Withdraw option for countered offers too */}
+                        {offer.status === "countered" && (
+                          <button
+                            onClick={() => handleWithdraw(offer.id)}
+                            disabled={withdrawing === offer.id}
+                            className="w-full rounded-full border-2 border-black/30 bg-white py-2 text-xs font-bold text-black/60 transition-all hover:border-red-500 hover:text-red-500 disabled:opacity-50"
+                          >
+                            {withdrawing === offer.id ? "Withdrawing..." : "Withdraw Offer"}
+                          </button>
                         )}
                       </div>
                     )}

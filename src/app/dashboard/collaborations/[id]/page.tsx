@@ -100,6 +100,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; description:
     color: "bg-red-100", 
     description: "This collaboration was cancelled." 
   },
+  "cancellation-requested": { 
+    label: "Cancellation Pending", 
+    color: "bg-orange-200", 
+    description: "A cancellation request is pending approval." 
+  },
 }
 
 interface NextStepInfo {
@@ -285,6 +290,65 @@ export default function CollaborationDetailPage() {
   const [signing, setSigning] = useState(false)
   const [showAgreement, setShowAgreement] = useState(false)
   const [toast, setToast] = useState("")
+  const [cancelling, setCancelling] = useState(false)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [cancelReason, setCancelReason] = useState("")
+
+  // Handle cancel request
+  const handleCancelRequest = async () => {
+    if (!confirm("Are you sure you want to request cancellation? The other party will need to approve this.")) {
+      return
+    }
+    setCancelling(true)
+    try {
+      const res = await fetch(`/api/collaborations/${collaborationId}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "request", reason: cancelReason }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setToast(data.message)
+        setShowCancelModal(false)
+        setCancelReason("")
+        // Refresh
+        window.location.reload()
+      } else {
+        setToast(data.error || "Failed to request cancellation")
+      }
+    } catch (e) {
+      setToast("Network error. Please try again.")
+    }
+    setCancelling(false)
+  }
+
+  // Handle accept/decline cancellation
+  const handleCancellationResponse = async (action: "accept" | "decline") => {
+    const confirmMsg = action === "accept" 
+      ? "Are you sure you want to accept the cancellation? This will end the collaboration."
+      : "Are you sure you want to decline the cancellation? The collaboration will continue."
+    
+    if (!confirm(confirmMsg)) return
+    
+    setCancelling(true)
+    try {
+      const res = await fetch(`/api/collaborations/${collaborationId}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setToast(data.message)
+        window.location.reload()
+      } else {
+        setToast(data.error || "Failed to respond to cancellation")
+      }
+    } catch (e) {
+      setToast("Network error. Please try again.")
+    }
+    setCancelling(false)
+  }
 
   // Fetch collaboration
   useEffect(() => {
@@ -768,6 +832,96 @@ export default function CollaborationDetailPage() {
               <p className="mt-1 text-sm text-black">
                 Payment has been processed. Thank you for using CreatorStays.
               </p>
+            </div>
+          )}
+
+          {/* Cancellation Request Pending (show to other party) */}
+          {collaboration.status === "cancellation-requested" && (
+            <div className="rounded-2xl border-[3px] border-orange-400 bg-orange-50 p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-orange-400 bg-white">
+                  <span className="text-lg">⚠️</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-lg font-black text-black">Cancellation Requested</p>
+                  <p className="mt-1 text-sm text-black/70">
+                    The other party has requested to cancel this collaboration.
+                  </p>
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      onClick={() => handleCancellationResponse("accept")}
+                      disabled={cancelling}
+                      className="flex-1 rounded-full border-2 border-red-500 bg-red-500 py-2 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                    >
+                      {cancelling ? "Processing..." : "Accept Cancellation"}
+                    </button>
+                    <button
+                      onClick={() => handleCancellationResponse("decline")}
+                      disabled={cancelling}
+                      className="flex-1 rounded-full border-2 border-black bg-white py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                    >
+                      Decline & Continue
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Request Cancellation Button (show when collaboration can be cancelled) */}
+          {!["completed", "cancelled", "cancellation-requested"].includes(collaboration.status) && (
+            <div className="rounded-2xl border-2 border-black/10 bg-white p-5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-black/40">
+                Need to Cancel?
+              </p>
+              <p className="mt-1 text-sm text-black/60">
+                If circumstances have changed, you can request to cancel this collaboration.
+              </p>
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="mt-3 rounded-full border-2 border-black/20 bg-white px-4 py-2 text-xs font-bold text-black/60 transition-all hover:border-red-400 hover:text-red-500"
+              >
+                Request Cancellation
+              </button>
+            </div>
+          )}
+
+          {/* Cancel Modal */}
+          {showCancelModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <div className="w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6">
+                <h3 className="text-xl font-black text-black">Request Cancellation</h3>
+                <p className="mt-2 text-sm text-black/70">
+                  The other party will need to approve this cancellation request.
+                </p>
+                <div className="mt-4">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-black/60">
+                    Reason (optional)
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Let them know why you need to cancel..."
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    className="w-full rounded-lg border-2 border-black px-3 py-2 text-sm text-black placeholder:text-black/40"
+                  />
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={handleCancelRequest}
+                    disabled={cancelling}
+                    className="flex-1 rounded-full border-2 border-red-500 bg-red-500 py-3 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                  >
+                    {cancelling ? "Sending..." : "Send Request"}
+                  </button>
+                  <button
+                    onClick={() => { setShowCancelModal(false); setCancelReason(""); }}
+                    className="flex-1 rounded-full border-2 border-black bg-white py-3 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
+                  >
+                    Never Mind
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

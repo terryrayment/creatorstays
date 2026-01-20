@@ -571,6 +571,158 @@ Find other creators: ${BASE_URL}/dashboard/host/search-creators
 }
 
 /**
+ * Offer Withdrawn Email (to Creator)
+ */
+export function offerWithdrawnEmail(data: {
+  creatorName: string
+  hostName: string
+  propertyTitle: string
+}): { subject: string; html: string; text: string } {
+  const { creatorName, hostName, propertyTitle } = data
+
+  const subject = `Offer from ${hostName} has been withdrawn`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Offer Withdrawn</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${creatorName},</p>
+    
+    <div style="${styles.card}">
+      <p style="margin: 0 0 8px;"><strong>${hostName}</strong> has withdrawn their offer for:</p>
+      <p style="font-size: 18px; font-weight: 700; margin: 0;">${propertyTitle}</p>
+    </div>
+    
+    <p style="margin: 24px 0;">
+      This sometimes happens when hosts' circumstances change. Don't worry — you may receive new offers from other hosts soon!
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/creator" style="${styles.button}">View Dashboard →</a>
+    </div>
+  `)
+
+  const text = `
+Offer Withdrawn
+
+Hi ${creatorName},
+
+${hostName} has withdrawn their offer for ${propertyTitle}.
+
+This sometimes happens when hosts' circumstances change. You may receive new offers from other hosts soon!
+
+View dashboard: ${BASE_URL}/dashboard/creator
+`
+
+  return { subject, html, text }
+}
+
+/**
+ * Collaboration Cancellation Request Email (to other party)
+ */
+export function cancellationRequestEmail(data: {
+  recipientName: string
+  requesterName: string
+  requesterRole: 'host' | 'creator'
+  propertyTitle: string
+  reason?: string
+  collaborationId: string
+}): { subject: string; html: string; text: string } {
+  const { recipientName, requesterName, requesterRole, propertyTitle, reason, collaborationId } = data
+
+  const subject = `⚠️ ${requesterName} requested to cancel collaboration`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Cancellation Requested</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${recipientName},</p>
+    
+    <div style="${styles.card}; border-color: #FF6B6B;">
+      <p style="margin: 0 0 8px;"><strong>${requesterName}</strong> (${requesterRole}) has requested to cancel the collaboration for:</p>
+      <p style="font-size: 18px; font-weight: 700; margin: 0;">${propertyTitle}</p>
+    </div>
+    
+    ${reason ? `
+    <div style="${styles.card}; background: #fff;">
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Reason provided</p>
+      <p style="margin: 0; font-style: italic;">"${reason}"</p>
+    </div>
+    ` : ''}
+    
+    <p style="margin: 24px 0;">
+      You can <strong>accept</strong> the cancellation to end the collaboration, or <strong>decline</strong> to keep it active and discuss further.
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/collaborations/${collaborationId}" style="${styles.buttonYellow}">Review Request →</a>
+    </div>
+  `)
+
+  const text = `
+Cancellation Requested
+
+Hi ${recipientName},
+
+${requesterName} (${requesterRole}) has requested to cancel the collaboration for ${propertyTitle}.
+${reason ? `\nReason: "${reason}"` : ''}
+
+You can accept the cancellation or decline to keep it active.
+
+Review: ${BASE_URL}/dashboard/collaborations/${collaborationId}
+`
+
+  return { subject, html, text }
+}
+
+/**
+ * Collaboration Cancelled Email (to both parties)
+ */
+export function collaborationCancelledEmail(data: {
+  recipientName: string
+  otherPartyName: string
+  propertyTitle: string
+  cancelledBy: 'mutual' | 'host' | 'creator'
+}): { subject: string; html: string; text: string } {
+  const { recipientName, otherPartyName, propertyTitle, cancelledBy } = data
+
+  const cancelReason = cancelledBy === 'mutual' 
+    ? 'Both parties agreed to cancel'
+    : `Cancelled by ${cancelledBy}`
+
+  const subject = `Collaboration cancelled: ${propertyTitle}`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">Collaboration Cancelled</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi ${recipientName},</p>
+    
+    <div style="${styles.card}; background: #f5f5f5;">
+      <p style="margin: 0 0 8px;">The collaboration for <strong>${propertyTitle}</strong> has been cancelled.</p>
+      <p style="font-size: 14px; color: #666; margin: 0;">${cancelReason}</p>
+    </div>
+    
+    <p style="margin: 24px 0;">
+      We hope you'll find other great collaboration opportunities on CreatorStays!
+    </p>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard" style="${styles.button}">Go to Dashboard →</a>
+    </div>
+  `)
+
+  const text = `
+Collaboration Cancelled
+
+Hi ${recipientName},
+
+The collaboration for ${propertyTitle} has been cancelled.
+${cancelReason}
+
+We hope you'll find other great opportunities on CreatorStays!
+
+Dashboard: ${BASE_URL}/dashboard
+`
+
+  return { subject, html, text }
+}
+
+/**
  * Counter Offer Accepted Email (to Creator)
  */
 export function counterAcceptedEmail(data: {
