@@ -84,7 +84,7 @@ Pro tip: Don't just chase click volume. A creator with fewer clicks but higher u
 
 We handle all payment logistics: invoicing, currency conversion, and tax documentation. At year-end, creators who earned over $600 receive a 1099-NEC form automatically. You receive a summary of all payments for your records.
 
-Platform fees are 15% total, split between host and creator (7.5% each). This covers payment processing, fraud protection, dispute resolution, and tax compliance. There are no upfront costs or subscriptions.
+Each party pays a 15% service fee separately. As a host, you pay 15% on top of the creator payment. The creator pays 15% from their end. This covers payment processing, fraud protection, dispute resolution, and tax compliance. There are no upfront costs or subscriptions.
 
 If you need to pause or cancel a collaboration mid-campaign, contact support. Partial payments may apply depending on work already completed. We mediate disputes fairly based on the original agreement terms.
 
@@ -107,11 +107,14 @@ Current wait times vary by niche. Travel creators: 1-2 weeks. Lifestyle: 2-3 wee
   { 
     id: "08", 
     title: "Platform fees explained", 
-    content: `CreatorStays charges 15% on successful collaborations, split evenly between host and creator (7.5% each). There are no upfront costs, monthly subscriptions, or listing fees. You only pay when a collaboration is completed and approved.
+    content: `CreatorStays charges a 15% service fee to each party separately. Hosts pay 15% on top of the creator payment; creators pay 15% from their payout. There are no upfront costs, monthly subscriptions, or listing fees. You only pay when a collaboration is completed and approved.
 
 The fee covers: secure payment processing, fraud protection, dispute mediation, tax document generation (1099s), customer support, and platform maintenance. We don't take cuts from tips or bonuses you send directly.
 
-Example: If you pay a creator $500, the creator receives $462.50 after their 7.5% fee. You pay $537.50 total including your 7.5% fee. Stripe processing fees are included—no additional charges.
+Example: If you agree to pay a creator $500:
+• You (host) pay: $500 + $75 (15% fee) = $575 total
+• Creator receives: $500 - $75 (15% fee) = $425 net
+• Stripe processing fees are included—no additional charges.
 
 For high-volume hosts (10+ collaborations per month), contact us about enterprise pricing. We offer volume discounts and dedicated account management for property managers and multi-listing hosts.
 

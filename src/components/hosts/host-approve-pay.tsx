@@ -95,57 +95,50 @@ export function HostApprovePay() {
 
       {/* Fee Breakdown */}
       <div className="rounded-2xl border-[3px] border-black bg-white p-5">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Fee Breakdown</p>
-        <p className="text-xs text-black/60">Platform fees are 15% from each party</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Payment Summary</p>
 
         <div className="mt-4 space-y-4">
-          {/* Host side */}
+          {/* What you pay */}
           <div className="rounded-xl border-2 border-black bg-[#FFD84A] p-4">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-black">You Pay</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black">What You Pay</p>
             <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-black">Creator payout (gross)</span>
+                <span className="text-black">Creator payment</span>
                 <span className="font-bold text-black">{formatCurrency(agreedAmount)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-black">Host platform fee (15%)</span>
+                <span className="text-black">Service fee (15%)</span>
                 <span className="font-bold text-black">+ {formatCurrency(hostPlatformFee)}</span>
               </div>
               <div className="border-t-2 border-black/20 pt-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-black">Your total</span>
+                  <span className="font-bold text-black">Total charge</span>
                   <span className="text-2xl font-black text-black">{formatCurrency(hostTotalCharged)}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Creator side */}
+          {/* What creator receives */}
           <div className="rounded-xl border-2 border-black bg-[#28D17C] p-4">
             <p className="text-[10px] font-bold uppercase tracking-wider text-black">Creator Receives</p>
-            <div className="mt-3 space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-black">Creator payout (gross)</span>
-                <span className="font-bold text-black">{formatCurrency(agreedAmount)}</span>
+            <div className="mt-3">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-black">Net payout</span>
+                <span className="text-2xl font-black text-black">{formatCurrency(creatorNetPayout)}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-black">Creator platform fee (15%)</span>
-                <span className="font-bold text-black">− {formatCurrency(creatorPlatformFee)}</span>
-              </div>
-              <div className="border-t-2 border-black/20 pt-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-black">Creator net payout</span>
-                  <span className="text-2xl font-black text-black">{formatCurrency(creatorNetPayout)}</span>
-                </div>
-              </div>
+              <p className="mt-2 text-xs text-black/70">
+                After their 15% service fee is deducted
+              </p>
             </div>
           </div>
 
-          {/* Platform summary */}
-          <div className="rounded-xl border-2 border-dashed border-black/30 p-3 text-center">
-            <p className="text-xs text-black/60">
-              Platform revenue: <span className="font-bold text-black">{formatCurrency(platformEarnsTotal)}</span>
-              <span className="text-black/40"> (15% + 15%)</span>
+          {/* Explanation */}
+          <div className="rounded-xl border border-black/20 bg-black/5 p-3">
+            <p className="text-xs text-black/70">
+              <strong className="text-black">How fees work:</strong> You pay a 15% service fee on top of the creator payment. 
+              The creator separately pays their own 15% fee. Each party's fee covers payment processing, 
+              fraud protection, and platform services.
             </p>
           </div>
         </div>
