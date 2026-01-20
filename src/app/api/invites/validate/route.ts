@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Master beta codes - always valid, unlimited uses
+const MASTER_BETA_CODES = [
+  "CREATOR2025",
+  "BETACREATOR", 
+  "CREATORSTAYS",
+]
+
 /**
  * GET /api/invites/validate?token=xxxx
  * 
  * Validates a creator invite token for private beta access.
  * 
  * Validation rules:
- * 1. Token must exist in database
- * 2. Token must not be revoked
- * 3. Token must not be expired (if expiresAt is set)
- * 4. Token must have remaining uses (uses < maxUses)
+ * 1. If token is a master beta code, always valid
+ * 2. Otherwise, token must exist in database
+ * 3. Token must not be revoked
+ * 4. Token must not be expired (if expiresAt is set)
+ * 5. Token must have remaining uses (uses < maxUses)
  * 
  * Returns:
  * - { valid: true } if token is valid and can be used
@@ -25,6 +33,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ 
       valid: false, 
       reason: 'No token provided' 
+    })
+  }
+
+  // Check if it's a master beta code (case-insensitive)
+  if (MASTER_BETA_CODES.includes(token.toUpperCase())) {
+    return NextResponse.json({ 
+      valid: true,
+      isMasterCode: true,
+      meta: {
+        remainingUses: 'unlimited',
+        expiresAt: null
+      }
     })
   }
 
