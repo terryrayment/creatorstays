@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 
-export default function CreatorLoginPage() {
+function CreatorLoginContent() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard/creator"
   const errorParam = searchParams.get("error")
@@ -169,5 +169,25 @@ export default function CreatorLoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-black px-3 pt-16 pb-8 lg:px-4">
+      <div className="mx-auto max-w-md">
+        <div className="rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-6 text-center">
+          <p className="text-black">Loading...</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function CreatorLoginPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CreatorLoginContent />
+    </Suspense>
   )
 }
