@@ -11,6 +11,7 @@ import { Metric } from "@/components/ui/metric"
 import { EdgeBlur } from "@/components/ui/edge-blur"
 import { UGCGalleryManager } from "@/components/creators/ugc-gallery"
 import { CreatorDashboardStats } from "@/components/dashboard/dashboard-stats"
+import { ActionRequiredBanner } from "@/components/dashboard/action-required-banner"
 
 // Platform connection types
 type Platform = 'instagram' | 'tiktok' | 'youtube'
@@ -779,6 +780,9 @@ export function CreatorDashboardProfile() {
   return (
     <div className="relative min-h-screen bg-[hsl(210,20%,99%)]">
       <EdgeBlur />
+
+      {/* Action Required Banner - shows pending items */}
+      <ActionRequiredBanner />
 
       {/* Onboarding Banner */}
       {showOnboardingBanner && (

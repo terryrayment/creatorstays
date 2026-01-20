@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { HostDashboard } from "@/components/hosts/host-dashboard"
 import { HostDashboardStats } from "@/components/dashboard/dashboard-stats"
+import { ActionRequiredBanner } from "@/components/dashboard/action-required-banner"
 
 function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
   return (
@@ -180,6 +181,7 @@ export default function HostDashboardPage() {
 
   return (
     <div className="dashboard min-h-screen bg-[#FAFAFA]">
+      <ActionRequiredBanner />
       {showOnboardingBanner && (
         <OnboardingBanner onDismiss={() => setShowOnboardingBanner(false)} />
       )}

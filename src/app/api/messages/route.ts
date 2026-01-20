@@ -74,7 +74,13 @@ export async function GET() {
             take: 1,
           },
           collaboration: {
-            select: { id: true, status: true },
+            select: { 
+              id: true, 
+              status: true,
+              property: {
+                select: { id: true, title: true, heroImageUrl: true },
+              },
+            },
           },
         },
         orderBy: { lastMessageAt: 'desc' },
@@ -105,7 +111,13 @@ export async function GET() {
             take: 1,
           },
           collaboration: {
-            select: { id: true, status: true },
+            select: { 
+              id: true, 
+              status: true,
+              property: {
+                select: { id: true, title: true, heroImageUrl: true },
+              },
+            },
           },
         },
         orderBy: { lastMessageAt: 'desc' },

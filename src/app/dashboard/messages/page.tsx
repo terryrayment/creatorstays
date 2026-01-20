@@ -26,6 +26,11 @@ interface Conversation {
   collaboration: {
     id: string
     status: string
+    property?: {
+      id: string
+      title: string | null
+      heroImageUrl: string | null
+    }
   } | null
   lastMessageAt: string
 }
@@ -291,6 +296,21 @@ export default function MessagesPage() {
                     </div>
                     {conv.otherParty.handle && (
                       <p className="text-xs text-black/50">@{conv.otherParty.handle}</p>
+                    )}
+                    {/* Property context for collaboration */}
+                    {conv.collaboration?.property?.title && (
+                      <div className="mt-1 flex items-center gap-1.5">
+                        {conv.collaboration.property.heroImageUrl && (
+                          <img 
+                            src={conv.collaboration.property.heroImageUrl} 
+                            alt="" 
+                            className="h-4 w-4 rounded object-cover border border-black/20"
+                          />
+                        )}
+                        <span className="truncate text-[10px] font-medium text-black/50">
+                          🏠 {conv.collaboration.property.title}
+                        </span>
+                      </div>
                     )}
                     {conv.lastMessage && (
                       <p className="mt-1 truncate text-xs text-black/60">

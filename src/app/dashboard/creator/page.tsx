@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { CreatorDashboardProfile } from "@/components/creators/creator-dashboard-profile"
+import { ActionRequiredBanner } from "@/components/dashboard/action-required-banner"
 
 export const metadata = {
   title: "Creator Dashboard | CreatorStays",
@@ -20,6 +21,7 @@ function DashboardLoading() {
 export default function CreatorDashboardPage() {
   return (
     <div className="dashboard">
+      <ActionRequiredBanner />
       <Suspense fallback={<DashboardLoading />}>
         <CreatorDashboardProfile />
       </Suspense>

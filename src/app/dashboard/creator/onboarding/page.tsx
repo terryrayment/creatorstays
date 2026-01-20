@@ -606,7 +606,7 @@ export default function CreatorOnboardingPage() {
 
         {/* Progress note */}
         <p className="mt-4 text-center text-xs text-white/40">
-          Step {step} of 4 · Your progress is saved automatically
+          Step {step} of 4 · {step < 4 ? "Complete all steps to save your profile" : "Ready to save!"}
         </p>
       </div>
     </div>
