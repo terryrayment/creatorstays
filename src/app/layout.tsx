@@ -30,10 +30,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${dmSans.variable} ${bebasNeue.variable}`}>
-      <body className="flex min-h-screen flex-col font-body text-foreground antialiased">
+      <body className="flex min-h-screen flex-col bg-black font-body text-foreground antialiased">
         <AuthProvider>
           <Navbar />
-          <main className="flex-1 pt-20">{children}</main>
+          <main className="flex-1 bg-black pt-20">{children}</main>
           <Footer />
         </AuthProvider>
       </body>
