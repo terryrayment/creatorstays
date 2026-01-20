@@ -32,6 +32,51 @@ export async function POST(request: NextRequest) {
 
     // Handle the event
     switch (event.type) {
+      case 'checkout.session.completed': {
+        const checkoutSession = event.data.object as Stripe.Checkout.Session
+        console.log('[Stripe Webhook] Checkout completed:', checkoutSession.id)
+
+        // Handle platform fee payment (post-for-stay)
+        if (checkoutSession.metadata?.type === 'platform_fee') {
+          const collaborationId = checkoutSession.metadata.collaborationId
+          if (collaborationId) {
+            await prisma.collaboration.update({
+              where: { id: collaborationId },
+              data: {
+                paymentStatus: 'completed',
+                paidAt: new Date(),
+                paymentNotes: 'Platform fee ($99) paid via Stripe Checkout',
+              },
+            })
+            console.log('[Stripe Webhook] Platform fee paid for collaboration:', collaborationId)
+          }
+        }
+        // Handle regular collaboration payment
+        else if (checkoutSession.metadata?.collaborationId) {
+          const collaborationId = checkoutSession.metadata.collaborationId
+          await prisma.collaboration.update({
+            where: { id: collaborationId },
+            data: {
+              paymentStatus: 'completed',
+              paidAt: new Date(),
+            },
+          })
+          
+          // Also update status to completed if content was approved
+          const collab = await prisma.collaboration.findUnique({
+            where: { id: collaborationId },
+            select: { status: true },
+          })
+          if (collab?.status === 'approved') {
+            await prisma.collaboration.update({
+              where: { id: collaborationId },
+              data: { status: 'completed', completedAt: new Date() },
+            })
+          }
+        }
+        break
+      }
+
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent
         console.log('[Stripe Webhook] Payment succeeded:', paymentIntent.id)

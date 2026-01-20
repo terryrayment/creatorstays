@@ -8,6 +8,7 @@ import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import { PropertyGallery } from "@/components/properties/property-gallery"
 import { TrafficBonusTracker } from "@/components/shared/traffic-bonus-tracker"
+import { PayoutTracker } from "@/components/shared/payout-tracker"
 import { getCollaborationStatusDisplay, type UserRole } from "@/lib/status-display"
 
 interface Collaboration {
@@ -20,6 +21,8 @@ interface Collaboration {
   contentApprovedAt: string | null
   clicksGenerated: number
   createdAt: string
+  paymentStatus: string
+  paidAt: string | null
   creator: {
     id: string
     displayName: string
@@ -348,6 +351,33 @@ export default function CollaborationDetailPage() {
 
       if (res.ok) {
         setToast(data.message)
+        
+        // For post-for-stay deals: redirect host to pay $99 platform fee after signing
+        if (
+          userRole === "host" && 
+          collaboration?.offer.offerType === "post-for-stay" &&
+          data.fullyExecuted
+        ) {
+          // Agreement is now fully executed, redirect to pay platform fee
+          const feeRes = await fetch('/api/payments/platform-fee', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ collaborationId }),
+          })
+          const feeData = await feeRes.json()
+          
+          if (feeRes.ok && feeData.url) {
+            // Redirect to Stripe Checkout
+            window.location.href = feeData.url
+            return
+          } else if (feeData.alreadyPaid) {
+            // Fee already paid, just refresh
+            setToast("Agreement signed! Platform fee already paid.")
+          } else {
+            setToast("Agreement signed! Please complete the $99 platform fee payment.")
+          }
+        }
+        
         // Refresh data
         const refreshRes = await fetch(`/api/collaborations/${collaborationId}/agreement`)
         if (refreshRes.ok) {
@@ -589,6 +619,66 @@ export default function CollaborationDetailPage() {
             </div>
           </div>
 
+          {/* Platform Fee Section (Post-for-Stay only) */}
+          {collaboration.offer.offerType === "post-for-stay" && userRole === "host" && (
+            <div className={`rounded-2xl border-[3px] border-black p-5 ${
+              collaboration.paymentStatus === 'completed' ? 'bg-[#28D17C]' : 'bg-[#FFD84A]'
+            }`}>
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">
+                    Platform Fee
+                  </p>
+                  <p className="mt-1 text-2xl font-black text-black">$99</p>
+                  <p className="text-xs text-black/70">
+                    One-time fee for post-for-stay collaborations
+                  </p>
+                </div>
+                <div className={`rounded-full px-3 py-1 text-[10px] font-bold ${
+                  collaboration.paymentStatus === 'completed' 
+                    ? 'bg-white text-black' 
+                    : 'bg-black text-white'
+                }`}>
+                  {collaboration.paymentStatus === 'completed' ? '✓ PAID' : 'PENDING'}
+                </div>
+              </div>
+              
+              {collaboration.paymentStatus !== 'completed' && isFullyExecuted && (
+                <button
+                  onClick={async () => {
+                    setSigning(true)
+                    try {
+                      const res = await fetch('/api/payments/platform-fee', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ collaborationId }),
+                      })
+                      const data = await res.json()
+                      if (res.ok && data.url) {
+                        window.location.href = data.url
+                      } else {
+                        setToast(data.error || 'Failed to initiate payment')
+                      }
+                    } catch (e) {
+                      setToast('Network error. Please try again.')
+                    }
+                    setSigning(false)
+                  }}
+                  disabled={signing}
+                  className="mt-4 w-full rounded-full border-2 border-black bg-black py-3 text-sm font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-1 disabled:opacity-50"
+                >
+                  {signing ? 'Processing...' : 'Pay $99 Platform Fee →'}
+                </button>
+              )}
+              
+              {collaboration.paymentStatus === 'completed' && (
+                <p className="mt-3 text-sm text-black/70">
+                  ✓ Platform fee paid. The collaboration is now active!
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Agreement Section */}
           {agreement && (
             <div className="rounded-2xl border-[3px] border-black bg-white p-5">
@@ -819,6 +909,13 @@ export default function CollaborationDetailPage() {
                 Payment has been processed. Thank you for using CreatorStays.
               </p>
             </div>
+          )}
+
+          {/* Payout Tracker for Creators (show when payment is relevant) */}
+          {userRole === "creator" && 
+           collaboration.offer.cashCents > 0 && 
+           ["approved", "completed"].includes(collaboration.status) && (
+            <PayoutTracker collaborationId={collaboration.id} />
           )}
 
           {/* Cancellation Request Pending (show to other party) */}

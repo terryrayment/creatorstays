@@ -85,9 +85,13 @@ export function TrafficBonusTracker({
               <ul className="space-y-1.5 text-black/70">
                 <li><strong>• What counts:</strong> Each unique click on your CreatorStays tracking link</li>
                 <li><strong>• Deduplication:</strong> Multiple clicks from the same visitor within 24h count as one</li>
-                <li><strong>• Time period:</strong> Clicks count from when you start posting until the collaboration is completed</li>
-                <li><strong>• Payout:</strong> Bonus is paid with your base payment once approved by the host</li>
+                <li><strong>• Time period:</strong> Clicks count from collaboration start until payment</li>
+                <li><strong>• Evaluation:</strong> Bonus is checked when host initiates payment</li>
+                <li><strong>• Payout:</strong> If threshold is met at payment time, bonus is automatically included</li>
               </ul>
+              <p className="mt-2 pt-2 border-t border-black/10 text-black/60">
+                <strong>Tip:</strong> Keep promoting your link until the host pays—more clicks = better chance of hitting the bonus!
+              </p>
             </InfoTooltip>
           </div>
           <p className="mt-1 text-lg font-black text-black">

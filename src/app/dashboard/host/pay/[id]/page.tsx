@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 interface Collaboration {
   id: string
   status: string
+  clicksGenerated: number
   creator: {
     displayName: string
     handle: string
@@ -23,6 +24,9 @@ interface Collaboration {
     offerType: string
     cashCents: number
     deliverables: string[]
+    trafficBonusEnabled: boolean
+    trafficBonusThreshold: number | null
+    trafficBonusCents: number | null
   }
   agreement: {
     isFullyExecuted: boolean
@@ -124,10 +128,20 @@ export default function PayCollaborationPage() {
   }
 
   const cashCents = collaboration.offer.cashCents
-  const hostFeeCents = Math.round(cashCents * 0.15)
-  const hostTotalCents = cashCents + hostFeeCents
-  const creatorFeeCents = Math.round(cashCents * 0.15)
-  const creatorNetCents = cashCents - creatorFeeCents
+  
+  // Check if traffic bonus is earned
+  const bonusEnabled = collaboration.offer.trafficBonusEnabled
+  const bonusThreshold = collaboration.offer.trafficBonusThreshold || 0
+  const bonusCents = collaboration.offer.trafficBonusCents || 0
+  const bonusEarned = bonusEnabled && collaboration.clicksGenerated >= bonusThreshold
+  const earnedBonusCents = bonusEarned ? bonusCents : 0
+  
+  // Total payment including bonus
+  const totalCreatorPayment = cashCents + earnedBonusCents
+  const hostFeeCents = Math.round(totalCreatorPayment * 0.15)
+  const hostTotalCents = totalCreatorPayment + hostFeeCents
+  const creatorFeeCents = Math.round(totalCreatorPayment * 0.15)
+  const creatorNetCents = totalCreatorPayment - creatorFeeCents
 
   const canPay = collaboration.agreement?.isFullyExecuted && cashCents > 0
   const creatorInitials = collaboration.creator.displayName
@@ -219,9 +233,27 @@ export default function PayCollaborationPage() {
                 <p className="text-[10px] font-bold uppercase tracking-wider text-black">What You Pay</p>
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-black">Creator payment</span>
+                    <span className="text-black">Creator base payment</span>
                     <span className="font-bold text-black">{formatCurrency(cashCents)}</span>
                   </div>
+                  {bonusEarned && (
+                    <div className="flex items-center justify-between text-sm text-[#28D17C]">
+                      <span className="flex items-center gap-1">
+                        <span>🎯</span>
+                        Performance bonus ({collaboration.clicksGenerated.toLocaleString()} clicks)
+                      </span>
+                      <span className="font-bold">+ {formatCurrency(earnedBonusCents)}</span>
+                    </div>
+                  )}
+                  {bonusEnabled && !bonusEarned && (
+                    <div className="flex items-center justify-between text-sm text-black/50">
+                      <span className="flex items-center gap-1">
+                        <span>🎯</span>
+                        Performance bonus (not reached)
+                      </span>
+                      <span className="font-bold">$0.00</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-black">Service fee (15%)</span>
                     <span className="font-bold text-black">+ {formatCurrency(hostFeeCents)}</span>

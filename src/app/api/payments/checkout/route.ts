@@ -64,19 +64,36 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Calculate payment
-    const cashCents = collaboration.offer.cashCents
-    if (cashCents <= 0) {
+    // Calculate payment including traffic bonus if earned
+    const baseCashCents = collaboration.offer.cashCents
+    if (baseCashCents <= 0) {
       return NextResponse.json({ error: 'No payment required for stay-only deals' }, { status: 400 })
     }
 
-    const breakdown = calculatePaymentBreakdown(cashCents)
+    // Check if traffic bonus was earned
+    const bonusEnabled = collaboration.offer.trafficBonusEnabled
+    const bonusThreshold = collaboration.offer.trafficBonusThreshold || 0
+    const bonusCents = collaboration.offer.trafficBonusCents || 0
+    const bonusEarned = bonusEnabled && collaboration.clicksGenerated >= bonusThreshold
+    const earnedBonusCents = bonusEarned ? bonusCents : 0
+    
+    // Total cash payment to creator (base + bonus if earned)
+    const totalCashCents = baseCashCents + earnedBonusCents
+
+    const breakdown = calculatePaymentBreakdown(totalCashCents)
 
     // Check if creator has Stripe account connected
     const creatorStripeAccountId = collaboration.creator.stripeAccountId
 
     // Build line items
-    const lineItems = [
+    const lineItems: Array<{
+      price_data: {
+        currency: string
+        product_data: { name: string; description?: string }
+        unit_amount: number
+      }
+      quantity: number
+    }> = [
       {
         price_data: {
           currency: 'usd',
@@ -84,22 +101,39 @@ export async function POST(request: NextRequest) {
             name: `Creator Payment: ${collaboration.creator.displayName}`,
             description: `Collaboration for ${collaboration.property.title}`,
           },
-          unit_amount: cashCents,
-        },
-        quantity: 1,
-      },
-      {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: 'Platform Fee (15%)',
-            description: 'CreatorStays service fee',
-          },
-          unit_amount: breakdown.hostFeeCents,
+          unit_amount: baseCashCents,
         },
         quantity: 1,
       },
     ]
+    
+    // Add bonus as separate line item if earned
+    if (bonusEarned && earnedBonusCents > 0) {
+      lineItems.push({
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: `Performance Bonus: ${collaboration.creator.displayName}`,
+            description: `Traffic bonus for reaching ${bonusThreshold.toLocaleString()} clicks`,
+          },
+          unit_amount: earnedBonusCents,
+        },
+        quantity: 1,
+      })
+    }
+    
+    // Add platform fee
+    lineItems.push({
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: 'Platform Fee (15%)',
+          description: 'CreatorStays service fee',
+        },
+        unit_amount: breakdown.hostFeeCents,
+      },
+      quantity: 1,
+    })
 
     // Create checkout session
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://creatorstays.com'
@@ -114,7 +148,10 @@ export async function POST(request: NextRequest) {
         collaborationId,
         hostProfileId: hostProfile.id,
         creatorProfileId: collaboration.creatorId,
-        cashCents: cashCents.toString(),
+        baseCashCents: baseCashCents.toString(),
+        bonusEarned: bonusEarned.toString(),
+        bonusCents: earnedBonusCents.toString(),
+        totalCashCents: totalCashCents.toString(),
         hostFeeCents: breakdown.hostFeeCents.toString(),
         creatorFeeCents: breakdown.creatorFeeCents.toString(),
         creatorNetCents: breakdown.creatorNetCents.toString(),
