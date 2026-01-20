@@ -45,6 +45,13 @@ export default function RootLayout({
             gtag('config', 'G-01XZB7MKG9');
           `}
         </Script>
+        {/* Google Places API for location autocomplete */}
+        {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
+          <Script
+            src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
+            strategy="afterInteractive"
+          />
+        )}
       </head>
       <body className="flex min-h-screen flex-col bg-black font-body text-foreground antialiased">
         <AuthProvider>
