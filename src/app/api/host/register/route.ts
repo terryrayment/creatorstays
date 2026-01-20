@@ -114,21 +114,28 @@ export async function POST(request: NextRequest) {
     })
 
     // 4. Create a verification token for magic link sign-in
-    // This allows the user to sign in without needing to go through email verification again
-    const token = crypto.randomUUID()
+    // NextAuth hashes tokens before storing, so we need to match that format
+    const rawToken = crypto.randomUUID()
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
+    // Hash the token the same way NextAuth does (SHA256)
+    const encoder = new TextEncoder()
+    const data = encoder.encode(`${rawToken}${process.env.NEXTAUTH_SECRET || ''}`)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const hashedToken = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 
     await prisma.verificationToken.create({
       data: {
         identifier: normalizedEmail,
-        token,
+        token: hashedToken,
         expires,
       },
     })
 
-    // 5. Send welcome email with magic link
+    // 5. Send welcome email with magic link (use raw token in URL - NextAuth will hash it to verify)
     const baseUrl = process.env.NEXTAUTH_URL || 'https://creatorstays.com'
-    const magicLink = `${baseUrl}/api/auth/callback/email?callbackUrl=${encodeURIComponent('/dashboard/host/onboarding')}&token=${token}&email=${encodeURIComponent(normalizedEmail)}`
+    const magicLink = `${baseUrl}/api/auth/callback/email?callbackUrl=${encodeURIComponent('/dashboard/host/onboarding')}&token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`
 
     try {
       await sendEmail({
