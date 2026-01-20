@@ -1,14 +1,58 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Container } from "@/components/layout/container"
 import { Navbar } from "@/components/navigation/navbar"
 import { Footer } from "@/components/navigation/footer"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select } from "@/components/ui/select"
+
+// City coordinates for distance calculation (lat, lng)
+const CITY_COORDS: Record<string, [number, number]> = {
+  "Los Angeles, CA": [34.0522, -118.2437],
+  "Austin, TX": [30.2672, -97.7431],
+  "Miami, FL": [25.7617, -80.1918],
+  "Denver, CO": [39.7392, -104.9903],
+  "Portland, OR": [45.5152, -122.6784],
+  "Seattle, WA": [47.6062, -122.3321],
+  "San Francisco, CA": [37.7749, -122.4194],
+  "San Diego, CA": [32.7157, -117.1611],
+  "Phoenix, AZ": [33.4484, -112.0740],
+  "Las Vegas, NV": [36.1699, -115.1398],
+  "Lake Arrowhead, CA": [34.2483, -117.1897],
+  "Big Bear Lake, CA": [34.2439, -116.9114],
+  "Palm Springs, CA": [33.8303, -116.5453],
+  "Joshua Tree, CA": [34.1347, -116.3131],
+  "Nashville, TN": [36.1627, -86.7816],
+  "New York, NY": [40.7128, -74.0060],
+  "Chicago, IL": [41.8781, -87.6298],
+}
+
+// Calculate distance between two coordinates in miles
+function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 3959 // Earth's radius in miles
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLon = (lon2 - lon1) * Math.PI / 180
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  return R * c
+}
+
+// Parse audience size to number
+function parseAudienceSize(size: string): number {
+  return parseInt(size.replace('K', '000').replace('M', '000000'))
+}
+
+// Parse engagement rate to number
+function parseEngagementRate(rate: string): number {
+  return parseFloat(rate.replace('%', ''))
+}
 
 // Mock approved creators database
 const APPROVED_CREATORS = [
@@ -95,62 +139,181 @@ const APPROVED_CREATORS = [
 const PLATFORM_OPTIONS = ["All Platforms", "Instagram", "TikTok", "YouTube"]
 const NICHE_OPTIONS = ["All Niches", "Travel", "Lifestyle", "Photography", "Vlog", "Food", "Adventure", "Luxury", "Design", "Family", "Minimal"]
 const AUDIENCE_OPTIONS = ["All Sizes", "Under 50K", "50K-100K", "100K-250K", "250K+"]
-const LOCATION_OPTIONS = ["All Locations", "Los Angeles, CA", "Austin, TX", "Miami, FL", "Denver, CO", "Portland, OR", "Seattle, WA"]
+const SORT_OPTIONS = [
+  { value: "relevance", label: "Relevance" },
+  { value: "followers_high", label: "Followers: High to Low" },
+  { value: "followers_low", label: "Followers: Low to High" },
+  { value: "engagement_high", label: "Engagement: High to Low" },
+  { value: "engagement_low", label: "Engagement: Low to High" },
+  { value: "distance", label: "Distance: Nearest" },
+]
+
+const ALL_LOCATIONS = Object.keys(CITY_COORDS)
+
+// Location search component
+function LocationSearch({ 
+  value, 
+  onChange,
+  onClear 
+}: { 
+  value: string
+  onChange: (value: string) => void
+  onClear: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [inputValue, setInputValue] = useState("")
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const filteredLocations = inputValue
+    ? ALL_LOCATIONS.filter(loc => loc.toLowerCase().includes(inputValue.toLowerCase()))
+    : ALL_LOCATIONS
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex h-10 w-44 items-center justify-between rounded-full border-2 border-black bg-white px-3 text-[12px] font-bold text-black"
+      >
+        <span className="truncate">{value || "All Locations"}</span>
+        {value ? (
+          <span 
+            onClick={(e) => { e.stopPropagation(); onClear(); setInputValue("") }}
+            className="ml-1 text-black/50 hover:text-black"
+          >
+            ✕
+          </span>
+        ) : (
+          <svg className="h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        )}
+      </button>
+      
+      {open && (
+        <div className="absolute z-20 mt-1 w-56 rounded-xl border-2 border-black bg-white p-2 shadow-lg">
+          <input
+            autoFocus
+            placeholder="Search location..."
+            value={inputValue}
+            onChange={e => setInputValue(e.target.value)}
+            className="w-full rounded-lg border-2 border-black px-3 py-2 text-[12px] font-medium text-black placeholder:text-black/40 focus:outline-none"
+          />
+          <p className="mt-2 px-2 text-[9px] font-bold uppercase tracking-wider text-black/50">
+            Shows creators within 150 miles
+          </p>
+          <div className="mt-1 max-h-48 overflow-y-auto">
+            {filteredLocations.map((loc) => (
+              <button
+                key={loc}
+                type="button"
+                className="w-full rounded-lg px-3 py-2 text-left text-[12px] font-medium text-black transition-colors hover:bg-[#FFD84A]"
+                onClick={() => {
+                  onChange(loc)
+                  setOpen(false)
+                  setInputValue("")
+                }}
+              >
+                {loc}
+              </button>
+            ))}
+            {filteredLocations.length === 0 && (
+              <p className="px-3 py-2 text-[11px] text-black/50">No locations found</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function SearchCreatorsPage() {
   const router = useRouter()
-  const [isAuthorized, setIsAuthorized] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const { data: session, status } = useSession()
   
   // Filters
   const [search, setSearch] = useState("")
   const [platform, setPlatform] = useState("All Platforms")
   const [niche, setNiche] = useState("All Niches")
   const [audienceSize, setAudienceSize] = useState("All Sizes")
-  const [location, setLocation] = useState("All Locations")
+  const [location, setLocation] = useState("")
+  const [sortBy, setSortBy] = useState("relevance")
 
-  // Check if user is logged in as host
-  useEffect(() => {
-    const role = localStorage.getItem('creatorstays_role')
-    if (role !== 'host') {
-      router.push('/demo-login?role=host')
-    } else {
-      setIsAuthorized(true)
-    }
-    setIsLoading(false)
-  }, [router])
+  // Calculate distance for a creator from selected location
+  const getCreatorDistance = (creatorLocation: string): number | null => {
+    if (!location || !CITY_COORDS[location] || !CITY_COORDS[creatorLocation]) return null
+    const [lat1, lon1] = CITY_COORDS[location]
+    const [lat2, lon2] = CITY_COORDS[creatorLocation]
+    return getDistance(lat1, lon1, lat2, lon2)
+  }
 
-  // Filter creators
-  const filteredCreators = APPROVED_CREATORS.filter(creator => {
-    // Search
-    if (search && !creator.name.toLowerCase().includes(search.toLowerCase()) && 
-        !creator.handle.toLowerCase().includes(search.toLowerCase())) {
-      return false
-    }
-    // Platform
-    if (platform !== "All Platforms" && !creator.platforms.includes(platform)) {
-      return false
-    }
-    // Niche
-    if (niche !== "All Niches" && !creator.niches.includes(niche)) {
-      return false
-    }
-    // Location
-    if (location !== "All Locations" && creator.location !== location) {
-      return false
-    }
-    // Audience size
-    if (audienceSize !== "All Sizes") {
-      const size = parseInt(creator.audienceSize.replace('K', '000'))
-      if (audienceSize === "Under 50K" && size >= 50000) return false
-      if (audienceSize === "50K-100K" && (size < 50000 || size > 100000)) return false
-      if (audienceSize === "100K-250K" && (size < 100000 || size > 250000)) return false
-      if (audienceSize === "250K+" && size < 250000) return false
-    }
-    return true
-  })
+  // Filter and sort creators
+  const filteredCreators = APPROVED_CREATORS
+    .map(creator => ({
+      ...creator,
+      distance: getCreatorDistance(creator.location)
+    }))
+    .filter(creator => {
+      // Search by name, handle, or location
+      if (search) {
+        const searchLower = search.toLowerCase()
+        const matchesName = creator.name.toLowerCase().includes(searchLower)
+        const matchesHandle = creator.handle.toLowerCase().includes(searchLower)
+        const matchesLocation = creator.location.toLowerCase().includes(searchLower)
+        if (!matchesName && !matchesHandle && !matchesLocation) return false
+      }
+      // Platform
+      if (platform !== "All Platforms" && !creator.platforms.includes(platform)) {
+        return false
+      }
+      // Niche
+      if (niche !== "All Niches" && !creator.niches.includes(niche)) {
+        return false
+      }
+      // Location radius (150 miles)
+      if (location && creator.distance !== null && creator.distance > 150) {
+        return false
+      }
+      // Audience size
+      if (audienceSize !== "All Sizes") {
+        const size = parseAudienceSize(creator.audienceSize)
+        if (audienceSize === "Under 50K" && size >= 50000) return false
+        if (audienceSize === "50K-100K" && (size < 50000 || size > 100000)) return false
+        if (audienceSize === "100K-250K" && (size < 100000 || size > 250000)) return false
+        if (audienceSize === "250K+" && size < 250000) return false
+      }
+      return true
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "followers_high":
+          return parseAudienceSize(b.audienceSize) - parseAudienceSize(a.audienceSize)
+        case "followers_low":
+          return parseAudienceSize(a.audienceSize) - parseAudienceSize(b.audienceSize)
+        case "engagement_high":
+          return parseEngagementRate(b.engagementRate) - parseEngagementRate(a.engagementRate)
+        case "engagement_low":
+          return parseEngagementRate(a.engagementRate) - parseEngagementRate(b.engagementRate)
+        case "distance":
+          if (a.distance === null) return 1
+          if (b.distance === null) return -1
+          return a.distance - b.distance
+        default:
+          return 0
+      }
+    })
 
-  if (isLoading) {
+  if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA]">
         <p className="text-black">Loading...</p>
@@ -158,14 +321,10 @@ export default function SearchCreatorsPage() {
     )
   }
 
-  if (!isAuthorized) {
-    return null
-  }
-
   return (
     <div className="dashboard flex min-h-screen flex-col bg-[#FAFAFA]">
       <Navbar />
-      <main className="flex-1 py-6 pt-20">
+      <main className="flex-1 py-6">
         <Container>
           <div className="mb-4">
             <Link href="/dashboard/host" className="text-xs font-bold text-black hover:underline">
@@ -174,8 +333,8 @@ export default function SearchCreatorsPage() {
           </div>
 
           {/* Header */}
-          <div className="mb-6 rounded-xl border-2 border-black bg-[#4AA3FF] p-5">
-            <h1 className="text-2xl font-bold text-black">Find Creators</h1>
+          <div className="mb-6 rounded-xl border-2 border-black bg-white p-5">
+            <h1 className="font-heading text-[2rem] font-black text-black">FIND CREATORS</h1>
             <p className="mt-1 text-sm text-black">
               Browse approved creators and send collaboration offers.
             </p>
@@ -186,10 +345,11 @@ export default function SearchCreatorsPage() {
             <div className="flex flex-wrap items-center gap-3">
               {/* Search */}
               <div className="flex-1 min-w-[200px]">
-                <Input
-                  placeholder="Search by name or handle..."
+                <input
+                  placeholder="Search by name, handle, or location..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
+                  className="h-10 w-full rounded-full border-2 border-black px-4 text-[12px] font-medium text-black placeholder:text-black/40 focus:outline-none"
                 />
               </div>
 
@@ -209,12 +369,11 @@ export default function SearchCreatorsPage() {
                 options={NICHE_OPTIONS.map(opt => ({ value: opt, label: opt }))}
               />
 
-              {/* Location Dropdown */}
-              <Select
-                className="w-40"
+              {/* Location Search */}
+              <LocationSearch
                 value={location}
-                onChange={e => setLocation(e.target.value)}
-                options={LOCATION_OPTIONS.map(opt => ({ value: opt, label: opt }))}
+                onChange={setLocation}
+                onClear={() => setLocation("")}
               />
 
               {/* Audience Dropdown */}
@@ -225,12 +384,24 @@ export default function SearchCreatorsPage() {
                 options={AUDIENCE_OPTIONS.map(opt => ({ value: opt, label: opt }))}
               />
             </div>
-          </div>
 
-          {/* Results Count */}
-          <p className="mb-4 text-sm font-bold text-black">
-            {filteredCreators.length} creator{filteredCreators.length !== 1 ? 's' : ''} found
-          </p>
+            {/* Sort row */}
+            <div className="mt-3 flex items-center justify-between border-t border-black/10 pt-3">
+              <p className="text-sm font-bold text-black">
+                {filteredCreators.length} creator{filteredCreators.length !== 1 ? 's' : ''} found
+                {location && ` within 150 miles of ${location}`}
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-black/50">Sort by:</span>
+                <Select
+                  className="w-44"
+                  value={sortBy}
+                  onChange={e => setSortBy(e.target.value)}
+                  options={SORT_OPTIONS}
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Creator Grid */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -283,8 +454,13 @@ export default function SearchCreatorsPage() {
                   ))}
                 </div>
 
-                {/* Location */}
-                <p className="mt-2 text-[10px] text-black">📍 {creator.location}</p>
+                {/* Location with distance */}
+                <p className="mt-2 text-[10px] text-black">
+                  📍 {creator.location}
+                  {creator.distance !== null && (
+                    <span className="ml-1 text-black/50">({Math.round(creator.distance)} mi away)</span>
+                  )}
+                </p>
 
                 {/* Action */}
                 <Button className="mt-4 w-full" size="sm">
@@ -298,7 +474,7 @@ export default function SearchCreatorsPage() {
           {filteredCreators.length === 0 && (
             <div className="rounded-xl border-2 border-dashed border-black/30 p-8 text-center">
               <p className="text-sm font-bold text-black">No creators match your filters</p>
-              <p className="mt-1 text-xs text-black">Try adjusting your search criteria</p>
+              <p className="mt-1 text-xs text-black">Try adjusting your search criteria or expanding your location radius</p>
             </div>
           )}
         </Container>
