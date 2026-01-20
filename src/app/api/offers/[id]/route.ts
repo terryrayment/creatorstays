@@ -79,6 +79,7 @@ export async function PATCH(
     // Get creator profile
     const creatorProfile = await prisma.creatorProfile.findUnique({
       where: { userId: session.user.id },
+      include: { user: true },
     })
 
     if (!creatorProfile) {
@@ -193,10 +194,26 @@ export async function PATCH(
           collaborationId: collaboration.id,
           version: '1.0',
           agreementText,
+          // Parties
+          hostName: offer.hostProfile.displayName,
+          hostEmail: offer.hostProfile.user?.email || offer.hostProfile.contactEmail,
+          creatorName: creatorProfile.displayName,
+          creatorHandle: creatorProfile.handle,
+          creatorEmail: creatorProfile.user.email || '',
+          // Property
+          propertyTitle: property.title || 'Property',
+          propertyLocation: property.cityRegion,
+          propertyUrl: property.airbnbUrl,
+          // Deal terms
           dealType: offer.offerType,
           cashAmount: offer.cashCents,
           stayIncluded: !!offer.stayNights,
           stayNights: offer.stayNights,
+          // Bonus terms
+          bonusEnabled: offer.trafficBonusEnabled,
+          bonusAmount: offer.trafficBonusCents,
+          bonusThreshold: offer.trafficBonusThreshold,
+          // Deliverables
           deliverables: offer.deliverables,
           contentDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         },
