@@ -1,9 +1,43 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { HostDashboard } from "@/components/hosts/host-dashboard"
 import { HostDashboardStats } from "@/components/dashboard/dashboard-stats"
+
+function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="border-b-2 border-black bg-[#4AA3FF]">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <div className="flex items-center gap-3">
+          <span className="text-xl">🏠</span>
+          <div>
+            <p className="text-sm font-bold text-black">Complete your setup to start finding creators!</p>
+            <p className="text-xs text-black/70">Add your first property to get started</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link 
+            href="/dashboard/host/onboarding"
+            className="rounded-full border-2 border-black bg-black px-4 py-1.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5"
+          >
+            Complete Setup →
+          </Link>
+          <button
+            onClick={onDismiss}
+            className="p-1 text-black/60 hover:text-black"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function NextStepStrip() {
   return (
@@ -98,8 +132,51 @@ function SetupChecklist() {
 }
 
 export default function HostDashboardPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [showOnboardingBanner, setShowOnboardingBanner] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function checkProfile() {
+      if (status !== "authenticated") return
+      
+      try {
+        const res = await fetch("/api/host/profile")
+        if (res.status === 404) {
+          // No profile, redirect to onboarding
+          router.push("/dashboard/host/onboarding")
+          return
+        }
+        if (res.ok) {
+          const profile = await res.json()
+          // No properties yet, show banner
+          if (!profile.properties || profile.properties.length === 0) {
+            setShowOnboardingBanner(true)
+          }
+        }
+      } catch (e) {
+        console.error("Failed to check profile:", e)
+      }
+      setLoading(false)
+    }
+    
+    checkProfile()
+  }, [status, router])
+
+  if (status === "loading" || loading) {
+    return (
+      <div className="dashboard min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+        <p className="text-sm text-black/60">Loading...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="dashboard min-h-screen bg-[#FAFAFA]">
+      {showOnboardingBanner && (
+        <OnboardingBanner onDismiss={() => setShowOnboardingBanner(false)} />
+      )}
       <NextStepStrip />
       <StatsSection />
       <SetupChecklist />
