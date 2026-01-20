@@ -79,7 +79,8 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
         if (res.ok) {
           const data = await res.json()
           setProperties(data.properties || [])
-          if (data.properties?.length > 0) {
+          // Don't auto-select - require explicit selection unless only one property
+          if (data.properties?.length === 1) {
             setSelectedProperty(data.properties[0].id)
           }
         }
@@ -264,16 +265,37 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                     </a>
                   </div>
                 ) : (
-                  <StyledSelect
-                    value={selectedProperty}
-                    onChange={setSelectedProperty}
-                    options={properties.map(p => ({
-                      value: p.id,
-                      label: `${p.title || "Untitled"} — ${p.cityRegion || "No location"}`
-                    }))}
-                    placeholder="Select a property..."
-                  />
-                )}
+                  <>
+                    <StyledSelect
+                      value={selectedProperty}
+                      onChange={setSelectedProperty}
+                      options={properties.map(p => ({
+                        value: p.id,
+                        label: `${p.title || "Untitled"} — ${p.cityRegion || "No location"}`
+                      }))}
+                      placeholder="Select a property..."
+                    />
+                    {/* Warning when multiple properties but none selected */}
+                    {properties.length > 1 && !selectedProperty && (
+                      <div className="mt-2 flex items-start gap-2 rounded-lg border-2 border-amber-400 bg-amber-50 px-3 py-2">
+                        <svg className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                        <p className="text-xs text-amber-800">
+                          <span className="font-bold">Please select which property</span> you want the creator to feature in their content.
+                        </p>
+                      </div>
+                    )}
+                    {/* Show selected property preview */}
+                    {selectedProperty && selectedPropertyData && (
+                      <div className="mt-2 rounded-lg border border-black/20 bg-black/5 px-3 py-2">
+                        <p className="text-xs text-black/60">
+                          ✓ Content will feature: <span className="font-bold text-black">{selectedPropertyData.title || "Untitled Property"}</span>
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}}
               </div>
 
               {/* Cash Amount (for flat and flat-with-bonus) */}

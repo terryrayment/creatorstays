@@ -7,7 +7,7 @@ import { sendEmail, counterAcceptedEmail, counterDeclinedEmail } from '@/lib/ema
 
 export const dynamic = 'force-dynamic'
 
-// POST /api/offers/[id]/respond-counter - Host accepts or declines a counter offer
+// POST /api/offers/[id]/respond-counter - Host accepts, declines, or re-counters a counter offer
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -19,9 +19,9 @@ export async function POST(
     }
 
     const body = await request.json()
-    const { action } = body // "accept" or "decline"
+    const { action, reCounterCashCents, reCounterMessage } = body // "accept", "decline", or "re-counter"
 
-    if (!action || !['accept', 'decline'].includes(action)) {
+    if (!action || !['accept', 'decline', 're-counter'].includes(action)) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
 
@@ -91,6 +91,60 @@ export async function POST(
       return NextResponse.json({
         success: true,
         message: 'Counter offer declined',
+      })
+    }
+
+    // ACTION: RE-COUNTER (Host sends back a new counter)
+    if (action === 're-counter') {
+      if (!reCounterCashCents || reCounterCashCents <= 0) {
+        return NextResponse.json({ error: 'Re-counter amount required' }, { status: 400 })
+      }
+
+      // Update offer: reset status to pending, store host's re-counter
+      // We reuse counterCashCents field but flip the negotiation back to creator
+      await prisma.offer.update({
+        where: { id: params.id },
+        data: {
+          status: 'pending', // Back to pending for creator to respond
+          cashCents: reCounterCashCents, // Update the main offer amount
+          counterCashCents: null, // Clear creator's counter
+          counterMessage: null,
+          requirements: reCounterMessage || offer.requirements, // Update message if provided
+          respondedAt: null, // Reset response timestamp
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days to respond
+        },
+      })
+
+      // Send email to creator about re-counter
+      const creatorEmail = offer.creatorProfile.user?.email
+      if (creatorEmail) {
+        // Using the existing email system - we'll send a modified new offer email
+        const { newOfferEmail } = await import('@/lib/email')
+        const emailData = newOfferEmail({
+          creatorName: offer.creatorProfile.displayName,
+          hostName: offer.hostProfile.displayName,
+          propertyTitle: offer.property?.title || 'Property',
+          propertyLocation: offer.property?.cityRegion || '',
+          dealType: offer.offerType,
+          cashAmount: reCounterCashCents,
+          stayNights: offer.stayNights || undefined,
+          deliverables: offer.deliverables,
+          offerId: offer.id,
+        })
+
+        // Customize subject to indicate it's a counter response
+        await sendEmail({
+          to: creatorEmail,
+          subject: `💬 ${offer.hostProfile.displayName} responded to your counter offer`,
+          html: emailData.html.replace('New Collaboration Offer!', 'Counter Response from Host'),
+          text: emailData.text,
+        })
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Re-counter sent to creator',
+        newAmount: reCounterCashCents,
       })
     }
 

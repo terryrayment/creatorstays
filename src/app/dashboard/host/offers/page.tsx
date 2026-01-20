@@ -72,10 +72,16 @@ export default function HostSentOffersPage() {
   const [responding, setResponding] = useState<string | null>(null)
   const [withdrawing, setWithdrawing] = useState<string | null>(null)
   const [resending, setResending] = useState<string | null>(null)
+  const [showReCounter, setShowReCounter] = useState(false)
+  const [reCounterAmount, setReCounterAmount] = useState("")
+  const [reCounterMessage, setReCounterMessage] = useState("")
 
   // Mark offer as viewed when host selects a responded offer
   const handleSelectOffer = async (offer: Offer | null) => {
     setSelectedOffer(offer)
+    setShowReCounter(false) // Reset re-counter form when switching offers
+    setReCounterAmount("")
+    setReCounterMessage("")
     
     // If selecting an offer that has been responded to, mark it as viewed
     if (offer && offer.status !== 'pending' && offer.respondedAt) {
@@ -151,30 +157,59 @@ export default function HostSentOffersPage() {
     setWithdrawing(null)
   }
 
-  // Handle counter offer response
-  const handleCounterResponse = async (offerId: string, action: "accept" | "decline") => {
+  // Handle counter offer response (accept, decline, or re-counter)
+  const handleCounterResponse = async (offerId: string, action: "accept" | "decline" | "re-counter") => {
+    // Validate re-counter amount if that's the action
+    if (action === "re-counter") {
+      const amount = parseFloat(reCounterAmount)
+      if (!amount || amount <= 0) {
+        alert("Please enter a valid counter amount")
+        return
+      }
+    }
+    
     setResponding(offerId)
     try {
       const res = await fetch(`/api/offers/${offerId}/respond-counter`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ 
+          action,
+          ...(action === "re-counter" ? {
+            reCounterCashCents: Math.round(parseFloat(reCounterAmount) * 100),
+            reCounterMessage: reCounterMessage || undefined,
+          } : {}),
+        }),
       })
       
       const data = await res.json()
       
       if (res.ok) {
-        // Update the offer in state
-        setOffers(prev => prev.map(o => 
-          o.id === offerId 
-            ? { ...o, status: action === "accept" ? "accepted" : "declined" }
-            : o
-        ))
-        setSelectedOffer(null)
-        
-        // Redirect to collaborations if accepted
-        if (action === "accept" && data.collaborationId) {
-          window.location.href = "/dashboard/collaborations"
+        if (action === "re-counter") {
+          // Update offer back to pending with new amount
+          setOffers(prev => prev.map(o => 
+            o.id === offerId 
+              ? { ...o, status: "pending", cashCents: Math.round(parseFloat(reCounterAmount) * 100), counterCashCents: null, counterMessage: null }
+              : o
+          ))
+          setSelectedOffer(null)
+          setShowReCounter(false)
+          setReCounterAmount("")
+          setReCounterMessage("")
+          alert("Re-counter sent! The creator has 7 days to respond.")
+        } else {
+          // Update the offer in state
+          setOffers(prev => prev.map(o => 
+            o.id === offerId 
+              ? { ...o, status: action === "accept" ? "accepted" : "declined" }
+              : o
+          ))
+          setSelectedOffer(null)
+          
+          // Redirect to collaborations if accepted
+          if (action === "accept" && data.collaborationId) {
+            window.location.href = "/dashboard/collaborations"
+          }
         }
       } else {
         alert(data.error || "Failed to respond to counter offer")
@@ -410,27 +445,92 @@ export default function HostSentOffersPage() {
                         {/* Counter Offer */}
                         {offer.status === "countered" && offer.counterCashCents && (
                           <div className="rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-4">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60 mb-1">Counter Offer</p>
-                            <p className="text-xl font-black text-black">{formatCurrency(offer.counterCashCents)}</p>
-                            {offer.counterMessage && (
-                              <p className="mt-2 text-sm text-black/80">&ldquo;{offer.counterMessage}&rdquo;</p>
-                            )}
-                            <div className="mt-3 flex gap-2">
-                              <button 
-                                onClick={() => handleCounterResponse(offer.id, "accept")}
-                                disabled={responding === offer.id}
-                                className="flex-1 rounded-full border-2 border-black bg-[#28D17C] py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
-                              >
-                                {responding === offer.id ? "Processing..." : "Accept Counter"}
-                              </button>
-                              <button 
-                                onClick={() => handleCounterResponse(offer.id, "decline")}
-                                disabled={responding === offer.id}
-                                className="flex-1 rounded-full border-2 border-black bg-white py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
-                              >
-                                Decline
-                              </button>
+                            <div className="flex items-start justify-between mb-2">
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Counter Offer from Creator</p>
+                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#4AA3FF] text-white font-bold">Negotiation Open</span>
                             </div>
+                            <p className="text-xl font-black text-black">{formatCurrency(offer.counterCashCents)}</p>
+                            <p className="text-xs text-black/60 mt-1">
+                              Your original offer: {formatCurrency(offer.cashCents)}
+                            </p>
+                            {offer.counterMessage && (
+                              <p className="mt-2 text-sm text-black/80 bg-white/50 rounded-lg p-2 border border-black/10">&ldquo;{offer.counterMessage}&rdquo;</p>
+                            )}
+                            
+                            {/* Re-counter form */}
+                            {showReCounter ? (
+                              <div className="mt-4 space-y-3 rounded-lg border-2 border-[#FFD84A] bg-[#FFD84A]/20 p-3">
+                                <p className="text-xs font-bold text-black">Make a Counter Offer</p>
+                                <div>
+                                  <label className="text-[10px] font-bold uppercase tracking-wider text-black/60 block mb-1">
+                                    Your Amount ($)
+                                  </label>
+                                  <input
+                                    type="number"
+                                    placeholder={`e.g., ${Math.round((offer.cashCents + offer.counterCashCents) / 2 / 100)}`}
+                                    value={reCounterAmount}
+                                    onChange={e => setReCounterAmount(e.target.value)}
+                                    className="w-full rounded-lg border-2 border-black px-3 py-2 text-sm font-bold"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[10px] font-bold uppercase tracking-wider text-black/60 block mb-1">
+                                    Message (optional)
+                                  </label>
+                                  <textarea
+                                    rows={2}
+                                    placeholder="Explain your offer..."
+                                    value={reCounterMessage}
+                                    onChange={e => setReCounterMessage(e.target.value)}
+                                    className="w-full rounded-lg border-2 border-black px-3 py-2 text-sm"
+                                  />
+                                </div>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleCounterResponse(offer.id, "re-counter")}
+                                    disabled={responding === offer.id || !reCounterAmount}
+                                    className="flex-1 rounded-full border-2 border-black bg-[#FFD84A] py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                                  >
+                                    {responding === offer.id ? "Sending..." : "Send Counter"}
+                                  </button>
+                                  <button
+                                    onClick={() => { setShowReCounter(false); setReCounterAmount(""); setReCounterMessage(""); }}
+                                    className="rounded-full border-2 border-black/30 px-4 py-2 text-xs font-bold text-black/60 hover:border-black"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="mt-3 flex gap-2">
+                                  <button 
+                                    onClick={() => handleCounterResponse(offer.id, "accept")}
+                                    disabled={responding === offer.id}
+                                    className="flex-1 rounded-full border-2 border-black bg-[#28D17C] py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                                  >
+                                    {responding === offer.id ? "Processing..." : "Accept Counter"}
+                                  </button>
+                                  <button 
+                                    onClick={() => setShowReCounter(true)}
+                                    disabled={responding === offer.id}
+                                    className="flex-1 rounded-full border-2 border-black bg-[#FFD84A] py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                                  >
+                                    Counter Back
+                                  </button>
+                                  <button 
+                                    onClick={() => handleCounterResponse(offer.id, "decline")}
+                                    disabled={responding === offer.id}
+                                    className="rounded-full border-2 border-black/30 px-4 py-2 text-xs font-bold text-black/60 hover:border-red-400 hover:text-red-500 disabled:opacity-50"
+                                  >
+                                    Decline
+                                  </button>
+                                </div>
+                                <p className="mt-2 text-[10px] text-black/50 text-center">
+                                  💡 You can negotiate back and forth until you reach an agreement
+                                </p>
+                              </>
+                            )}
                           </div>
                         )}
 

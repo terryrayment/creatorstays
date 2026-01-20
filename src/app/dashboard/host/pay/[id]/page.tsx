@@ -342,7 +342,7 @@ export default function PayCollaborationPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-black bg-[#28D17C] text-[8px] font-bold text-black">2</span>
-                <span>Funds transfer directly to the creator's Stripe account</span>
+                <span><strong className="text-black">Immediate transfer</strong> — Funds go directly to the creator's Stripe account (no holding period)</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-black bg-[#28D17C] text-[8px] font-bold text-black">3</span>
@@ -350,19 +350,24 @@ export default function PayCollaborationPage() {
               </li>
             </ul>
 
-            {/* Important: Dispute/Refund Info */}
+            {/* Important: Direct Transfer Disclosure */}
             <div className="mt-4 rounded-lg border-2 border-[#FFD84A] bg-[#FFD84A]/10 p-3">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-black">Important: Payment is Final</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-black">⚠️ Direct Payment — No Escrow</p>
               <p className="mt-1 text-xs text-black/70">
-                By paying, you confirm that you've reviewed and approved the creator's submitted content. 
-                Payments transfer directly to the creator and cannot be automatically reversed.
+                This is <strong className="text-black">not an escrow payment</strong>. Funds transfer immediately to the creator upon checkout completion. 
+                Only pay after you've reviewed and approved the submitted content.
               </p>
-              <p className="mt-2 text-xs text-black/70">
-                <strong className="text-black">If there's a dispute:</strong> Contact us at{' '}
+            </div>
+
+            {/* Dispute Info */}
+            <div className="mt-3 rounded-lg border border-black/10 bg-black/5 p-3">
+              <p className="text-[11px] font-bold text-black">If there's a dispute:</p>
+              <p className="mt-1 text-xs text-black/70">
+                Contact us at{' '}
                 <a href="mailto:support@creatorstays.com" className="font-bold text-black underline">
                   support@creatorstays.com
                 </a>
-                {' '}and we'll work with both parties to resolve the issue.
+                {' '}— we'll mediate between both parties. As this is a direct transfer, refunds require creator agreement.
               </p>
             </div>
           </div>

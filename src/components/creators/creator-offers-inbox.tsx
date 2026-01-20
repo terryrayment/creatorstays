@@ -436,20 +436,28 @@ export function CreatorOffersInbox() {
                         <svg className="h-4 w-4 text-[#28D17C]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span className="text-sm font-bold text-black">Host viewed your response</span>
+                        <div>
+                          <span className="text-sm font-bold text-black">Host viewed your response</span>
+                          <p className="text-xs text-black/60">They're reviewing your {selectedOffer.status === 'countered' ? 'counter offer' : 'response'}</p>
+                        </div>
                       </>
                     ) : (
                       <>
-                        <svg className="h-4 w-4 text-[#FFD84A]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="text-sm font-bold text-black">Waiting for host to view</span>
+                        <div className="relative">
+                          <svg className="h-4 w-4 text-[#FFD84A] animate-pulse" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <span className="text-sm font-bold text-black">Waiting for host to view</span>
+                          <p className="text-xs text-black/60">You'll see when they open this {selectedOffer.status === 'countered' ? 'counter' : 'response'}</p>
+                        </div>
                       </>
                     )}
                   </div>
                   <span className="text-xs text-black/50">
                     {selectedOffer.hostViewedAt 
-                      ? formatDate(selectedOffer.hostViewedAt)
+                      ? `Seen ${formatDate(selectedOffer.hostViewedAt)}`
                       : `Sent ${formatDate(selectedOffer.respondedAt)}`
                     }
                   </span>
