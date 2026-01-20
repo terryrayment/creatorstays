@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
+import { sendEmail, paymentCompleteEmail, paymentReceiptEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,6 +55,19 @@ export async function POST(request: NextRequest) {
         // Handle regular collaboration payment
         else if (checkoutSession.metadata?.collaborationId) {
           const collaborationId = checkoutSession.metadata.collaborationId
+          
+          // Get collaboration details for email
+          const collaboration = await prisma.collaboration.findUnique({
+            where: { id: collaborationId },
+            include: {
+              creator: { include: { user: true } },
+              host: { include: { user: true } },
+              property: true,
+              offer: true,
+            },
+          })
+          
+          // Update collaboration
           await prisma.collaboration.update({
             where: { id: collaborationId },
             data: {
@@ -62,16 +76,62 @@ export async function POST(request: NextRequest) {
             },
           })
           
-          // Also update status to completed if content was approved
-          const collab = await prisma.collaboration.findUnique({
-            where: { id: collaborationId },
-            select: { status: true },
-          })
-          if (collab?.status === 'approved') {
+          // Update status to completed if content was approved
+          if (collaboration?.status === 'approved') {
             await prisma.collaboration.update({
               where: { id: collaborationId },
               data: { status: 'completed', completedAt: new Date() },
             })
+          }
+          
+          // Send payment emails
+          if (collaboration) {
+            const totalCashCents = parseInt(checkoutSession.metadata.totalCashCents || '0') || collaboration.offer.cashCents
+            const creatorNetCents = parseInt(checkoutSession.metadata.creatorNetCents || '0') || Math.round(totalCashCents * 0.85)
+            
+            // Email to creator: Payment received
+            if (collaboration.creator.user.email) {
+              const emailData = paymentCompleteEmail({
+                creatorName: collaboration.creator.displayName,
+                hostName: collaboration.host.displayName,
+                propertyTitle: collaboration.property.title || 'Property',
+                amount: creatorNetCents,
+                collaborationId,
+              })
+              sendEmail({ to: collaboration.creator.user.email, ...emailData })
+                .catch(err => console.error('[Webhook] Creator payment email error:', err))
+            }
+            
+            // Email to host: Payment receipt
+            const hostEmail = collaboration.host.user?.email || collaboration.host.contactEmail
+            if (hostEmail) {
+              const baseCashCents = parseInt(checkoutSession.metadata.baseCashCents || '0') || collaboration.offer.cashCents
+              const hostFeeCents = parseInt(checkoutSession.metadata.hostFeeCents || '0') || Math.round(baseCashCents * 0.15)
+              const bonusEarned = checkoutSession.metadata.bonusEarned === 'true'
+              const bonusCents = parseInt(checkoutSession.metadata.bonusCents || '0')
+              const totalPaidCents = baseCashCents + hostFeeCents + (bonusEarned ? bonusCents : 0)
+              const creatorFeeCents = Math.round((baseCashCents + (bonusEarned ? bonusCents : 0)) * 0.15)
+              
+              const emailData = paymentReceiptEmail({
+                hostName: collaboration.host.displayName,
+                hostEmail,
+                creatorName: collaboration.creator.displayName,
+                creatorHandle: collaboration.creator.handle,
+                propertyTitle: collaboration.property.title || 'Property',
+                propertyLocation: collaboration.property.cityRegion || undefined,
+                dealType: collaboration.offer.offerType,
+                baseCashCents: baseCashCents + (bonusEarned ? bonusCents : 0),
+                hostFeeCents,
+                totalPaidCents,
+                creatorFeeCents,
+                creatorNetCents,
+                deliverables: collaboration.offer.deliverables,
+                collaborationId,
+                paidAt: new Date(),
+              })
+              sendEmail({ to: hostEmail, ...emailData })
+                .catch(err => console.error('[Webhook] Host receipt email error:', err))
+            }
           }
         }
         break
