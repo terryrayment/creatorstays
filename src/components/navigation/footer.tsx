@@ -32,6 +32,7 @@ export function Footer() {
                 { href: "/how-to/creators", label: "How To (Creators)" },
                 { href: "/creators", label: "Browse Creators" },
                 { href: "/pricing", label: "Pricing" },
+                { href: "/careers", label: "Careers" },
               ].map((link) => (
                 <Link
                   key={link.href}
