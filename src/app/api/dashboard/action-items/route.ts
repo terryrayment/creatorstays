@@ -63,29 +63,29 @@ export async function GET() {
         where: {
           hostId: hostProfile.id,
           status: 'pending-agreement',
-          agreement: {
-            hostSignedAt: null,
-          },
         },
         include: {
           creator: { select: { displayName: true, handle: true } },
           property: { select: { title: true } },
-          agreement: { select: { creatorSignedAt: true } },
+          agreement: { select: { creatorSignedAt: true, hostSignedAt: true } },
         },
       })
 
       for (const collab of pendingAgreements) {
-        actionItems.push({
-          id: collab.id,
-          type: 'sign-agreement',
-          title: `Sign agreement with @${collab.creator.handle}`,
-          description: collab.agreement?.creatorSignedAt 
-            ? `Creator has signed - waiting for your signature`
-            : `Agreement ready for signatures`,
-          href: `/dashboard/collaborations/${collab.id}`,
-          priority: 'high',
-          createdAt: collab.createdAt,
-        })
+        // Only show if host hasn't signed yet
+        if (collab.agreement && !collab.agreement.hostSignedAt) {
+          actionItems.push({
+            id: collab.id,
+            type: 'sign-agreement',
+            title: `Sign agreement with @${collab.creator.handle}`,
+            description: collab.agreement?.creatorSignedAt 
+              ? `Creator has signed - waiting for your signature`
+              : `Agreement ready for signatures`,
+            href: `/dashboard/collaborations/${collab.id}`,
+            priority: 'high',
+            createdAt: collab.createdAt,
+          })
+        }
       }
 
       // 3. Content awaiting review
@@ -193,29 +193,29 @@ export async function GET() {
         where: {
           creatorId: creatorProfile.id,
           status: 'pending-agreement',
-          agreement: {
-            creatorSignedAt: null,
-          },
         },
         include: {
           host: { select: { displayName: true } },
           property: { select: { title: true } },
-          agreement: { select: { hostSignedAt: true } },
+          agreement: { select: { hostSignedAt: true, creatorSignedAt: true } },
         },
       })
 
       for (const collab of pendingAgreements) {
-        actionItems.push({
-          id: collab.id,
-          type: 'sign-agreement',
-          title: `Sign agreement for ${collab.property.title}`,
-          description: collab.agreement?.hostSignedAt 
-            ? `Host has signed - waiting for your signature`
-            : `Agreement ready for signatures`,
-          href: `/dashboard/collaborations/${collab.id}`,
-          priority: 'high',
-          createdAt: collab.createdAt,
-        })
+        // Only show if creator hasn't signed yet
+        if (collab.agreement && !collab.agreement.creatorSignedAt) {
+          actionItems.push({
+            id: collab.id,
+            type: 'sign-agreement',
+            title: `Sign agreement for ${collab.property.title}`,
+            description: collab.agreement?.hostSignedAt 
+              ? `Host has signed - waiting for your signature`
+              : `Agreement ready for signatures`,
+            href: `/dashboard/collaborations/${collab.id}`,
+            priority: 'high',
+            createdAt: collab.createdAt,
+          })
+        }
       }
 
       // 3. Active collaborations needing content submission
