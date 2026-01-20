@@ -161,13 +161,24 @@ export function CreatorOffersInbox() {
         
         {offers.length === 0 ? (
           <div className="py-12 text-center">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/20 bg-black/5">
-              <svg className="h-6 w-6 text-black/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A]">
+              <svg className="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 9v.906a2.25 2.25 0 01-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 001.183 1.981l6.478 3.488m8.839 2.51l-4.66-2.51m0 0l-1.023-.55a2.25 2.25 0 00-2.134 0l-1.022.55m0 0l-4.661 2.51m16.5 1.615a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V8.844a2.25 2.25 0 011.183-1.98l7.5-4.04a2.25 2.25 0 012.134 0l7.5 4.04a2.25 2.25 0 011.183 1.98V19.5z" />
               </svg>
             </div>
-            <p className="text-sm font-bold text-black">No pending offers</p>
-            <p className="mt-1 text-xs text-black/60">When hosts reach out, their offers will appear here.</p>
+            <p className="text-lg font-bold text-black">No offers yet</p>
+            <p className="mx-auto mt-2 max-w-xs text-sm text-black/60">
+              Complete your profile to get discovered by hosts. The more complete your profile, the more likely you are to receive offers.
+            </p>
+            <Link
+              href="/dashboard/creator/settings"
+              className="mt-4 inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-6 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-1"
+            >
+              Complete Your Profile
+              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
           </div>
         ) : (
           <div className="divide-y divide-black/10">

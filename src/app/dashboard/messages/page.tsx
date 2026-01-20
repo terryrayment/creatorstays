@@ -184,11 +184,34 @@ export default function MessagesPage() {
         {loading ? (
           <div className="p-4 text-center text-sm text-black/60">Loading...</div>
         ) : conversations.length === 0 ? (
-          <div className="p-4 text-center">
-            <p className="text-sm text-black/60">No conversations yet</p>
-            <p className="mt-2 text-xs text-black/40">
-              Start a conversation by sending an offer to a creator
+          <div className="p-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-black bg-[#4AA3FF]">
+              <svg className="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+              </svg>
+            </div>
+            <p className="text-sm font-bold text-black">No conversations yet</p>
+            <p className="mx-auto mt-2 max-w-[200px] text-xs text-black/60">
+              {role === "host" 
+                ? "Start a conversation by sending an offer to a creator."
+                : "Conversations will appear here when you collaborate with hosts."}
             </p>
+            {role === "host" && (
+              <Link
+                href="/dashboard/host/search-creators"
+                className="mt-4 inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-5 py-2 text-xs font-bold text-white transition-transform hover:-translate-y-0.5"
+              >
+                Find Creators
+              </Link>
+            )}
+            {role === "creator" && (
+              <Link
+                href="/dashboard/creator/offers"
+                className="mt-4 inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-5 py-2 text-xs font-bold text-white transition-transform hover:-translate-y-0.5"
+              >
+                View Offers
+              </Link>
+            )}
           </div>
         ) : (
           <div className="divide-y divide-black/10">

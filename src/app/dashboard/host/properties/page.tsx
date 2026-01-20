@@ -465,9 +465,13 @@ export default function HostPropertiesPage() {
                 <button onClick={handleAddNew} className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black hover:bg-gray-50">+ Add</button>
               </div>
               {isLoading ? <p className="text-sm text-black/60">Loading...</p> : properties.length === 0 ? (
-                <div className="rounded-lg border-2 border-dashed border-black/30 p-4 text-center">
-                  <p className="text-xs text-black/60">No properties yet</p>
-                  <button onClick={handleAddNew} className="mt-2 rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1.5 text-[10px] font-bold text-black">Add your first</button>
+                <div className="rounded-xl border-2 border-black bg-[#FFD84A] p-5 text-center">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-white">
+                    <span className="text-xl">🏠</span>
+                  </div>
+                  <p className="font-bold text-black">No properties yet</p>
+                  <p className="mt-1 text-xs text-black/70">Add your first property to start finding creators.</p>
+                  <button onClick={handleAddNew} className="mt-4 rounded-full border-2 border-black bg-black px-5 py-2 text-[10px] font-bold text-white transition-transform hover:-translate-y-0.5">+ Add Your First Property</button>
                 </div>
               ) : (
                 <div className="space-y-2">{properties.map(p => <PropertyListItem key={p.id} property={p} isSelected={selectedId === p.id} onSelect={() => handleSelect(p)} />)}</div>

@@ -232,9 +232,12 @@ function ImageSection() {
     <section className="bg-black px-3 py-2 lg:px-4">
       <div className="mx-auto max-w-7xl">
         <div className="overflow-hidden rounded-2xl border-[3px] border-black">
-          <img 
-            src="/images/creator-filming.jpg" 
-            alt="Creator filming content" 
+          <video 
+            src="/images/creator-filming.mp4" 
+            autoPlay
+            loop
+            muted
+            playsInline
             className="h-auto w-full object-cover"
           />
         </div>
