@@ -7,6 +7,7 @@ import Link from "next/link"
 import { HostDashboard } from "@/components/hosts/host-dashboard"
 import { HostDashboardStats } from "@/components/dashboard/dashboard-stats"
 import { ActionRequiredBanner } from "@/components/dashboard/action-required-banner"
+import { HostDashboardSkeleton } from "@/components/ui/loading-skeleton"
 
 function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
   return (
@@ -172,11 +173,7 @@ export default function HostDashboardPage() {
   }, [status, router])
 
   if (status === "loading" || loading) {
-    return (
-      <div className="dashboard min-h-screen bg-[#FAFAFA] flex items-center justify-center">
-        <p className="text-sm text-black/60">Loading...</p>
-      </div>
-    )
+    return <HostDashboardSkeleton />
   }
 
   return (
