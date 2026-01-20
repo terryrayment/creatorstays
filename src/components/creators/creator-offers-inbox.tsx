@@ -53,19 +53,24 @@ const DEAL_TYPE_LABELS: Record<string, string> = {
 // Modal for Stripe Connect requirement
 function StripeConnectModal({ onClose, onConnect }: { onClose: () => void; onConnect: () => void }) {
   const [connecting, setConnecting] = useState(false)
+  const [error, setError] = useState("")
 
   const handleConnect = async () => {
     setConnecting(true)
+    setError("")
     try {
       const res = await fetch('/api/stripe/connect', { method: 'POST' })
       const data = await res.json()
-      if (data.url) {
+      if (res.ok && data.url) {
         window.location.href = data.url
       } else {
+        console.error('Stripe connect failed:', data)
+        setError(data.error || 'Failed to connect to Stripe. Please try again.')
         setConnecting(false)
       }
     } catch (e) {
       console.error('Stripe connect error:', e)
+      setError('Network error. Please check your connection and try again.')
       setConnecting(false)
     }
   }
@@ -96,6 +101,11 @@ function StripeConnectModal({ onClose, onConnect }: { onClose: () => void; onCon
             Automatic tax documents (1099)
           </li>
         </ul>
+        {error && (
+          <div className="mt-4 rounded-lg border-2 border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
         <div className="mt-6 flex gap-3">
           <Button
             onClick={handleConnect}

@@ -530,13 +530,16 @@ export function CreatorDashboardProfile() {
     try {
       const res = await fetch('/api/stripe/connect', { method: 'POST' })
       const data = await res.json()
-      if (data.url) {
+      if (res.ok && data.url) {
         window.location.href = data.url
       } else {
+        console.error('Stripe connect failed:', data)
+        setToastMessage(data.error || 'Failed to connect to Stripe. Please try again.')
         setStripeConnecting(false)
       }
     } catch (e) {
       console.error('Stripe connect error:', e)
+      setToastMessage('Network error. Please check your connection and try again.')
       setStripeConnecting(false)
     }
   }
@@ -752,7 +755,7 @@ export function CreatorDashboardProfile() {
 
       {/* Onboarding Banner */}
       {showOnboardingBanner && (
-        <div className="fixed left-0 right-0 top-16 z-40 border-b-2 border-black bg-[#FFD84A] px-4 py-3">
+        <div className="fixed left-0 right-0 top-14 z-40 border-b-2 border-black bg-[#FFD84A] px-4 py-3">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="text-xl">👋</span>
@@ -783,7 +786,7 @@ export function CreatorDashboardProfile() {
 
       {/* Stripe Connect Banner - shows when Stripe is not set up */}
       {stripeStatus && !stripeStatus.onboardingComplete && !showOnboardingBanner && (
-        <div className="fixed left-0 right-0 top-16 z-40 border-b-2 border-black bg-[#4AA3FF] px-4 py-3">
+        <div className="fixed left-0 right-0 top-14 z-40 border-b-2 border-black bg-[#4AA3FF] px-4 py-3">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <svg className="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">

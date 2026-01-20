@@ -12,7 +12,8 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      console.log('[Stripe Connect] No session found')
+      return NextResponse.json({ error: 'Please log in to connect your payment account' }, { status: 401 })
     }
 
     // Get creator profile
@@ -22,11 +23,19 @@ export async function POST(request: NextRequest) {
     })
 
     if (!creator) {
-      return NextResponse.json({ error: 'Creator profile not found' }, { status: 404 })
+      console.log('[Stripe Connect] No creator profile for user:', session.user.id)
+      return NextResponse.json({ error: 'Creator profile not found. Please complete your profile first.' }, { status: 404 })
+    }
+
+    // Check if Stripe is configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('[Stripe Connect] STRIPE_SECRET_KEY not configured')
+      return NextResponse.json({ error: 'Payment system is not configured. Please contact support.' }, { status: 500 })
     }
 
     // Check if creator already has a Stripe account
     if (creator.stripeAccountId) {
+      console.log('[Stripe Connect] Creating account link for existing account:', creator.stripeAccountId)
       // Create a new account link for existing account
       const accountLink = await stripe.accountLinks.create({
         account: creator.stripeAccountId,
@@ -38,6 +47,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ url: accountLink.url })
     }
 
+    console.log('[Stripe Connect] Creating new account for:', creator.user.email)
+    
     // Create new Stripe Connect account
     const account = await stripe.accounts.create({
       type: 'express',
@@ -54,6 +65,8 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log('[Stripe Connect] Account created:', account.id)
+
     // Save Stripe account ID to creator profile
     await prisma.creatorProfile.update({
       where: { id: creator.id },
@@ -68,11 +81,13 @@ export async function POST(request: NextRequest) {
       type: 'account_onboarding',
     })
 
+    console.log('[Stripe Connect] Account link created, redirecting to Stripe')
     return NextResponse.json({ url: accountLink.url })
   } catch (error) {
     console.error('[Stripe Connect] Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to create Stripe account' },
+      { error: `Failed to connect payment account: ${errorMessage}` },
       { status: 500 }
     )
   }

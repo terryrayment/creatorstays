@@ -445,9 +445,8 @@ export default function CareersPage() {
             <Panel className="bg-[#FFD84A]">
               <h2 className="text-[15px] font-bold text-black mb-2">Why CreatorStays?</h2>
               <p className="text-[14px] text-black/80 leading-relaxed">
-                We're creating a new category: the first marketplace connecting vacation rental hosts with content creators. 
-                It's an untapped $100B+ market, and we're the first movers. You'll work on hard problems with a small, 
-                talented team where your work ships fast and impacts real users immediately.
+                We're defining a new marketplace for vacation rental marketing by connecting hosts directly with content creators. 
+                The opportunity is large, the product is early, and the team is small. Your work will ship quickly and matter immediately.
               </p>
             </Panel>
 
