@@ -300,6 +300,7 @@ model AffiliateLink {
 
   // Relations
   clicks                LinkClick[]
+  collaboration         Collaboration?
 
   @@index([creatorId])
   @@index([hostId])
@@ -501,17 +502,28 @@ model Collaboration {
   property        Property @relation(fields: [propertyId], references: [id])
   
   // Status tracking
-  status          String   @default("active") // "active", "content-submitted", "completed", "cancelled"
+  // "pending-agreement" -> "active" -> "content-submitted" -> "pending-review" -> "approved" -> "link-active" -> "completed"
+  status          String   @default("pending-agreement")
+  
+  // Affiliate link (generated when collaboration starts)
+  affiliateLinkId String?  @unique
+  affiliateLink   AffiliateLink? @relation(fields: [affiliateLinkId], references: [id])
+  affiliateToken  String?  @unique // Short token for URL: cs.link/abc123
   
   // Content delivery
   contentLinks    String[] // URLs to posted content
   contentSubmittedAt DateTime?
+  contentApprovedAt DateTime?
+  
+  // Timeline
+  contentDeadline DateTime? // When content must be posted
+  linkActiveUntil DateTime? // How long the tracking link stays active
   
   // Results
   clicksGenerated Int      @default(0)
   
-  // Payment (tracked, but settled off-platform)
-  paymentStatus   String   @default("pending") // "pending", "completed", "failed"
+  // Payment (tracked, but settled off-platform for now)
+  paymentStatus   String   @default("pending") // "pending", "processing", "completed", "failed"
   paymentNotes    String?  @db.Text
   settledAt       DateTime?
   
@@ -524,7 +536,71 @@ model Collaboration {
   updatedAt       DateTime @updatedAt
   completedAt     DateTime?
 
+  // Relations
+  agreement       CollaborationAgreement?
+
   @@map("collaborations")
+}
+
+// Legal agreement stored for each collaboration
+model CollaborationAgreement {
+  id                String   @id @default(cuid())
+  
+  collaborationId   String   @unique
+  collaboration     Collaboration @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
+  
+  // Agreement version (for tracking changes to template)
+  version           String   @default("1.0")
+  
+  // Parties
+  hostName          String
+  hostEmail         String
+  creatorName       String
+  creatorHandle     String
+  creatorEmail      String
+  
+  // Property
+  propertyTitle     String
+  propertyLocation  String?
+  propertyUrl       String?
+  
+  // Deal terms (snapshot at time of agreement)
+  dealType          String   // "flat", "flat-with-bonus", "post-for-stay"
+  cashAmount        Int      // In cents
+  stayIncluded      Boolean  @default(false)
+  stayNights        Int?
+  stayDates         String?  // Human readable date range
+  
+  // Bonus terms
+  bonusEnabled      Boolean  @default(false)
+  bonusAmount       Int?     // In cents
+  bonusThreshold    Int?     // Click threshold
+  
+  // Deliverables
+  deliverables      String[] // ["2 Instagram Reels", "5 Stories"]
+  contentDeadline   DateTime?
+  
+  // Platform fees (15% each side)
+  hostFeePercent    Float    @default(15)
+  creatorFeePercent Float    @default(15)
+  
+  // Full agreement text (generated and stored)
+  agreementText     String   @db.Text
+  
+  // Signatures
+  hostAcceptedAt    DateTime?
+  hostIpAddress     String?
+  creatorAcceptedAt DateTime?
+  creatorIpAddress  String?
+  
+  // Both must accept for agreement to be valid
+  isFullyExecuted   Boolean  @default(false)
+  executedAt        DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("collaboration_agreements")
 }
 
 // ============================================================================
