@@ -147,17 +147,17 @@ export async function PUT(request: NextRequest) {
       profileComplete,
     } = body
 
+    // Normalize handle - strip @ and invalid characters
+    const normalizedHandle = handle ? handle.toLowerCase().trim().replace(/^@/, '').replace(/[^a-z0-9_]/g, '') : null
+
     // Check if handle is taken by another user
-    if (handle) {
+    if (normalizedHandle) {
       const existingHandle = await prisma.creatorProfile.findUnique({
-        where: { handle: handle.toLowerCase() },
+        where: { handle: normalizedHandle },
       })
       
-      const currentProfile = await prisma.creatorProfile.findUnique({
-        where: { userId: session.user.id },
-      })
-
-      if (existingHandle && existingHandle.id !== currentProfile?.id) {
+      // Only check for conflicts if someone ELSE has this handle
+      if (existingHandle && existingHandle.userId !== session.user.id) {
         return NextResponse.json({ error: 'Handle is already taken' }, { status: 400 })
       }
     }
@@ -167,18 +167,18 @@ export async function PUT(request: NextRequest) {
       where: { userId: session.user.id },
       update: {
         ...(displayName !== undefined && { displayName }),
-        ...(handle !== undefined && { handle: handle.toLowerCase() }),
+        ...(normalizedHandle && { handle: normalizedHandle }),
         ...(bio !== undefined && { bio }),
         ...(location !== undefined && { location }),
         ...(avatarUrl !== undefined && { avatarUrl }),
         ...(niches !== undefined && { niches }),
-        ...(instagramHandle !== undefined && { instagramHandle }),
+        ...(instagramHandle !== undefined && { instagramHandle: instagramHandle?.replace(/^@/, '') || null }),
         ...(instagramUrl !== undefined && { instagramUrl }),
         ...(instagramFollowers !== undefined && { instagramFollowers }),
-        ...(tiktokHandle !== undefined && { tiktokHandle }),
+        ...(tiktokHandle !== undefined && { tiktokHandle: tiktokHandle?.replace(/^@/, '') || null }),
         ...(tiktokUrl !== undefined && { tiktokUrl }),
         ...(tiktokFollowers !== undefined && { tiktokFollowers }),
-        ...(youtubeHandle !== undefined && { youtubeHandle }),
+        ...(youtubeHandle !== undefined && { youtubeHandle: youtubeHandle?.replace(/^@/, '') || null }),
         ...(youtubeUrl !== undefined && { youtubeUrl }),
         ...(youtubeSubscribers !== undefined && { youtubeSubscribers }),
         ...(totalFollowers !== undefined && { totalFollowers }),
@@ -194,18 +194,18 @@ export async function PUT(request: NextRequest) {
       create: {
         userId: session.user.id,
         displayName: displayName || session.user.name || 'Creator',
-        handle: handle?.toLowerCase() || `creator_${Date.now()}`,
+        handle: normalizedHandle || `creator_${Date.now()}`,
         bio,
         location,
         avatarUrl,
         niches: niches || [],
-        instagramHandle,
+        instagramHandle: instagramHandle?.replace(/^@/, '') || null,
         instagramUrl,
         instagramFollowers,
-        tiktokHandle,
+        tiktokHandle: tiktokHandle?.replace(/^@/, '') || null,
         tiktokUrl,
         tiktokFollowers,
-        youtubeHandle,
+        youtubeHandle: youtubeHandle?.replace(/^@/, '') || null,
         youtubeUrl,
         youtubeSubscribers,
         totalFollowers,
