@@ -72,16 +72,15 @@ export function CreatorOffersInbox() {
   }, [session])
 
   // Handle offer response
-  const handleRespond = async (action: 'approve' | 'counter' | 'decline') => {
+  const handleRespond = async (action: 'accept' | 'counter' | 'decline') => {
     if (!selectedOffer) return
     
     setActionLoading(true)
     try {
-      const res = await fetch('/api/collaborations', {
+      const res = await fetch(`/api/offers/${selectedOffer.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          requestId: selectedOffer.id,
           action,
           counterCashCents: action === 'counter' ? Math.round(parseFloat(counterCashAmount) * 100) : undefined,
           counterMessage: action === 'counter' ? counterMessage : undefined,
@@ -99,9 +98,9 @@ export function CreatorOffersInbox() {
         setCounterMessage('')
 
         // Show success message
-        if (action === 'approve') {
+        if (action === 'accept') {
           setToast({ 
-            message: `Collaboration approved! ${data.collaboration?.trackingUrl ? 'Your tracking link is ready.' : ''}`, 
+            message: data.message || 'Offer accepted! Please sign the agreement.', 
             type: 'success' 
           })
         } else if (action === 'counter') {
@@ -323,7 +322,7 @@ export function CreatorOffersInbox() {
             {!responding && (
               <div className="flex gap-2 pt-2">
                 <Button 
-                  onClick={() => handleRespond('approve')} 
+                  onClick={() => handleRespond('accept')} 
                   disabled={actionLoading}
                   className="flex-1 bg-[#28D17C] hover:bg-[#28D17C]/90"
                 >

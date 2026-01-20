@@ -467,8 +467,12 @@ model Offer {
   deliverables    String[] // ["2 Reels", "5 Stories", "1 Feed Post"]
   
   // Status
-  status          String   @default("pending") // "pending", "accepted", "declined", "expired", "completed"
+  status          String   @default("pending") // "pending", "accepted", "declined", "countered", "expired"
   
+  // Counter offer fields
+  counterCashCents  Int?
+  counterMessage    String?  @db.Text
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   expiresAt       DateTime?
