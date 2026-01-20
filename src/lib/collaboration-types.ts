@@ -44,9 +44,15 @@ export interface CollaborationRequest {
   propertyId: string
   
   // Host's proposed terms
-  proposedType: 'affiliate' | 'flat' | 'post-for-stay'
+  proposedType: 'flat' | 'flat-with-bonus' | 'post-for-stay'
   proposedPercent?: number
   proposedFlatFee?: number
+  // Pay-for-Stay fields
+  cashCents?: number
+  stayNights?: number | null
+  trafficBonusEnabled?: boolean
+  trafficBonusThreshold?: number | null
+  trafficBonusCents?: number | null
   message: string
   deliverables: string[]
   
@@ -55,6 +61,7 @@ export interface CollaborationRequest {
   // Creator's counter (if any)
   counterPercent?: number
   counterFlatFee?: number
+  counterCashCents?: number
   counterMessage?: string
   
   createdAt: Date
@@ -70,9 +77,21 @@ export interface Collaboration {
   
   // Final agreed terms
   dealType: 'flat' | 'flat-with-bonus' | 'post-for-stay'
-  flatFee?: number // base rate per post
-  trafficBonusPercent?: number // optional bonus based on link clicks
+  flatFee?: number // legacy: base rate per post
+  trafficBonusPercent?: number // legacy: bonus based on link clicks
   deliverables: string[]
+  
+  // Pay-for-Stay fields
+  cashCents?: number
+  stayNights?: number | null
+  trafficBonusEnabled?: boolean
+  trafficBonusThreshold?: number | null
+  trafficBonusCents?: number | null
+  
+  // Payment breakdown (calculated)
+  hostTotalCents?: number
+  creatorNetCents?: number
+  platformRevenueCents?: number
   
   // Tracked link for this collaboration
   trackingToken: string
@@ -83,7 +102,7 @@ export interface Collaboration {
   contentLinks: string[] // URLs to posted content
   
   // Payment tracking
-  paymentStatus: 'pending' | 'settled'
+  paymentStatus: 'pending' | 'completed' | 'failed' | 'not-applicable'
   paymentNotes?: string
   
   createdAt: Date
