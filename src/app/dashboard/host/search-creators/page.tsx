@@ -10,6 +10,22 @@ import { Footer } from "@/components/navigation/footer"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select } from "@/components/ui/select"
+import { SendOfferModal } from "@/components/hosts/send-offer-modal"
+
+// Toast notification
+function Toast({ message, onClose }: { message: string; onClose: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 5000)
+    return () => clearTimeout(timer)
+  }, [onClose])
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-xl border-2 border-black bg-[#28D17C] px-4 py-3 shadow-lg">
+      <span className="text-sm font-bold text-black">{message}</span>
+      <button onClick={onClose} className="text-black/60 hover:text-black">✕</button>
+    </div>
+  )
+}
 
 // City coordinates for distance calculation (lat, lng)
 const CITY_COORDS: Record<string, [number, number]> = {
@@ -249,6 +265,10 @@ export default function SearchCreatorsPage() {
   const [location, setLocation] = useState("")
   const [sortBy, setSortBy] = useState("relevance")
 
+  // Modal state
+  const [selectedCreator, setSelectedCreator] = useState<typeof APPROVED_CREATORS[0] | null>(null)
+  const [toast, setToast] = useState("")
+
   // Calculate distance for a creator from selected location
   const getCreatorDistance = (creatorLocation: string): number | null => {
     if (!location || !CITY_COORDS[location] || !CITY_COORDS[creatorLocation]) return null
@@ -463,7 +483,11 @@ export default function SearchCreatorsPage() {
                 </p>
 
                 {/* Action */}
-                <Button className="mt-4 w-full" size="sm">
+                <Button 
+                  className="mt-4 w-full" 
+                  size="sm"
+                  onClick={() => setSelectedCreator(creator)}
+                >
                   Send Offer
                 </Button>
               </div>
@@ -480,6 +504,21 @@ export default function SearchCreatorsPage() {
         </Container>
       </main>
       <Footer />
+
+      {/* Send Offer Modal */}
+      {selectedCreator && (
+        <SendOfferModal
+          creator={selectedCreator}
+          onClose={() => setSelectedCreator(null)}
+          onSuccess={(msg) => {
+            setToast(msg)
+            setSelectedCreator(null)
+          }}
+        />
+      )}
+
+      {/* Toast */}
+      {toast && <Toast message={toast} onClose={() => setToast("")} />}
     </div>
   )
 }
