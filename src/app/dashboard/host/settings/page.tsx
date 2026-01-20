@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 
-export default function HostSettingsPage() {
+function HostSettingsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session, status } = useSession()
@@ -257,5 +257,13 @@ export default function HostSettingsPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function HostSettingsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+      <HostSettingsContent />
+    </Suspense>
   )
 }

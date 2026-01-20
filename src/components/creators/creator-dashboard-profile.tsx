@@ -81,12 +81,12 @@ function CompletenessBar({ percent }: { percent: number }) {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-[10px]">
-        <span className="text-black/60">Profile complete</span>
-        <span className="font-semibold">{percent}%</span>
+        <span className="text-black">Profile complete</span>
+        <span className="font-semibold text-black">{percent}%</span>
       </div>
-      <div className="h-1 w-full overflow-hidden rounded-full bg-black/5">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/10 border border-black">
         <div 
-          className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
+          className="h-full rounded-full bg-black"
           style={{ width: `${percent}%` }}
         />
       </div>
@@ -106,13 +106,13 @@ function CopyLinkButton({ handle, onCopy }: { handle: string; onCopy: () => void
   return (
     <button 
       onClick={copy}
-      className="flex w-full items-center gap-2 rounded-lg border border-black/5 bg-black/[0.02] px-3 py-2 text-left transition-colors hover:bg-black/[0.04]"
+      className="flex w-full items-center gap-2 rounded-lg border-2 border-black bg-white px-3 py-2 text-left transition-colors hover:bg-black/5"
     >
-      <svg className="h-3.5 w-3.5 shrink-0 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <svg className="h-3.5 w-3.5 shrink-0 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
       </svg>
-      <span className="flex-1 truncate text-xs text-black/60">{link}</span>
-      <span className="text-[10px] font-medium text-primary">Copy</span>
+      <span className="flex-1 truncate text-xs text-black">{link}</span>
+      <span className="text-[10px] font-bold text-black">Copy</span>
     </button>
   )
 }
@@ -948,15 +948,15 @@ export function CreatorDashboardProfile() {
             <Panel variant="elevated" className="overflow-hidden">
               <div className="flex flex-col md:flex-row">
                 {/* Left: Avatar + actions */}
-                <div className="border-b border-black/5 bg-black/[0.01] p-5 md:w-56 md:border-b-0 md:border-r">
+                <div className="border-b border-black bg-black/[0.02] p-5 md:w-56 md:border-b-0 md:border-r">
                   <div className="flex items-center gap-3 md:flex-col md:items-start md:gap-0">
                     <div className="relative">
                       <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 md:h-20 md:w-20" />
                       <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-white bg-amber-500" />
                     </div>
                     <div className="md:mt-3">
-                      <p className="text-lg font-semibold">{profile.displayName}</p>
-                      <p className="text-xs text-black/60">@{profile.handle}</p>
+                      <p className="text-lg font-semibold text-black">{profile.displayName}</p>
+                      <p className="text-xs text-black">@{profile.handle}</p>
                     </div>
                   </div>
 
@@ -972,28 +972,28 @@ export function CreatorDashboardProfile() {
                   </div>
 
                   {/* Status indicators */}
-                  <div className="mt-4 flex flex-col gap-2 border-t border-black/5 pt-4">
-                    <div className="flex items-center gap-2 text-xs">
+                  <div className="mt-4 flex flex-col gap-2 border-t border-black pt-4">
+                    <div className="flex items-center gap-2 text-xs text-black">
                       <StatusDot active color="bg-amber-500" />
                       <span>Beta access</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs">
+                    <div className="flex items-center gap-2 text-xs text-black">
                       <StatusDot active color="bg-emerald-500" />
                       <span>Open to offers</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-black/60/50">
+                    <div className="flex items-center gap-2 text-xs text-black">
                       <StatusDot active={false} color="bg-gray-300" />
                       <span>Verified</span>
                     </div>
                   </div>
 
                   <div className="mt-4 space-y-2">
-                    <Button size="sm" className="w-full text-xs" onClick={() => {
+                    <Button size="sm" className="w-full text-xs border-2 border-black bg-black text-white hover:bg-black/90" onClick={() => {
                       setEditDisplayName(profile.displayName)
                       setEditHandle(profile.handle)
                       setEditProfileOpen(true)
                     }}>Edit Profile</Button>
-                    <Button size="sm" variant="outline" className="w-full text-xs" asChild>
+                    <Button size="sm" variant="outline" className="w-full text-xs border-2 border-black text-black hover:bg-black/5" asChild>
                       <Link href={`/creators/${profile.handle}`}>View Public</Link>
                     </Button>
                   </div>
