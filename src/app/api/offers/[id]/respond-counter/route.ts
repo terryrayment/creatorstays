@@ -160,11 +160,14 @@ By signing below, both parties agree to these terms.
         hostName,
         hostEmail: offer.hostProfile.user?.email || offer.hostProfile.contactEmail || '',
         creatorName,
+        creatorHandle: offer.creatorProfile.handle,
         creatorEmail: offer.creatorProfile.user?.email || '',
         agreementText,
         propertyTitle,
         dealType: offer.offerType,
-        compensationSummary: `$${(acceptedAmount / 100).toFixed(2)} (counter accepted)`,
+        cashAmount: acceptedAmount,
+        stayIncluded: (offer.stayNights || 0) > 0,
+        stayNights: offer.stayNights,
       },
     })
 
