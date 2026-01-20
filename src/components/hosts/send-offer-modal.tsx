@@ -53,10 +53,11 @@ const DELIVERABLE_OPTIONS = [
 ]
 
 export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalProps) {
-  const [step, setStep] = useState(1) // 1: Deal Type, 2: Terms, 3: Review
+  const [step, setStep] = useState(1) // 1: Deal Type, 2: Terms, 3: Review, 4: Confirmation
   const [loading, setLoading] = useState(false)
   const [properties, setProperties] = useState<Property[]>([])
   const [loadingProperties, setLoadingProperties] = useState(true)
+  const [sentOfferId, setSentOfferId] = useState<string | null>(null)
   
   // Form state
   const [dealType, setDealType] = useState("flat")
@@ -138,8 +139,9 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
       })
 
       if (res.ok) {
-        onSuccess(`Offer sent to @${creator.handle}! They'll review and respond.`)
-        onClose()
+        const data = await res.json()
+        setSentOfferId(data.offer?.id || null)
+        setStep(4) // Show confirmation screen
       } else {
         const data = await res.json()
         alert(data.error || 'Failed to send offer')
@@ -160,41 +162,51 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border-[3px] border-black bg-white">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-black bg-[#4AA3FF] p-4">
+        <div className={`sticky top-0 z-10 flex items-center justify-between border-b-2 border-black p-4 ${step === 4 ? 'bg-[#28D17C]' : 'bg-[#4AA3FF]'}`}>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-white text-sm font-bold">
-              {creator.avatar}
-            </div>
+            {step === 4 ? (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-white">
+                <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-white text-sm font-bold">
+                {creator.avatar}
+              </div>
+            )}
             <div>
-              <p className="font-bold text-black">{creatorName}</p>
-              <p className="text-xs text-black">@{creator.handle} • {creator.audienceSize} followers</p>
+              <p className="font-bold text-black">{step === 4 ? 'Offer Sent Successfully' : creatorName}</p>
+              <p className="text-xs text-black">{step === 4 ? `To @${creator.handle}` : `@${creator.handle} • ${creator.audienceSize} followers`}</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-black hover:text-black/70">
+          <button onClick={() => { if (step === 4) { onSuccess(`Offer sent to @${creator.handle}!`); } onClose(); }} className="text-black hover:text-black/70">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        {/* Progress */}
-        <div className="flex border-b border-black/10 bg-black/5">
-          {["Deal Type", "Terms", "Review"].map((label, i) => (
-            <button
-              key={label}
-              onClick={() => setStep(i + 1)}
-              className={`flex-1 py-2 text-center text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                step === i + 1 
-                  ? "bg-black text-white" 
-                  : step > i + 1 
-                  ? "bg-[#28D17C] text-black"
-                  : "text-black/50"
-              }`}
-            >
-              {i + 1}. {label}
-            </button>
-          ))}
-        </div>
+        {/* Progress - hide on confirmation */}
+        {step < 4 && (
+          <div className="flex border-b border-black/10 bg-black/5">
+            {["Deal Type", "Terms", "Review"].map((label, i) => (
+              <button
+                key={label}
+                onClick={() => setStep(i + 1)}
+                className={`flex-1 py-2 text-center text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                  step === i + 1 
+                    ? "bg-black text-white" 
+                    : step > i + 1 
+                    ? "bg-[#28D17C] text-black"
+                    : "text-black/50"
+                }`}
+              >
+                {i + 1}. {label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="p-5">
           {/* Step 1: Deal Type */}
@@ -597,6 +609,103 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                 >
                   {loading ? "Sending..." : "Send Offer"}
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Confirmation */}
+          {step === 4 && (
+            <div className="space-y-5 text-center">
+              {/* Success Icon */}
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-black bg-[#28D17C]">
+                <svg className="h-10 w-10 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+
+              <div>
+                <h2 className="font-heading text-2xl font-black text-black">OFFER SENT!</h2>
+                <p className="mt-2 text-sm text-black/70">
+                  Your offer has been sent to <span className="font-bold">@{creator.handle}</span>
+                </p>
+              </div>
+
+              {/* What was sent */}
+              <div className="mx-auto max-w-sm rounded-xl border-2 border-black bg-[#FFD84A]/20 p-4 text-left">
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-black/60">Offer Summary</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-black/70">To</span>
+                    <span className="font-bold text-black">{creatorName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-black/70">Property</span>
+                    <span className="font-bold text-black">{selectedPropertyData?.title || "Property"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-black/70">Deal Type</span>
+                    <span className="font-bold text-black">{DEAL_TYPES.find(t => t.value === dealType)?.label}</span>
+                  </div>
+                  {dealType !== "post-for-stay" && (
+                    <div className="flex justify-between">
+                      <span className="text-black/70">Amount</span>
+                      <span className="font-bold text-black">${cashAmount}</span>
+                    </div>
+                  )}
+                  {dealType === "post-for-stay" && (
+                    <div className="flex justify-between">
+                      <span className="text-black/70">Stay</span>
+                      <span className="font-bold text-black">{stayNights} nights</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-black/70">Deliverables</span>
+                    <span className="font-bold text-black">{deliverables.length} items</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* What happens next */}
+              <div className="mx-auto max-w-sm rounded-xl border-2 border-black bg-white p-4 text-left">
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-black/60">What Happens Next</p>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex gap-3">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4AA3FF] text-[10px] font-bold text-white">1</span>
+                    <span className="text-black/80"><span className="font-bold text-black">Email sent</span> — {creatorName} will receive an email notification about your offer</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4AA3FF] text-[10px] font-bold text-white">2</span>
+                    <span className="text-black/80"><span className="font-bold text-black">Creator reviews</span> — They can accept, counter, or decline within 7 days</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4AA3FF] text-[10px] font-bold text-white">3</span>
+                    <span className="text-black/80"><span className="font-bold text-black">You'll be notified</span> — We'll email you when they respond</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Confirmation email notice */}
+              <div className="rounded-lg bg-black/5 p-3 text-[11px] text-black/60">
+                <span className="font-bold">📧 Confirmation sent to your email</span> with a copy of this offer
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    onSuccess(`Offer sent to @${creator.handle}!`)
+                    onClose()
+                  }}
+                  className="flex-1 rounded-full bg-black py-3 text-[11px] font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5"
+                >
+                  Done
+                </button>
+                <a
+                  href="/dashboard/host/offers"
+                  className="flex-1 rounded-full border-2 border-black py-3 text-center text-[11px] font-black uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5"
+                >
+                  View All Offers →
+                </a>
               </div>
             </div>
           )}
