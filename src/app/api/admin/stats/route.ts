@@ -1,22 +1,17 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
-
-// Admin emails - add your email here
-const ADMIN_EMAILS = [
-  'terry@traffik.com',
-  'terryrayment@gmail.com',
-  // Add more admin emails as needed
-]
 
 // GET /api/admin/stats - Get platform-wide statistics
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
+    // Check admin session cookie
+    const cookieStore = await cookies()
+    const adminSession = cookieStore.get('admin_session')
+    
+    if (!adminSession || adminSession.value !== 'authenticated') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

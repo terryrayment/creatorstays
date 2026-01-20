@@ -492,12 +492,12 @@ export default function SearchCreatorsPage() {
 
                 {/* Tags */}
                 <div className="mt-3 flex flex-wrap gap-1">
-                  {creator.niches.map(n => (
+                  {creator.niches.map((n: string) => (
                     <span key={n} className="rounded-full border border-black bg-[#4AA3FF]/20 px-2 py-0.5 text-[9px] font-bold text-black">
                       {n}
                     </span>
                   ))}
-                  {creator.platforms.map(p => (
+                  {creator.platforms.map((p: string) => (
                     <span key={p} className="rounded-full border border-black bg-[#FFD84A]/30 px-2 py-0.5 text-[9px] font-bold text-black">
                       {p}
                     </span>
