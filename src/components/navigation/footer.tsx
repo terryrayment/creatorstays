@@ -16,7 +16,7 @@ export function Footer() {
               The marketplace connecting vacation rental hosts with content creators.
             </p>
             <p className="mt-4 text-[10px] font-bold text-black/40">
-              © {new Date().getFullYear()} CreatorStays
+              © {new Date().getFullYear()} Wolfpup, Inc. All rights reserved.
             </p>
           </div>
 
@@ -73,6 +73,15 @@ export function Footer() {
               </Link>
             </div>
           </div>
+        </div>
+        
+        {/* Legal links - subtle at bottom */}
+        <div className="mt-3 flex items-center justify-center gap-4 text-[9px] text-white/30">
+          <Link href="/terms" className="hover:text-white/50 transition-colors">Terms & Conditions</Link>
+          <span>·</span>
+          <Link href="/privacy" className="hover:text-white/50 transition-colors">Privacy Policy</Link>
+          <span>·</span>
+          <span>Not affiliated with Airbnb, Inc.</span>
         </div>
       </div>
     </footer>

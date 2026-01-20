@@ -402,7 +402,7 @@ export function HostSignupForm() {
             className="mt-0.5 h-4 w-4 rounded border-[2px] border-black accent-black"
           />
           <label htmlFor="terms" className="text-[10px] font-medium text-black">
-            I agree to the <a href="#" className="font-bold underline">Terms</a> and <a href="#" className="font-bold underline">Privacy Policy</a>
+            I agree to the <Link href="/terms" target="_blank" className="font-bold underline">Terms & Conditions</Link> and <Link href="/privacy" target="_blank" className="font-bold underline">Privacy Policy</Link>
           </label>
         </div>
 
