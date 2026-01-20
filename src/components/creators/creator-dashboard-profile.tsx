@@ -956,15 +956,23 @@ export function CreatorDashboardProfile() {
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Creator Dashboard</h1>
-          <Link 
-            href="/dashboard/creator/offers"
-            className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-medium text-white hover:bg-primary/90"
-          >
-            View Offers
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link 
+              href="/dashboard/messages"
+              className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-medium text-black hover:bg-black/5"
+            >
+              Messages
+            </Link>
+            <Link 
+              href="/dashboard/creator/offers"
+              className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-medium text-white hover:bg-primary/90"
+            >
+              View Offers
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </Link>
+          </div>
         </div>
 
         {/* Stats Section */}
