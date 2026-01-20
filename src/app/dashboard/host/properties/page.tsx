@@ -5,8 +5,6 @@ import Link from "next/link"
 import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Navbar } from "@/components/navigation/navbar"
-import { Footer } from "@/components/navigation/footer"
 
 interface Property {
   id: string
@@ -431,9 +429,8 @@ export default function HostPropertiesPage() {
   }
 
   return (
-    <div className="dashboard flex min-h-screen flex-col bg-[#FAFAFA]">
-      <Navbar />
-      <main className="flex-1 py-6">
+    <div className="dashboard min-h-screen bg-[#FAFAFA]">
+      <div className="py-6">
         <Container>
           <div className="mb-4"><Link href="/dashboard/host" className="text-xs font-bold text-black/60 hover:text-black">← Dashboard</Link></div>
           
@@ -474,8 +471,7 @@ export default function HostPropertiesPage() {
             </div>
           </div>
         </Container>
-      </main>
-      <Footer />
+      </div>
     </div>
   )
 }

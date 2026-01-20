@@ -2,14 +2,11 @@
 
 import Link from "next/link"
 import { Container } from "@/components/layout/container"
-import { Navbar } from "@/components/navigation/navbar"
-import { Footer } from "@/components/navigation/footer"
 
 export default function HostCollaborationsPage() {
   return (
-    <div className="dashboard flex min-h-screen flex-col bg-[#FAFAFA]">
-      <Navbar />
-      <main className="flex-1 py-6">
+    <div className="dashboard min-h-screen bg-[#FAFAFA]">
+      <div className="py-6">
         <Container>
           <div className="mb-4">
             <Link href="/dashboard/host" className="text-xs font-bold text-black/60 hover:text-black">
@@ -59,8 +56,7 @@ export default function HostCollaborationsPage() {
             </div>
           </div>
         </Container>
-      </main>
-      <Footer />
+      </div>
     </div>
   )
 }
