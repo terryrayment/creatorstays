@@ -197,11 +197,7 @@ export default function RootLayout({
             gtag('config', 'G-01XZB7MKG9');
           `}
         </Script>
-        {/* Google Places API for location autocomplete */}
-        <Script
-          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAS1JPH--alnIScrIN3pCZx0B6UVyxaUm8&libraries=places"
-          strategy="beforeInteractive"
-        />
+        {/* Google Places API loaded by LocationAutocomplete component */}
       </head>
       <body className="flex min-h-screen flex-col bg-black font-body text-foreground antialiased">
         <AuthProvider>

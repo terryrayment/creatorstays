@@ -1,12 +1,39 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 
 interface LocationAutocompleteProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+}
+
+// Load Google Maps script
+const loadGoogleMapsScript = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    // Check if already loaded
+    if (typeof window !== 'undefined' && (window as any).google?.maps?.places) {
+      resolve()
+      return
+    }
+
+    // Check if script is already in DOM
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]')
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve())
+      return
+    }
+
+    // Create and load script
+    const script = document.createElement('script')
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAS1JPH--alnIScrIN3pCZx0B6UVyxaUm8&libraries=places'
+    script.async = true
+    script.defer = true
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error('Failed to load Google Maps'))
+    document.head.appendChild(script)
+  })
 }
 
 // Expanded city suggestions for when Google API isn't available
@@ -166,31 +193,29 @@ export default function LocationAutocomplete({
 
   // Check if Google Places API is available
   useEffect(() => {
-    const checkGoogle = () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const win = window as any
-      if (win.google?.maps?.places?.AutocompleteService) {
-        autocompleteRef.current = new win.google.maps.places.AutocompleteService()
-        setIsGoogleLoaded(true)
-        return true
+    let mounted = true
+
+    const initGoogle = async () => {
+      try {
+        await loadGoogleMapsScript()
+        
+        // Wait a bit for the API to fully initialize
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        const win = window as any
+        if (mounted && win.google?.maps?.places?.AutocompleteService) {
+          autocompleteRef.current = new win.google.maps.places.AutocompleteService()
+          setIsGoogleLoaded(true)
+          console.log('Google Places loaded successfully')
+        }
+      } catch (error) {
+        console.error('Failed to load Google Maps:', error)
       }
-      return false
     }
 
-    // Check immediately
-    if (checkGoogle()) return
+    initGoogle()
 
-    // Poll for Google Maps to load (check every 500ms for up to 10 seconds)
-    let attempts = 0
-    const maxAttempts = 20
-    const interval = setInterval(() => {
-      attempts++
-      if (checkGoogle() || attempts >= maxAttempts) {
-        clearInterval(interval)
-      }
-    }, 500)
-
-    return () => clearInterval(interval)
+    return () => { mounted = false }
   }, [])
 
   // Close suggestions when clicking outside
