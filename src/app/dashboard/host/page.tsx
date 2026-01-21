@@ -119,19 +119,21 @@ function SetupChecklist() {
       try {
         // Fetch properties count
         const propsRes = await fetch("/api/properties")
-        const propsData = await propsRes.json()
-        const hasPublishedProperty = propsData.some((p: any) => !p.isDraft)
+        const propsJson = await propsRes.json()
+        const propsData = propsJson.properties || propsJson || []
+        const hasPublishedProperty = Array.isArray(propsData) && propsData.some((p: any) => !p.isDraft)
 
         // Fetch offers sent count
         const offersRes = await fetch("/api/offers/sent")
         const offersData = await offersRes.json()
-        const hasInvitedCreator = offersData.length > 0
+        const hasInvitedCreator = Array.isArray(offersData) && offersData.length > 0
 
         // Fetch collaborations (for tracked links and payments)
         const collabsRes = await fetch("/api/collaborations/list?role=host")
         const collabsData = await collabsRes.json()
-        const hasTrackedLink = collabsData.some((c: any) => c.status !== "pending" && c.status !== "declined")
-        const hasPaidCreator = collabsData.some((c: any) => c.status === "completed" || c.hostPaidAt)
+        const collabsList = Array.isArray(collabsData) ? collabsData : []
+        const hasTrackedLink = collabsList.some((c: any) => c.status !== "pending" && c.status !== "declined")
+        const hasPaidCreator = collabsList.some((c: any) => c.status === "completed" || c.hostPaidAt)
 
         setChecklist([
           { label: "Save 1 property", done: hasPublishedProperty, href: "/dashboard/host/properties" },
