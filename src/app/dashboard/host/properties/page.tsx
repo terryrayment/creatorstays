@@ -253,9 +253,21 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       const data = await res.json()
       
       if (data.ok) {
+        // Clean up title - remove rating, bedroom count, etc. that Airbnb adds
+        let cleanTitle = data.title || ''
+        cleanTitle = cleanTitle
+          .replace(/\s*·\s*★[\d.]+/g, '')  // Remove rating
+          .replace(/\s*·\s*\d+\s*bedrooms?\s*/gi, '')  // Remove bedroom count
+          .replace(/\s*·\s*\d+\s*beds?\s*/gi, '')  // Remove bed count
+          .replace(/\s*·\s*\d+\s*baths?\s*/gi, '')  // Remove bath count
+          .replace(/\s*·\s*\d+\s*guests?\s*/gi, '')  // Remove guest count
+          .replace(/\s*·\s*$/g, '')  // Remove trailing separator
+          .replace(/\s+/g, ' ')  // Clean up extra spaces
+          .trim()
+        
         setForm(prev => ({
           ...prev,
-          title: data.title || prev.title,
+          title: cleanTitle || prev.title,
           heroImageUrl: data.imageUrl || prev.heroImageUrl,
           cityRegion: data.cityRegion || prev.cityRegion,
           rating: data.rating || prev.rating,
@@ -360,7 +372,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-4">
-            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Price/night</label><Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="$150-$250" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Price/night <span className="font-normal text-black/50">(from Airbnb)</span></label><Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="e.g. $150-$250" /></div>
             <div><label className="mb-1.5 block text-[11px] font-bold text-black">Guests</label><Input type="number" value={form.guests || ''} onChange={e => setForm({ ...form, guests: parseInt(e.target.value) || undefined })} placeholder="4" /></div>
             <div><label className="mb-1.5 block text-[11px] font-bold text-black">Beds</label><Input type="number" value={form.beds || ''} onChange={e => setForm({ ...form, beds: parseInt(e.target.value) || undefined })} placeholder="2" /></div>
             <div><label className="mb-1.5 block text-[11px] font-bold text-black">Baths</label><Input type="number" value={form.baths || ''} onChange={e => setForm({ ...form, baths: parseInt(e.target.value) || undefined })} placeholder="1" /></div>
