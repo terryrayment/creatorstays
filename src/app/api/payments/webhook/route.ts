@@ -198,6 +198,18 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         },
       })
       
+      // Publish all draft properties for this host
+      if (hostProfile) {
+        await prisma.property.updateMany({
+          where: { 
+            hostProfileId: hostProfile.id,
+            isDraft: true
+          },
+          data: { isDraft: false }
+        })
+        console.log(`[Webhook] Published properties for host: ${hostProfile.id}`)
+      }
+      
       // Send welcome email
       if (hostProfile?.user?.email) {
         const emailData = hostMembershipWelcomeEmail({
