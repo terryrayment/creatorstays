@@ -1,11 +1,179 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
+
+// Location options for search
+const ALL_LOCATIONS = [
+  "Los Angeles, CA",
+  "Austin, TX",
+  "Miami, FL",
+  "Denver, CO",
+  "Portland, OR",
+  "Seattle, WA",
+  "San Francisco, CA",
+  "San Diego, CA",
+  "Phoenix, AZ",
+  "Las Vegas, NV",
+  "Lake Arrowhead, CA",
+  "Big Bear Lake, CA",
+  "Palm Springs, CA",
+  "Joshua Tree, CA",
+  "Nashville, TN",
+  "New York, NY",
+  "Chicago, IL",
+]
+
+// Location search component for Find Creators
+function LocationSearch({ 
+  value, 
+  onChange,
+  onClear 
+}: { 
+  value: string
+  onChange: (value: string) => void
+  onClear: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
+  const [inputValue, setInputValue] = useState("")
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setOpen(false)
+        setShowSearch(false)
+        setInputValue("")
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const filteredLocations = inputValue
+    ? ALL_LOCATIONS.filter(loc => loc.toLowerCase().includes(inputValue.toLowerCase()))
+    : ALL_LOCATIONS
+
+  const presetLocations = ["Los Angeles", "Austin", "Miami", "Denver", "Portland"]
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex h-8 items-center justify-between gap-2 rounded-full border-2 border-black bg-white px-3 text-[11px] font-bold text-black"
+      >
+        <span className="truncate">{value || "All Locations"}</span>
+        <svg className={`h-3 w-3 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
+      
+      {open && !showSearch && (
+        <div className="absolute z-20 mt-1 w-48 rounded-xl border-2 border-black bg-white py-1 shadow-lg">
+          {/* All Locations option */}
+          <button
+            type="button"
+            className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-[12px] font-bold text-black transition-colors ${!value ? 'bg-[#FFD84A]' : 'hover:bg-black/5'}`}
+            onClick={() => {
+              onClear()
+              setOpen(false)
+            }}
+          >
+            {!value && <span>✓</span>}
+            <span>All Locations</span>
+          </button>
+          
+          {/* Preset locations */}
+          {presetLocations.map((loc) => {
+            const fullLoc = ALL_LOCATIONS.find(l => l.startsWith(loc)) || loc
+            const isSelected = value === fullLoc
+            return (
+              <button
+                key={loc}
+                type="button"
+                className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-[12px] font-medium text-black transition-colors ${isSelected ? 'bg-[#FFD84A] font-bold' : 'hover:bg-black/5'}`}
+                onClick={() => {
+                  onChange(fullLoc)
+                  setOpen(false)
+                }}
+              >
+                {isSelected && <span>✓</span>}
+                <span>{loc}</span>
+              </button>
+            )
+          })}
+          
+          {/* Search option */}
+          <div className="border-t border-black/10 mt-1 pt-1">
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[12px] font-medium text-black transition-colors hover:bg-black/5"
+              onClick={() => setShowSearch(true)}
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              <span>Search...</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Search view */}
+      {open && showSearch && (
+        <div className="absolute z-20 mt-1 w-56 rounded-xl border-2 border-black bg-white p-2 shadow-lg">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setShowSearch(false)
+                setInputValue("")
+              }}
+              className="text-black/50 hover:text-black"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <input
+              autoFocus
+              placeholder="Search location..."
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              className="flex-1 rounded-lg border-2 border-black px-2 py-1.5 text-[11px] font-medium text-black placeholder:text-black/40 focus:outline-none"
+            />
+          </div>
+          <div className="mt-2 max-h-40 overflow-y-auto">
+            {filteredLocations.map((loc) => (
+              <button
+                key={loc}
+                type="button"
+                className="w-full rounded-lg px-3 py-2 text-left text-[11px] font-medium text-black transition-colors hover:bg-[#FFD84A]"
+                onClick={() => {
+                  onChange(loc)
+                  setOpen(false)
+                  setShowSearch(false)
+                  setInputValue("")
+                }}
+              >
+                {loc}
+              </button>
+            ))}
+            {filteredLocations.length === 0 && (
+              <p className="px-3 py-2 text-[10px] text-black/50">No locations found</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 // Section wrapper
 function Section({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
@@ -306,7 +474,7 @@ export function HostDashboard() {
   // Search state
   const [search, setSearch] = useState("")
   const [filters, setFilters] = useState({ platform: "", niche: "", location: "" })
-  const [sortBy, setSortBy] = useState<"default" | "match">("default")
+  const [sortBy, setSortBy] = useState<"default" | "best_match" | "distance">("default")
   
   // Message composer state
   const [composing, setComposing] = useState<typeof mockCreators[0] | null>(null)
@@ -338,7 +506,13 @@ export function HostDashboard() {
       return true
     })
     .sort((a, b) => {
-      if (sortBy === "match") return b.matchScore - a.matchScore
+      if (sortBy === "best_match") return b.matchScore - a.matchScore
+      if (sortBy === "distance" && filters.location) {
+        // Sort by whether location matches filter
+        const aMatch = a.location.toLowerCase().includes(filters.location.toLowerCase()) ? 0 : 1
+        const bMatch = b.location.toLowerCase().includes(filters.location.toLowerCase()) ? 0 : 1
+        return aMatch - bMatch
+      }
       return 0
     })
 
@@ -405,15 +579,15 @@ export function HostDashboard() {
               <p className="mb-3 text-[11px] text-black">
                 Match helps you find creators that fit your property and campaign.
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Input 
                   placeholder="Search by name or handle..." 
-                  className="w-48"
+                  className="w-48 h-8 text-[11px]"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                 />
                 <Select
-                  className="w-36"
+                  className="w-32"
                   size="sm"
                   placeholder="All Platforms"
                   value={filters.platform}
@@ -426,7 +600,7 @@ export function HostDashboard() {
                   ]}
                 />
                 <Select
-                  className="w-32"
+                  className="w-28"
                   size="sm"
                   placeholder="All Niches"
                   value={filters.niche}
@@ -441,31 +615,24 @@ export function HostDashboard() {
                     { value: "Adventure", label: "Adventure" },
                   ]}
                 />
-                <Select
-                  className="w-36"
-                  size="sm"
-                  placeholder="All Locations"
+                <LocationSearch
                   value={filters.location}
-                  onChange={e => setFilters({...filters, location: e.target.value})}
-                  options={[
-                    { value: "", label: "All Locations" },
-                    { value: "Los Angeles", label: "Los Angeles" },
-                    { value: "Austin", label: "Austin" },
-                    { value: "Miami", label: "Miami" },
-                    { value: "Denver", label: "Denver" },
-                    { value: "Portland", label: "Portland" },
-                    { value: "Seattle", label: "Seattle" },
-                  ]}
+                  onChange={(loc) => setFilters({...filters, location: loc})}
+                  onClear={() => setFilters({...filters, location: ""})}
                 />
+              </div>
+              
+              <div className="mt-3 flex items-center justify-between border-t border-black/10 pt-3">
+                <p className="text-[11px] font-bold text-black">{filteredCreators.length} creators found</p>
                 <Select
-                  className="w-36"
+                  className="w-44"
                   size="sm"
-                  placeholder="Sort: Default"
                   value={sortBy}
-                  onChange={e => setSortBy(e.target.value as "default" | "match")}
+                  onChange={e => setSortBy(e.target.value as "default" | "best_match" | "distance")}
                   options={[
                     { value: "default", label: "Sort: Default" },
-                    { value: "match", label: "Sort: Best Match" },
+                    { value: "best_match", label: "Sort: Best Match" },
+                    { value: "distance", label: "Sort: Location, closest" },
                   ]}
                 />
               </div>
