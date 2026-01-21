@@ -115,7 +115,7 @@ function PropertyListItem({ property, isSelected, onSelect }: { property: Proper
             {property.isBoosted && (
               <span className="rounded-full border border-[#28D17C] bg-[#28D17C]/20 px-1.5 py-0.5 text-[9px] font-bold text-black">Boosted</span>
             )}
-            <span className={`rounded-full border border-black px-1.5 py-0.5 text-[9px] font-bold ${property.isDraft ? 'bg-amber-100 text-black' : 'bg-emerald-100 text-black'}`}>{property.isDraft ? 'Draft' : 'Ready'}</span>
+            <span className={`rounded-full border border-black px-1.5 py-0.5 text-[9px] font-bold ${property.isDraft ? 'bg-amber-100 text-black' : 'bg-emerald-100 text-black'}`}>{property.isDraft ? 'Draft' : 'Published'}</span>
             <span className="text-[9px] text-black/50">{formatDate(property.updatedAt)}</span>
           </div>
         </div>
@@ -138,7 +138,7 @@ function ChipSelector({ options, selected, onChange, label }: { options: string[
   )
 }
 
-function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess }: { property: EditingProperty; onSave: (data: EditingProperty) => void; onDelete?: () => void; isSaving: boolean; saveSuccess: boolean }) {
+function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onStepChange, showBoost, onBoost, isBoosted, onCancelBoost }: { property: EditingProperty; onSave: (data: EditingProperty) => void; onDelete?: () => void; isSaving: boolean; saveSuccess: boolean; onStepChange?: (step: number) => void; showBoost?: boolean; onBoost?: () => void; isBoosted?: boolean; onCancelBoost?: () => void }) {
   const [form, setForm] = useState<EditingProperty>(property)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [isImporting, setIsImporting] = useState(false)
@@ -148,6 +148,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess }: {
   const [isUploading, setIsUploading] = useState(false)
 
   useEffect(() => { setForm(property); setStep(1) }, [property])
+  useEffect(() => { onStepChange?.(step) }, [step, onStepChange])
 
   // Handle photo upload
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -326,7 +327,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess }: {
               </div>
             </div>
           )}
-          <div className="flex justify-end gap-2 pt-2"><Button variant="outline" onClick={() => setStep(2)}>Skip to details →</Button></div>
+          <div className="flex justify-end gap-2 pt-2"><Button variant="outline" onClick={() => setStep(2)}>Continue →</Button></div>
         </div>
       )}
 
@@ -430,11 +431,19 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess }: {
             <textarea value={form.creatorBrief || ''} onChange={e => setForm({ ...form, creatorBrief: e.target.value })} placeholder="Describe what makes your property special for content creators..." rows={6} className="w-full resize-none rounded-lg border border-black/10 bg-white px-3 py-2 text-sm focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20" />
             <p className="mt-1 text-[10px] text-black/60">This helps creators understand your property.</p>
           </div>
-          <div className="flex items-center justify-between border-t border-black/10 bg-white -mx-5 px-5 py-4 mt-4 -mb-5 rounded-b-xl">
-            <div className="flex gap-2"><Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => setStep(2)}>← Back</Button>{onDelete && <Button className="border-2 border-black bg-white text-red-600 hover:bg-red-50" onClick={onDelete}>Delete</Button>}</div>
-            <div className="flex gap-2"><Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => handleSave(true)} disabled={isSaving}>Save Draft</Button><Button className={`bg-black text-white hover:bg-black/90 transition-all duration-300 ${saveSuccess ? 'animate-pulse !bg-emerald-500' : ''}`} onClick={() => handleSave(false)} disabled={isSaving || !canPublish}>{isSaving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Save Property'}</Button></div>
+          <div className="mt-6 rounded-xl border-2 border-black bg-white p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-2">
+                <Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => setStep(2)}>← Back</Button>
+                {onDelete && <Button className="border-2 border-red-200 bg-red-50 text-red-600 hover:bg-red-100" onClick={onDelete}>Delete</Button>}
+              </div>
+              <div className="flex gap-2">
+                <Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => handleSave(true)} disabled={isSaving}>Save Draft</Button>
+                <Button className={`border-2 border-black bg-black text-white hover:bg-black/90 transition-all duration-300 ${saveSuccess ? 'animate-pulse !bg-emerald-500' : ''}`} onClick={() => handleSave(false)} disabled={isSaving || !canPublish}>{isSaving ? 'Saving...' : saveSuccess ? '✓ Published!' : 'Publish Property'}</Button>
+              </div>
+            </div>
+            {!canPublish && <p className="mt-3 text-right text-[11px] text-amber-600">Complete at least 7 checklist items to publish</p>}
           </div>
-          {!canPublish && <p className="text-right text-[10px] text-amber-600">Complete at least 7 checklist items to publish</p>}
         </div>
       )}
     </div>
@@ -450,6 +459,7 @@ export default function HostPropertiesPage() {
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [editorStep, setEditorStep] = useState(1)
   
   // Owner invite state
   const [showOwnerModal, setShowOwnerModal] = useState(false)
@@ -631,7 +641,18 @@ export default function HostPropertiesPage() {
             
             {/* Right: Editor */}
             <div className="space-y-4">
-              {editing ? <PropertyEditor property={editing} onSave={handleSave} onDelete={selectedId ? () => setShowDeleteModal(true) : undefined} isSaving={isSaving} saveSuccess={saveSuccess} /> : (
+              {editing ? <PropertyEditor 
+                property={editing} 
+                onSave={handleSave} 
+                onDelete={selectedId ? () => setShowDeleteModal(true) : undefined} 
+                isSaving={isSaving} 
+                saveSuccess={saveSuccess}
+                onStepChange={setEditorStep}
+                showBoost={editorStep === 3 && !editing.isNew && !!selectedId}
+                onBoost={() => selectedId && handleBoost(selectedId)}
+                isBoosted={(editing as Property).isBoosted}
+                onCancelBoost={() => selectedId && handleCancelBoost(selectedId)}
+              /> : (
                 <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed border-black/30 bg-white">
                   <div className="text-center">
                     <p className="text-sm text-black/60">Select a property or add a new one</p>
@@ -640,8 +661,8 @@ export default function HostPropertiesPage() {
                 </div>
               )}
               
-              {/* Boost Card */}
-              {editing && !editing.isNew && selectedId && (
+              {/* Boost Card - Only show on step 3 */}
+              {editing && !editing.isNew && selectedId && editorStep === 3 && (
                 <div className="rounded-xl border-2 border-black bg-white p-4">
                   <div className="flex items-start justify-between">
                     <div>
