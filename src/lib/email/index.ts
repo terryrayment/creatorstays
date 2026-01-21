@@ -1938,6 +1938,119 @@ No payment is required until you approve submitted content.`
 }
 
 // =============================================================================
+// HOST MEMBERSHIP EMAILS
+// =============================================================================
+
+/**
+ * Welcome email sent when host completes membership payment
+ */
+export function hostMembershipWelcomeEmail(data: {
+  hostName: string
+  hostEmail: string
+  amountPaid: number // in cents
+  promoCodeUsed?: string | null
+  propertyTitle?: string
+}): { subject: string; html: string; text: string } {
+  const { hostName, hostEmail, amountPaid, promoCodeUsed, propertyTitle } = data
+
+  const amountDisplay = amountPaid === 0 ? 'Free (Promo Code)' : `$${(amountPaid / 100).toFixed(2)}`
+  const subject = `Welcome to CreatorStays! 🎉`
+
+  const html = emailWrapper(`
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="display: inline-block; background: #28D17C; border-radius: 50%; width: 80px; height: 80px; line-height: 80px; margin-bottom: 16px;">
+        <span style="font-size: 40px;">✓</span>
+      </div>
+      <h1 style="font-size: 32px; font-weight: 900; margin: 0 0 8px;">You're in!</h1>
+      <p style="color: #666; margin: 0;">Welcome to the CreatorStays host community, ${hostName}.</p>
+    </div>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Payment Receipt</p>
+      <p style="font-size: 28px; font-weight: 900; margin: 0 0 4px;">${amountDisplay}</p>
+      <p style="font-size: 14px; color: #666; margin: 0 0 16px;">Host Membership — Lifetime Access</p>
+      
+      ${promoCodeUsed ? `<p style="font-size: 13px; color: #28D17C; margin: 0;">Promo code applied: ${promoCodeUsed}</p>` : ''}
+      
+      <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;">
+      
+      <p style="font-size: 12px; color: #999; margin: 0;">
+        Billed to: ${hostEmail}<br>
+        Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </p>
+    </div>
+    
+    <div style="background: #FFFDF7; border: 2px solid #000; border-radius: 12px; padding: 20px; margin: 24px 0;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 16px;">What's included in your membership:</p>
+      <p style="font-size: 14px; margin: 0 0 12px;">✓ &nbsp; Access to creator directory (500+ verified creators)</p>
+      <p style="font-size: 14px; margin: 0 0 12px;">✓ &nbsp; Send unlimited collaboration offers</p>
+      <p style="font-size: 14px; margin: 0 0 12px;">✓ &nbsp; Tracked affiliate links & performance analytics</p>
+      <p style="font-size: 14px; margin: 0 0 12px;">✓ &nbsp; Secure payment processing</p>
+      <p style="font-size: 14px; margin: 0;">✓ &nbsp; Priority support</p>
+    </div>
+    
+    ${propertyTitle ? `
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Your Property</p>
+      <p style="font-size: 16px; font-weight: 600; margin: 0;">${propertyTitle}</p>
+    </div>
+    ` : ''}
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${BASE_URL}/dashboard/host" style="${styles.buttonGreen}">Go to Dashboard →</a>
+    </div>
+    
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 12px;">Next steps:</p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        <strong>1.</strong> Browse the creator directory and find creators that match your property
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0 0 8px;">
+        <strong>2.</strong> Send your first collaboration offer
+      </p>
+      <p style="font-size: 13px; color: #666; margin: 0;">
+        <strong>3.</strong> Get amazing content for your property!
+      </p>
+    </div>
+    
+    <p style="font-size: 12px; color: #999; text-align: center;">
+      Questions? Reply to this email or visit our <a href="${BASE_URL}/help" style="color: #666;">Help Center</a>.
+    </p>
+  `)
+
+  const text = `Welcome to CreatorStays!
+
+Hi ${hostName},
+
+You're in! Your host membership is now active.
+
+PAYMENT RECEIPT
+Amount: ${amountDisplay}
+Plan: Host Membership — Lifetime Access
+${promoCodeUsed ? `Promo code: ${promoCodeUsed}` : ''}
+Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+Billed to: ${hostEmail}
+
+WHAT'S INCLUDED:
+✓ Access to creator directory (500+ verified creators)
+✓ Send unlimited collaboration offers
+✓ Tracked affiliate links & performance analytics
+✓ Secure payment processing
+✓ Priority support
+
+NEXT STEPS:
+1. Browse the creator directory and find creators that match your property
+2. Send your first collaboration offer
+3. Get amazing content for your property!
+
+Go to your dashboard: ${BASE_URL}/dashboard/host
+
+Questions? Reply to this email or visit ${BASE_URL}/help`
+
+  return { subject, html, text }
+}
+
+// =============================================================================
 // DISPUTE / ESCALATION EMAILS
 // =============================================================================
 

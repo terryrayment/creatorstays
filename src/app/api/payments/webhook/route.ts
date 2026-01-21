@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import Stripe from 'stripe'
-import { sendEmail, paymentCompleteEmail, paymentReceiptEmail, collaborationCompletedEmail } from '@/lib/email'
+import { sendEmail, paymentCompleteEmail, paymentReceiptEmail, collaborationCompletedEmail, hostMembershipWelcomeEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -188,6 +188,33 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
           onboardingComplete: true,
         },
       })
+      
+      // Get host profile with user info for email
+      const hostProfile = await prisma.hostProfile.findUnique({
+        where: { userId },
+        include: { 
+          user: true,
+          properties: { take: 1 }
+        },
+      })
+      
+      // Send welcome email
+      if (hostProfile?.user?.email) {
+        const emailData = hostMembershipWelcomeEmail({
+          hostName: hostProfile.displayName || hostProfile.user.name || 'Host',
+          hostEmail: hostProfile.user.email,
+          amountPaid: originalAmount - discountAmount,
+          promoCodeUsed: promoCode,
+          propertyTitle: hostProfile.properties[0]?.title || undefined,
+        })
+        
+        sendEmail({
+          to: hostProfile.user.email,
+          ...emailData,
+        }).catch(err => console.error('[Webhook] Host welcome email error:', err))
+        
+        console.log(`[Webhook] Welcome email sent to: ${hostProfile.user.email}`)
+      }
       
       // If promo code was used, record redemption
       if (promoCode) {
