@@ -129,10 +129,10 @@ function ChipSelector({ options, selected, onChange, label }: { options: string[
   const toggle = (opt: string) => onChange(selected.includes(opt) ? selected.filter(s => s !== opt) : [...selected, opt])
   return (
     <div>
-      <label className="mb-2 block text-[11px] font-medium text-black/60">{label}</label>
+      <label className="mb-2 block text-[11px] font-bold text-black">{label}</label>
       <div className="flex flex-wrap gap-1.5">
         {options.map(opt => (
-          <button key={opt} type="button" onClick={() => toggle(opt)} className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${selected.includes(opt) ? 'border-black bg-black/10 text-black' : 'border-black/10 bg-white hover:bg-black/[0.02]'}`}>{opt}</button>
+          <button key={opt} type="button" onClick={() => toggle(opt)} className={`rounded-full border-2 px-2.5 py-1 text-[11px] font-medium transition-colors ${selected.includes(opt) ? 'border-black bg-[#FFD84A] text-black' : 'border-black bg-white text-black hover:bg-black/[0.02]'}`}>{opt}</button>
         ))}
       </div>
     </div>
@@ -436,15 +436,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label className="text-[11px] font-bold text-black">Photos (3+ recommended)</label>
-              {(form.photos?.length || 0) > 0 && (
-                <button
-                  type="button"
-                  onClick={cleanupPhotos}
-                  className="text-[10px] font-bold text-red-500 hover:text-red-700"
-                >
-                  Remove non-property images
-                </button>
-              )}
             </div>
             
             {/* Photo Grid */}
