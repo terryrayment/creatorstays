@@ -407,6 +407,8 @@ export default function HostPropertiesPage() {
   const [editing, setEditing] = useState<EditingProperty | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => { fetchProperties() }, [])
 
@@ -439,9 +441,17 @@ export default function HostPropertiesPage() {
   }
 
   const handleDelete = async () => {
-    if (!selectedId || !confirm('Delete this property?')) return
-    try { await fetch('/api/properties', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: selectedId }) }); setProperties(prev => prev.filter(p => p.id !== selectedId)); setSelectedId(null); setEditing(null) }
+    if (!selectedId) return
+    setDeleting(true)
+    try { 
+      await fetch('/api/properties', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: selectedId }) })
+      setProperties(prev => prev.filter(p => p.id !== selectedId))
+      setSelectedId(null)
+      setEditing(null)
+      setShowDeleteModal(false)
+    }
     catch (e) { console.error(e) }
+    finally { setDeleting(false) }
   }
 
   return (
@@ -480,7 +490,7 @@ export default function HostPropertiesPage() {
             
             {/* Right: Editor */}
             <div>
-              {editing ? <PropertyEditor property={editing} onSave={handleSave} onDelete={selectedId ? handleDelete : undefined} isSaving={isSaving} saveSuccess={saveSuccess} /> : (
+              {editing ? <PropertyEditor property={editing} onSave={handleSave} onDelete={selectedId ? () => setShowDeleteModal(true) : undefined} isSaving={isSaving} saveSuccess={saveSuccess} /> : (
                 <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed border-black/30 bg-white">
                   <div className="text-center">
                     <p className="text-sm text-black/60">Select a property or add a new one</p>
@@ -492,6 +502,34 @@ export default function HostPropertiesPage() {
           </div>
         </Container>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6">
+            <h3 className="text-xl font-black text-black">Delete Property?</h3>
+            <p className="mt-2 text-sm text-black/70">
+              This will permanently remove this property and any associated data. This action cannot be undone.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="flex-1 rounded-full border-2 border-black bg-white py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 rounded-full border-2 border-red-500 bg-red-500 py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Yes, Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

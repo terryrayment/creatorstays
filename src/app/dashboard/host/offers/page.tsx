@@ -76,6 +76,7 @@ export default function HostSentOffersPage() {
   const [reCounterAmount, setReCounterAmount] = useState("")
   const [reCounterMessage, setReCounterMessage] = useState("")
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null)
+  const [confirmAction, setConfirmAction] = useState<{ type: "resend" | "withdraw"; offerId: string } | null>(null)
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -103,13 +104,10 @@ export default function HostSentOffersPage() {
     }
   }
 
-  // Handle resend offer
+  // Handle resend offer (called after modal confirmation)
   const handleResend = async (offerId: string) => {
-    if (!confirm("Resend this offer? The creator will receive a new notification and have 14 days to respond.")) {
-      return
-    }
-    
     setResending(offerId)
+    setConfirmAction(null)
     try {
       const res = await fetch(`/api/offers/${offerId}/resend`, {
         method: "POST",
@@ -136,13 +134,10 @@ export default function HostSentOffersPage() {
     setResending(null)
   }
 
-  // Handle withdraw offer
+  // Handle withdraw offer (called after modal confirmation)
   const handleWithdraw = async (offerId: string) => {
-    if (!confirm("Are you sure you want to withdraw this offer? This action cannot be undone.")) {
-      return
-    }
-    
     setWithdrawing(offerId)
+    setConfirmAction(null)
     try {
       const res = await fetch(`/api/offers/${offerId}/withdraw`, {
         method: "POST",
@@ -566,7 +561,7 @@ export default function HostSentOffersPage() {
                               Sent {timeAgo(offer.createdAt)} · Expires {offer.expiresAt ? formatDate(offer.expiresAt) : "in 14 days"}
                             </p>
                             <button
-                              onClick={() => handleWithdraw(offer.id)}
+                              onClick={() => setConfirmAction({ type: "withdraw", offerId: offer.id })}
                               disabled={withdrawing === offer.id}
                               className="w-full rounded-full border-2 border-black/30 bg-white py-2 text-xs font-bold text-black/60 transition-all hover:border-red-500 hover:text-red-500 disabled:opacity-50"
                             >
@@ -578,7 +573,7 @@ export default function HostSentOffersPage() {
                         {/* Withdraw option for countered offers too */}
                         {offer.status === "countered" && (
                           <button
-                            onClick={() => handleWithdraw(offer.id)}
+                            onClick={() => setConfirmAction({ type: "withdraw", offerId: offer.id })}
                             disabled={withdrawing === offer.id}
                             className="w-full rounded-full border-2 border-black/30 bg-white py-2 text-xs font-bold text-black/60 transition-all hover:border-red-500 hover:text-red-500 disabled:opacity-50"
                           >
@@ -602,7 +597,7 @@ export default function HostSentOffersPage() {
                             <div className="rounded-lg border-2 border-[#FFD84A] bg-[#FFD84A]/10 p-3">
                               <p className="text-xs font-bold text-black mb-2">Want to try again?</p>
                               <button
-                                onClick={() => handleResend(offer.id)}
+                                onClick={() => setConfirmAction({ type: "resend", offerId: offer.id })}
                                 disabled={resending === offer.id}
                                 className="w-full rounded-full border-2 border-black bg-[#FFD84A] py-2.5 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
                               >
@@ -643,7 +638,7 @@ export default function HostSentOffersPage() {
                               <p className="text-xs font-bold text-black mb-2">Your options:</p>
                               <div className="space-y-2">
                                 <button
-                                  onClick={() => handleResend(offer.id)}
+                                  onClick={() => setConfirmAction({ type: "resend", offerId: offer.id })}
                                   disabled={resending === offer.id}
                                   className="w-full rounded-full border-2 border-black bg-white py-2 text-xs font-bold text-black transition-all hover:bg-[#FFD84A] disabled:opacity-50"
                                 >
@@ -686,6 +681,47 @@ export default function HostSentOffersPage() {
               )}
               <span className="text-sm font-bold text-black">{toast.message}</span>
               <button onClick={() => setToast(null)} className="ml-2 text-black/60 hover:text-black">×</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6">
+            <h3 className="text-xl font-black text-black">
+              {confirmAction.type === "resend" ? "Resend Offer?" : "Withdraw Offer?"}
+            </h3>
+            <p className="mt-2 text-sm text-black/70">
+              {confirmAction.type === "resend" 
+                ? "The creator will receive a new notification and have 14 days to respond."
+                : "This action cannot be undone. The creator will no longer see this offer."
+              }
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setConfirmAction(null)}
+                className="flex-1 rounded-full border-2 border-black bg-white py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (confirmAction.type === "resend") {
+                    handleResend(confirmAction.offerId)
+                  } else {
+                    handleWithdraw(confirmAction.offerId)
+                  }
+                }}
+                className={`flex-1 rounded-full border-2 py-3 text-sm font-bold transition-transform hover:-translate-y-0.5 ${
+                  confirmAction.type === "withdraw" 
+                    ? "border-red-500 bg-red-500 text-white" 
+                    : "border-black bg-[#FFD84A] text-black"
+                }`}
+              >
+                {confirmAction.type === "resend" ? "Yes, Resend" : "Yes, Withdraw"}
+              </button>
             </div>
           </div>
         </div>

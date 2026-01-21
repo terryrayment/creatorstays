@@ -289,6 +289,9 @@ export default function CollaborationDetailPage() {
   const [cancelling, setCancelling] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancelReason, setCancelReason] = useState("")
+  const [pendingCancelAction, setPendingCancelAction] = useState<"accept" | "decline" | null>(null)
+  const [showConfirmStayModal, setShowConfirmStayModal] = useState(false)
+  const [confirmingStay, setConfirmingStay] = useState(false)
 
   // Auto-dismiss toast after 4 seconds
   useEffect(() => {
@@ -397,11 +400,8 @@ export default function CollaborationDetailPage() {
     setReviewingContent(false)
   }
 
-  // Handle cancel request
+  // Handle cancel request (called from modal, so no need for confirm())
   const handleCancelRequest = async () => {
-    if (!confirm("Are you sure you want to request cancellation? The other party will need to approve this.")) {
-      return
-    }
     setCancelling(true)
     try {
       const res = await fetch(`/api/collaborations/${collaborationId}/cancel`, {
@@ -426,14 +426,8 @@ export default function CollaborationDetailPage() {
     setCancelling(false)
   }
 
-  // Handle accept/decline cancellation
+  // Handle accept/decline cancellation (called after modal confirmation)
   const handleCancellationResponse = async (action: "accept" | "decline") => {
-    const confirmMsg = action === "accept" 
-      ? "Are you sure you want to accept the cancellation? This will end the collaboration."
-      : "Are you sure you want to decline the cancellation? The collaboration will continue."
-    
-    if (!confirm(confirmMsg)) return
-    
     setCancelling(true)
     try {
       const res = await fetch(`/api/collaborations/${collaborationId}/cancel`, {
@@ -444,6 +438,7 @@ export default function CollaborationDetailPage() {
       const data = await res.json()
       if (res.ok) {
         setToast(data.message)
+        setPendingCancelAction(null)
         // Update status locally
         const newStatus = action === "accept" ? "cancelled" : "active"
         setCollaboration(prev => prev ? { ...prev, status: newStatus } : prev)
@@ -1197,22 +1192,7 @@ export default function CollaborationDetailPage() {
                 </div>
               </div>
               <button
-                onClick={async () => {
-                  if (!confirm("Confirm the creator's stay is complete? This will finalize the collaboration.")) return
-                  try {
-                    const res = await fetch(`/api/collaborations/${collaboration.id}/complete`, { method: "POST" })
-                    const data = await res.json()
-                    if (res.ok) {
-                      setToast(data.message || "Collaboration completed!")
-                      setCollaboration(prev => prev ? { ...prev, status: "completed" } : prev)
-                      setTimeout(() => window.location.reload(), 1500)
-                    } else {
-                      setToast(data.error || "Failed to complete")
-                    }
-                  } catch (e) {
-                    setToast("Network error. Please try again.")
-                  }
-                }}
+                onClick={() => setShowConfirmStayModal(true)}
                 className="mt-4 block w-full rounded-full border-2 border-black bg-black py-4 text-center text-sm font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-1"
               >
                 ✓ Confirm Stay Complete
@@ -1341,14 +1321,14 @@ export default function CollaborationDetailPage() {
                   </p>
                   <div className="mt-4 flex gap-2">
                     <button
-                      onClick={() => handleCancellationResponse("accept")}
+                      onClick={() => setPendingCancelAction("accept")}
                       disabled={cancelling}
                       className="flex-1 rounded-full border-2 border-red-500 bg-red-500 py-2 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
                     >
-                      {cancelling ? "Processing..." : "Accept Cancellation"}
+                      Accept Cancellation
                     </button>
                     <button
-                      onClick={() => handleCancellationResponse("decline")}
+                      onClick={() => setPendingCancelAction("decline")}
                       disabled={cancelling}
                       className="flex-1 rounded-full border-2 border-black bg-white py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
                     >
@@ -1463,6 +1443,97 @@ export default function CollaborationDetailPage() {
                     className="flex-1 rounded-full border-2 border-black bg-white py-3 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
                   >
                     Never Mind
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Cancellation Response Confirmation Modal */}
+          {pendingCancelAction && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <div className="w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6">
+                <h3 className="text-xl font-black text-black">
+                  {pendingCancelAction === "accept" ? "Accept Cancellation?" : "Decline Cancellation?"}
+                </h3>
+                <p className="mt-2 text-sm text-black/70">
+                  {pendingCancelAction === "accept" 
+                    ? "This will end the collaboration. Any pending payments will be handled according to the agreement terms."
+                    : "The collaboration will continue as normal. The other party will be notified of your decision."
+                  }
+                </p>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={() => setPendingCancelAction(null)}
+                    disabled={cancelling}
+                    className="flex-1 rounded-full border-2 border-black bg-white py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                  >
+                    Go Back
+                  </button>
+                  <button
+                    onClick={() => handleCancellationResponse(pendingCancelAction)}
+                    disabled={cancelling}
+                    className={`flex-1 rounded-full border-2 py-3 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-50 ${
+                      pendingCancelAction === "accept" 
+                        ? "border-red-500 bg-red-500 text-white" 
+                        : "border-black bg-black text-white"
+                    }`}
+                  >
+                    {cancelling ? "Processing..." : pendingCancelAction === "accept" ? "Yes, Cancel" : "Yes, Continue"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Confirm Stay Complete Modal */}
+          {showConfirmStayModal && collaboration && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <div className="w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6">
+                <h3 className="text-xl font-black text-black">Confirm Stay Complete?</h3>
+                <p className="mt-2 text-sm text-black/70">
+                  This will mark the collaboration as complete. The creator delivered great content and their stay is finished.
+                </p>
+                <div className="mt-4 rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🎉</span>
+                    <div>
+                      <p className="font-bold text-black">Post-for-Stay Complete</p>
+                      <p className="text-xs text-black/60">Both parties fulfilled their commitments</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={() => setShowConfirmStayModal(false)}
+                    disabled={confirmingStay}
+                    className="flex-1 rounded-full border-2 border-black bg-white py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                  >
+                    Not Yet
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setConfirmingStay(true)
+                      try {
+                        const res = await fetch(`/api/collaborations/${collaboration.id}/complete`, { method: "POST" })
+                        const data = await res.json()
+                        if (res.ok) {
+                          setToast(data.message || "Collaboration completed!")
+                          setShowConfirmStayModal(false)
+                          setCollaboration(prev => prev ? { ...prev, status: "completed" } : prev)
+                          setTimeout(() => window.location.reload(), 1500)
+                        } else {
+                          setToast(data.error || "Failed to complete")
+                        }
+                      } catch (e) {
+                        setToast("Network error. Please try again.")
+                      }
+                      setConfirmingStay(false)
+                    }}
+                    disabled={confirmingStay}
+                    className="flex-1 rounded-full border-2 border-[#28D17C] bg-[#28D17C] py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                  >
+                    {confirmingStay ? "Completing..." : "Yes, Complete!"}
                   </button>
                 </div>
               </div>
