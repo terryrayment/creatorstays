@@ -256,20 +256,29 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         // Clean up title - remove rating, bedroom count, etc. that Airbnb adds
         let cleanTitle = data.title || ''
         cleanTitle = cleanTitle
-          .replace(/\s*·\s*★[\d.]+/g, '')  // Remove rating
-          .replace(/\s*·\s*\d+\s*bedrooms?\s*/gi, '')  // Remove bedroom count
-          .replace(/\s*·\s*\d+\s*beds?\s*/gi, '')  // Remove bed count
-          .replace(/\s*·\s*\d+\s*baths?\s*/gi, '')  // Remove bath count
-          .replace(/\s*·\s*\d+\s*guests?\s*/gi, '')  // Remove guest count
+          .replace(/\s*·\s*★[\d.]+/g, '')  // Remove rating with separator
+          .replace(/★[\d.]+\s*/g, '')  // Remove rating without separator
+          .replace(/\s*·?\s*\d+(?:\.\d+)?\s*bedrooms?\s*/gi, '')  // Remove bedroom count
+          .replace(/\s*·?\s*\d+(?:\.\d+)?\s*beds?\s*/gi, '')  // Remove bed count
+          .replace(/\s*·?\s*\d+(?:\.\d+)?\s*baths?\s*/gi, '')  // Remove bath count
+          .replace(/\s*·?\s*\d+(?:\.\d+)?\s*guests?\s*/gi, '')  // Remove guest count
+          .replace(/\s*·\s*\d+\s*$/g, '')  // Remove trailing numbers
           .replace(/\s*·\s*$/g, '')  // Remove trailing separator
           .replace(/\s+/g, ' ')  // Clean up extra spaces
+          .trim()
+        
+        // Also clean up the city/region - remove descriptors like "a Lake Tahoe Estate"
+        let cleanCity = data.cityRegion || ''
+        cleanCity = cleanCity
+          .replace(/^a\s+/i, '')  // Remove leading "a "
+          .replace(/\s+(estate|retreat|house|home|cabin|villa|lodge|resort|property).*$/i, '')
           .trim()
         
         setForm(prev => ({
           ...prev,
           title: cleanTitle || prev.title,
           heroImageUrl: data.imageUrl || prev.heroImageUrl,
-          cityRegion: data.cityRegion || prev.cityRegion,
+          cityRegion: cleanCity || prev.cityRegion,
           rating: data.rating || prev.rating,
           reviewCount: data.reviewCount || prev.reviewCount,
           priceNightlyRange: data.price || prev.priceNightlyRange,

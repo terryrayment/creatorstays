@@ -69,12 +69,38 @@ export async function GET(request: NextRequest) {
       result.imageUrl = ogImage
     }
 
-    // Extract location from description or title
-    if (ogDescription) {
+    // Extract location from title first (most reliable)
+    // Format: "Home in Incline Village" or "Cabin in Big Bear Lake"
+    if (ogTitle) {
+      const titleLocationMatch = ogTitle.match(/(?:home|cabin|house|apartment|condo|villa|cottage|chalet|studio|loft|suite|room|place|retreat|estate|lodge)\s+in\s+([^·\-|]+)/i)
+      if (titleLocationMatch) {
+        let location = titleLocationMatch[1].trim()
+        // Clean up - remove trailing descriptors
+        location = location
+          .replace(/\s*[-–—]\s*Airbnb.*$/i, '')
+          .replace(/\s*\|.*$/i, '')
+          .replace(/\s*·.*$/i, '')
+          .trim()
+        if (location && location.length > 2) {
+          result.cityRegion = location
+        }
+      }
+    }
+
+    // Fallback: Extract location from description
+    if (!result.cityRegion && ogDescription) {
       // Common formats: "Entire cabin in Big Bear, California" or "in Big Bear Lake, CA"
-      const locationMatch = ogDescription.match(/(?:in|at)\s+([^.·\-|]+(?:,\s*[A-Z]{2})?)/i)
+      // Be more careful - stop at common separators and property descriptions
+      const locationMatch = ogDescription.match(/(?:Entire\s+\w+|Private\s+room|Shared\s+room)\s+in\s+([^.·\-|,]+(?:,\s*[A-Za-z\s]+)?)/i)
       if (locationMatch) {
-        result.cityRegion = locationMatch[1].trim()
+        let location = locationMatch[1].trim()
+        // Remove things that aren't locations
+        location = location
+          .replace(/\s+(estate|retreat|house|home|cabin|villa|lodge|resort).*$/i, '')
+          .trim()
+        if (location && location.length > 2) {
+          result.cityRegion = location
+        }
       }
     }
 
