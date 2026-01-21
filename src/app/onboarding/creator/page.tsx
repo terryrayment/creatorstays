@@ -159,6 +159,13 @@ export default function CreatorOnboardingPage() {
       if (status === "loading") return
       if (status === "unauthenticated") { router.push("/login?callbackUrl=/onboarding/creator"); return }
       
+      // Check for referral code in URL or localStorage
+      const params = new URLSearchParams(window.location.search)
+      const refCode = params.get("ref") || localStorage.getItem("referralCode")
+      if (refCode) {
+        localStorage.setItem("referralCode", refCode.toUpperCase())
+      }
+      
       try {
         const res = await fetch("/api/creator/profile")
         if (res.ok) {
@@ -250,6 +257,22 @@ export default function CreatorOnboardingPage() {
         }),
       })
       if (!res.ok) throw new Error("Failed to save profile")
+      
+      // Apply referral code if present
+      const referralCode = localStorage.getItem("referralCode")
+      if (referralCode) {
+        try {
+          await fetch("/api/creator/referral", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ referralCode }),
+          })
+          localStorage.removeItem("referralCode")
+        } catch (e) {
+          console.error("Failed to apply referral code:", e)
+        }
+      }
+      
       router.push("/dashboard/creator?welcome=true")
     } catch (e) { setError("Something went wrong. Please try again."); setSaving(false) }
   }

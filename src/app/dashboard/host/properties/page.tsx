@@ -26,6 +26,8 @@ interface Property {
   creatorBrief?: string
   isActive: boolean
   isDraft: boolean
+  isBoosted?: boolean
+  boostExpiresAt?: string
   lastImportedAt?: string
   createdAt: string
   updatedAt: string
@@ -100,13 +102,19 @@ function PropertyListItem({ property, isSelected, onSelect }: { property: Proper
   return (
     <button onClick={onSelect} className={`w-full rounded-lg border-2 border-black p-3 text-left transition-all ${isSelected ? 'bg-[#FFD84A]' : 'bg-white hover:bg-gray-50'}`}>
       <div className="flex items-start gap-3">
-        <div className="h-12 w-16 shrink-0 overflow-hidden rounded border-2 border-black bg-gray-100">
+        <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded border-2 border-black bg-gray-100">
           {property.heroImageUrl ? <img src={property.heroImageUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-lg text-black/30">🏠</div>}
+          {property.isBoosted && (
+            <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px]">🚀</div>
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-bold text-black">{property.title || 'Untitled'}</p>
           <p className="text-[11px] text-black/60">{property.cityRegion || 'No location'}</p>
           <div className="mt-1 flex items-center gap-2">
+            {property.isBoosted && (
+              <span className="rounded-full border border-[#28D17C] bg-[#28D17C]/20 px-1.5 py-0.5 text-[9px] font-bold text-black">Boosted</span>
+            )}
             <span className={`rounded-full border border-black px-1.5 py-0.5 text-[9px] font-bold ${property.isDraft ? 'bg-amber-100 text-black' : 'bg-emerald-100 text-black'}`}>{property.isDraft ? 'Draft' : 'Ready'}</span>
             <span className="text-[9px] text-black/50">{formatDate(property.updatedAt)}</span>
           </div>
@@ -487,6 +495,28 @@ export default function HostPropertiesPage() {
     finally { setDeleting(false) }
   }
 
+  const handleBoost = async (propertyId: string) => {
+    try {
+      const res = await fetch(`/api/properties/${propertyId}/boost`, { method: 'POST' })
+      const data = await res.json()
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+      }
+    } catch (e) {
+      console.error('Failed to start boost:', e)
+    }
+  }
+
+  const handleCancelBoost = async (propertyId: string) => {
+    if (!confirm('Cancel boost subscription? Your property will no longer appear as featured.')) return
+    try {
+      await fetch(`/api/properties/${propertyId}/boost`, { method: 'DELETE' })
+      await fetchProperties()
+    } catch (e) {
+      console.error('Failed to cancel boost:', e)
+    }
+  }
+
   return (
     <div className="dashboard min-h-screen bg-[#FAFAFA]">
       <div className="py-6">
@@ -522,13 +552,53 @@ export default function HostPropertiesPage() {
             </div>
             
             {/* Right: Editor */}
-            <div>
+            <div className="space-y-4">
               {editing ? <PropertyEditor property={editing} onSave={handleSave} onDelete={selectedId ? () => setShowDeleteModal(true) : undefined} isSaving={isSaving} saveSuccess={saveSuccess} /> : (
                 <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed border-black/30 bg-white">
                   <div className="text-center">
                     <p className="text-sm text-black/60">Select a property or add a new one</p>
                     <button onClick={handleAddNew} className="mt-3 rounded-full border-2 border-black bg-black px-5 py-2 text-[10px] font-bold text-white">+ Add Property</button>
                   </div>
+                </div>
+              )}
+              
+              {/* Boost Card */}
+              {editing && !editing.isNew && selectedId && (
+                <div className="rounded-xl border-2 border-black bg-white p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🚀</span>
+                        <h3 className="font-bold text-black">Boost This Property</h3>
+                      </div>
+                      <p className="mt-1 text-xs text-black/60">
+                        Get featured placement in creator search results
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-[#28D17C]/20 px-2 py-0.5 text-xs font-bold text-black">$49/mo</span>
+                  </div>
+                  
+                  {(editing as Property).isBoosted ? (
+                    <div className="mt-4">
+                      <div className="flex items-center gap-2 rounded-lg bg-[#28D17C]/20 px-3 py-2">
+                        <span className="text-sm">✓</span>
+                        <span className="text-sm font-bold text-black">Currently Boosted</span>
+                      </div>
+                      <button
+                        onClick={() => handleCancelBoost(selectedId)}
+                        className="mt-2 text-xs text-red-500 hover:underline"
+                      >
+                        Cancel Boost
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleBoost(selectedId)}
+                      className="mt-4 w-full rounded-full border-2 border-black bg-[#28D17C] py-2 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+                    >
+                      Boost Property →
+                    </button>
+                  )}
                 </div>
               )}
             </div>

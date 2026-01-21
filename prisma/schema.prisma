@@ -140,6 +140,11 @@ model CreatorProfile {
   // Onboarding status
   onboardingComplete       Boolean   @default(false)
   
+  // Referral/Affiliate program
+  referralCode      String?   @unique  // Their unique code to share
+  referredBy        String?             // ID of creator who referred them
+  referralEarnings  Int       @default(0)  // Total cents earned from referrals
+  
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -236,6 +241,73 @@ model HostPromoRedemption {
 }
 
 // ============================================================================
+// CREATOR REFERRALS (Affiliate Program)
+// ============================================================================
+
+model CreatorReferral {
+  id              String    @id @default(cuid())
+  
+  // Who referred whom
+  referrerId      String    // CreatorProfile ID of referrer
+  referredId      String    // CreatorProfile ID of new creator
+  
+  // Referral code used
+  referralCode    String
+  
+  // Commission tracking
+  commissionCents Int       @default(0)  // Amount earned (e.g., $10 = 1000)
+  commissionPaid  Boolean   @default(false)
+  paidAt          DateTime?
+  
+  // Status
+  status          String    @default("pending")  // pending, qualified, paid
+  qualifiedAt     DateTime?  // When referral completed onboarding
+  
+  createdAt       DateTime  @default(now())
+
+  @@unique([referrerId, referredId])
+  @@index([referrerId])
+  @@index([referralCode])
+  @@map("creator_referrals")
+}
+
+// ============================================================================
+// AGENCY TEAM MEMBERS
+// ============================================================================
+
+model AgencyTeamMember {
+  id              String    @id @default(cuid())
+  
+  // The agency host profile
+  agencyHostId    String
+  
+  // Team member user
+  userId          String
+  
+  // Role
+  role            String    @default("member")  // owner, admin, member
+  
+  // Permissions
+  canManageProperties   Boolean @default(true)
+  canSendOffers         Boolean @default(true)
+  canViewAnalytics      Boolean @default(true)
+  canManageTeam         Boolean @default(false)
+  
+  // Status
+  inviteStatus    String    @default("pending")  // pending, accepted, declined
+  invitedAt       DateTime  @default(now())
+  acceptedAt      DateTime?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([agencyHostId, userId])
+  @@index([agencyHostId])
+  @@index([userId])
+  @@map("agency_team_members")
+}
+
+// ============================================================================
 // HOST
 // ============================================================================
 
@@ -282,6 +354,14 @@ model HostProfile {
   
   // Onboarding status
   onboardingComplete Boolean @default(false)
+  
+  // Agency Pro subscription ($199/month)
+  isAgency            Boolean   @default(false)
+  agencyName          String?
+  agencySubscriptionId String?   // Stripe subscription ID
+  agencySubscribedAt  DateTime?
+  agencyExpiresAt     DateTime?
+  teamSeats           Int       @default(1)  // How many team members allowed
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -337,6 +417,12 @@ model Property {
   // Status
   isActive        Boolean  @default(true)
   isDraft         Boolean  @default(true)
+  
+  // Boosted listing (paid promotion)
+  isBoosted       Boolean   @default(false)
+  boostExpiresAt  DateTime?
+  boostPurchasedAt DateTime?
+  boostStripeSubId String?   // Stripe subscription ID
   
   // Tracking
   trackingToken   String   @unique @default(cuid())
