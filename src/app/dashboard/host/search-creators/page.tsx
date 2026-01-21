@@ -79,12 +79,9 @@ const PLATFORM_OPTIONS = ["All Platforms", "Instagram", "TikTok", "YouTube"]
 const NICHE_OPTIONS = ["All Niches", "Travel", "Lifestyle", "Photography", "Vlog", "Food", "Adventure", "Luxury", "Design", "Family", "Minimal"]
 const AUDIENCE_OPTIONS = ["All Sizes", "Under 50K", "50K-100K", "100K-250K", "250K+"]
 const SORT_OPTIONS = [
-  { value: "relevance", label: "Relevance" },
-  { value: "followers_high", label: "Followers: High to Low" },
-  { value: "followers_low", label: "Followers: Low to High" },
-  { value: "engagement_high", label: "Engagement: High to Low" },
-  { value: "engagement_low", label: "Engagement: Low to High" },
-  { value: "distance", label: "Distance: Nearest" },
+  { value: "default", label: "Sort: Default" },
+  { value: "best_match", label: "Sort: Best Match" },
+  { value: "distance", label: "Sort: Location, closest" },
 ]
 
 const ALL_LOCATIONS = Object.keys(CITY_COORDS)
@@ -100,6 +97,7 @@ function LocationSearch({
   onClear: () => void
 }) {
   const [open, setOpen] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const wrapperRef = useRef<HTMLDivElement>(null)
 
@@ -107,6 +105,8 @@ function LocationSearch({
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setOpen(false)
+        setShowSearch(false)
+        setInputValue("")
       }
     }
     document.addEventListener("mousedown", handleClickOutside)
@@ -117,37 +117,96 @@ function LocationSearch({
     ? ALL_LOCATIONS.filter(loc => loc.toLowerCase().includes(inputValue.toLowerCase()))
     : ALL_LOCATIONS
 
+  const presetLocations = ["Los Angeles", "Austin", "Miami", "Denver", "Portland"]
+
   return (
     <div ref={wrapperRef} className="relative">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex h-10 w-44 items-center justify-between rounded-full border-2 border-black bg-white px-3 text-[12px] font-bold text-black"
+        className="flex h-10 items-center justify-between gap-2 rounded-full border-2 border-black bg-white px-4 text-[12px] font-bold text-black"
       >
         <span className="truncate">{value || "All Locations"}</span>
-        {value ? (
-          <span 
-            onClick={(e) => { e.stopPropagation(); onClear(); setInputValue("") }}
-            className="ml-1 text-black/50 hover:text-black"
-          >
-            ✕
-          </span>
-        ) : (
-          <svg className="h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-          </svg>
-        )}
+        <svg className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
       </button>
       
-      {open && (
+      {open && !showSearch && (
+        <div className="absolute z-20 mt-1 w-48 rounded-xl border-2 border-black bg-white py-1 shadow-lg">
+          {/* All Locations option */}
+          <button
+            type="button"
+            className={`flex w-full items-center gap-2 px-4 py-3 text-left text-[13px] font-bold text-black transition-colors ${!value ? 'bg-[#FFD84A]' : 'hover:bg-black/5'}`}
+            onClick={() => {
+              onClear()
+              setOpen(false)
+            }}
+          >
+            {!value && <span>✓</span>}
+            <span>All Locations</span>
+          </button>
+          
+          {/* Preset locations */}
+          {presetLocations.map((loc) => {
+            const fullLoc = ALL_LOCATIONS.find(l => l.startsWith(loc)) || loc
+            const isSelected = value === fullLoc
+            return (
+              <button
+                key={loc}
+                type="button"
+                className={`flex w-full items-center gap-2 px-4 py-3 text-left text-[13px] font-medium text-black transition-colors ${isSelected ? 'bg-[#FFD84A] font-bold' : 'hover:bg-black/5'}`}
+                onClick={() => {
+                  onChange(fullLoc)
+                  setOpen(false)
+                }}
+              >
+                {isSelected && <span>✓</span>}
+                <span>{loc}</span>
+              </button>
+            )
+          })}
+          
+          {/* Search option */}
+          <div className="border-t border-black/10 mt-1 pt-1">
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 px-4 py-3 text-left text-[13px] font-medium text-black transition-colors hover:bg-black/5"
+              onClick={() => setShowSearch(true)}
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              <span>Search...</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Search view */}
+      {open && showSearch && (
         <div className="absolute z-20 mt-1 w-56 rounded-xl border-2 border-black bg-white p-2 shadow-lg">
-          <input
-            autoFocus
-            placeholder="Search location..."
-            value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
-            className="w-full rounded-lg border-2 border-black px-3 py-2 text-[12px] font-medium text-black placeholder:text-black/40 focus:outline-none"
-          />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setShowSearch(false)
+                setInputValue("")
+              }}
+              className="text-black/50 hover:text-black"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <input
+              autoFocus
+              placeholder="Search location..."
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              className="flex-1 rounded-lg border-2 border-black px-3 py-2 text-[12px] font-medium text-black placeholder:text-black/40 focus:outline-none"
+            />
+          </div>
           <p className="mt-2 px-2 text-[9px] font-bold uppercase tracking-wider text-black/50">
             Shows creators within 150 miles
           </p>
@@ -160,6 +219,7 @@ function LocationSearch({
                 onClick={() => {
                   onChange(loc)
                   setOpen(false)
+                  setShowSearch(false)
                   setInputValue("")
                 }}
               >
@@ -186,7 +246,7 @@ export default function SearchCreatorsPage() {
   const [niche, setNiche] = useState("All Niches")
   const [audienceSize, setAudienceSize] = useState("All Sizes")
   const [location, setLocation] = useState("")
-  const [sortBy, setSortBy] = useState("relevance")
+  const [sortBy, setSortBy] = useState("default")
   const [openToGiftedStays, setOpenToGiftedStays] = useState(false)
 
   // Data state
@@ -351,9 +411,8 @@ export default function SearchCreatorsPage() {
                   Gifted stays only
                 </label>
                 <span className="text-black/30">|</span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-black/50">Sort:</span>
                 <Select
-                  className="w-44"
+                  className="w-48"
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value)}
                   options={SORT_OPTIONS}
