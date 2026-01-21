@@ -89,7 +89,7 @@ export async function GET(
           cashCents: c.offer?.cashCents || 0,
           stayNights: c.offer?.stayNights || 0,
         },
-        contentUrls: c.contentUrls || [],
+        contentLinks: c.contentLinks || [],
         contentSubmittedAt: c.contentSubmittedAt,
       })),
       stats,
