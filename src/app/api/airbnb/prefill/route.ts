@@ -371,107 +371,56 @@ function decodeHtmlEntities(str: string): string {
 
 /**
  * Detect if a URL is an Airbnb logo, icon, host photo, or non-property image
+ * Be conservative - only filter things we're CERTAIN are not property photos
  */
 function isAirbnbLogo(url: string): boolean {
   const lowerUrl = url.toLowerCase()
   
-  // Known logo/icon/non-property patterns
-  const excludePatterns = [
+  // Only filter out things we're absolutely sure aren't property photos
+  const definiteExclusions = [
     'airbnb-static',
     'airbnb_logo',
     'airbnb-logo',
     '/logo',
-    '/icon',
     '/favicon',
     '/apple-touch',
     'android-chrome',
-    'default_user',
-    'default-user',
-    'avatar',
-    'user_pic',
-    'profile_pic',
-    'host_pic',
-    'badge',
-    'superhost',
-    'verified',
-    'safety',
-    '/em/',           // Emoji/icon folder
-    '/social/',       // Social icons
-    '/experiences/',  // Not property images
+    'belo',
     'brandmark',
     'symbol',
-    'belo',           // Airbnb Bélo logo
-    'airbnb.com/static', // Static assets
-    '/illustrations/', // Illustration graphics
-    '/category_icon/', // Category icons
-    'placeholder',
-    'blank',
-    'empty',
-    '/users/',        // Host profile photos
-    '/user-',         // User images
+    '/em/',           // Emoji folder
+    '/social/',       // Social icons
+    '/airbnb-platform-assets/',
+    '/platform-assets/',
+    '/original_application/',
+    '/airbnb-brand/',
+    '/category_icon/',
+    '/users/',        // User profile photos
     'im/users',       // User profile images
-    'im/pictures/user', // User pictures
-    '/host/',         // Host images
-    '/miso/',         // Airbnb illustration system
+    '/miso/',         // Airbnb illustration system (MISO)
     '/lottie/',       // Animated graphics
-    '/aircover/',     // AirCover marketing
-    '/trips/',        // Trip-related graphics
-    '/guidebook/',    // Guidebook images
-    'drawing',        // Illustrated content
-    'cartoon',        // Cartoon graphics
-    'illustration',   // Illustrations
-    'artwork',        // Artwork
-    '/im/pictures/e2', // Experience/marketing images
-    '/im/pictures/c8', // Category images
-    'mediacdn',       // Media CDN (often profile pics)
-    'guest-favorite', // Guest favorite badge
-    'guest_favorite', // Guest favorite badge alt
-    'airbnb-edu',     // Airbnb education
-    '/pictures/6f7',   // Known illustration folder
-    '/pictures/f0a',   // Known illustration folder
-    '/pictures/d7e',   // Known illustration folder  
-    '/pictures/76f',   // Known illustration folder
-    'getaway',        // Marketing images
-    'travel-insurance', // Insurance graphics
-    'hosting-',       // Hosting marketing
-    '-hosting',       // Hosting marketing
-    'hero-image',     // Marketing hero images
-    'cover-photo',    // Cover photos (marketing)
+    'mediacdn',       // Media CDN (profile pics)
   ]
   
-  for (const pattern of excludePatterns) {
+  for (const pattern of definiteExclusions) {
     if (lowerUrl.includes(pattern)) {
       return true
     }
   }
   
-  // Check for very small image dimensions in URL (icons are usually small)
+  // Check for very small image dimensions in URL
   const dimensionMatch = url.match(/\/(\d+)x(\d+)/)
   if (dimensionMatch) {
     const width = parseInt(dimensionMatch[1])
     const height = parseInt(dimensionMatch[2])
-    // Skip images smaller than 200px in either dimension (likely icons)
-    if (width < 200 || height < 200) {
-      return true
-    }
-    // Also skip very square small images (likely profile photos)
-    if (width === height && width < 400) {
+    // Only skip very small images (icons)
+    if (width < 100 || height < 100) {
       return true
     }
   }
   
-  // Check if the image looks like an illustration by examining the URL structure
-  // Airbnb property photos typically have UUIDs or numeric IDs
-  // Illustrations often have descriptive names
-  const filename = url.split('/').pop()?.toLowerCase() || ''
-  const illustrationKeywords = ['welcome', 'guest', 'host', 'check', 'arrival', 'key', 'door', 'people', 'person', 'family', 'couple', 'pet', 'dog', 'cat', 'luggage', 'suitcase', 'travel']
-  for (const keyword of illustrationKeywords) {
-    if (filename.includes(keyword)) {
-      return true
-    }
-  }
-  
-  // Airbnb logo has specific red/pink color scheme - check for known logo image IDs
+  return false
+}
   const logoImageIds = [
     'airbnb-logo',
     'rbw4n0bgz',  // Common Airbnb Bélo logo ID

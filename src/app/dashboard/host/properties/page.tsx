@@ -201,58 +201,39 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     })
   }
 
-  // Filter out Airbnb branding images and illustrations
+  // Filter out Airbnb branding images - be conservative
   const isAirbnbBranding = (url: string): boolean => {
     const lowerUrl = url.toLowerCase()
-    const brandingPatterns = [
+    
+    // Only filter definite non-property images
+    const definiteExclusions = [
       'airbnb-static',
       'airbnb_logo',
       'airbnb-logo',
       '/logo',
-      '/icon',
       'belo',
       'brandmark',
-      '/illustrations/',
       '/platform-assets/',
       '/airbnb-platform-assets/',
       '/original_application/',
-      'placeholder',
-      'empty',
-      'default',
       '/users/',
-      '/user-',
       'im/users',
       '/miso/',
       '/lottie/',
-      '/aircover/',
       'mediacdn',
-      'guest-favorite',
-      'guest_favorite',
       '/em/',
       '/social/',
+      '/category_icon/',
     ]
     
-    // Check patterns
-    for (const pattern of brandingPatterns) {
+    for (const pattern of definiteExclusions) {
       if (lowerUrl.includes(pattern)) return true
     }
     
-    // Check for small dimensions (icons)
+    // Check for very small dimensions (icons)
     const dimMatch = url.match(/\/(\d+)x(\d+)/)
-    if (dimMatch && (parseInt(dimMatch[1]) < 200 || parseInt(dimMatch[2]) < 200)) {
+    if (dimMatch && (parseInt(dimMatch[1]) < 100 || parseInt(dimMatch[2]) < 100)) {
       return true
-    }
-    
-    // Check for square images (likely profile photos or icons)
-    if (dimMatch && parseInt(dimMatch[1]) === parseInt(dimMatch[2]) && parseInt(dimMatch[1]) < 400) {
-      return true
-    }
-    
-    // Check filename for illustration keywords
-    const filename = url.split('/').pop()?.toLowerCase() || ''
-    const illustrationKeywords = ['welcome', 'guest', 'host', 'check', 'arrival', 'key', 'door', 'people', 'person', 'family', 'couple', 'pet', 'dog', 'cat', 'luggage', 'suitcase', 'travel', 'illustration', 'drawing', 'cartoon', 'artwork']
-    for (const keyword of illustrationKeywords) {
-      if (filename.includes(keyword)) return true
     }
     
     return false
