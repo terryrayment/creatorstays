@@ -450,8 +450,86 @@ export default function HostPropertiesPage() {
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  
+  // Owner invite state
+  const [showOwnerModal, setShowOwnerModal] = useState(false)
+  const [ownerEmail, setOwnerEmail] = useState("")
+  const [ownerName, setOwnerName] = useState("")
+  const [invitingOwner, setInvitingOwner] = useState(false)
+  const [ownerInviteSuccess, setOwnerInviteSuccess] = useState(false)
+  const [propertyOwners, setPropertyOwners] = useState<Array<{ id: string; name: string; email: string; lastAccessedAt: string | null }>>([])
+  const [isAgency, setIsAgency] = useState(false)
 
-  useEffect(() => { fetchProperties() }, [])
+  useEffect(() => { 
+    fetchProperties()
+    fetchAgencyStatus()
+  }, [])
+
+  // Fetch owners when property is selected
+  useEffect(() => {
+    if (selectedId && isAgency) {
+      fetchPropertyOwners(selectedId)
+    }
+  }, [selectedId, isAgency])
+
+  const fetchAgencyStatus = async () => {
+    try {
+      const res = await fetch('/api/host/agency')
+      if (res.ok) {
+        const data = await res.json()
+        setIsAgency(data.isAgency || false)
+      }
+    } catch (e) { console.error(e) }
+  }
+
+  const fetchPropertyOwners = async (propertyId: string) => {
+    try {
+      const res = await fetch(`/api/properties/${propertyId}/owner`)
+      if (res.ok) {
+        const data = await res.json()
+        setPropertyOwners(data.owners || [])
+      }
+    } catch (e) { console.error(e) }
+  }
+
+  const handleInviteOwner = async () => {
+    if (!selectedId || !ownerEmail || !ownerName) return
+    setInvitingOwner(true)
+    try {
+      const res = await fetch(`/api/properties/${selectedId}/owner`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: ownerEmail, name: ownerName }),
+      })
+      if (res.ok) {
+        setOwnerInviteSuccess(true)
+        setOwnerEmail("")
+        setOwnerName("")
+        fetchPropertyOwners(selectedId)
+        setTimeout(() => {
+          setOwnerInviteSuccess(false)
+          setShowOwnerModal(false)
+        }, 2000)
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to invite owner')
+      }
+    } catch (e) { console.error(e) }
+    finally { setInvitingOwner(false) }
+  }
+
+  const handleRemoveOwner = async (ownerId: string) => {
+    if (!selectedId) return
+    if (!confirm('Remove this owner\'s access?')) return
+    try {
+      await fetch(`/api/properties/${selectedId}/owner`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ownerId }),
+      })
+      fetchPropertyOwners(selectedId)
+    } catch (e) { console.error(e) }
+  }
 
   const fetchProperties = async () => {
     try {
@@ -601,6 +679,48 @@ export default function HostPropertiesPage() {
                   )}
                 </div>
               )}
+
+              {/* Owner Access Section - Agency Only */}
+              {selectedId && isAgency && (
+                <div className="mt-6 rounded-xl border-2 border-black bg-white p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">🔑</span>
+                      <h3 className="font-bold text-black">Owner Access</h3>
+                    </div>
+                    <button
+                      onClick={() => setShowOwnerModal(true)}
+                      className="rounded-full border-2 border-black bg-black px-3 py-1 text-xs font-bold text-white"
+                    >
+                      + Invite
+                    </button>
+                  </div>
+                  <p className="mt-1 text-xs text-black/60">
+                    Give property owners read-only access to view campaigns
+                  </p>
+                  
+                  {propertyOwners.length > 0 ? (
+                    <div className="mt-3 space-y-2">
+                      {propertyOwners.map((owner) => (
+                        <div key={owner.id} className="flex items-center justify-between rounded-lg border border-black/20 bg-black/5 px-3 py-2">
+                          <div>
+                            <p className="text-sm font-bold text-black">{owner.name}</p>
+                            <p className="text-xs text-black/60">{owner.email}</p>
+                          </div>
+                          <button
+                            onClick={() => handleRemoveOwner(owner.id)}
+                            className="text-xs text-red-500 hover:underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-xs text-black/40">No owners invited yet</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </Container>
@@ -630,6 +750,85 @@ export default function HostPropertiesPage() {
                 {deleting ? "Deleting..." : "Yes, Delete"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Owner Modal */}
+      {showOwnerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-black text-black">Invite Property Owner</h3>
+              <button
+                onClick={() => setShowOwnerModal(false)}
+                className="text-black/40 hover:text-black"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="mt-2 text-sm text-black/60">
+              Send a read-only access link to the property owner so they can view campaign performance.
+            </p>
+            
+            {ownerInviteSuccess ? (
+              <div className="mt-6 rounded-lg border-2 border-[#28D17C] bg-[#28D17C]/10 p-4 text-center">
+                <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-[#28D17C]">
+                  <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <p className="font-bold text-black">Invite Sent!</p>
+                <p className="text-sm text-black/60">They'll receive an email with their access link.</p>
+              </div>
+            ) : (
+              <>
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                      Owner Name
+                    </label>
+                    <input
+                      type="text"
+                      value={ownerName}
+                      onChange={e => setOwnerName(e.target.value)}
+                      placeholder="John Smith"
+                      className="w-full rounded-lg border-2 border-black px-4 py-3 text-sm font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                      Owner Email
+                    </label>
+                    <input
+                      type="email"
+                      value={ownerEmail}
+                      onChange={e => setOwnerEmail(e.target.value)}
+                      placeholder="owner@example.com"
+                      className="w-full rounded-lg border-2 border-black px-4 py-3 text-sm font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
+                    />
+                  </div>
+                </div>
+                
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={() => setShowOwnerModal(false)}
+                    className="flex-1 rounded-full border-2 border-black bg-white py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleInviteOwner}
+                    disabled={invitingOwner || !ownerEmail || !ownerName}
+                    className="flex-1 rounded-full border-2 border-black bg-black py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                  >
+                    {invitingOwner ? "Sending..." : "Send Invite"}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

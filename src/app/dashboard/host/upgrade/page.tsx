@@ -110,12 +110,10 @@ export default function AgencyUpgradePage() {
           <div className="space-y-4 mb-8">
             {[
               { icon: "🏠", title: "Unlimited Properties", desc: "Manage as many listings as you need" },
-              { icon: "👥", title: "5 Team Seats", desc: "Invite team members to help manage" },
-              { icon: "📨", title: "Bulk Offers", desc: "Send offers to multiple creators at once" },
-              { icon: "📊", title: "Advanced Analytics", desc: "Deep insights across all properties" },
-              { icon: "🔌", title: "API Access", desc: "Integrate with your existing tools" },
-              { icon: "⭐", title: "Priority Support", desc: "24/7 dedicated support channel" },
-              { icon: "🏷️", title: "White Label Options", desc: "Custom branding for your agency" },
+              { icon: "👥", title: "5 Team Logins", desc: "Invite your team to help manage ($29/extra seat)" },
+              { icon: "📁", title: "Organize by Owner", desc: "Group properties by owner or portfolio" },
+              { icon: "🔑", title: "Owner Access Portals", desc: "Give owners view-only access to their properties" },
+              { icon: "📊", title: "Multi-Property Dashboard", desc: "See all properties at a glance, filter by owner" },
             ].map((feature, i) => (
               <div key={i} className="flex items-start gap-3">
                 <span className="text-xl">{feature.icon}</span>
@@ -168,13 +166,11 @@ export default function AgencyUpgradePage() {
             <div className="p-4 text-center font-bold text-black border-l-2 border-black bg-[#28D17C]/20">Agency Pro ($199/mo)</div>
           </div>
           {[
-            { feature: "Properties", standard: "Unlimited", agency: "Unlimited" },
-            { feature: "Team Members", standard: "1", agency: "5 included" },
-            { feature: "Bulk Offers", standard: "—", agency: "✓" },
-            { feature: "API Access", standard: "—", agency: "✓" },
-            { feature: "White Label", standard: "—", agency: "✓" },
-            { feature: "Priority Support", standard: "Email", agency: "24/7 Chat" },
-            { feature: "Analytics", standard: "Basic", agency: "Advanced" },
+            { feature: "Properties", standard: "1 listing", agency: "Unlimited" },
+            { feature: "Team Logins", standard: "1", agency: "5 included" },
+            { feature: "Organize by Owner", standard: "—", agency: "✓" },
+            { feature: "Owner Access Portals", standard: "—", agency: "✓" },
+            { feature: "Dashboard View", standard: "Single property", agency: "All properties" },
           ].map((row, i) => (
             <div key={i} className="grid grid-cols-3 border-b border-black/10 last:border-b-0">
               <div className="p-4 text-sm text-black">{row.feature}</div>

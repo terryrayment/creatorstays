@@ -94,6 +94,20 @@ export async function POST(request: NextRequest) {
       lastImportedAt,
     } = body
 
+    // Check property limit for non-agency hosts (only when creating new property)
+    if (!id && !hostProfile.isAgency) {
+      const existingPropertyCount = await prisma.property.count({
+        where: { hostProfileId: hostProfile.id },
+      })
+      
+      if (existingPropertyCount >= 1) {
+        return NextResponse.json({ 
+          error: 'Property limit reached. Upgrade to Agency Pro for unlimited properties.',
+          code: 'PROPERTY_LIMIT_REACHED'
+        }, { status: 403 })
+      }
+    }
+
     // Validate Airbnb URL if provided
     if (airbnbUrl && !isValidAirbnbUrl(airbnbUrl)) {
       return NextResponse.json({ 

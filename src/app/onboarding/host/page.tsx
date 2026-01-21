@@ -305,6 +305,7 @@ export default function HostOnboardingPage() {
     isFree: boolean
   } | null>(null)
   const [checkingOut, setCheckingOut] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<'standard' | 'agency'>('standard')
   
   const [data, setData] = useState<OnboardingData>({
     displayName: "",
@@ -596,30 +597,50 @@ export default function HostOnboardingPage() {
       // First save profile and property
       await saveProfileAndProperty()
       
-      // Then initiate checkout
-      const res = await fetch("/api/host/membership/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          promoCode: promoResult?.isFree ? promoCode : promoCode || undefined,
-        }),
-      })
-      
-      const result = await res.json()
-      
-      if (result.freeAccess) {
-        // Promo code gave free access - mark onboarding complete and redirect
-        await fetch("/api/host/profile", {
-          method: "PUT",
+      // Determine which checkout to use based on selected plan
+      if (selectedPlan === 'agency') {
+        // Agency Pro subscription
+        const res = await fetch("/api/host/agency", {
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ onboardingComplete: true }),
+          body: JSON.stringify({
+            agencyName: data.displayName,
+          }),
         })
-        router.push("/onboarding/host/success")
-      } else if (result.checkoutUrl) {
-        // Redirect to Stripe checkout
-        window.location.href = result.checkoutUrl
+        
+        const result = await res.json()
+        
+        if (result.checkoutUrl) {
+          window.location.href = result.checkoutUrl
+        } else {
+          throw new Error(result.error || "Failed to start agency subscription")
+        }
       } else {
-        throw new Error(result.error || "Failed to start checkout")
+        // Standard membership (one-time)
+        const res = await fetch("/api/host/membership/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            promoCode: promoResult?.isFree ? promoCode : promoCode || undefined,
+          }),
+        })
+        
+        const result = await res.json()
+        
+        if (result.freeAccess) {
+          // Promo code gave free access - mark onboarding complete and redirect
+          await fetch("/api/host/profile", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ onboardingComplete: true }),
+          })
+          router.push("/onboarding/host/success")
+        } else if (result.checkoutUrl) {
+          // Redirect to Stripe checkout
+          window.location.href = result.checkoutUrl
+        } else {
+          throw new Error(result.error || "Failed to start checkout")
+        }
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong")
@@ -1134,56 +1155,132 @@ export default function HostOnboardingPage() {
           </div>
         )}
 
-        {/* STEP 5: Checkout */}
+        {/* STEP 5: Choose Plan & Checkout */}
         {step === 5 && (
           <div>
-            {/* Header - matches homepage style */}
+            {/* Header */}
             <div className="mb-8">
               <p className="text-[10px] font-black uppercase tracking-wider text-black">
                 Final Step
               </p>
               <h1 className="mt-2 font-heading text-[2.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[3rem]" style={{ fontWeight: 900 }}>
-                <span className="block text-black">COMPLETE YOUR</span>
-                <span className="block text-black" style={{ fontWeight: 400 }}>MEMBERSHIP</span>
+                <span className="block text-black">CHOOSE YOUR</span>
+                <span className="block text-black" style={{ fontWeight: 400 }}>PLAN</span>
               </h1>
-              <p className="mt-3 text-sm text-black/60">One-time payment for lifetime access</p>
+              <p className="mt-3 text-sm text-black/60">Select the plan that fits your needs</p>
             </div>
 
             <div className="space-y-4">
-              {/* What's Included - Yellow card like homepage */}
-              <div className="rounded-2xl border-[3px] border-black bg-[#FFD84A] p-6">
-                <p className="text-[10px] font-black uppercase tracking-wider text-black">
-                  What you get
-                </p>
-                <h3 className="mt-1 font-heading text-xl font-bold text-black">Your membership includes:</h3>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {[
-                    { icon: "→", text: "Unlimited access to creator directory" },
-                    { icon: "→", text: "Send unlimited offers to creators" },
-                    { icon: "→", text: "Tracked links & performance analytics" },
-                    { icon: "→", text: "Secure payment processing" },
-                    { icon: "→", text: "Priority support" },
-                    { icon: "→", text: "Lifetime access — pay once, never again" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="font-bold text-black">{item.icon}</span>
-                      <span className="text-sm font-medium text-black">{item.text}</span>
+              {/* Plan Selection */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* Standard Plan */}
+                <button
+                  onClick={() => setSelectedPlan('standard')}
+                  className={`rounded-2xl border-[3px] p-6 text-left transition-all ${
+                    selectedPlan === 'standard' 
+                      ? 'border-black bg-[#FFD84A]' 
+                      : 'border-black/30 bg-white hover:border-black/60'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-wider text-black/60">
+                        Most Popular
+                      </p>
+                      <p className="mt-1 font-heading text-xl font-bold text-black">Standard Host</p>
                     </div>
-                  ))}
-                </div>
+                    <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${
+                      selectedPlan === 'standard' ? 'border-black bg-black' : 'border-black/30'
+                    }`}>
+                      {selectedPlan === 'standard' && (
+                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <p className="mt-4 font-heading text-3xl font-black text-black">$199</p>
+                  <p className="text-sm text-black/60">One-time payment</p>
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <span className="font-bold">→</span> 1 property listing
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <span className="font-bold">→</span> Unlimited creator access
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <span className="font-bold">→</span> Unlimited offers
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <span className="font-bold">→</span> Tracked links & analytics
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <span className="font-bold">→</span> Lifetime access
+                    </div>
+                  </div>
+                </button>
+
+                {/* Agency Plan */}
+                <button
+                  onClick={() => setSelectedPlan('agency')}
+                  className={`rounded-2xl border-[3px] p-6 text-left transition-all ${
+                    selectedPlan === 'agency' 
+                      ? 'border-black bg-[#4AA3FF]' 
+                      : 'border-black/30 bg-white hover:border-black/60'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-wider text-black/60">
+                        Property Managers
+                      </p>
+                      <p className="mt-1 font-heading text-xl font-bold text-black">Agency Pro</p>
+                    </div>
+                    <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${
+                      selectedPlan === 'agency' ? 'border-black bg-black' : 'border-black/30'
+                    }`}>
+                      {selectedPlan === 'agency' && (
+                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  <p className="mt-4 font-heading text-3xl font-black text-black">$199<span className="text-lg font-medium">/mo</span></p>
+                  <p className="text-sm text-black/60">Cancel anytime</p>
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <span className="font-bold">→</span> Unlimited properties
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <span className="font-bold">→</span> 5 team logins included
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <span className="font-bold">→</span> Organize by owner/portfolio
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <span className="font-bold">→</span> Owner access portals
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-black">
+                      <span className="font-bold">→</span> Multi-property dashboard
+                    </div>
+                  </div>
+                </button>
               </div>
 
-              {/* Pricing - Green accent */}
+              {/* Selected Plan Summary */}
               <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-wider text-black">
-                      One-time payment
+                      {selectedPlan === 'standard' ? 'One-time payment' : 'Monthly subscription'}
                     </p>
-                    <p className="mt-1 font-heading text-lg font-bold text-black">Host Membership</p>
+                    <p className="mt-1 font-heading text-lg font-bold text-black">
+                      {selectedPlan === 'standard' ? 'Standard Host' : 'Agency Pro'}
+                    </p>
                   </div>
                   <div className="text-right">
-                    {promoResult ? (
+                    {selectedPlan === 'standard' && promoResult ? (
                       <>
                         <p className="font-heading text-4xl font-black text-black">
                           {promoResult.isFree ? "FREE" : `$${promoResult.finalPrice}`}
@@ -1192,47 +1289,51 @@ export default function HostOnboardingPage() {
                         <p className="mt-1 text-xs font-bold text-black">{promoResult.description}</p>
                       </>
                     ) : (
-                      <p className="font-heading text-4xl font-black text-black">$199</p>
+                      <p className="font-heading text-4xl font-black text-black">
+                        $199{selectedPlan === 'agency' && <span className="text-lg">/mo</span>}
+                      </p>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Promo Code - White card */}
-              <div className="rounded-2xl border-[3px] border-black bg-white p-5">
-                <label className="block text-[10px] font-black uppercase tracking-wider text-black">
-                  Have a promo code?
-                </label>
-                <div className="mt-3 flex gap-2">
-                  <input
-                    type="text"
-                    value={promoCode}
-                    onChange={e => {
-                      setPromoCode(e.target.value.toUpperCase())
-                      setPromoResult(null)
-                    }}
-                    placeholder="ENTER CODE"
-                    className="flex-1 rounded-lg border-[3px] border-black px-4 py-3 text-sm font-bold uppercase tracking-wider text-black placeholder:text-black/30 focus:outline-none focus:ring-2 focus:ring-black"
-                  />
-                  <button
-                    onClick={validatePromoCode}
-                    disabled={promoValidating || !promoCode.trim()}
-                    className="rounded-lg border-[3px] border-black bg-black px-6 py-3 text-[10px] font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
-                  >
-                    {promoValidating ? "..." : "Apply"}
-                  </button>
-                </div>
-                {promoResult && promoResult.valid && (
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C]">
-                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                      </svg>
-                    </div>
-                    <p className="text-sm font-bold text-black">{promoResult.description} applied</p>
+              {/* Promo Code - Only for Standard plan */}
+              {selectedPlan === 'standard' && (
+                <div className="rounded-2xl border-[3px] border-black bg-white p-5">
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-black">
+                    Have a promo code?
+                  </label>
+                  <div className="mt-3 flex gap-2">
+                    <input
+                      type="text"
+                      value={promoCode}
+                      onChange={e => {
+                        setPromoCode(e.target.value.toUpperCase())
+                        setPromoResult(null)
+                      }}
+                      placeholder="ENTER CODE"
+                      className="flex-1 rounded-lg border-[3px] border-black px-4 py-3 text-sm font-bold uppercase tracking-wider text-black placeholder:text-black/30 focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                    <button
+                      onClick={validatePromoCode}
+                      disabled={promoValidating || !promoCode.trim()}
+                      className="rounded-lg border-[3px] border-black bg-black px-6 py-3 text-[10px] font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                    >
+                      {promoValidating ? "..." : "Apply"}
+                    </button>
                   </div>
-                )}
-              </div>
+                  {promoResult && promoResult.valid && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C]">
+                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-bold text-black">{promoResult.description} applied</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Security Note */}
               <div className="flex items-center gap-4 rounded-2xl border-[3px] border-black/20 bg-black/5 p-4">
@@ -1285,7 +1386,14 @@ export default function HostOnboardingPage() {
               disabled={checkingOut}
               className="rounded-full border-[3px] border-black bg-[#28D17C] px-8 py-3 text-[11px] font-black uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
             >
-              {checkingOut ? "Processing..." : promoResult?.isFree ? "Activate Free Access" : "Pay $199 & Launch"}
+              {checkingOut 
+                ? "Processing..." 
+                : selectedPlan === 'agency'
+                  ? "Subscribe $199/mo"
+                  : promoResult?.isFree 
+                    ? "Activate Free Access" 
+                    : `Pay $${promoResult?.finalPrice || 199} & Launch`
+              }
             </button>
           )}
         </div>

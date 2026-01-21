@@ -371,6 +371,7 @@ model HostProfile {
   conversations  Conversation[]
   offers         Offer[]
   collaborations Collaboration[]
+  invitedOwners  PropertyOwner[]  // Property owners this agency has invited
 
   @@map("host_profiles")
 }
@@ -424,6 +425,10 @@ model Property {
   boostPurchasedAt DateTime?
   boostStripeSubId String?   // Stripe subscription ID
   
+  // Owner organization (for agencies)
+  ownerName       String?   // Name of property owner (for agency organization)
+  ownerGroup      String?   // Portfolio/group name
+  
   // Tracking
   trackingToken   String   @unique @default(cuid())
   
@@ -434,6 +439,7 @@ model Property {
   trackingLinks   TrackingLink[]
   collaborations  Collaboration[]
   offers          Offer[]
+  propertyOwners  PropertyOwner[]
 
   @@unique([hostProfileId, airbnbUrl])
   @@index([hostProfileId])
@@ -933,4 +939,41 @@ model Dispute {
   @@index([collaborationId])
   @@index([status])
   @@map("disputes")
+}
+
+// ============================================================================
+// PROPERTY OWNER ACCESS (for agencies to share with property owners)
+// ============================================================================
+
+model PropertyOwner {
+  id              String   @id @default(cuid())
+  
+  // Owner info
+  email           String
+  name            String
+  
+  // Property access
+  propertyId      String
+  property        Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  // Who invited them
+  invitedById     String
+  invitedBy       HostProfile @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+  
+  // Access token for magic link login
+  accessToken     String   @unique @default(cuid())
+  
+  // Tracking
+  invitedAt       DateTime @default(now())
+  lastAccessedAt  DateTime?
+  accessCount     Int      @default(0)
+  
+  // Status
+  isActive        Boolean  @default(true)
+  
+  @@unique([email, propertyId]) // One invite per email per property
+  @@index([propertyId])
+  @@index([invitedById])
+  @@index([accessToken])
+  @@map("property_owners")
 }
