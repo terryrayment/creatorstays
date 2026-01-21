@@ -198,12 +198,10 @@ export default function RootLayout({
           `}
         </Script>
         {/* Google Places API for location autocomplete */}
-        {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
-          <Script
-            src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
-            strategy="afterInteractive"
-          />
-        )}
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}&libraries=places`}
+          strategy="beforeInteractive"
+        />
       </head>
       <body className="flex min-h-screen flex-col bg-black font-body text-foreground antialiased">
         <AuthProvider>
