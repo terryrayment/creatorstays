@@ -172,15 +172,15 @@ export async function GET(request: NextRequest) {
         updatedAt: dateRange,
       },
       include: {
-        hostProfile: true,
-        creatorProfile: true,
+        host: true,
+        creator: true,
         offer: true,
       },
     })
     stats.collaborationsCompleted = completedCollabs.length
     stats.completedCollabs = completedCollabs.map(c => ({
-      host: c.hostProfile.displayName,
-      creator: c.creatorProfile.displayName,
+      host: c.host.displayName,
+      creator: c.creator.displayName,
       amount: c.offer.cashCents,
     }))
 
