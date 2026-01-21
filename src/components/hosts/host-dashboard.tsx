@@ -382,17 +382,6 @@ export function HostDashboard() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Top bar */}
-      <div className="border-b-2 border-black bg-white">
-        <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
-            <span className="text-sm font-bold text-black">Host Dashboard</span>
-          </div>
-          <Link href="/" className="text-sm font-bold text-black hover:underline">← Back to site</Link>
-        </div>
-      </div>
-
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -400,9 +389,12 @@ export function HostDashboard() {
             <h1 className="text-2xl font-bold text-black">Welcome, Host</h1>
             <p className="mt-1 text-black">Set up your property and start outreach.</p>
           </div>
-          <Button asChild>
-            <Link href="/creators">Browse all creators</Link>
-          </Button>
+          <Link 
+            href="/dashboard/host/search-creators"
+            className="rounded-full border-2 border-black bg-[#FFD84A] px-5 py-2.5 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+          >
+            Browse all creators
+          </Link>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_380px]">

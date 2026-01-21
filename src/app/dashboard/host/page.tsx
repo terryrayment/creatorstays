@@ -88,6 +88,20 @@ function NextStepStrip() {
   )
 }
 
+function BetaHeader() {
+  return (
+    <div className="border-b-2 border-black bg-white">
+      <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
+          <span className="text-sm font-bold text-black">Host Dashboard</span>
+        </div>
+        <Link href="/" className="text-sm font-bold text-black hover:underline">← Back to site</Link>
+      </div>
+    </div>
+  )
+}
+
 function StatsSection() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6">
@@ -223,6 +237,7 @@ export default function HostDashboardPage() {
         </div>
       )}
       
+      <BetaHeader />
       <ActionRequiredBanner />
       {showOnboardingBanner && (
         <OnboardingBanner onDismiss={() => setShowOnboardingBanner(false)} />
