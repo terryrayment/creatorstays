@@ -1137,62 +1137,73 @@ export default function HostOnboardingPage() {
         {/* STEP 5: Checkout */}
         {step === 5 && (
           <div>
-            <StepHeader
-              emoji="💳"
-              title="Complete your membership"
-              subtitle="One-time payment for lifetime access"
-            />
+            {/* Header - matches homepage style */}
+            <div className="mb-8">
+              <p className="text-[10px] font-black uppercase tracking-wider text-black">
+                Final Step
+              </p>
+              <h1 className="mt-2 font-heading text-[2.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[3rem]" style={{ fontWeight: 900 }}>
+                <span className="block text-black">COMPLETE YOUR</span>
+                <span className="block text-black" style={{ fontWeight: 400 }}>MEMBERSHIP</span>
+              </h1>
+              <p className="mt-3 text-sm text-black/60">One-time payment for lifetime access</p>
+            </div>
 
-            <div className="space-y-6">
-              {/* What's Included */}
-              <div className="rounded-xl border-2 border-black bg-white p-6">
-                <h3 className="mb-4 text-sm font-bold text-black">Your membership includes:</h3>
-                <div className="space-y-3">
+            <div className="space-y-4">
+              {/* What's Included - Yellow card like homepage */}
+              <div className="rounded-2xl border-[3px] border-black bg-[#FFD84A] p-6">
+                <p className="text-[10px] font-black uppercase tracking-wider text-black">
+                  What you get
+                </p>
+                <h3 className="mt-1 font-heading text-xl font-bold text-black">Your membership includes:</h3>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {[
-                    { emoji: "🔍", text: "Unlimited access to creator directory" },
-                    { emoji: "💌", text: "Send unlimited offers to creators" },
-                    { emoji: "📊", text: "Tracked links & performance analytics" },
-                    { emoji: "💸", text: "Secure payment processing" },
-                    { emoji: "🎯", text: "Priority support" },
-                    { emoji: "♾️", text: "Lifetime access — pay once, never again" },
+                    { icon: "→", text: "Unlimited access to creator directory" },
+                    { icon: "→", text: "Send unlimited offers to creators" },
+                    { icon: "→", text: "Tracked links & performance analytics" },
+                    { icon: "→", text: "Secure payment processing" },
+                    { icon: "→", text: "Priority support" },
+                    { icon: "→", text: "Lifetime access — pay once, never again" },
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <span className="text-xl">{item.emoji}</span>
-                      <span className="text-sm text-black">{item.text}</span>
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="font-bold text-black">{item.icon}</span>
+                      <span className="text-sm font-medium text-black">{item.text}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Pricing */}
-              <div className="rounded-xl border-2 border-black bg-[#28D17C]/10 p-6">
+              {/* Pricing - Green accent */}
+              <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-bold text-black">Host Membership</p>
-                    <p className="text-xs text-black/60">One-time payment</p>
+                    <p className="text-[10px] font-black uppercase tracking-wider text-black">
+                      One-time payment
+                    </p>
+                    <p className="mt-1 font-heading text-lg font-bold text-black">Host Membership</p>
                   </div>
                   <div className="text-right">
                     {promoResult ? (
                       <>
-                        <p className="text-2xl font-bold text-black">
+                        <p className="font-heading text-4xl font-black text-black">
                           {promoResult.isFree ? "FREE" : `$${promoResult.finalPrice}`}
                         </p>
-                        <p className="text-xs text-black/60 line-through">$199</p>
-                        <p className="text-xs font-bold text-[#28D17C]">{promoResult.description}</p>
+                        <p className="text-sm text-black/60 line-through">$199</p>
+                        <p className="mt-1 text-xs font-bold text-black">{promoResult.description}</p>
                       </>
                     ) : (
-                      <p className="text-2xl font-bold text-black">$199</p>
+                      <p className="font-heading text-4xl font-black text-black">$199</p>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Promo Code */}
-              <div className="rounded-xl border-2 border-black bg-white p-4">
-                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">
+              {/* Promo Code - White card */}
+              <div className="rounded-2xl border-[3px] border-black bg-white p-5">
+                <label className="block text-[10px] font-black uppercase tracking-wider text-black">
                   Have a promo code?
                 </label>
-                <div className="flex gap-2">
+                <div className="mt-3 flex gap-2">
                   <input
                     type="text"
                     value={promoCode}
@@ -1200,27 +1211,36 @@ export default function HostOnboardingPage() {
                       setPromoCode(e.target.value.toUpperCase())
                       setPromoResult(null)
                     }}
-                    placeholder="Enter code"
-                    className={`${inputClass} flex-1 uppercase`}
+                    placeholder="ENTER CODE"
+                    className="flex-1 rounded-lg border-[3px] border-black px-4 py-3 text-sm font-bold uppercase tracking-wider text-black placeholder:text-black/30 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                   <button
                     onClick={validatePromoCode}
                     disabled={promoValidating || !promoCode.trim()}
-                    className="rounded-lg border-2 border-black bg-black px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                    className="rounded-lg border-[3px] border-black bg-black px-6 py-3 text-[10px] font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
                   >
                     {promoValidating ? "..." : "Apply"}
                   </button>
                 </div>
                 {promoResult && promoResult.valid && (
-                  <p className="mt-2 text-sm font-bold text-[#28D17C]">
-                    ✓ {promoResult.description} applied!
-                  </p>
+                  <div className="mt-3 flex items-center gap-2">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C]">
+                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-bold text-black">{promoResult.description} applied</p>
+                  </div>
                 )}
               </div>
 
               {/* Security Note */}
-              <div className="flex items-start gap-3 rounded-xl border-2 border-black/20 bg-black/5 p-4">
-                <span className="text-xl">🔒</span>
+              <div className="flex items-center gap-4 rounded-2xl border-[3px] border-black/20 bg-black/5 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-white">
+                  <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                </div>
                 <div>
                   <p className="text-sm font-bold text-black">Secure checkout</p>
                   <p className="text-xs text-black/60">
@@ -1244,9 +1264,9 @@ export default function HostOnboardingPage() {
           {step > 1 ? (
             <button
               onClick={prevStep}
-              className="rounded-full border-2 border-black bg-white px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+              className="rounded-full border-[3px] border-black bg-white px-6 py-3 text-[11px] font-black uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5"
             >
-              ← Back
+              Back
             </button>
           ) : (
             <div />
@@ -1255,17 +1275,17 @@ export default function HostOnboardingPage() {
           {step < totalSteps ? (
             <button
               onClick={nextStep}
-              className="rounded-full border-2 border-black bg-black px-8 py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+              className="rounded-full border-[3px] border-black bg-black px-8 py-3 text-[11px] font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5"
             >
-              Continue →
+              Continue
             </button>
           ) : (
             <button
               onClick={handleCheckout}
               disabled={checkingOut}
-              className="rounded-full border-2 border-black bg-[#28D17C] px-8 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+              className="rounded-full border-[3px] border-black bg-[#28D17C] px-8 py-3 text-[11px] font-black uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
             >
-              {checkingOut ? "Processing..." : promoResult?.isFree ? "Activate Free Access 🎉" : "Pay $199 & Launch 🚀"}
+              {checkingOut ? "Processing..." : promoResult?.isFree ? "Activate Free Access" : "Pay $199 & Launch"}
             </button>
           )}
         </div>
