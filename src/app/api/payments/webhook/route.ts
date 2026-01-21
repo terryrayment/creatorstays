@@ -73,6 +73,19 @@ export async function POST(request: NextRequest) {
         break
       }
 
+      // Handle subscription events for Boost and Agency
+      case 'invoice.paid': {
+        const invoice = event.data.object as Stripe.Invoice
+        await handleInvoicePaid(invoice)
+        break
+      }
+
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription
+        await handleSubscriptionDeleted(subscription)
+        break
+      }
+
       default:
         console.log(`[Webhook] Unhandled event type: ${event.type}`)
     }
@@ -85,6 +98,74 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
+  const type = session.metadata?.type
+  
+  // Handle Property Boost subscription
+  if (type === 'property_boost') {
+    const propertyId = session.metadata?.propertyId
+    if (!propertyId) {
+      console.error('[Webhook] No propertyId for property_boost')
+      return
+    }
+    
+    console.log(`[Webhook] Activating property boost: ${propertyId}`)
+    
+    try {
+      // Get subscription ID from the session
+      const subscriptionId = session.subscription as string
+      
+      await prisma.property.update({
+        where: { id: propertyId },
+        data: {
+          isBoosted: true,
+          boostStripeSubId: subscriptionId,
+          boostExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        },
+      })
+      
+      console.log(`[Webhook] Property boost activated: ${propertyId}`)
+      return
+    } catch (error) {
+      console.error('[Webhook] Error activating property boost:', error)
+      return
+    }
+  }
+  
+  // Handle Agency Pro subscription
+  if (type === 'agency_subscription') {
+    const hostProfileId = session.metadata?.hostProfileId
+    const agencyName = session.metadata?.agencyName
+    
+    if (!hostProfileId) {
+      console.error('[Webhook] No hostProfileId for agency_subscription')
+      return
+    }
+    
+    console.log(`[Webhook] Activating agency subscription: ${hostProfileId}`)
+    
+    try {
+      const subscriptionId = session.subscription as string
+      
+      await prisma.hostProfile.update({
+        where: { id: hostProfileId },
+        data: {
+          isAgency: true,
+          agencyName: agencyName || 'My Agency',
+          agencySubscriptionId: subscriptionId,
+          agencySubscribedAt: new Date(),
+          agencyExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+          teamSeats: 5, // Default 5 team seats
+        },
+      })
+      
+      console.log(`[Webhook] Agency subscription activated: ${hostProfileId}`)
+      return
+    } catch (error) {
+      console.error('[Webhook] Error activating agency subscription:', error)
+      return
+    }
+  }
+
   // Check if this is a host membership payment
   const userId = session.metadata?.userId
   if (userId && !session.metadata?.collaborationId) {
@@ -295,5 +376,97 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
     })
   } catch (error) {
     console.error('[Webhook] Failed to update collaboration:', error)
+  }
+}
+
+// Handle subscription renewal (invoice.paid)
+async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  const subscriptionId = invoice.subscription as string
+  if (!subscriptionId) return
+  
+  console.log(`[Webhook] Invoice paid for subscription: ${subscriptionId}`)
+  
+  try {
+    // Check if this is a property boost renewal
+    const boostedProperty = await prisma.property.findFirst({
+      where: { boostStripeSubId: subscriptionId },
+    })
+    
+    if (boostedProperty) {
+      await prisma.property.update({
+        where: { id: boostedProperty.id },
+        data: {
+          boostExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Extend 30 days
+        },
+      })
+      console.log(`[Webhook] Property boost renewed: ${boostedProperty.id}`)
+      return
+    }
+    
+    // Check if this is an agency subscription renewal
+    const agencyHost = await prisma.hostProfile.findFirst({
+      where: { agencySubscriptionId: subscriptionId },
+    })
+    
+    if (agencyHost) {
+      await prisma.hostProfile.update({
+        where: { id: agencyHost.id },
+        data: {
+          agencyExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Extend 30 days
+        },
+      })
+      console.log(`[Webhook] Agency subscription renewed: ${agencyHost.id}`)
+      return
+    }
+  } catch (error) {
+    console.error('[Webhook] Error handling invoice.paid:', error)
+  }
+}
+
+// Handle subscription cancellation
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+  const subscriptionId = subscription.id
+  
+  console.log(`[Webhook] Subscription cancelled: ${subscriptionId}`)
+  
+  try {
+    // Check if this is a property boost
+    const boostedProperty = await prisma.property.findFirst({
+      where: { boostStripeSubId: subscriptionId },
+    })
+    
+    if (boostedProperty) {
+      await prisma.property.update({
+        where: { id: boostedProperty.id },
+        data: {
+          isBoosted: false,
+          boostStripeSubId: null,
+          boostExpiresAt: null,
+        },
+      })
+      console.log(`[Webhook] Property boost cancelled: ${boostedProperty.id}`)
+      return
+    }
+    
+    // Check if this is an agency subscription
+    const agencyHost = await prisma.hostProfile.findFirst({
+      where: { agencySubscriptionId: subscriptionId },
+    })
+    
+    if (agencyHost) {
+      await prisma.hostProfile.update({
+        where: { id: agencyHost.id },
+        data: {
+          isAgency: false,
+          agencySubscriptionId: null,
+          agencyExpiresAt: null,
+          teamSeats: 0,
+        },
+      })
+      console.log(`[Webhook] Agency subscription cancelled: ${agencyHost.id}`)
+      return
+    }
+  } catch (error) {
+    console.error('[Webhook] Error handling subscription.deleted:', error)
   }
 }
