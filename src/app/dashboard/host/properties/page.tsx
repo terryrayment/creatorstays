@@ -368,6 +368,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
 
       {step === 2 && (
         <div className="space-y-4">
+          <p className="text-[11px] text-black/50">Verify details match your Airbnb listing.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div><label className="mb-1.5 block text-[11px] font-bold text-black">Title *</label><Input value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Cozy Mountain Cabin" /></div>
             <div>
@@ -381,7 +382,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-4">
-            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Price/night <span className="font-normal text-black/50">(from Airbnb)</span></label><Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="e.g. $150-$250" /></div>
+            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Price/night</label><Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="e.g. $150-$250" /></div>
             <div><label className="mb-1.5 block text-[11px] font-bold text-black">Guests</label><Input type="number" value={form.guests || ''} onChange={e => setForm({ ...form, guests: parseInt(e.target.value) || undefined })} placeholder="4" /></div>
             <div><label className="mb-1.5 block text-[11px] font-bold text-black">Beds</label><Input type="number" value={form.beds || ''} onChange={e => setForm({ ...form, beds: parseInt(e.target.value) || undefined })} placeholder="2" /></div>
             <div><label className="mb-1.5 block text-[11px] font-bold text-black">Baths</label><Input type="number" value={form.baths || ''} onChange={e => setForm({ ...form, baths: parseInt(e.target.value) || undefined })} placeholder="1" /></div>
