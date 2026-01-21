@@ -424,6 +424,19 @@ function isAirbnbLogo(url: string): boolean {
     '/im/pictures/e2', // Experience/marketing images
     '/im/pictures/c8', // Category images
     'mediacdn',       // Media CDN (often profile pics)
+    'guest-favorite', // Guest favorite badge
+    'guest_favorite', // Guest favorite badge alt
+    'airbnb-edu',     // Airbnb education
+    '/pictures/6f7',   // Known illustration folder
+    '/pictures/f0a',   // Known illustration folder
+    '/pictures/d7e',   // Known illustration folder  
+    '/pictures/76f',   // Known illustration folder
+    'getaway',        // Marketing images
+    'travel-insurance', // Insurance graphics
+    'hosting-',       // Hosting marketing
+    '-hosting',       // Hosting marketing
+    'hero-image',     // Marketing hero images
+    'cover-photo',    // Cover photos (marketing)
   ]
   
   for (const pattern of excludePatterns) {
@@ -443,6 +456,17 @@ function isAirbnbLogo(url: string): boolean {
     }
     // Also skip very square small images (likely profile photos)
     if (width === height && width < 400) {
+      return true
+    }
+  }
+  
+  // Check if the image looks like an illustration by examining the URL structure
+  // Airbnb property photos typically have UUIDs or numeric IDs
+  // Illustrations often have descriptive names
+  const filename = url.split('/').pop()?.toLowerCase() || ''
+  const illustrationKeywords = ['welcome', 'guest', 'host', 'check', 'arrival', 'key', 'door', 'people', 'person', 'family', 'couple', 'pet', 'dog', 'cat', 'luggage', 'suitcase', 'travel']
+  for (const keyword of illustrationKeywords) {
+    if (filename.includes(keyword)) {
       return true
     }
   }
