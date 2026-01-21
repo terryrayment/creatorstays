@@ -27,7 +27,7 @@ const loadGoogleMapsScript = (): Promise<void> => {
 
     // Create and load script
     const script = document.createElement('script')
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAS1JPH--alnIScrIN3pCZx0B6UVyxaUm8&libraries=places'
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyClauePA6V5yio6N1Ucr9m1ULmzPZ6zcoo&libraries=places'
     script.async = true
     script.defer = true
     script.onload = () => resolve()
