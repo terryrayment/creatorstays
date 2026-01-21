@@ -11,14 +11,12 @@ import LocationAutocomplete from "@/components/ui/location-autocomplete"
 // ============================================================================
 
 interface OnboardingData {
-  // Step 1: Welcome / About You
+  // Profile (auto-filled from Google)
   displayName: string
   contactEmail: string
   phone: string
-  location: string
-  bio: string
   avatarUrl: string
-  // Step 2: Property
+  // Property
   airbnbUrl: string
   propertyTitle: string
   propertyType: string
@@ -28,73 +26,56 @@ interface OnboardingData {
   bathrooms: string
   maxGuests: string
   amenities: string[]
-  vibeTags: string[]
   photos: string[]
   heroImageUrl: string
-  // Step 3: What You're Looking For
+  // Preferences
   idealCreators: string[]
   contentNeeds: string[]
   budgetRange: string
-  timeline: string
-  // Step 4: Review & Launch
 }
 
+// Reduced to top 8 property types
 const PROPERTY_TYPES = [
-  { value: "cabin", label: "🏔️ Cabin", emoji: "🏔️" },
-  { value: "beach-house", label: "🏖️ Beach House", emoji: "🏖️" },
-  { value: "mountain", label: "⛰️ Mountain Retreat", emoji: "⛰️" },
-  { value: "city", label: "🌆 City Apartment", emoji: "🌆" },
-  { value: "farmhouse", label: "🌾 Farmhouse", emoji: "🌾" },
-  { value: "villa", label: "🏛️ Villa", emoji: "🏛️" },
-  { value: "cottage", label: "🏡 Cottage", emoji: "🏡" },
-  { value: "treehouse", label: "🌳 Treehouse", emoji: "🌳" },
-  { value: "tiny-home", label: "🏠 Tiny Home", emoji: "🏠" },
-  { value: "loft", label: "🏢 Loft", emoji: "🏢" },
-  { value: "other", label: "✨ Other", emoji: "✨" },
+  { value: "cabin", label: "Cabin" },
+  { value: "beach-house", label: "Beach House" },
+  { value: "mountain", label: "Mountain Retreat" },
+  { value: "city", label: "City Apartment" },
+  { value: "villa", label: "Villa" },
+  { value: "cottage", label: "Cottage" },
+  { value: "tiny-home", label: "Tiny Home" },
+  { value: "other", label: "Other" },
 ]
 
+// Reduced to top 10 amenities
 const AMENITIES = [
-  "Pool", "Hot Tub", "Ocean View", "Mountain View", "Lake View",
-  "Fireplace", "Chef's Kitchen", "Outdoor Space", "Fire Pit",
-  "Pet Friendly", "EV Charger", "Game Room", "Home Theater",
-  "Gym", "Sauna", "BBQ Grill", "Ski-in/Ski-out", "Beach Access"
+  "Pool", "Hot Tub", "Ocean View", "Mountain View", 
+  "Fireplace", "Chef's Kitchen", "Outdoor Space",
+  "Pet Friendly", "Beach Access", "Lake View"
 ]
 
-const VIBE_TAGS = [
-  "Romantic", "Family-Friendly", "Party-Ready", "Work-Friendly",
-  "Secluded", "Walkable", "Instagrammable", "Cozy", "Modern",
-  "Rustic", "Luxury", "Budget-Friendly", "Pet Paradise", "Eco-Friendly"
-]
-
+// Simplified creator types
 const CREATOR_TYPES = [
-  { value: "travel", label: "✈️ Travel Creators", desc: "Destination-focused content" },
-  { value: "lifestyle", label: "🌟 Lifestyle Influencers", desc: "Broad appeal, daily life" },
-  { value: "photography", label: "📸 Photography Focused", desc: "Stunning visuals" },
-  { value: "video", label: "🎬 Video/Vlog Creators", desc: "YouTube, long-form" },
-  { value: "family", label: "👨‍👩‍👧 Family Content", desc: "Parents & kids" },
-  { value: "luxury", label: "💎 Luxury/High-End", desc: "Premium audiences" },
-  { value: "adventure", label: "🏕️ Adventure/Outdoor", desc: "Active travelers" },
-  { value: "wellness", label: "🧘 Wellness/Retreat", desc: "Health-conscious" },
-  { value: "food", label: "🍳 Food/Culinary", desc: "Foodies & chefs" },
+  { value: "travel", label: "Travel Creators" },
+  { value: "lifestyle", label: "Lifestyle Influencers" },
+  { value: "photography", label: "Photography Focused" },
+  { value: "video", label: "Video/Vlog Creators" },
+  { value: "family", label: "Family Content" },
+  { value: "luxury", label: "Luxury/High-End" },
 ]
 
+// Simplified content needs
 const CONTENT_NEEDS = [
-  { value: "ig-post", label: "Instagram Post", platform: "instagram" },
-  { value: "ig-reel", label: "Instagram Reel", platform: "instagram" },
-  { value: "ig-stories", label: "Instagram Stories", platform: "instagram" },
-  { value: "tiktok", label: "TikTok Video", platform: "tiktok" },
-  { value: "youtube", label: "YouTube Video", platform: "youtube" },
-  { value: "youtube-short", label: "YouTube Short", platform: "youtube" },
-  { value: "blog", label: "Blog Post", platform: "blog" },
-  { value: "photos", label: "Professional Photos", platform: "photos" },
-  { value: "drone", label: "Drone Footage", platform: "video" },
+  { value: "ig-post", label: "Instagram Post" },
+  { value: "ig-reel", label: "Instagram Reel" },
+  { value: "tiktok", label: "TikTok Video" },
+  { value: "youtube", label: "YouTube Video" },
+  { value: "photos", label: "Professional Photos" },
 ]
 
 const BUDGET_RANGES = [
-  { value: "post-for-stay", label: "Post-for-Stay Only", desc: "Free stay in exchange for content" },
+  { value: "post-for-stay", label: "Post-for-Stay Only", desc: "Free stay for content" },
   { value: "under-500", label: "Under $500", desc: "Plus free stay" },
-  { value: "500-1000", label: "$500 - $1,000", desc: "Plus free stay" },
-  { value: "1000-2500", label: "$1,000 - $2,500", desc: "Plus free stay" },
+  { value: "500-2500", label: "$500 - $2,500", desc: "Plus free stay" },
   { value: "2500-plus", label: "$2,500+", desc: "Premium creators" },
 ]
 
@@ -126,14 +107,25 @@ function filterAirbnbBranding(photos: string[]): string[] {
 
 function ProgressBar({ step, totalSteps }: { step: number; totalSteps: number }) {
   const progress = (step / totalSteps) * 100
+  const stepNames = ["Property", "Preferences", "Review & Pay"]
   
   return (
     <div className="mb-8">
-      <div className="mb-2 flex items-center justify-between text-xs font-bold text-black/60">
-        <span>Step {step} of {totalSteps}</span>
-        <span>{Math.round(progress)}% complete</span>
+      <div className="mb-3 flex justify-between">
+        {stepNames.map((name, i) => (
+          <div key={name} className="flex flex-col items-center">
+            <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold ${
+              i + 1 <= step ? 'border-black bg-black text-white' : 'border-black/30 text-black/30'
+            }`}>
+              {i + 1}
+            </div>
+            <span className={`mt-1 text-[10px] font-bold uppercase tracking-wider ${
+              i + 1 <= step ? 'text-black' : 'text-black/30'
+            }`}>{name}</span>
+          </div>
+        ))}
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-black/10">
+      <div className="h-1.5 overflow-hidden rounded-full bg-black/10">
         <div 
           className="h-full rounded-full bg-[#28D17C] transition-all duration-500"
           style={{ width: `${progress}%` }}
@@ -143,106 +135,30 @@ function ProgressBar({ step, totalSteps }: { step: number; totalSteps: number })
   )
 }
 
-function StepHeader({ 
-  title, 
-  subtitle, 
-  emoji 
-}: { 
-  title: string
-  subtitle: string
-  emoji: string 
-}) {
-  return (
-    <div className="mb-8 text-center">
-      <span className="mb-2 inline-block text-5xl">{emoji}</span>
-      <h1 className="font-heading text-3xl tracking-tight text-black sm:text-4xl">
-        {title}
-      </h1>
-      <p className="mt-2 text-sm text-black/60">{subtitle}</p>
-    </div>
-  )
-}
-
-function ChipSelector({ 
-  options, 
-  selected, 
-  onChange,
-  columns = 3,
-}: { 
-  options: string[]
-  selected: string[]
-  onChange: (selected: string[]) => void
-  columns?: number
-}) {
-  const toggle = (option: string) => {
-    if (selected.includes(option)) {
-      onChange(selected.filter(s => s !== option))
-    } else {
-      onChange([...selected, option])
-    }
+function StepIcon({ icon }: { icon: 'home' | 'target' | 'card' }) {
+  const icons = {
+    home: (
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+    ),
+    target: (
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+    ),
+    card: (
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+    ),
   }
-
+  
   return (
-    <div className={`grid gap-2 grid-cols-2 sm:grid-cols-${columns}`}>
-      {options.map(option => (
-        <button
-          key={option}
-          type="button"
-          onClick={() => toggle(option)}
-          className={`rounded-lg border-2 border-black px-3 py-2 text-xs font-bold transition-all hover:-translate-y-0.5 ${
-            selected.includes(option)
-              ? "bg-[#28D17C] text-black"
-              : "bg-white text-black hover:bg-black/5"
-          }`}
-        >
-          {option}
-        </button>
-      ))}
+    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-black bg-[#FFD84A]">
+      <svg className="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        {icons[icon]}
+      </svg>
     </div>
   )
 }
 
-function RadioCards<T extends string>({ 
-  options, 
-  value, 
-  onChange,
-  columns = 2,
-}: { 
-  options: { value: T; label: string; desc?: string; emoji?: string }[]
-  value: T | ""
-  onChange: (value: T) => void
-  columns?: number
-}) {
-  return (
-    <div className={`grid gap-3 sm:grid-cols-${columns}`}>
-      {options.map(option => (
-        <button
-          key={option.value}
-          type="button"
-          onClick={() => onChange(option.value)}
-          className={`rounded-xl border-2 border-black p-4 text-left transition-all hover:-translate-y-0.5 ${
-            value === option.value
-              ? "bg-[#FFD84A] ring-2 ring-black ring-offset-2"
-              : "bg-white hover:bg-black/5"
-          }`}
-        >
-          {option.emoji && <span className="text-2xl">{option.emoji}</span>}
-          <p className="mt-1 text-sm font-bold text-black">{option.label}</p>
-          {option.desc && <p className="mt-0.5 text-xs text-black/60">{option.desc}</p>}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function PhotoGrid({ 
-  photos, 
-  onRemove 
-}: { 
-  photos: string[]
-  onRemove: (index: number) => void 
-}) {
-  if (photos.length === 0) return null
+function PhotoGrid({ photos, onRemove }: { photos: string[]; onRemove: (i: number) => void }) {
+  if (!photos.length) return null
   
   return (
     <div className="grid grid-cols-4 gap-2">
@@ -267,11 +183,6 @@ function PhotoGrid({
           )}
         </div>
       ))}
-      {photos.length > 8 && (
-        <div className="flex aspect-square items-center justify-center rounded-lg border-2 border-dashed border-black/30 bg-black/5">
-          <span className="text-xs font-bold text-black/40">+{photos.length - 8}</span>
-        </div>
-      )}
     </div>
   )
 }
@@ -311,8 +222,6 @@ export default function HostOnboardingPage() {
     displayName: "",
     contactEmail: "",
     phone: "",
-    location: "",
-    bio: "",
     avatarUrl: "",
     airbnbUrl: "",
     propertyTitle: "",
@@ -323,26 +232,21 @@ export default function HostOnboardingPage() {
     bathrooms: "",
     maxGuests: "",
     amenities: [],
-    vibeTags: [],
     photos: [],
     heroImageUrl: "",
     idealCreators: [],
     contentNeeds: [],
     budgetRange: "",
-    timeline: "",
   })
 
-  const totalSteps = 5 // Now includes checkout step
+  const totalSteps = 3
   
-  const updateField = <K extends keyof OnboardingData>(
-    field: K, 
-    value: OnboardingData[K]
-  ) => {
+  const updateField = <K extends keyof OnboardingData>(field: K, value: OnboardingData[K]) => {
     setData(prev => ({ ...prev, [field]: value }))
     setError("")
   }
 
-  // Check auth and existing profile
+  // Check auth and existing profile - auto-fill from session
   useEffect(() => {
     async function init() {
       if (status === "loading") return
@@ -352,7 +256,6 @@ export default function HostOnboardingPage() {
         return
       }
       
-      // Check if already completed onboarding
       try {
         const res = await fetch("/api/host/profile")
         if (res.ok) {
@@ -361,17 +264,14 @@ export default function HostOnboardingPage() {
             router.push("/dashboard/host")
             return
           }
-          // Pre-fill with existing data
           setData(prev => ({
             ...prev,
             displayName: profile.displayName || session?.user?.name || "",
             contactEmail: profile.contactEmail || session?.user?.email || "",
-            location: profile.location || "",
-            bio: profile.bio || "",
             avatarUrl: profile.avatarUrl || session?.user?.image || "",
           }))
         } else {
-          // No profile yet, pre-fill from session
+          // No profile yet - auto-fill from Google session
           setData(prev => ({
             ...prev,
             displayName: session?.user?.name || "",
@@ -381,6 +281,12 @@ export default function HostOnboardingPage() {
         }
       } catch (e) {
         console.error("Failed to check profile:", e)
+        setData(prev => ({
+          ...prev,
+          displayName: session?.user?.name || "",
+          contactEmail: session?.user?.email || "",
+          avatarUrl: session?.user?.image || "",
+        }))
       }
       
       setLoading(false)
@@ -420,525 +326,316 @@ export default function HostOnboardingPage() {
         bedrooms: result.bedrooms?.toString() || prev.bedrooms,
         bathrooms: result.baths?.toString() || prev.bathrooms,
         maxGuests: result.guests?.toString() || prev.maxGuests,
-        priceRange: result.price || prev.priceRange,
+        priceRange: result.priceRange || prev.priceRange,
+        amenities: result.amenities || prev.amenities,
         photos: cleanPhotos,
         heroImageUrl: cleanPhotos[0] || "",
       }))
       
       setImportSuccess(true)
     } catch (e) {
-      setError("Failed to connect. Try entering details manually.")
+      console.error("Airbnb import error:", e)
+      setError("Import failed. Please try again or enter manually.")
       setManualEntry(true)
     }
     
     setImportingAirbnb(false)
   }
 
-  // Remove photo
-  const removePhoto = (index: number) => {
-    setData(prev => {
-      const newPhotos = [...prev.photos]
-      newPhotos.splice(index, 1)
-      return {
-        ...prev,
-        photos: newPhotos,
-        heroImageUrl: index === 0 ? newPhotos[0] || "" : prev.heroImageUrl,
-      }
-    })
-  }
-
   // Validation
-  const validateStep = (stepNum: number): boolean => {
-    setError("")
-    
-    switch (stepNum) {
-      case 1:
-        if (!data.displayName.trim()) {
-          setError("Please enter your name")
-          return false
-        }
-        if (!data.contactEmail.trim()) {
-          setError("Please enter your email")
-          return false
-        }
-        return true
-        
-      case 2:
-        if (!importSuccess && !manualEntry) {
-          setError("Please import your listing or enter details manually")
-          return false
-        }
-        if (!data.propertyTitle.trim()) {
-          setError("Property title is required")
-          return false
-        }
-        if (!data.cityRegion.trim()) {
-          setError("Location is required")
-          return false
-        }
-        return true
-        
-      case 3:
-        if (data.idealCreators.length === 0) {
-          setError("Please select at least one creator type")
-          return false
-        }
-        if (data.contentNeeds.length === 0) {
-          setError("Please select at least one content type")
-          return false
-        }
-        return true
-        
-      default:
-        return true
+  const validateStep = (): boolean => {
+    if (step === 1) {
+      if (!data.propertyTitle.trim()) {
+        setError("Please enter your property title")
+        return false
+      }
+      if (!data.cityRegion.trim()) {
+        setError("Please enter the property location")
+        return false
+      }
     }
+    
+    if (step === 2) {
+      if (!data.idealCreators.length) {
+        setError("Please select at least one creator type")
+        return false
+      }
+      if (!data.contentNeeds.length) {
+        setError("Please select at least one content type")
+        return false
+      }
+    }
+    
+    return true
   }
 
-  // Navigation
   const nextStep = () => {
-    if (validateStep(step)) {
-      setStep(prev => Math.min(prev + 1, totalSteps))
-      window.scrollTo(0, 0)
-    }
+    if (!validateStep()) return
+    setStep(prev => Math.min(prev + 1, totalSteps))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const prevStep = () => {
     setStep(prev => Math.max(prev - 1, 1))
-    window.scrollTo(0, 0)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Validate promo code
-  const validatePromoCode = async () => {
-    if (!promoCode.trim()) {
-      setPromoResult(null)
-      return
+  // Save profile and property
+  const saveData = async () => {
+    try {
+      const profileRes = await fetch("/api/host/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: data.displayName,
+          contactEmail: data.contactEmail,
+          phone: data.phone,
+          avatarUrl: data.avatarUrl,
+          location: data.cityRegion,
+          bio: "",
+          idealCreatorTypes: data.idealCreators,
+          preferredContentTypes: data.contentNeeds,
+          budgetRange: data.budgetRange,
+        }),
+      })
+
+      if (!profileRes.ok) {
+        const err = await profileRes.json()
+        throw new Error(err.error || "Failed to save profile")
+      }
+
+      const propertyRes = await fetch("/api/properties", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: data.propertyTitle,
+          propertyType: data.propertyType,
+          cityRegion: data.cityRegion,
+          priceRange: data.priceRange,
+          beds: parseInt(data.bedrooms) || 1,
+          baths: parseFloat(data.bathrooms) || 1,
+          maxGuests: parseInt(data.maxGuests) || 2,
+          amenities: data.amenities,
+          vibeTags: [],
+          photos: data.photos,
+          heroImageUrl: data.photos[0] || "",
+          airbnbUrl: data.airbnbUrl,
+        }),
+      })
+
+      if (!propertyRes.ok) {
+        const err = await propertyRes.json()
+        throw new Error(err.error || "Failed to save property")
+      }
+
+      return true
+    } catch (e) {
+      console.error("Save error:", e)
+      throw e
     }
+  }
+
+  // Promo code validation
+  const validatePromo = async () => {
+    if (!promoCode.trim()) return
     
     setPromoValidating(true)
-    setError("")
-    
     try {
-      const res = await fetch(`/api/host/membership/validate-promo?code=${encodeURIComponent(promoCode)}`)
+      const res = await fetch(`/api/host/membership/validate-promo?code=${encodeURIComponent(promoCode.trim())}`)
       const result = await res.json()
-      
-      if (result.valid) {
-        setPromoResult(result)
-      } else {
-        setPromoResult(null)
-        setError(result.error || "Invalid promo code")
-      }
-    } catch {
-      setError("Failed to validate promo code")
+      setPromoResult(result)
+    } catch (e) {
+      setPromoResult(null)
     }
-    
     setPromoValidating(false)
-  }
-
-  // Save profile and property (before checkout)
-  const saveProfileAndProperty = async () => {
-    // Create/update host profile (NOT marking onboardingComplete yet)
-    const profileRes = await fetch("/api/host/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        displayName: data.displayName,
-        contactEmail: data.contactEmail,
-        phone: data.phone,
-        location: data.location,
-        bio: data.bio,
-        avatarUrl: data.avatarUrl,
-        idealCreators: data.idealCreators,
-        contentNeeds: data.contentNeeds,
-        budgetRange: data.budgetRange,
-        onboardingComplete: false, // Will be set after payment
-      }),
-    })
-    
-    if (!profileRes.ok) {
-      const errorData = await profileRes.json().catch(() => ({}))
-      console.error("Profile save error:", errorData)
-      throw new Error(errorData.error || "Failed to save profile")
-    }
-    
-    // Create property
-    const propertyRes = await fetch("/api/properties", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        airbnbUrl: data.airbnbUrl,
-        title: data.propertyTitle,
-        cityRegion: data.cityRegion,
-        priceNightlyRange: data.priceRange,
-        beds: data.bedrooms ? parseInt(data.bedrooms) : undefined,
-        baths: data.bathrooms ? parseInt(data.bathrooms) : undefined,
-        guests: data.maxGuests ? parseInt(data.maxGuests) : undefined,
-        amenities: data.amenities,
-        vibeTags: data.vibeTags,
-        photos: data.photos,
-        heroImageUrl: data.heroImageUrl || (data.photos && data.photos[0]) || null,
-        isActive: true,
-        isDraft: false,
-      }),
-    })
-    
-    if (!propertyRes.ok) {
-      const errorData = await propertyRes.json().catch(() => ({}))
-      console.error("Property save error:", errorData)
-      throw new Error(errorData.error || "Failed to save property")
-    }
   }
 
   // Handle checkout
   const handleCheckout = async () => {
     setCheckingOut(true)
     setError("")
-    
+
     try {
-      // First save profile and property
-      await saveProfileAndProperty()
-      
-      // Determine which checkout to use based on selected plan
+      await saveData()
+
       if (selectedPlan === 'agency') {
-        // Agency Pro subscription
         const res = await fetch("/api/host/agency", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            agencyName: data.displayName,
-          }),
+          body: JSON.stringify({}),
         })
-        
         const result = await res.json()
-        
         if (result.checkoutUrl) {
           window.location.href = result.checkoutUrl
         } else {
-          throw new Error(result.error || "Failed to start agency subscription")
+          throw new Error(result.error || "Failed to start checkout")
         }
       } else {
-        // Standard membership (one-time)
         const res = await fetch("/api/host/membership/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            promoCode: promoResult?.isFree ? promoCode : promoCode || undefined,
+            promoCode: promoResult?.valid ? promoCode : undefined,
           }),
         })
-        
         const result = await res.json()
         
-        if (result.freeAccess) {
-          // Promo code gave free access - mark onboarding complete and redirect
-          await fetch("/api/host/profile", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ onboardingComplete: true }),
-          })
+        if (result.free) {
           router.push("/onboarding/host/success")
         } else if (result.checkoutUrl) {
-          // Redirect to Stripe checkout
           window.location.href = result.checkoutUrl
         } else {
           throw new Error(result.error || "Failed to start checkout")
         }
       }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong")
+    } catch (e: any) {
+      setError(e.message || "Something went wrong")
       setCheckingOut(false)
     }
   }
 
-  // Loading state
-  if (loading || status === "loading") {
+  if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA]">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
-          <p className="text-sm font-medium text-black/60">Setting things up...</p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-[#FFFDF7]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-black border-t-transparent" />
       </div>
     )
   }
 
-  const inputClass = "w-full rounded-lg border-2 border-black bg-white px-4 py-3 text-sm font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
+  const inputClass = "w-full rounded-lg border-2 border-black px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black"
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FFFDF7]">
       {/* Header */}
       <header className="border-b-2 border-black bg-white">
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
-          <div className="font-heading text-xl tracking-tight">
-            <span className="text-black">CREATOR</span>
-            <span className="text-black/40">STAYS</span>
+        <div className="mx-auto flex h-16 max-w-2xl items-center justify-between px-4">
+          <span className="font-heading text-xl font-black text-black">CreatorStays</span>
+          <div className="flex items-center gap-3">
+            {data.avatarUrl && (
+              <img src={data.avatarUrl} alt="" className="h-8 w-8 rounded-full border-2 border-black" />
+            )}
+            <span className="text-sm font-medium text-black">{data.displayName || 'Host'}</span>
           </div>
-          <span className="rounded-full bg-[#4AA3FF] px-3 py-1 text-xs font-bold text-black">
-            Host Setup
-          </span>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="mx-auto max-w-2xl px-4 py-8">
         <ProgressBar step={step} totalSteps={totalSteps} />
 
-        {/* STEP 1: About You */}
-        {step === 1 && (
-          <div>
-            <StepHeader
-              emoji="👋"
-              title="Welcome! Let's get started"
-              subtitle="Tell us a bit about yourself so creators know who they'll be working with"
-            />
-
-            <div className="space-y-6">
-              {/* Avatar */}
-              <div className="flex justify-center">
-                <div className="relative">
-                  <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-black bg-black/10">
-                    {data.avatarUrl ? (
-                      <img src={data.avatarUrl} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-3xl">
-                        {data.displayName?.[0]?.toUpperCase() || "?"}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                  Your Name *
-                </label>
-                <input
-                  type="text"
-                  value={data.displayName}
-                  onChange={e => updateField("displayName", e.target.value)}
-                  placeholder="How creators will see you"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    value={data.contactEmail}
-                    onChange={e => updateField("contactEmail", e.target.value)}
-                    placeholder="you@email.com"
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                    Phone (optional)
-                  </label>
-                  <input
-                    type="tel"
-                    value={data.phone}
-                    onChange={e => updateField("phone", e.target.value)}
-                    placeholder="+1 (555) 000-0000"
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                  Your Location
-                </label>
-                <LocationAutocomplete
-                  value={data.location}
-                  onChange={val => updateField("location", val)}
-                  placeholder="Where are you based?"
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                  Short Bio
-                </label>
-                <textarea
-                  value={data.bio}
-                  onChange={e => updateField("bio", e.target.value)}
-                  placeholder="Tell creators about your hosting style, your properties, why you love hosting..."
-                  rows={3}
-                  className={`${inputClass} resize-none`}
-                />
-              </div>
-            </div>
+        {error && (
+          <div className="mb-6 rounded-lg border-2 border-red-500 bg-red-50 p-3 text-sm text-red-700">
+            {error}
           </div>
         )}
 
-        {/* STEP 2: Your Property */}
-        {step === 2 && (
+        {/* STEP 1: Property */}
+        {step === 1 && (
           <div>
-            <StepHeader
-              emoji="🏡"
-              title="Add your first property"
-              subtitle="Import from Airbnb or enter details manually"
-            />
+            <div className="mb-8 text-center">
+              <StepIcon icon="home" />
+              <h1 className="font-heading text-3xl tracking-tight text-black">Add your property</h1>
+              <p className="mt-2 text-sm text-black/60">Import from Airbnb or enter details manually</p>
+            </div>
 
             <div className="space-y-6">
-              {/* Airbnb Import */}
               {!importSuccess && !manualEntry && (
                 <div className="rounded-xl border-2 border-black bg-white p-6">
-                  <h3 className="mb-1 text-sm font-bold text-black">Import from Airbnb</h3>
-                  <p className="mb-4 text-xs text-black/60">
-                    Paste your listing URL and we'll pull in all your photos and details
-                  </p>
-                  
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">
+                    Airbnb Listing URL
+                  </label>
                   <div className="flex gap-2">
                     <input
-                      type="text"
+                      type="url"
                       value={data.airbnbUrl}
                       onChange={e => updateField("airbnbUrl", e.target.value)}
-                      placeholder="airbnb.com/rooms/..."
-                      className={`${inputClass} flex-1`}
+                      placeholder="https://airbnb.com/rooms/..."
+                      className={inputClass}
                     />
                     <button
                       onClick={handleAirbnbImport}
                       disabled={importingAirbnb}
-                      className="rounded-lg border-2 border-black bg-black px-4 py-2 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                      className="whitespace-nowrap rounded-lg border-2 border-black bg-black px-4 py-2 text-sm font-bold text-white hover:bg-black/80 disabled:opacity-50"
                     >
                       {importingAirbnb ? "Importing..." : "Import"}
                     </button>
                   </div>
-                  
                   <button
                     onClick={() => setManualEntry(true)}
-                    className="mt-3 text-xs font-bold text-black/60 hover:text-black"
+                    className="mt-3 text-xs font-medium text-black/50 underline hover:text-black"
                   >
-                    Or enter details manually →
+                    Or enter details manually
                   </button>
                 </div>
               )}
 
-              {/* Import Success */}
-              {importSuccess && (
-                <div className="rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">✅</span>
-                    <div>
-                      <p className="text-sm font-bold text-black">Import successful!</p>
-                      <p className="text-xs text-black/60">
-                        We pulled {data.photos.length} photos and your details. Review below.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Property Form (shown after import or manual entry) */}
               {(importSuccess || manualEntry) && (
                 <>
-                  {/* Photos */}
-                  {data.photos.length > 0 && (
-                    <div>
-                      <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">
-                        Photos ({data.photos.length})
-                      </label>
-                      <PhotoGrid photos={data.photos} onRemove={removePhoto} />
+                  {importSuccess && (
+                    <div className="rounded-lg border-2 border-[#28D17C] bg-[#28D17C]/10 p-3 text-sm font-medium text-black">
+                      Property imported! Review and edit below.
                     </div>
                   )}
 
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="sm:col-span-2">
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                        Property Title *
-                      </label>
-                      <input
-                        type="text"
-                        value={data.propertyTitle}
-                        onChange={e => updateField("propertyTitle", e.target.value)}
-                        placeholder="e.g., A-Frame Cabin in the Pines"
-                        className={inputClass}
-                      />
-                    </div>
-
+                  {data.photos.length > 0 && (
                     <div>
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                        Location *
-                      </label>
-                      <LocationAutocomplete
-                        value={data.cityRegion}
-                        onChange={val => updateField("cityRegion", val)}
-                        placeholder="Lake Arrowhead, CA"
-                        className={inputClass}
+                      <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">Photos</label>
+                      <PhotoGrid 
+                        photos={data.photos} 
+                        onRemove={(i) => {
+                          const newPhotos = [...data.photos]
+                          newPhotos.splice(i, 1)
+                          updateField("photos", newPhotos)
+                        }} 
                       />
                     </div>
+                  )}
 
-                    <div>
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                        Price / Night
-                      </label>
-                      <input
-                        type="text"
-                        value={data.priceRange}
-                        onChange={e => updateField("priceRange", e.target.value)}
-                        placeholder="$200-$350"
-                        className={inputClass}
-                      />
-                    </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Property Title</label>
+                    <input
+                      type="text"
+                      value={data.propertyTitle}
+                      onChange={e => updateField("propertyTitle", e.target.value)}
+                      placeholder="Beautiful Beach House with Ocean Views"
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Location</label>
+                    <LocationAutocomplete
+                      value={data.cityRegion}
+                      onChange={(val) => updateField("cityRegion", val)}
+                      placeholder="City, State or Region"
+                      className={inputClass}
+                    />
                   </div>
 
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                        Bedrooms
-                      </label>
-                      <input
-                        type="number"
-                        value={data.bedrooms}
-                        onChange={e => updateField("bedrooms", e.target.value)}
-                        placeholder="2"
-                        className={inputClass}
-                      />
+                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Beds</label>
+                      <input type="number" value={data.bedrooms} onChange={e => updateField("bedrooms", e.target.value)} placeholder="3" className={inputClass} />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                        Bathrooms
-                      </label>
-                      <input
-                        type="number"
-                        value={data.bathrooms}
-                        onChange={e => updateField("bathrooms", e.target.value)}
-                        placeholder="1"
-                        className={inputClass}
-                      />
+                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Baths</label>
+                      <input type="number" value={data.bathrooms} onChange={e => updateField("bathrooms", e.target.value)} placeholder="2" className={inputClass} />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                        Guests
-                      </label>
-                      <input
-                        type="number"
-                        value={data.maxGuests}
-                        onChange={e => updateField("maxGuests", e.target.value)}
-                        placeholder="6"
-                        className={inputClass}
-                      />
+                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Guests</label>
+                      <input type="number" value={data.maxGuests} onChange={e => updateField("maxGuests", e.target.value)} placeholder="6" className={inputClass} />
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">
-                      Property Type
-                    </label>
-                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">Property Type</label>
+                    <div className="flex flex-wrap gap-2">
                       {PROPERTY_TYPES.map(type => (
                         <button
                           key={type.value}
                           type="button"
                           onClick={() => updateField("propertyType", type.value)}
-                          className={`rounded-lg border-2 border-black px-2 py-2 text-xs font-bold transition-all hover:-translate-y-0.5 ${
-                            data.propertyType === type.value
-                              ? "bg-[#FFD84A]"
-                              : "bg-white hover:bg-black/5"
+                          className={`rounded-full border-2 border-black px-3 py-1.5 text-xs font-bold transition-all ${
+                            data.propertyType === type.value ? "bg-[#FFD84A]" : "bg-white hover:bg-black/5"
                           }`}
                         >
                           {type.label}
@@ -948,27 +645,28 @@ export default function HostOnboardingPage() {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">
-                      Amenities
-                    </label>
-                    <ChipSelector
-                      options={AMENITIES}
-                      selected={data.amenities}
-                      onChange={val => updateField("amenities", val)}
-                      columns={4}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">
-                      Vibe Tags
-                    </label>
-                    <ChipSelector
-                      options={VIBE_TAGS}
-                      selected={data.vibeTags}
-                      onChange={val => updateField("vibeTags", val)}
-                      columns={4}
-                    />
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">Amenities</label>
+                    <div className="flex flex-wrap gap-2">
+                      {AMENITIES.map(amenity => (
+                        <button
+                          key={amenity}
+                          type="button"
+                          onClick={() => {
+                            const current = data.amenities
+                            if (current.includes(amenity)) {
+                              updateField("amenities", current.filter(a => a !== amenity))
+                            } else {
+                              updateField("amenities", [...current, amenity])
+                            }
+                          }}
+                          className={`rounded-full border-2 border-black px-3 py-1.5 text-xs font-bold transition-all ${
+                            data.amenities.includes(amenity) ? "bg-[#4AA3FF]" : "bg-white hover:bg-black/5"
+                          }`}
+                        >
+                          {amenity}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </>
               )}
@@ -976,21 +674,19 @@ export default function HostOnboardingPage() {
           </div>
         )}
 
-        {/* STEP 3: What You're Looking For */}
-        {step === 3 && (
+        {/* STEP 2: Preferences */}
+        {step === 2 && (
           <div>
-            <StepHeader
-              emoji="🎯"
-              title="What are you looking for?"
-              subtitle="Help us match you with the right creators"
-            />
+            <div className="mb-8 text-center">
+              <StepIcon icon="target" />
+              <h1 className="font-heading text-3xl tracking-tight text-black">What are you looking for?</h1>
+              <p className="mt-2 text-sm text-black/60">Help us match you with the right creators</p>
+            </div>
 
             <div className="space-y-8">
               <div>
-                <label className="mb-3 block text-sm font-bold text-black">
-                  What types of creators interest you?
-                </label>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <label className="mb-3 block text-sm font-bold text-black">What types of creators interest you?</label>
+                <div className="grid gap-2 sm:grid-cols-2">
                   {CREATOR_TYPES.map(type => (
                     <button
                       key={type.value}
@@ -1003,24 +699,19 @@ export default function HostOnboardingPage() {
                           updateField("idealCreators", [...current, type.value])
                         }
                       }}
-                      className={`rounded-xl border-2 border-black p-3 text-left transition-all hover:-translate-y-0.5 ${
-                        data.idealCreators.includes(type.value)
-                          ? "bg-[#4AA3FF] ring-2 ring-black ring-offset-2"
-                          : "bg-white hover:bg-black/5"
+                      className={`rounded-xl border-2 border-black p-3 text-left text-sm font-bold transition-all hover:-translate-y-0.5 ${
+                        data.idealCreators.includes(type.value) ? "bg-[#4AA3FF]" : "bg-white hover:bg-black/5"
                       }`}
                     >
-                      <p className="text-sm font-bold text-black">{type.label}</p>
-                      <p className="text-xs text-black/60">{type.desc}</p>
+                      {type.label}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="mb-3 block text-sm font-bold text-black">
-                  What content do you need?
-                </label>
-                <div className="grid grid-cols-3 gap-2">
+                <label className="mb-3 block text-sm font-bold text-black">What content do you need?</label>
+                <div className="flex flex-wrap gap-2">
                   {CONTENT_NEEDS.map(content => (
                     <button
                       key={content.value}
@@ -1033,10 +724,8 @@ export default function HostOnboardingPage() {
                           updateField("contentNeeds", [...current, content.value])
                         }
                       }}
-                      className={`rounded-lg border-2 border-black px-3 py-2 text-xs font-bold transition-all hover:-translate-y-0.5 ${
-                        data.contentNeeds.includes(content.value)
-                          ? "bg-[#28D17C]"
-                          : "bg-white hover:bg-black/5"
+                      className={`rounded-full border-2 border-black px-4 py-2 text-xs font-bold transition-all ${
+                        data.contentNeeds.includes(content.value) ? "bg-[#28D17C]" : "bg-white hover:bg-black/5"
                       }`}
                     >
                       {content.label}
@@ -1046,19 +735,15 @@ export default function HostOnboardingPage() {
               </div>
 
               <div>
-                <label className="mb-3 block text-sm font-bold text-black">
-                  What's your budget per collaboration?
-                </label>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <label className="mb-3 block text-sm font-bold text-black">What's your budget per collaboration?</label>
+                <div className="grid gap-2 sm:grid-cols-2">
                   {BUDGET_RANGES.map(budget => (
                     <button
                       key={budget.value}
                       type="button"
                       onClick={() => updateField("budgetRange", budget.value)}
-                      className={`rounded-xl border-2 border-black p-4 text-left transition-all hover:-translate-y-0.5 ${
-                        data.budgetRange === budget.value
-                          ? "bg-[#FFD84A] ring-2 ring-black ring-offset-2"
-                          : "bg-white hover:bg-black/5"
+                      className={`rounded-xl border-2 border-black p-3 text-left transition-all hover:-translate-y-0.5 ${
+                        data.budgetRange === budget.value ? "bg-[#FFD84A]" : "bg-white hover:bg-black/5"
                       }`}
                     >
                       <p className="text-sm font-bold text-black">{budget.label}</p>
@@ -1071,329 +756,147 @@ export default function HostOnboardingPage() {
           </div>
         )}
 
-        {/* STEP 4: Review */}
-        {step === 4 && (
+        {/* STEP 3: Review & Pay */}
+        {step === 3 && (
           <div>
-            <StepHeader
-              emoji="👀"
-              title="Review your profile"
-              subtitle="Make sure everything looks good before checkout"
-            />
+            <div className="mb-8 text-center">
+              <StepIcon icon="card" />
+              <h1 className="font-heading text-3xl tracking-tight text-black">Review & Launch</h1>
+              <p className="mt-2 text-sm text-black/60">Confirm your details and choose your plan</p>
+            </div>
 
             <div className="space-y-6">
-              {/* Profile Preview */}
-              <div className="rounded-xl border-2 border-black bg-white p-6">
-                <div className="flex items-start gap-4">
-                  <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-black bg-black/10">
-                    {data.avatarUrl ? (
-                      <img src={data.avatarUrl} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-2xl font-bold">
-                        {data.displayName?.[0]?.toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-black">{data.displayName}</h3>
-                    <p className="text-sm text-black/60">{data.location || "No location set"}</p>
-                    {data.bio && <p className="mt-2 text-sm text-black/80">{data.bio}</p>}
-                  </div>
-                </div>
-              </div>
-
               {/* Property Preview */}
-              <div className="rounded-xl border-2 border-black bg-white overflow-hidden">
+              <div className="overflow-hidden rounded-xl border-2 border-black bg-white">
                 {data.photos[0] && (
-                  <div className="aspect-video relative">
-                    <img 
-                      src={`/api/image-proxy?url=${encodeURIComponent(data.photos[0])}`}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
+                  <div className="relative aspect-video">
+                    <img src={`/api/image-proxy?url=${encodeURIComponent(data.photos[0])}`} alt="" className="h-full w-full object-cover" />
                   </div>
                 )}
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-black">{data.propertyTitle}</h3>
                   <p className="text-sm text-black/60">{data.cityRegion}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {data.bedrooms && (
-                      <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs font-medium text-black">
-                        {data.bedrooms} bed
-                      </span>
-                    )}
-                    {data.bathrooms && (
-                      <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs font-medium text-black">
-                        {data.bathrooms} bath
-                      </span>
-                    )}
-                    {data.maxGuests && (
-                      <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs font-medium text-black">
-                        {data.maxGuests} guests
-                      </span>
-                    )}
-                    {data.priceRange && (
-                      <span className="rounded-full bg-[#28D17C]/20 px-2 py-0.5 text-xs font-bold text-black">
-                        {data.priceRange}/night
-                      </span>
-                    )}
+                    {data.bedrooms && <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs font-medium">{data.bedrooms} bed</span>}
+                    {data.bathrooms && <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs font-medium">{data.bathrooms} bath</span>}
+                    {data.maxGuests && <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs font-medium">{data.maxGuests} guests</span>}
                   </div>
                 </div>
               </div>
 
-              {/* Preferences Summary */}
-              <div className="rounded-xl border-2 border-black bg-[#FFD84A]/20 p-4">
-                <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-black">
-                  Your Preferences
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <p><strong>Looking for:</strong> {data.idealCreators.map(c => CREATOR_TYPES.find(t => t.value === c)?.label.split(' ').slice(1).join(' ')).join(', ') || 'Any creators'}</p>
-                  <p><strong>Content needs:</strong> {data.contentNeeds.map(c => CONTENT_NEEDS.find(t => t.value === c)?.label).join(', ') || 'Flexible'}</p>
-                  <p><strong>Budget:</strong> {BUDGET_RANGES.find(b => b.value === data.budgetRange)?.label || 'Flexible'}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 5: Choose Plan & Checkout */}
-        {step === 5 && (
-          <div>
-            {/* Header */}
-            <div className="mb-8">
-              <p className="text-[10px] font-black uppercase tracking-wider text-black">
-                Final Step
-              </p>
-              <h1 className="mt-2 font-heading text-[2.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[3rem]" style={{ fontWeight: 900 }}>
-                <span className="block text-black">CHOOSE YOUR</span>
-                <span className="block text-black" style={{ fontWeight: 400 }}>PLAN</span>
-              </h1>
-              <p className="mt-3 text-sm text-black/60">Select the plan that fits your needs</p>
-            </div>
-
-            <div className="space-y-4">
               {/* Plan Selection */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                {/* Standard Plan */}
-                <button
-                  onClick={() => setSelectedPlan('standard')}
-                  className={`rounded-2xl border-[3px] p-6 text-left transition-all ${
-                    selectedPlan === 'standard' 
-                      ? 'border-black bg-[#FFD84A]' 
-                      : 'border-black/30 bg-white hover:border-black/60'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-wider text-black/60">
-                        Most Popular
-                      </p>
-                      <p className="mt-1 font-heading text-xl font-bold text-black">Standard Host</p>
+              <div>
+                <label className="mb-3 block text-sm font-bold text-black">Choose your plan</label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                    onClick={() => setSelectedPlan('standard')}
+                    className={`rounded-xl border-[3px] p-4 text-left transition-all ${
+                      selectedPlan === 'standard' ? 'border-black bg-[#FFD84A]' : 'border-black/30 bg-white hover:border-black/60'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-wider text-black/60">Most Popular</p>
+                        <p className="font-heading text-lg font-bold text-black">Standard Host</p>
+                      </div>
+                      <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                        selectedPlan === 'standard' ? 'border-black bg-black' : 'border-black/30'
+                      }`}>
+                        {selectedPlan === 'standard' && (
+                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                        )}
+                      </div>
                     </div>
-                    <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${
-                      selectedPlan === 'standard' ? 'border-black bg-black' : 'border-black/30'
-                    }`}>
-                      {selectedPlan === 'standard' && (
-                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-                  <p className="mt-4 font-heading text-3xl font-black text-black">$199</p>
-                  <p className="text-sm text-black/60">One-time payment</p>
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <span className="font-bold">→</span> 1 property listing
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <span className="font-bold">→</span> Unlimited creator access
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <span className="font-bold">→</span> Unlimited offers
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <span className="font-bold">→</span> Tracked links & analytics
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <span className="font-bold">→</span> Lifetime access
-                    </div>
-                  </div>
-                </button>
+                    <p className="mt-2 font-heading text-2xl font-black text-black">$199</p>
+                    <p className="text-xs text-black/60">One-time • 1 property • Lifetime access</p>
+                  </button>
 
-                {/* Agency Plan */}
-                <button
-                  onClick={() => setSelectedPlan('agency')}
-                  className={`rounded-2xl border-[3px] p-6 text-left transition-all ${
-                    selectedPlan === 'agency' 
-                      ? 'border-black bg-[#4AA3FF]' 
-                      : 'border-black/30 bg-white hover:border-black/60'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-wider text-black/60">
-                        Property Managers
-                      </p>
-                      <p className="mt-1 font-heading text-xl font-bold text-black">Agency Pro</p>
+                  <button
+                    onClick={() => setSelectedPlan('agency')}
+                    className={`rounded-xl border-[3px] p-4 text-left transition-all ${
+                      selectedPlan === 'agency' ? 'border-black bg-[#4AA3FF]' : 'border-black/30 bg-white hover:border-black/60'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-wider text-black/60">Property Managers</p>
+                        <p className="font-heading text-lg font-bold text-black">Agency Pro</p>
+                      </div>
+                      <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                        selectedPlan === 'agency' ? 'border-black bg-black' : 'border-black/30'
+                      }`}>
+                        {selectedPlan === 'agency' && (
+                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                        )}
+                      </div>
                     </div>
-                    <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${
-                      selectedPlan === 'agency' ? 'border-black bg-black' : 'border-black/30'
-                    }`}>
-                      {selectedPlan === 'agency' && (
-                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-                  <p className="mt-4 font-heading text-3xl font-black text-black">$199<span className="text-lg font-medium">/mo</span></p>
-                  <p className="text-sm text-black/60">Cancel anytime</p>
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <span className="font-bold">→</span> Unlimited properties
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <span className="font-bold">→</span> 5 team logins included
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <span className="font-bold">→</span> Organize by owner/portfolio
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <span className="font-bold">→</span> Owner access portals
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-black">
-                      <span className="font-bold">→</span> Multi-property dashboard
-                    </div>
-                  </div>
-                </button>
-              </div>
-
-              {/* Selected Plan Summary */}
-              <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-wider text-black">
-                      {selectedPlan === 'standard' ? 'One-time payment' : 'Monthly subscription'}
-                    </p>
-                    <p className="mt-1 font-heading text-lg font-bold text-black">
-                      {selectedPlan === 'standard' ? 'Standard Host' : 'Agency Pro'}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    {selectedPlan === 'standard' && promoResult ? (
-                      <>
-                        <p className="font-heading text-4xl font-black text-black">
-                          {promoResult.isFree ? "FREE" : `$${promoResult.finalPrice}`}
-                        </p>
-                        <p className="text-sm text-black/60 line-through">$199</p>
-                        <p className="mt-1 text-xs font-bold text-black">{promoResult.description}</p>
-                      </>
-                    ) : (
-                      <p className="font-heading text-4xl font-black text-black">
-                        $199{selectedPlan === 'agency' && <span className="text-lg">/mo</span>}
-                      </p>
-                    )}
-                  </div>
+                    <p className="mt-2 font-heading text-2xl font-black text-black">$199<span className="text-sm font-medium">/mo</span></p>
+                    <p className="text-xs text-black/60">Unlimited properties • 5 team logins</p>
+                  </button>
                 </div>
               </div>
 
-              {/* Promo Code - Only for Standard plan */}
+              {/* Promo Code */}
               {selectedPlan === 'standard' && (
-                <div className="rounded-2xl border-[3px] border-black bg-white p-5">
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-black">
-                    Have a promo code?
-                  </label>
-                  <div className="mt-3 flex gap-2">
+                <div className="rounded-xl border-2 border-black bg-white p-4">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">Promo Code</label>
+                  <div className="flex gap-2">
                     <input
                       type="text"
                       value={promoCode}
-                      onChange={e => {
-                        setPromoCode(e.target.value.toUpperCase())
-                        setPromoResult(null)
-                      }}
-                      placeholder="ENTER CODE"
-                      className="flex-1 rounded-lg border-[3px] border-black px-4 py-3 text-sm font-bold uppercase tracking-wider text-black placeholder:text-black/30 focus:outline-none focus:ring-2 focus:ring-black"
+                      onChange={e => { setPromoCode(e.target.value.toUpperCase()); setPromoResult(null) }}
+                      placeholder="LAUNCH2025"
+                      className="flex-1 rounded-lg border-2 border-black px-3 py-2 text-sm uppercase"
                     />
                     <button
-                      onClick={validatePromoCode}
+                      onClick={validatePromo}
                       disabled={promoValidating || !promoCode.trim()}
-                      className="rounded-lg border-[3px] border-black bg-black px-6 py-3 text-[10px] font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                      className="rounded-lg border-2 border-black bg-black px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
                     >
                       {promoValidating ? "..." : "Apply"}
                     </button>
                   </div>
-                  {promoResult && promoResult.valid && (
-                    <div className="mt-3 flex items-center gap-2">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C]">
-                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                        </svg>
-                      </div>
-                      <p className="text-sm font-bold text-black">{promoResult.description} applied</p>
-                    </div>
+                  {promoResult && (
+                    <p className={`mt-2 text-xs font-medium ${promoResult.valid ? 'text-green-600' : 'text-red-500'}`}>
+                      {promoResult.valid ? (promoResult.isFree ? "Free access activated!" : `$${promoResult.discountAmount} off applied!`) : "Invalid promo code"}
+                    </p>
                   )}
                 </div>
               )}
 
-              {/* Security Note */}
-              <div className="flex items-center gap-4 rounded-2xl border-[3px] border-black/20 bg-black/5 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-white">
-                  <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-black">Secure checkout</p>
-                  <p className="text-xs text-black/60">
-                    Payments processed securely by Stripe. We never store your card details.
-                  </p>
-                </div>
+              <div className="flex items-center justify-center gap-2 text-xs text-black/50">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <span>Secure checkout powered by Stripe</span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Error Message */}
-        {error && (
-          <div className="mt-6 rounded-lg border-2 border-red-500 bg-red-50 p-3">
-            <p className="text-sm font-medium text-red-600">{error}</p>
-          </div>
-        )}
-
-        {/* Navigation Buttons */}
+        {/* Navigation */}
         <div className="mt-8 flex items-center justify-between">
           {step > 1 ? (
-            <button
-              onClick={prevStep}
-              className="rounded-full border-[3px] border-black bg-white px-6 py-3 text-[11px] font-black uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5"
-            >
+            <button onClick={prevStep} className="rounded-full border-2 border-black bg-white px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5">
               Back
             </button>
-          ) : (
-            <div />
-          )}
+          ) : <div />}
           
           {step < totalSteps ? (
-            <button
-              onClick={nextStep}
-              className="rounded-full border-[3px] border-black bg-black px-8 py-3 text-[11px] font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5"
-            >
+            <button onClick={nextStep} className="rounded-full border-2 border-black bg-black px-8 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5">
               Continue
             </button>
           ) : (
             <button
               onClick={handleCheckout}
               disabled={checkingOut}
-              className="rounded-full border-[3px] border-black bg-[#28D17C] px-8 py-3 text-[11px] font-black uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+              className="rounded-full border-2 border-black bg-[#28D17C] px-8 py-2.5 text-xs font-bold uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
             >
-              {checkingOut 
-                ? "Processing..." 
-                : selectedPlan === 'agency'
-                  ? "Subscribe $199/mo"
-                  : promoResult?.isFree 
-                    ? "Activate Free Access" 
-                    : `Pay $${promoResult?.finalPrice || 199} & Launch`
-              }
+              {checkingOut ? "Processing..." : selectedPlan === 'agency' ? "Subscribe $199/mo" : promoResult?.isFree ? "Activate Free" : `Pay $${promoResult?.finalPrice || 199}`}
             </button>
           )}
         </div>
