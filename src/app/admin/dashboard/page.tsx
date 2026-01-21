@@ -188,6 +188,12 @@ export default function AdminDashboardPage() {
               {tab.label}
             </button>
           ))}
+          <Link
+            href="/admin/promo-codes"
+            className="border-b-2 border-transparent px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#FFD84A] hover:text-white transition-colors"
+          >
+            🎟️ Promo Codes
+          </Link>
         </div>
       </div>
 
