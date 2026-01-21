@@ -303,11 +303,19 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       {toast && <div className="mb-4 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">{toast}</div>}
 
       <div className="mb-5 flex gap-1 rounded-lg bg-black/[0.03] p-1">
-        {[1, 2, 3].map(s => (
-          <button key={s} onClick={() => setStep(s as 1 | 2 | 3)} className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${step === s ? 'bg-white text-black shadow-sm' : 'text-black/60 hover:text-black'}`}>
-            {s === 1 ? '1. Import' : s === 2 ? '2. Confirm' : '3. Brief'}
-          </button>
-        ))}
+        {[1, 2, 3].map(s => {
+          const isDisabled = s > 1 && !form.heroImageUrl && !form.title
+          return (
+            <button 
+              key={s} 
+              onClick={() => !isDisabled && setStep(s as 1 | 2 | 3)} 
+              disabled={isDisabled}
+              className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${step === s ? 'bg-white text-black shadow-sm' : isDisabled ? 'text-black/30 cursor-not-allowed' : 'text-black/60 hover:text-black'}`}
+            >
+              {s === 1 ? '1. Import' : s === 2 ? '2. Confirm' : '3. Brief'}
+            </button>
+          )
+        })}
       </div>
 
       {step === 1 && (
@@ -333,7 +341,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               </div>
             </div>
           )}
-          <div className="flex justify-end gap-2 pt-2"><Button variant="outline" onClick={() => setStep(2)}>Continue →</Button></div>
+          <div className="flex justify-end gap-2 pt-2"><Button variant="outline" onClick={() => setStep(2)} disabled={!form.heroImageUrl && !form.title}>Continue →</Button></div>
         </div>
       )}
 
