@@ -488,10 +488,26 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
 
       {/* Upgrade to Agency Modal */}
       {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" style={{ position: 'fixed' }}>
-          <div className="w-full max-w-lg rounded-2xl border-[3px] border-black bg-white p-6" style={{ transform: 'none' }}>
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-[9998] bg-black/50"
+            onClick={() => setShowUpgradeModal(false)}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+          />
+          {/* Modal */}
+          <div 
+            className="fixed z-[9999] w-full max-w-lg rounded-2xl border-[3px] border-black bg-white p-6"
+            style={{ 
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              margin: 0
+            }}
+          >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-black text-black">Upgrade to Agency Plan</h3>
+              <h3 className="text-xl font-black" style={{ color: '#000' }}>Upgrade to Agency Plan</h3>
               <button onClick={() => setShowUpgradeModal(false)} className="text-gray-400 hover:text-black">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -499,13 +515,13 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               </button>
             </div>
             
-            <p className="text-sm text-black mb-6">
+            <p className="text-sm mb-6" style={{ color: '#000' }}>
               Your current plan allows 1 published property. Upgrade to Agency to manage multiple properties and unlock team features.
             </p>
 
             <div className="rounded-xl border-2 border-black bg-white p-4 mb-6">
-              <p className="font-bold text-black mb-3">Agency Plan includes:</p>
-              <ul className="space-y-2 text-sm text-black">
+              <p className="font-bold mb-3" style={{ color: '#000' }}>Agency Plan includes:</p>
+              <ul className="space-y-2 text-sm" style={{ color: '#000' }}>
                 <li className="flex items-center gap-2">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
                   Unlimited published properties
@@ -528,7 +544,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 </li>
               </ul>
               <div className="mt-4 pt-4 border-t border-black/20">
-                <p className="text-2xl font-black" style={{ color: '#000000' }}>$149<span className="text-sm font-bold" style={{ color: '#000000' }}>/month</span></p>
+                <p className="text-3xl font-black" style={{ color: '#000000' }}>$149<span className="text-base font-bold" style={{ color: '#000000' }}>/month</span></p>
               </div>
             </div>
 
@@ -550,7 +566,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               </button>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )
