@@ -85,6 +85,66 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
+  // Check if this is a host membership payment
+  const userId = session.metadata?.userId
+  if (userId && !session.metadata?.collaborationId) {
+    // This is a host membership payment
+    console.log(`[Webhook] Processing host membership for user: ${userId}`)
+    
+    try {
+      const promoCode = session.metadata?.promoCode || null
+      const originalAmount = parseInt(session.metadata?.originalAmount || '19900')
+      const discountAmount = parseInt(session.metadata?.discountAmount || '0')
+      
+      await prisma.hostProfile.update({
+        where: { userId },
+        data: {
+          membershipPaid: true,
+          membershipPaidAt: new Date(),
+          membershipAmount: originalAmount - discountAmount,
+          stripePaymentId: session.payment_intent as string,
+          promoCodeUsed: promoCode,
+          onboardingComplete: true,
+        },
+      })
+      
+      // If promo code was used, record redemption
+      if (promoCode) {
+        const promoCodeRecord = await prisma.hostPromoCode.findUnique({
+          where: { code: promoCode },
+        })
+        
+        if (promoCodeRecord) {
+          const hostProfile = await prisma.hostProfile.findUnique({
+            where: { userId },
+          })
+          
+          if (hostProfile) {
+            await prisma.hostPromoRedemption.create({
+              data: {
+                promoCodeId: promoCodeRecord.id,
+                hostProfileId: hostProfile.id,
+                amountSaved: discountAmount,
+              },
+            })
+            
+            await prisma.hostPromoCode.update({
+              where: { id: promoCodeRecord.id },
+              data: { uses: { increment: 1 } },
+            })
+          }
+        }
+      }
+      
+      console.log(`[Webhook] Host membership activated for user: ${userId}`)
+      return
+    } catch (error) {
+      console.error('[Webhook] Error activating host membership:', error)
+      return
+    }
+  }
+
+  // Otherwise, this is a collaboration payment
   const collaborationId = session.metadata?.collaborationId
   const cashCents = parseInt(session.metadata?.cashCents || '0')
   const hostFeeCents = parseInt(session.metadata?.hostFeeCents || '0')
