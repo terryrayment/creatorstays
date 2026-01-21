@@ -74,13 +74,16 @@ export async function GET(request: NextRequest) {
     const locationPatterns = [
       // JSON patterns for location data
       /"locationTitle"\s*:\s*"([^"]+)"/i,
-      /"city"\s*:\s*"([^"]+)"[^}]*"state"\s*:\s*"([^"]+)"/i,
-      /"addressLocality"\s*:\s*"([^"]+)"[^}]*"addressRegion"\s*:\s*"([^"]+)"/i,
-      /Where you['']ll be[^<]*<[^>]*>([^<]+,\s*[^<]+)</i,
+      /"smartLocationString"\s*:\s*"([^"]+)"/i,
+      /"city"\s*:\s*"([^"]+)"[^}]{0,100}"state"\s*:\s*"([^"]+)"/i,
+      /"addressLocality"\s*:\s*"([^"]+)"[^}]{0,100}"addressRegion"\s*:\s*"([^"]+)"/i,
       /"location"\s*:\s*\{[^}]*"city"\s*:\s*"([^"]+)"/i,
       /"smartLocation"\s*:\s*"([^"]+)"/i,
       /"publicAddress"\s*:\s*"([^"]+)"/i,
       /"localizedCityName"\s*:\s*"([^"]+)"/i,
+      /"marketLocation"\s*:\s*"([^"]+)"/i,
+      /"cityName"\s*:\s*"([^"]+)"[^}]{0,200}"stateName"\s*:\s*"([^"]+)"/i,
+      /"locationName"\s*:\s*"([^"]+)"/i,
     ]
     
     for (const pattern of locationPatterns) {
@@ -98,10 +101,33 @@ export async function GET(request: NextRequest) {
           .replace(/\\u[\dA-Fa-f]{4}/g, '') // Remove unicode escapes
           .replace(/\s+/g, ' ')
           .trim()
-        if (location && location.length > 3 && location.includes(',')) {
-          result.cityRegion = location
-          break
+        if (location && location.length > 3) {
+          // Prefer locations with comma (city, state format)
+          if (location.includes(',')) {
+            result.cityRegion = location
+            break
+          } else if (!result.cityRegion) {
+            result.cityRegion = location
+          }
         }
+      }
+    }
+
+    // Also search for location in script tags with __RELAY_DATA or similar
+    const relayDataMatch = html.match(/<script[^>]*id="__RELAY_DATA"[^>]*>([\s\S]*?)<\/script>/i)
+    if (relayDataMatch) {
+      try {
+        // Look for location patterns in the relay data
+        const relayText = relayDataMatch[1]
+        const cityStateMatch = relayText.match(/"city"\s*:\s*"([^"]+)"[\s\S]{0,500}"state"\s*:\s*"([^"]+)"/i)
+        if (cityStateMatch) {
+          const fullLocation = `${cityStateMatch[1]}, ${cityStateMatch[2]}`
+          if (fullLocation.length > 5) {
+            result.cityRegion = fullLocation
+          }
+        }
+      } catch {
+        // Ignore relay data parsing errors
       }
     }
 
@@ -202,13 +228,18 @@ export async function GET(request: NextRequest) {
           result.title = data.name
         }
         
-        // Get address
-        if (data.address && !result.cityRegion) {
+        // Get address - prefer this over title-extracted location
+        if (data.address) {
           const addr = data.address
+          let fullLocation = ''
           if (typeof addr === 'string') {
-            result.cityRegion = addr
+            fullLocation = addr
           } else if (addr.addressLocality) {
-            result.cityRegion = `${addr.addressLocality}${addr.addressRegion ? ', ' + addr.addressRegion : ''}`
+            fullLocation = `${addr.addressLocality}${addr.addressRegion ? ', ' + addr.addressRegion : ''}${addr.addressCountry ? ', ' + addr.addressCountry : ''}`
+          }
+          // Use JSON-LD location if it's more complete (has comma = city, state)
+          if (fullLocation && (fullLocation.includes(',') || !result.cityRegion)) {
+            result.cityRegion = fullLocation
           }
         }
         
