@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import Link from "next/link"
 import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
@@ -385,10 +386,26 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-4">
-            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Price/night</label><Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="e.g. $150-$250" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Guests</label><Input type="number" value={form.guests || ''} onChange={e => setForm({ ...form, guests: parseInt(e.target.value) || undefined })} placeholder="4" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Beds</label><Input type="number" value={form.beds || ''} onChange={e => setForm({ ...form, beds: parseInt(e.target.value) || undefined })} placeholder="2" /></div>
-            <div><label className="mb-1.5 block text-[11px] font-bold text-black">Baths</label><Input type="number" value={form.baths || ''} onChange={e => setForm({ ...form, baths: parseInt(e.target.value) || undefined })} placeholder="1" /></div>
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold text-black">Price/night *</label>
+              <Input value={form.priceNightlyRange || ''} onChange={e => setForm({ ...form, priceNightlyRange: e.target.value })} placeholder="e.g. $150-$250" />
+              {!form.priceNightlyRange && <p className="mt-1 text-[10px] text-red-500">Required</p>}
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold text-black">Guests *</label>
+              <Input type="number" value={form.guests || ''} onChange={e => setForm({ ...form, guests: parseInt(e.target.value) || undefined })} placeholder="4" />
+              {!form.guests && <p className="mt-1 text-[10px] text-red-500">Required</p>}
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold text-black">Beds *</label>
+              <Input type="number" value={form.beds || ''} onChange={e => setForm({ ...form, beds: parseInt(e.target.value) || undefined })} placeholder="2" />
+              {!form.beds && <p className="mt-1 text-[10px] text-red-500">Required</p>}
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold text-black">Baths *</label>
+              <Input type="number" value={form.baths || ''} onChange={e => setForm({ ...form, baths: parseInt(e.target.value) || undefined })} placeholder="1" />
+              {!form.baths && <p className="mt-1 text-[10px] text-red-500">Required</p>}
+            </div>
           </div>
           <ChipSelector options={COMMON_AMENITIES} selected={form.amenities || []} onChange={v => setForm({ ...form, amenities: v })} label="Amenities (select 5+)" />
           <ChipSelector options={COMMON_VIBE_TAGS} selected={form.vibeTags || []} onChange={v => setForm({ ...form, vibeTags: v })} label="Vibe Tags" />
@@ -459,7 +476,16 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               {checklist.map(item => (<div key={item.label} className="flex items-center gap-1.5 text-[11px]"><span className={item.done ? 'text-emerald-600 font-bold' : 'text-black'}>{item.done ? '✓' : '○'}</span><span className="text-black">{item.label}</span></div>))}
             </div>
           </div>
-          <div className="flex justify-between pt-2"><Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => setStep(1)}>← Back</Button><Button className="bg-black text-white hover:bg-black/90" onClick={() => setStep(3)}>Next: Creator Brief →</Button></div>
+          <div className="flex justify-between pt-2">
+            <Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => setStep(1)}>← Back</Button>
+            <Button 
+              className="bg-black text-white hover:bg-black/90 disabled:opacity-50 disabled:cursor-not-allowed" 
+              onClick={() => setStep(3)}
+              disabled={!form.priceNightlyRange || !form.guests || !form.beds || !form.baths}
+            >
+              Next: Creator Brief →
+            </Button>
+          </div>
         </div>
       )}
 
@@ -486,72 +512,77 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         </div>
       )}
 
-      {/* Upgrade to Agency Modal */}
-      {showUpgradeModal && (
-        <>
+      {/* Upgrade to Agency Modal - using Portal */}
+      {showUpgradeModal && typeof document !== 'undefined' && createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 z-[9998] bg-black/50"
             onClick={() => setShowUpgradeModal(false)}
-            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+            }}
           />
           {/* Modal */}
-          <div 
-            className="fixed z-[9999] w-full max-w-lg rounded-2xl border-[3px] border-black bg-white p-6"
-            style={{ 
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              margin: 0
-            }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-black" style={{ color: '#000' }}>Upgrade to Agency Plan</h3>
-              <button onClick={() => setShowUpgradeModal(false)} className="text-gray-400 hover:text-black">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '32rem',
+            margin: '1rem',
+            padding: '1.5rem',
+            backgroundColor: '#ffffff',
+            borderRadius: '1rem',
+            border: '3px solid #000000',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#000000' }}>Upgrade to Agency Plan</h3>
+              <button onClick={() => setShowUpgradeModal(false)} style={{ color: '#9ca3af', cursor: 'pointer', background: 'none', border: 'none' }}>
+                <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
             
-            <p className="text-sm mb-6" style={{ color: '#000' }}>
+            <p style={{ fontSize: '0.875rem', color: '#000000', marginBottom: '1.5rem' }}>
               Your current plan allows 1 published property. Upgrade to Agency to manage multiple properties and unlock team features.
             </p>
 
-            <div className="rounded-xl border-2 border-black bg-white p-4 mb-6">
-              <p className="font-bold mb-3" style={{ color: '#000' }}>Agency Plan includes:</p>
-              <ul className="space-y-2 text-sm" style={{ color: '#000' }}>
-                <li className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
-                  Unlimited published properties
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
-                  Team member accounts (up to 5)
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
-                  Property owner read-only access
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
-                  Priority creator matching
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
-                  Advanced analytics dashboard
-                </li>
+            <div style={{ borderRadius: '0.75rem', border: '2px solid #000000', backgroundColor: '#ffffff', padding: '1rem', marginBottom: '1.5rem' }}>
+              <p style={{ fontWeight: 700, color: '#000000', marginBottom: '0.75rem' }}>Agency Plan includes:</p>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem', color: '#000000' }}>
+                {['Unlimited published properties', 'Team member accounts (up to 5)', 'Property owner read-only access', 'Priority creator matching', 'Advanced analytics dashboard'].map((item, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ display: 'flex', width: '1.25rem', height: '1.25rem', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', backgroundColor: '#28D17C', fontSize: '10px', color: '#ffffff' }}>✓</span>
+                    {item}
+                  </li>
+                ))}
               </ul>
-              <div className="mt-4 pt-4 border-t border-black/20">
-                <p className="text-3xl font-black" style={{ color: '#000000' }}>$149<span className="text-base font-bold" style={{ color: '#000000' }}>/month</span></p>
+              <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+                <p style={{ fontSize: '1.875rem', fontWeight: 900, color: '#000000', margin: 0 }}>
+                  $149<span style={{ fontSize: '1rem', fontWeight: 700, color: '#000000' }}>/month</span>
+                </p>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button
                 onClick={() => setShowUpgradeModal(false)}
-                className="flex-1 rounded-full border-2 border-black bg-white py-3 text-sm font-bold text-black hover:bg-gray-50"
+                style={{ flex: 1, borderRadius: '9999px', border: '2px solid #000000', backgroundColor: '#ffffff', padding: '0.75rem', fontSize: '0.875rem', fontWeight: 700, color: '#000000', cursor: 'pointer' }}
               >
                 Maybe Later
               </button>
@@ -560,13 +591,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                   setShowUpgradeModal(false)
                   onUpgrade?.()
                 }}
-                className="flex-1 rounded-full border-2 border-black bg-[#FFD84A] py-3 text-sm font-bold text-black hover:bg-[#f5ce3a]"
+                style={{ flex: 1, borderRadius: '9999px', border: '2px solid #000000', backgroundColor: '#FFD84A', padding: '0.75rem', fontSize: '0.875rem', fontWeight: 700, color: '#000000', cursor: 'pointer' }}
               >
                 Upgrade Now →
               </button>
             </div>
           </div>
-        </>
+        </div>,
+        document.body
       )}
     </div>
   )
