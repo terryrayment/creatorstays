@@ -576,7 +576,10 @@ model Collaboration {
   // Timeline
   contentDeadline DateTime? // When content must be posted
   linkActiveUntil DateTime? // How long the tracking link stays active
-  deadlineWarningAt DateTime? // When we sent the 3-day warning email
+  deadline3DayWarningAt DateTime? // When we sent the 3-day warning email
+  deadline1DayWarningAt DateTime? // When we sent the 1-day warning email
+  deadlineDayOfWarningAt DateTime? // When we sent the day-of warning email
+  deadlineWarningAt DateTime? // Legacy: original warning field
   deadlinePassedAt DateTime? // When we marked the deadline as passed
   
   // Results
