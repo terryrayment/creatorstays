@@ -115,102 +115,138 @@ export async function GET(request: NextRequest) {
     }
 
     // 1. New Hosts
-    const newHosts = await prisma.hostProfile.findMany({
-      where: { createdAt: dateRange },
-      include: { user: true },
-    })
-    stats.newHosts = newHosts.length
-    stats.newHostsList = newHosts.map(h => ({
-      name: h.displayName,
-      email: h.user?.email || h.contactEmail || 'N/A',
-      location: h.location,
-    }))
+    try {
+      const newHosts = await prisma.hostProfile.findMany({
+        where: { createdAt: dateRange },
+        include: { user: true },
+      })
+      stats.newHosts = newHosts.length
+      stats.newHostsList = newHosts.map(h => ({
+        name: h.displayName,
+        email: h.user?.email || h.contactEmail || 'N/A',
+        location: h.location || null,
+      }))
+    } catch (e) {
+      console.error('[Admin Digest] Error fetching hosts:', e)
+    }
 
     // 2. New Creators
-    const newCreators = await prisma.creatorProfile.findMany({
-      where: { createdAt: dateRange },
-    })
-    stats.newCreators = newCreators.length
-    stats.newCreatorsList = newCreators.map(c => ({
-      name: c.displayName,
-      handle: c.handle,
-      followers: c.totalFollowers || 0,
-    }))
+    try {
+      const newCreators = await prisma.creatorProfile.findMany({
+        where: { createdAt: dateRange },
+      })
+      stats.newCreators = newCreators.length
+      stats.newCreatorsList = newCreators.map(c => ({
+        name: c.displayName,
+        handle: c.handle,
+        followers: c.totalFollowers || 0,
+      }))
+    } catch (e) {
+      console.error('[Admin Digest] Error fetching creators:', e)
+    }
 
     // 3. New Waitlist
-    stats.newWaitlist = await prisma.waitlistEntry.count({
-      where: { createdAt: dateRange },
-    })
+    try {
+      stats.newWaitlist = await prisma.waitlistEntry.count({
+        where: { createdAt: dateRange },
+      })
+    } catch (e) {
+      console.error('[Admin Digest] Error fetching waitlist:', e)
+    }
 
     // 4. Offers sent
-    stats.offersSent = await prisma.offer.count({
-      where: { createdAt: dateRange },
-    })
+    try {
+      stats.offersSent = await prisma.offer.count({
+        where: { createdAt: dateRange },
+      })
+    } catch (e) {
+      console.error('[Admin Digest] Error fetching offers sent:', e)
+    }
 
     // 5. Offers responded to
-    const respondedOffers = await prisma.offer.findMany({
-      where: { respondedAt: dateRange },
-      select: { status: true },
-    })
-    
-    for (const offer of respondedOffers) {
-      if (offer.status === 'accepted') stats.offersAccepted++
-      else if (offer.status === 'declined') stats.offersDeclined++
-      else if (offer.status === 'countered') stats.offersCountered++
-      else if (offer.status === 'expired') stats.offersExpired++
+    try {
+      const respondedOffers = await prisma.offer.findMany({
+        where: { respondedAt: dateRange },
+        select: { status: true },
+      })
+      
+      for (const offer of respondedOffers) {
+        if (offer.status === 'accepted') stats.offersAccepted++
+        else if (offer.status === 'declined') stats.offersDeclined++
+        else if (offer.status === 'countered') stats.offersCountered++
+        else if (offer.status === 'expired') stats.offersExpired++
+      }
+    } catch (e) {
+      console.error('[Admin Digest] Error fetching offer responses:', e)
     }
 
     // 6. Collaborations started (created yesterday)
-    stats.collaborationsStarted = await prisma.collaboration.count({
-      where: { createdAt: dateRange },
-    })
+    try {
+      stats.collaborationsStarted = await prisma.collaboration.count({
+        where: { createdAt: dateRange },
+      })
+    } catch (e) {
+      console.error('[Admin Digest] Error fetching new collabs:', e)
+    }
 
     // 7. Collaborations completed
-    const completedCollabs = await prisma.collaboration.findMany({
-      where: { 
-        status: 'completed',
-        updatedAt: dateRange,
-      },
-      include: {
-        host: true,
-        creator: true,
-        offer: true,
-      },
-    })
-    stats.collaborationsCompleted = completedCollabs.length
-    stats.completedCollabs = completedCollabs.map(c => ({
-      host: c.host.displayName,
-      creator: c.creator.displayName,
-      amount: c.offer.cashCents,
-    }))
+    try {
+      const completedCollabs = await prisma.collaboration.findMany({
+        where: { 
+          status: 'completed',
+          updatedAt: dateRange,
+        },
+        include: {
+          host: true,
+          creator: true,
+          offer: true,
+        },
+      })
+      stats.collaborationsCompleted = completedCollabs.length
+      stats.completedCollabs = completedCollabs.map(c => ({
+        host: c.host.displayName,
+        creator: c.creator.displayName,
+        amount: c.offer.cashCents,
+      }))
 
-    // Calculate revenue from completed collabs
-    for (const collab of completedCollabs) {
-      if (collab.paymentStatus === 'completed' && collab.offer.cashCents > 0) {
-        stats.totalRevenueCents += collab.offer.cashCents
-        stats.paymentCount++
+      // Calculate revenue from completed collabs
+      for (const collab of completedCollabs) {
+        if (collab.paymentStatus === 'completed' && collab.offer.cashCents > 0) {
+          stats.totalRevenueCents += collab.offer.cashCents
+          stats.paymentCount++
+        }
       }
+    } catch (e) {
+      console.error('[Admin Digest] Error fetching completed collabs:', e)
     }
 
     // 8. Collaborations cancelled
-    stats.collaborationsCancelled = await prisma.collaboration.count({
-      where: { 
-        status: 'cancelled',
-        updatedAt: dateRange,
-      },
-    })
+    try {
+      stats.collaborationsCancelled = await prisma.collaboration.count({
+        where: { 
+          status: 'cancelled',
+          updatedAt: dateRange,
+        },
+      })
+    } catch (e) {
+      console.error('[Admin Digest] Error fetching cancelled collabs:', e)
+    }
 
     // 9. Disputes filed
-    const disputes = await prisma.dispute.findMany({
-      where: { createdAt: dateRange },
-      select: { id: true, reason: true, status: true },
-    })
-    stats.disputesFiled = disputes.length
-    stats.activeDisputes = disputes.map(d => ({
-      id: d.id,
-      reason: d.reason?.substring(0, 50) + (d.reason && d.reason.length > 50 ? '...' : '') || 'No reason',
-      status: d.status,
-    }))
+    try {
+      const disputes = await prisma.dispute.findMany({
+        where: { createdAt: dateRange },
+        select: { id: true, reason: true, status: true },
+      })
+      stats.disputesFiled = disputes.length
+      stats.activeDisputes = disputes.map(d => ({
+        id: d.id,
+        reason: d.reason?.substring(0, 50) + (d.reason && d.reason.length > 50 ? '...' : '') || 'No reason',
+        status: d.status,
+      }))
+    } catch (e) {
+      console.error('[Admin Digest] Error fetching disputes:', e)
+    }
 
     // Generate email HTML
     const emailHtml = generateDigestEmail(stats, yesterdayStart)
