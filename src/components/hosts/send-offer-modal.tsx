@@ -226,6 +226,7 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
+                        console.log('Clicking deal type:', type.value)
                         setDealType(type.value)
                       }}
                       onKeyDown={(e) => {
@@ -233,14 +234,33 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                           setDealType(type.value)
                         }
                       }}
-                      className={`w-full cursor-pointer rounded-xl border-2 p-4 text-left transition-all ${
-                        isSelected
-                          ? "border-black bg-[#FFD84A]"
-                          : "border-black/20 hover:border-black hover:-translate-y-0.5"
-                      }`}
+                      style={{
+                        backgroundColor: isSelected ? '#FFD84A' : 'white',
+                        borderColor: isSelected ? '#000' : 'rgba(0,0,0,0.2)',
+                        borderWidth: '2px',
+                        borderStyle: 'solid',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        cursor: 'pointer',
+                        textAlign: 'left' as const,
+                        width: '100%',
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.borderColor = '#000'
+                          e.currentTarget.style.transform = 'translateY(-2px)'
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.borderColor = 'rgba(0,0,0,0.2)'
+                          e.currentTarget.style.transform = 'translateY(0)'
+                        }
+                      }}
                     >
-                      <p className="font-bold text-black">{type.label}</p>
-                      <p className="text-xs text-black/70">{type.description}</p>
+                      <p style={{ fontWeight: 'bold', color: '#000', margin: 0 }}>{type.label}</p>
+                      <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.7)', margin: '4px 0 0 0' }}>{type.description}</p>
                     </div>
                   )
                 })}
