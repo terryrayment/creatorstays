@@ -18,7 +18,7 @@ export function Footer() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           email, 
-          type: "newsletter",
+          userType: "newsletter",
           source: "footer" 
         }),
       })

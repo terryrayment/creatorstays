@@ -83,9 +83,16 @@ export async function POST(request: NextRequest) {
 
     // Sync to MailerLite if configured
     const mailerliteApiKey = process.env.MAILERLITE_API_KEY
-    const mailerliteGroupId = userType === 'creator' 
-      ? process.env.MAILERLITE_GROUP_ID_CREATORS 
-      : process.env.MAILERLITE_GROUP_ID_HOSTS
+    
+    // Determine which group to use (no host waitlist - hosts go straight to signup)
+    let mailerliteGroupId: string | undefined
+    if (source === 'footer' || userType === 'newsletter') {
+      // Newsletter signups go to the newsletter group
+      mailerliteGroupId = process.env.MAILERLITE_GROUP_ID_NEWSLETTER
+    } else if (userType === 'creator') {
+      mailerliteGroupId = process.env.MAILERLITE_GROUP_ID_CREATORS
+    }
+    // Note: No host waitlist - hosts sign up directly
 
     if (mailerliteApiKey && mailerliteGroupId) {
       try {
