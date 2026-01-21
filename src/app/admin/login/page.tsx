@@ -15,18 +15,25 @@ export default function AdminLoginPage() {
     setError("")
     setLoading(true)
 
-    // Validate credentials
-    const res = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    })
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          email: email.trim().toLowerCase(), 
+          password: password.trim() 
+        }),
+      })
 
-    if (res.ok) {
-      router.push("/admin/dashboard")
-    } else {
       const data = await res.json()
-      setError(data.error || "Invalid credentials")
+      
+      if (res.ok && data.success) {
+        router.push("/admin/dashboard")
+      } else {
+        setError(data.error || "Invalid credentials")
+      }
+    } catch (err) {
+      setError("Network error. Please try again.")
     }
     setLoading(false)
   }

@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
-// Admin credentials from environment variables
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'terry@creatorpays.com'
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Rapp195312!'
+// Admin credentials - hardcoded for reliability
+const ADMIN_EMAIL = 'terry@creatorpays.com'
+const ADMIN_PASSWORD = 'Rapp195312!'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const body = await request.json()
+    const email = (body.email || '').trim().toLowerCase()
+    const password = (body.password || '').trim()
 
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    // Debug logging (remove in production)
+    console.log('[Admin Login] Attempt:', { 
+      emailProvided: email, 
+      emailExpected: ADMIN_EMAIL.toLowerCase(),
+      passwordMatch: password === ADMIN_PASSWORD 
+    })
+
+    if (email === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD) {
       // Set secure HTTP-only cookie
       const cookieStore = await cookies()
       cookieStore.set('admin_session', 'authenticated', {
