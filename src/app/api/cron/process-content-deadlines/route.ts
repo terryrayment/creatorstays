@@ -191,22 +191,22 @@ export async function GET(request: NextRequest) {
         const creatorEmail = collab.creator.user?.email
         if (creatorEmail && collab.contentDeadline) {
           try {
-            // Special "TODAY" email
-            const emailData = {
-              subject: `🚨 TODAY: Content due for ${collab.property?.title || 'your collaboration'}`,
-              ...contentDeadlineWarningEmail({
-                creatorName: collab.creator.displayName,
-                hostName: collab.host.displayName,
-                propertyTitle: collab.property?.title || 'Property',
-                deadline: collab.contentDeadline,
-                daysLeft: 0,
-                collaborationId: collab.id,
-              }),
-            }
-            // Override subject for urgency
-            emailData.subject = `🚨 TODAY: Content due for ${collab.property?.title || 'your collaboration'}`
+            // Special "TODAY" email with urgent subject
+            const baseEmail = contentDeadlineWarningEmail({
+              creatorName: collab.creator.displayName,
+              hostName: collab.host.displayName,
+              propertyTitle: collab.property?.title || 'Property',
+              deadline: collab.contentDeadline,
+              daysLeft: 0,
+              collaborationId: collab.id,
+            })
 
-            await sendEmail({ to: creatorEmail, ...emailData })
+            await sendEmail({ 
+              to: creatorEmail, 
+              subject: `🚨 TODAY: Content due for ${collab.property?.title || 'your collaboration'}`,
+              html: baseEmail.html,
+              text: baseEmail.text,
+            })
 
             await prisma.collaboration.update({
               where: { id: collab.id },
