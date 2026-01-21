@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 // Admin credentials - hardcoded for reliability
-const ADMIN_EMAIL = 'terry@creatorpays.com'
+const ADMIN_EMAIL = 'terry@creatorstays.com'
 const ADMIN_PASSWORD = 'Rapp195312!'
 
 export async function POST(request: NextRequest) {
