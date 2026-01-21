@@ -400,6 +400,16 @@ function isAirbnbLogo(url: string): boolean {
     '/miso/',         // Airbnb illustration system (MISO)
     '/lottie/',       // Animated graphics
     'mediacdn',       // Media CDN (profile pics)
+    '/icon/',         // Icon folders
+    '/icons/',        // Icon folders
+    '_icon',          // Icon suffix
+    '-icon',          // Icon suffix
+    'amenity',        // Amenity icons
+    'amenities',      // Amenity icons
+    'category',       // Category icons
+    '/pictures/c/',   // Category pictures folder
+    '/im/pictures/5/', // Known illustration/icon folder
+    '/im/pictures/7/', // Known illustration/icon folder
   ]
   
   for (const pattern of definiteExclusions) {
@@ -417,6 +427,14 @@ function isAirbnbLogo(url: string): boolean {
     if (width < 100 || height < 100) {
       return true
     }
+  }
+  
+  // Filter PNG images that are likely icons/illustrations (property photos are usually jpg/webp)
+  // Only filter PNGs from certain paths that are likely to be icons
+  if (lowerUrl.includes('.png') && 
+      (lowerUrl.includes('/pictures/') && !lowerUrl.includes('hosting') && !lowerUrl.includes('prohost'))) {
+    // PNG in a generic pictures folder (not hosting) is likely an icon
+    return true
   }
   
   return false

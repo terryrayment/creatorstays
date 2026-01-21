@@ -224,6 +224,12 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       '/em/',
       '/social/',
       '/category_icon/',
+      '/icon/',
+      '/icons/',
+      '_icon',
+      '-icon',
+      'amenity',
+      'category',
     ]
     
     for (const pattern of definiteExclusions) {
@@ -233,6 +239,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     // Check for very small dimensions (icons)
     const dimMatch = url.match(/\/(\d+)x(\d+)/)
     if (dimMatch && (parseInt(dimMatch[1]) < 100 || parseInt(dimMatch[2]) < 100)) {
+      return true
+    }
+    
+    // Filter PNG images that are likely icons (property photos are usually jpg/webp)
+    if (lowerUrl.includes('.png') && 
+        lowerUrl.includes('/pictures/') && 
+        !lowerUrl.includes('hosting') && 
+        !lowerUrl.includes('prohost')) {
       return true
     }
     
