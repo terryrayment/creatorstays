@@ -172,15 +172,25 @@ export default function LocationAutocomplete({
       if (win.google?.maps?.places?.AutocompleteService) {
         autocompleteRef.current = new win.google.maps.places.AutocompleteService()
         setIsGoogleLoaded(true)
+        return true
       }
+      return false
     }
 
     // Check immediately
-    checkGoogle()
+    if (checkGoogle()) return
 
-    // Also check when the script might load
-    const timer = setTimeout(checkGoogle, 1000)
-    return () => clearTimeout(timer)
+    // Poll for Google Maps to load (check every 500ms for up to 10 seconds)
+    let attempts = 0
+    const maxAttempts = 20
+    const interval = setInterval(() => {
+      attempts++
+      if (checkGoogle() || attempts >= maxAttempts) {
+        clearInterval(interval)
+      }
+    }, 500)
+
+    return () => clearInterval(interval)
   }, [])
 
   // Close suggestions when clicking outside
