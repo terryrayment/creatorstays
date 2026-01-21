@@ -455,21 +455,21 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
 
       {/* Upgrade to Agency Modal */}
       {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl border-[3px] border-black bg-white p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" style={{ position: 'fixed' }}>
+          <div className="w-full max-w-lg rounded-2xl border-[3px] border-black bg-white p-6" style={{ transform: 'none' }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <span className="text-3xl">🏢</span>
                 <h3 className="text-xl font-black text-black">Upgrade to Agency Plan</h3>
               </div>
-              <button onClick={() => setShowUpgradeModal(false)} className="text-black/40 hover:text-black">
+              <button onClick={() => setShowUpgradeModal(false)} className="text-gray-400 hover:text-black">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
             
-            <p className="text-sm text-black/70 mb-6">
+            <p className="text-sm text-black mb-6">
               Your current plan allows 1 published property. Upgrade to Agency to manage multiple properties and unlock team features.
             </p>
 
@@ -498,14 +498,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 </li>
               </ul>
               <div className="mt-4 pt-4 border-t border-black/10">
-                <p className="text-2xl font-black text-black">$149<span className="text-sm font-medium text-black/60">/month</span></p>
+                <p className="text-2xl font-black text-black">$149<span className="text-sm font-medium text-black">/month</span></p>
               </div>
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowUpgradeModal(false)}
-                className="flex-1 rounded-full border-2 border-black bg-white py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+                className="flex-1 rounded-full border-2 border-black bg-white py-3 text-sm font-bold text-black hover:bg-gray-50"
               >
                 Maybe Later
               </button>
@@ -514,7 +514,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                   setShowUpgradeModal(false)
                   onUpgrade?.()
                 }}
-                className="flex-1 rounded-full border-2 border-black bg-[#FFD84A] py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+                className="flex-1 rounded-full border-2 border-black bg-[#FFD84A] py-3 text-sm font-bold text-black hover:bg-[#f5ce3a]"
               >
                 Upgrade Now →
               </button>

@@ -163,7 +163,7 @@ export default function AgencyUpgradePage() {
           <div className="grid grid-cols-3 border-b-2 border-black bg-black/5">
             <div className="p-4 font-bold text-black">Feature</div>
             <div className="p-4 text-center font-bold text-black border-l-2 border-black">Standard ($199 one-time)</div>
-            <div className="p-4 text-center font-bold text-black border-l-2 border-black bg-[#28D17C]/20">Agency Pro ($199/mo)</div>
+            <div className="p-4 text-center font-bold text-black border-l-2 border-black bg-[#28D17C]/20">Agency Pro ($149/mo)</div>
           </div>
           {[
             { feature: "Properties", standard: "1 listing", agency: "Unlimited" },
