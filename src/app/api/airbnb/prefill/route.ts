@@ -182,6 +182,30 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Try to extract price from various HTML patterns
+    if (!result.price) {
+      const pricePatterns = [
+        /\$(\d{2,4})\s*(?:\/\s*night|per night|a night|nightly)/i,
+        /"priceString"\s*:\s*"\$(\d+)"/i,
+        /class="[^"]*price[^"]*"[^>]*>\s*\$(\d+)/i,
+        /data-testid="[^"]*price[^"]*"[^>]*>\s*\$(\d+)/i,
+        />\s*\$(\d{2,4})\s*<\/span>\s*<span[^>]*>\s*night/i,
+        /"price"\s*:\s*(\d+)/i,
+        /"priceForDisplay"\s*:\s*"\$(\d+)"/i,
+      ]
+      for (const pattern of pricePatterns) {
+        const priceMatch = html.match(pattern)
+        if (priceMatch) {
+          const price = parseInt(priceMatch[1])
+          // Create a range (price ± 20%)
+          const low = Math.round(price * 0.8)
+          const high = Math.round(price * 1.2)
+          result.price = `$${low}-$${high}`
+          break
+        }
+      }
+    }
+
     // Check if we got any useful data
     if (!result.title && !result.cityRegion && !result.imageUrl) {
       return NextResponse.json({ 

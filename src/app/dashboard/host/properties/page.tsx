@@ -138,7 +138,7 @@ function ChipSelector({ options, selected, onChange, label }: { options: string[
   )
 }
 
-function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onStepChange, showBoost, onBoost, isBoosted, onCancelBoost }: { property: EditingProperty; onSave: (data: EditingProperty) => void; onDelete?: () => void; isSaving: boolean; saveSuccess: boolean; onStepChange?: (step: number) => void; showBoost?: boolean; onBoost?: () => void; isBoosted?: boolean; onCancelBoost?: () => void }) {
+function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onStepChange, showBoost, onBoost, isBoosted, onCancelBoost, publishedCount, onUpgrade }: { property: EditingProperty; onSave: (data: EditingProperty) => void; onDelete?: () => void; isSaving: boolean; saveSuccess: boolean; onStepChange?: (step: number) => void; showBoost?: boolean; onBoost?: () => void; isBoosted?: boolean; onCancelBoost?: () => void; publishedCount?: number; onUpgrade?: () => void }) {
   const [form, setForm] = useState<EditingProperty>(property)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [isImporting, setIsImporting] = useState(false)
@@ -146,6 +146,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const [toast, setToast] = useState<string | null>(null)
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   useEffect(() => { setForm(property); setStep(1) }, [property])
   useEffect(() => { onStepChange?.(step) }, [step, onStepChange])
@@ -283,6 +284,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   }
 
   const handleSave = (asDraft: boolean) => {
+    // Check if trying to publish when already have a published property (non-agency)
+    if (!asDraft && publishedCount && publishedCount >= 1 && property.isNew) {
+      setShowUpgradeModal(true)
+      return
+    }
     onSave({ ...form, isDraft: asDraft })
     setToast('Property saved!')
     setTimeout(() => setToast(null), 2000)
@@ -446,6 +452,76 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           </div>
         </div>
       )}
+
+      {/* Upgrade to Agency Modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl border-[3px] border-black bg-white p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🏢</span>
+                <h3 className="text-xl font-black text-black">Upgrade to Agency Plan</h3>
+              </div>
+              <button onClick={() => setShowUpgradeModal(false)} className="text-black/40 hover:text-black">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <p className="text-sm text-black/70 mb-6">
+              Your current plan allows 1 published property. Upgrade to Agency to manage multiple properties and unlock team features.
+            </p>
+
+            <div className="rounded-xl border-2 border-black bg-[#FFD84A]/10 p-4 mb-6">
+              <p className="font-bold text-black mb-3">Agency Plan includes:</p>
+              <ul className="space-y-2 text-sm text-black">
+                <li className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
+                  Unlimited published properties
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
+                  Team member accounts (up to 5)
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
+                  Property owner read-only access
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
+                  Priority creator matching
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px] text-white">✓</span>
+                  Advanced analytics dashboard
+                </li>
+              </ul>
+              <div className="mt-4 pt-4 border-t border-black/10">
+                <p className="text-2xl font-black text-black">$149<span className="text-sm font-medium text-black/60">/month</span></p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="flex-1 rounded-full border-2 border-black bg-white py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+              >
+                Maybe Later
+              </button>
+              <button
+                onClick={() => {
+                  setShowUpgradeModal(false)
+                  onUpgrade?.()
+                }}
+                className="flex-1 rounded-full border-2 border-black bg-[#FFD84A] py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+              >
+                Upgrade Now →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -605,6 +681,18 @@ export default function HostPropertiesPage() {
     }
   }
 
+  const handleUpgradeToAgency = async () => {
+    try {
+      const res = await fetch('/api/host/agency/upgrade', { method: 'POST' })
+      const data = await res.json()
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+      }
+    } catch (e) {
+      console.error('Failed to start upgrade:', e)
+    }
+  }
+
   return (
     <div className="dashboard min-h-screen bg-[#FAFAFA]">
       <div className="py-6">
@@ -652,6 +740,8 @@ export default function HostPropertiesPage() {
                 onBoost={() => selectedId && handleBoost(selectedId)}
                 isBoosted={(editing as Property).isBoosted}
                 onCancelBoost={() => selectedId && handleCancelBoost(selectedId)}
+                publishedCount={properties.filter(p => !p.isDraft).length}
+                onUpgrade={handleUpgradeToAgency}
               /> : (
                 <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed border-black/30 bg-white">
                   <div className="text-center">
