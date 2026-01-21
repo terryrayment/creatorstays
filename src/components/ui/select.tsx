@@ -91,7 +91,7 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
 
         {/* Dropdown menu */}
         {isOpen && (
-          <div className="absolute z-50 mt-1 w-full min-w-[140px] overflow-hidden rounded-xl border-2 border-black bg-white shadow-lg">
+          <div className="absolute z-[100] mt-1 w-full min-w-[180px] overflow-hidden rounded-xl border-2 border-black bg-white shadow-lg">
             <div className="max-h-60 overflow-y-auto py-1">
               {options.map((option, index) => (
                 <button

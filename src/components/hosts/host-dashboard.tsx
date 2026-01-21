@@ -28,7 +28,7 @@ const ALL_LOCATIONS = [
   "Chicago, IL",
 ]
 
-// Location search component for Find Creators
+// Location search component for Find Creators - uses Google Places for search
 function LocationSearch({ 
   value, 
   onChange,
@@ -41,7 +41,10 @@ function LocationSearch({
   const [open, setOpen] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [inputValue, setInputValue] = useState("")
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -49,15 +52,54 @@ function LocationSearch({
         setOpen(false)
         setShowSearch(false)
         setInputValue("")
+        setSuggestions([])
       }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const filteredLocations = inputValue
-    ? ALL_LOCATIONS.filter(loc => loc.toLowerCase().includes(inputValue.toLowerCase()))
-    : ALL_LOCATIONS
+  // Initialize Google Places Autocomplete
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.google?.maps?.places?.AutocompleteService) {
+      autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService()
+    }
+  }, [])
+
+  // Fetch Google Places suggestions when typing
+  useEffect(() => {
+    if (!inputValue || inputValue.length < 2) {
+      setSuggestions(ALL_LOCATIONS.filter(loc => loc.toLowerCase().includes(inputValue.toLowerCase())))
+      return
+    }
+
+    if (!autocompleteServiceRef.current) {
+      // Fallback to local search if Google Places isn't available
+      setSuggestions(ALL_LOCATIONS.filter(loc => loc.toLowerCase().includes(inputValue.toLowerCase())))
+      return
+    }
+
+    setIsLoading(true)
+    const timer = setTimeout(() => {
+      autocompleteServiceRef.current?.getPlacePredictions(
+        {
+          input: inputValue,
+          types: ["(cities)"],
+        },
+        (predictions, status) => {
+          setIsLoading(false)
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+            setSuggestions(predictions.map(p => p.description))
+          } else {
+            // Fallback to local search on error
+            setSuggestions(ALL_LOCATIONS.filter(loc => loc.toLowerCase().includes(inputValue.toLowerCase())))
+          }
+        }
+      )
+    }, 300) // Debounce
+
+    return () => clearTimeout(timer)
+  }, [inputValue])
 
   const presetLocations = ["Los Angeles", "Austin", "Miami", "Denver", "Portland"]
 
@@ -75,7 +117,7 @@ function LocationSearch({
       </button>
       
       {open && !showSearch && (
-        <div className="absolute z-20 mt-1 w-48 rounded-xl border-2 border-black bg-white py-1 shadow-lg">
+        <div className="absolute z-50 mt-1 w-48 rounded-xl border-2 border-black bg-white py-1 shadow-lg">
           {/* All Locations option */}
           <button
             type="button"
@@ -125,15 +167,16 @@ function LocationSearch({
         </div>
       )}
 
-      {/* Search view */}
+      {/* Search view with Google Places */}
       {open && showSearch && (
-        <div className="absolute z-20 mt-1 w-56 rounded-xl border-2 border-black bg-white p-2 shadow-lg">
+        <div className="absolute z-50 mt-1 w-64 rounded-xl border-2 border-black bg-white p-2 shadow-lg">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => {
                 setShowSearch(false)
                 setInputValue("")
+                setSuggestions([])
               }}
               className="text-black/50 hover:text-black"
             >
@@ -143,14 +186,17 @@ function LocationSearch({
             </button>
             <input
               autoFocus
-              placeholder="Search location..."
+              placeholder="Search any city..."
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
               className="flex-1 rounded-lg border-2 border-black px-2 py-1.5 text-[11px] font-medium text-black placeholder:text-black/40 focus:outline-none"
             />
           </div>
-          <div className="mt-2 max-h-40 overflow-y-auto">
-            {filteredLocations.map((loc) => (
+          <div className="mt-2 max-h-48 overflow-y-auto">
+            {isLoading && (
+              <p className="px-3 py-2 text-[10px] text-black/50">Searching...</p>
+            )}
+            {!isLoading && suggestions.map((loc) => (
               <button
                 key={loc}
                 type="button"
@@ -160,13 +206,14 @@ function LocationSearch({
                   setOpen(false)
                   setShowSearch(false)
                   setInputValue("")
+                  setSuggestions([])
                 }}
               >
                 {loc}
               </button>
             ))}
-            {filteredLocations.length === 0 && (
-              <p className="px-3 py-2 text-[10px] text-black/50">No locations found</p>
+            {!isLoading && suggestions.length === 0 && inputValue && (
+              <p className="px-3 py-2 text-[10px] text-black/50">No locations found. Try a different search.</p>
             )}
           </div>
         </div>
@@ -624,17 +671,19 @@ export function HostDashboard() {
               
               <div className="mt-3 flex items-center justify-between border-t border-black/10 pt-3">
                 <p className="text-[11px] font-bold text-black">{filteredCreators.length} creators found</p>
-                <Select
-                  className="w-44"
-                  size="sm"
-                  value={sortBy}
-                  onChange={e => setSortBy(e.target.value as "default" | "best_match" | "distance")}
-                  options={[
-                    { value: "default", label: "Sort: Default" },
-                    { value: "best_match", label: "Sort: Best Match" },
-                    { value: "distance", label: "Sort: Location, closest" },
-                  ]}
-                />
+                <div className="relative z-30">
+                  <Select
+                    className="w-48"
+                    size="sm"
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value as "default" | "best_match" | "distance")}
+                    options={[
+                      { value: "default", label: "Sort: Default" },
+                      { value: "best_match", label: "Sort: Best Match" },
+                      { value: "distance", label: "Sort: Location, closest" },
+                    ]}
+                  />
+                </div>
               </div>
 
               <div className="mt-4 space-y-2">

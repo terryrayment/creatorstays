@@ -111,14 +111,59 @@ function StatsSection() {
 }
 
 function SetupChecklist() {
-  const [checklist] = useState([
-    { label: "Save 1 property", done: false, href: "/dashboard/host/properties" },
-    { label: "Invite 1 creator", done: false, href: "/dashboard/host/search-creators" },
-    { label: "Create 1 tracked link", done: false, href: "/dashboard/host/collaborations" },
-    { label: "Pay 1 creator", done: false, href: "/dashboard/host/pay" },
-  ])
+  const [checklist, setChecklist] = useState<Array<{ label: string; done: boolean; href: string }> | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchChecklistData() {
+      try {
+        // Fetch properties count
+        const propsRes = await fetch("/api/properties")
+        const propsData = await propsRes.json()
+        const hasPublishedProperty = propsData.some((p: any) => !p.isDraft)
+
+        // Fetch offers sent count
+        const offersRes = await fetch("/api/offers/sent")
+        const offersData = await offersRes.json()
+        const hasInvitedCreator = offersData.length > 0
+
+        // Fetch collaborations (for tracked links and payments)
+        const collabsRes = await fetch("/api/collaborations/list?role=host")
+        const collabsData = await collabsRes.json()
+        const hasTrackedLink = collabsData.some((c: any) => c.status !== "pending" && c.status !== "declined")
+        const hasPaidCreator = collabsData.some((c: any) => c.status === "completed" || c.hostPaidAt)
+
+        setChecklist([
+          { label: "Save 1 property", done: hasPublishedProperty, href: "/dashboard/host/properties" },
+          { label: "Invite 1 creator", done: hasInvitedCreator, href: "/dashboard/host/search-creators" },
+          { label: "Create 1 tracked link", done: hasTrackedLink, href: "/dashboard/host/collaborations" },
+          { label: "Pay 1 creator", done: hasPaidCreator, href: "/dashboard/host/pay" },
+        ])
+      } catch (error) {
+        console.error("Error fetching checklist data:", error)
+        setChecklist([
+          { label: "Save 1 property", done: false, href: "/dashboard/host/properties" },
+          { label: "Invite 1 creator", done: false, href: "/dashboard/host/search-creators" },
+          { label: "Create 1 tracked link", done: false, href: "/dashboard/host/collaborations" },
+          { label: "Pay 1 creator", done: false, href: "/dashboard/host/pay" },
+        ])
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchChecklistData()
+  }, [])
+
+  if (loading || !checklist) {
+    return null // Don't show while loading
+  }
 
   const completedCount = checklist.filter(c => c.done).length
+
+  // Hide checklist when all items are complete
+  if (completedCount === checklist.length) {
+    return null
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6">
