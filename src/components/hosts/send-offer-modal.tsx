@@ -219,19 +219,29 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                 {DEAL_TYPES.map(type => {
                   const isSelected = dealType === type.value
                   return (
-                    <button
+                    <div
                       key={type.value}
-                      type="button"
-                      onClick={() => setDealType(type.value)}
-                      className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setDealType(type.value)
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setDealType(type.value)
+                        }
+                      }}
+                      className={`w-full cursor-pointer rounded-xl border-2 p-4 text-left transition-all ${
                         isSelected
                           ? "border-black bg-[#FFD84A]"
-                          : "border-black/20 hover:border-black"
+                          : "border-black/20 hover:border-black hover:-translate-y-0.5"
                       }`}
                     >
                       <p className="font-bold text-black">{type.label}</p>
                       <p className="text-xs text-black/70">{type.description}</p>
-                    </button>
+                    </div>
                   )
                 })}
               </div>
