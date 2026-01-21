@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 // Admin credentials from environment variables
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'terry@traffik.com'
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'CreatorStays2025!'
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'terry@creatorpays.com'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Rapp195312!'
 
 export async function POST(request: NextRequest) {
   try {
