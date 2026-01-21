@@ -192,6 +192,19 @@ export async function GET(request: NextRequest) {
         />\s*\$(\d{2,4})\s*<\/span>\s*<span[^>]*>\s*night/i,
         /"price"\s*:\s*(\d+)/i,
         /"priceForDisplay"\s*:\s*"\$(\d+)"/i,
+        /"discountedPrice"\s*:\s*"\$(\d+)"/i,
+        /"originalPrice"\s*:\s*"\$(\d+)"/i,
+        /aria-label="[^"]*\$(\d+)[^"]*night/i,
+        /\$(\d{2,4})\s*<[^>]*>\s*night/i,
+        />\$(\d{2,4})<\/span>/i,
+        /"amount"\s*:\s*(\d+)/i,
+        /"localizedAmount"\s*:\s*"\$(\d+)"/i,
+        /data-price="(\d+)"/i,
+        /content="\$(\d+)"/i,
+        /"minPrice"\s*:\s*(\d+)/i,
+        /"maxPrice"\s*:\s*(\d+)/i,
+        /"basePrice"\s*:\s*(\d+)/i,
+        /"nightlyPrice"\s*:\s*(\d+)/i,
       ]
       for (const pattern of pricePatterns) {
         const priceMatch = html.match(pattern)
@@ -203,6 +216,17 @@ export async function GET(request: NextRequest) {
           result.price = `$${low}-$${high}`
           break
         }
+      }
+    }
+
+    // If still no price, try to find any dollar amount followed by "night"
+    if (!result.price) {
+      const genericPriceMatch = html.match(/\$\s*(\d{2,4})(?:[^0-9]|$)[\s\S]{0,50}night/i)
+      if (genericPriceMatch) {
+        const price = parseInt(genericPriceMatch[1])
+        const low = Math.round(price * 0.8)
+        const high = Math.round(price * 1.2)
+        result.price = `$${low}-$${high}`
       }
     }
 
