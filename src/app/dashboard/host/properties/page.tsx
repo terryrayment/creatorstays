@@ -186,6 +186,54 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess }: {
     })
   }
 
+  // Filter out Airbnb branding images
+  const isAirbnbBranding = (url: string): boolean => {
+    const lowerUrl = url.toLowerCase()
+    const brandingPatterns = [
+      'airbnb-static',
+      'airbnb_logo',
+      'airbnb-logo',
+      '/logo',
+      '/icon',
+      'belo',
+      'brandmark',
+      '/illustrations/',
+      '/platform-assets/',
+      '/airbnb-platform-assets/',
+      '/original_application/',
+      'placeholder',
+      'empty',
+      'default',
+    ]
+    
+    // Check patterns
+    for (const pattern of brandingPatterns) {
+      if (lowerUrl.includes(pattern)) return true
+    }
+    
+    // Check for small dimensions (icons)
+    const dimMatch = url.match(/\/(\d+)x(\d+)/)
+    if (dimMatch && (parseInt(dimMatch[1]) < 200 || parseInt(dimMatch[2]) < 200)) {
+      return true
+    }
+    
+    return false
+  }
+
+  // Clean up photos by removing Airbnb branding
+  const cleanupPhotos = () => {
+    setForm(prev => {
+      const cleanPhotos = (prev.photos || []).filter(p => !isAirbnbBranding(p))
+      return {
+        ...prev,
+        photos: cleanPhotos,
+        heroImageUrl: cleanPhotos.includes(prev.heroImageUrl || '') ? prev.heroImageUrl : cleanPhotos[0]
+      }
+    })
+    setToast('Removed Airbnb branding images')
+    setTimeout(() => setToast(null), 2000)
+  }
+
   const handleImport = async () => {
     if (!form.airbnbUrl) return
     setIsImporting(true)
@@ -299,7 +347,18 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess }: {
           
           {/* Photo Upload Section */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-bold text-black">Photos (3+ recommended)</label>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="text-[11px] font-bold text-black">Photos (3+ recommended)</label>
+              {(form.photos?.length || 0) > 0 && (
+                <button
+                  type="button"
+                  onClick={cleanupPhotos}
+                  className="text-[10px] font-bold text-red-500 hover:text-red-700"
+                >
+                  Remove Airbnb logos
+                </button>
+              )}
+            </div>
             
             {/* Photo Grid */}
             {(form.photos?.length || 0) > 0 && (

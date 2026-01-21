@@ -137,6 +137,9 @@ model CreatorProfile {
   stripeChargesEnabled     Boolean   @default(false)
   stripePayoutsEnabled     Boolean   @default(false)
   
+  // Onboarding status
+  onboardingComplete       Boolean   @default(false)
+  
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -218,6 +221,9 @@ model HostProfile {
   idealGuests String[] // ["Couples", "Families", "Remote workers"]
   vibes       String[] // ["Minimal", "Cozy", "Modern"]
   houseRules  String[] // ["No parties", "Pets allowed"]
+  
+  // Onboarding status
+  onboardingComplete Boolean @default(false)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

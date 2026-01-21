@@ -63,7 +63,11 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { displayName, contactEmail, location, bio, styleTags, idealGuests, vibes, houseRules } = body
+    const { 
+      displayName, contactEmail, location, bio, avatarUrl,
+      styleTags, idealGuests, vibes, houseRules, 
+      onboardingComplete, phone, idealCreators, contentNeeds, budgetRange 
+    } = body
 
     // Upsert host profile
     const hostProfile = await prisma.hostProfile.upsert({
@@ -73,10 +77,12 @@ export async function PUT(request: NextRequest) {
         ...(contactEmail !== undefined && { contactEmail }),
         ...(location !== undefined && { location }),
         ...(bio !== undefined && { bio }),
+        ...(avatarUrl !== undefined && { avatarUrl }),
         ...(styleTags !== undefined && { styleTags }),
         ...(idealGuests !== undefined && { idealGuests }),
         ...(vibes !== undefined && { vibes }),
         ...(houseRules !== undefined && { houseRules }),
+        ...(onboardingComplete !== undefined && { onboardingComplete }),
       },
       create: {
         userId: session.user.id,
@@ -84,10 +90,12 @@ export async function PUT(request: NextRequest) {
         contactEmail: contactEmail || session.user.email,
         location: location || null,
         bio: bio || null,
+        avatarUrl: avatarUrl || null,
         styleTags: styleTags || [],
         idealGuests: idealGuests || [],
         vibes: vibes || [],
         houseRules: houseRules || [],
+        onboardingComplete: onboardingComplete || false,
       },
     })
 

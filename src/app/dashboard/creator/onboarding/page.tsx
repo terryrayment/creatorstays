@@ -98,6 +98,28 @@ function ChipSelector({
 }
 
 export default function CreatorOnboardingPage() {
+  const { status } = useSession()
+  const router = useRouter()
+  
+  // Redirect to the new onboarding flow
+  useEffect(() => {
+    if (status !== "loading") {
+      router.replace("/onboarding/creator")
+    }
+  }, [status, router])
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA]">
+      <div className="text-center">
+        <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+        <p className="text-sm font-medium text-black/60">Redirecting...</p>
+      </div>
+    </div>
+  )
+}
+
+// Keep old component code for reference
+function OldCreatorOnboardingPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [step, setStep] = useState(1)

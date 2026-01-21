@@ -1,11 +1,11 @@
-import { Suspense } from "react"
+"use client"
+
+import { useState, useEffect, Suspense } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { CreatorDashboardProfile } from "@/components/creators/creator-dashboard-profile"
 import { ActionRequiredBanner } from "@/components/dashboard/action-required-banner"
-
-export const metadata = {
-  title: "Creator Dashboard | CreatorStays",
-  description: "Manage your creator profile and view offers from hosts.",
-}
 
 function DashboardLoading() {
   return (
@@ -19,8 +19,80 @@ function DashboardLoading() {
 }
 
 export default function CreatorDashboardPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [showWelcome, setShowWelcome] = useState(false)
+
+  useEffect(() => {
+    async function checkProfile() {
+      if (status !== "authenticated") return
+      
+      try {
+        const res = await fetch("/api/creator/profile")
+        if (res.status === 404) {
+          // No profile, redirect to onboarding
+          router.push("/onboarding/creator")
+          return
+        }
+        if (res.ok) {
+          const profile = await res.json()
+          
+          // Check if onboarding is complete
+          if (!profile.onboardingComplete) {
+            router.push("/onboarding/creator")
+            return
+          }
+          
+          // Check for welcome param
+          const params = new URLSearchParams(window.location.search)
+          if (params.get("welcome") === "true") {
+            setShowWelcome(true)
+            window.history.replaceState({}, "", "/dashboard/creator")
+          }
+        }
+      } catch (e) {
+        console.error("Failed to check profile:", e)
+      }
+      setLoading(false)
+    }
+    
+    checkProfile()
+  }, [status, router])
+
+  if (status === "loading" || loading) {
+    return <DashboardLoading />
+  }
+
   return (
     <div className="dashboard">
+      {/* Welcome Modal */}
+      {showWelcome && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
+            <span className="mb-4 inline-block text-6xl">🎉</span>
+            <h2 className="font-heading text-2xl tracking-tight text-black">Your profile is live!</h2>
+            <p className="mt-2 text-sm text-black/60">
+              Hosts can now discover you and send collaboration offers.
+            </p>
+            <div className="mt-6 space-y-3">
+              <Link
+                href="/creators"
+                className="block rounded-full border-2 border-black bg-[#D7B6FF] px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+              >
+                See Your Public Profile →
+              </Link>
+              <button
+                onClick={() => setShowWelcome(false)}
+                className="text-sm font-medium text-black/60 hover:text-black"
+              >
+                Explore my dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <ActionRequiredBanner />
       <Suspense fallback={<DashboardLoading />}>
         <CreatorDashboardProfile />

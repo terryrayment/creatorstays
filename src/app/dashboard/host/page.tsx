@@ -143,6 +143,7 @@ export default function HostDashboardPage() {
   const router = useRouter()
   const [showOnboardingBanner, setShowOnboardingBanner] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [showWelcome, setShowWelcome] = useState(false)
 
   useEffect(() => {
     async function checkProfile() {
@@ -152,14 +153,28 @@ export default function HostDashboardPage() {
         const res = await fetch("/api/host/profile")
         if (res.status === 404) {
           // No profile, redirect to onboarding
-          router.push("/dashboard/host/onboarding")
+          router.push("/onboarding/host")
           return
         }
         if (res.ok) {
           const profile = await res.json()
+          
+          // Check if onboarding is complete
+          if (!profile.onboardingComplete) {
+            router.push("/onboarding/host")
+            return
+          }
+          
           // No properties yet, show banner
           if (!profile.properties || profile.properties.length === 0) {
             setShowOnboardingBanner(true)
+          }
+          
+          // Check for welcome param (just completed onboarding)
+          const params = new URLSearchParams(window.location.search)
+          if (params.get("welcome") === "true") {
+            setShowWelcome(true)
+            window.history.replaceState({}, "", "/dashboard/host")
           }
         }
       } catch (e) {
@@ -181,6 +196,33 @@ export default function HostDashboardPage() {
 
   return (
     <div className="dashboard min-h-screen bg-[#FAFAFA]">
+      {/* Welcome Modal */}
+      {showWelcome && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
+            <span className="mb-4 inline-block text-6xl">🎉</span>
+            <h2 className="font-heading text-2xl tracking-tight text-black">Welcome to CreatorStays!</h2>
+            <p className="mt-2 text-sm text-black/60">
+              Your profile is live and your property is ready to attract creators.
+            </p>
+            <div className="mt-6 space-y-3">
+              <Link
+                href="/dashboard/host/search-creators"
+                className="block rounded-full border-2 border-black bg-[#28D17C] px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+              >
+                Browse Creators →
+              </Link>
+              <button
+                onClick={() => setShowWelcome(false)}
+                className="text-sm font-medium text-black/60 hover:text-black"
+              >
+                Explore my dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <ActionRequiredBanner />
       {showOnboardingBanner && (
         <OnboardingBanner onDismiss={() => setShowOnboardingBanner(false)} />

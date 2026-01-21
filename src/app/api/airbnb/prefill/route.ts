@@ -257,6 +257,13 @@ function isAirbnbLogo(url: string): boolean {
     '/experiences/',  // Not property images
     'brandmark',
     'symbol',
+    'belo',           // Airbnb Bélo logo
+    'airbnb.com/static', // Static assets
+    '/illustrations/', // Illustration graphics
+    '/category_icon/', // Category icons
+    'placeholder',
+    'blank',
+    'empty',
   ]
   
   for (const pattern of logoPatterns) {
@@ -282,12 +289,35 @@ function isAirbnbLogo(url: string): boolean {
   const logoImageIds = [
     'airbnb-logo',
     'rbw4n0bgz',  // Common Airbnb Bélo logo ID
+    'd22pp7j',    // Another Bélo variant
+    'wkvmnj',     // House icon
+    'hvna6j',     // Illustrated house
   ]
   
   for (const id of logoImageIds) {
     if (lowerUrl.includes(id)) {
       return true
     }
+  }
+  
+  // Filter out images that are likely Airbnb brand assets by checking URL patterns
+  // Airbnb property photos usually come from /im/pictures/hosting/
+  // Brand assets often come from /im/pictures/airbnb-platform-assets/
+  if (lowerUrl.includes('/airbnb-platform-assets/') || 
+      lowerUrl.includes('/platform-assets/') ||
+      lowerUrl.includes('/original_application/') ||
+      lowerUrl.includes('/airbnb-brand/')) {
+    return true
+  }
+  
+  // Check if it looks like a simple graphic (PNG with transparency often)
+  // Property photos are usually jpg/webp
+  if (lowerUrl.includes('.png') && 
+      (lowerUrl.includes('illustration') || 
+       lowerUrl.includes('graphic') || 
+       lowerUrl.includes('icon') ||
+       lowerUrl.includes('brand'))) {
+    return true
   }
   
   return false

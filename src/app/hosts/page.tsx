@@ -247,7 +247,7 @@ function BenefitsSection() {
 
 function SignupSection() {
   return (
-    <section id="signup" className="bg-black px-3 py-2 lg:px-4">
+    <section id="signup" className="scroll-mt-20 bg-black px-3 py-2 lg:px-4">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-2 lg:grid-cols-[1fr_1.2fr]">
           {/* Left info block */}

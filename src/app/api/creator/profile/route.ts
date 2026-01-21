@@ -136,6 +136,7 @@ export async function PUT(request: NextRequest) {
       youtubeHandle,
       youtubeUrl,
       youtubeSubscribers,
+      websiteUrl,
       totalFollowers,
       engagementRate,
       dealTypes,
@@ -145,6 +146,12 @@ export async function PUT(request: NextRequest) {
       deliverables,
       mediaKitUrl,
       profileComplete,
+      onboardingComplete,
+      contentStyle,
+      preferredDealTypes,
+      availability,
+      travelRadius,
+      portfolioUrls,
     } = body
 
     // Normalize handle - strip @ and invalid characters
@@ -190,6 +197,7 @@ export async function PUT(request: NextRequest) {
         ...(deliverables !== undefined && { deliverables }),
         ...(mediaKitUrl !== undefined && { mediaKitUrl }),
         ...(profileComplete !== undefined && { profileComplete }),
+        ...(onboardingComplete !== undefined && { onboardingComplete }),
       },
       create: {
         userId: session.user.id,
@@ -217,6 +225,7 @@ export async function PUT(request: NextRequest) {
         deliverables: deliverables || [],
         mediaKitUrl,
         profileComplete: profileComplete || 0,
+        onboardingComplete: onboardingComplete || false,
       },
     })
 

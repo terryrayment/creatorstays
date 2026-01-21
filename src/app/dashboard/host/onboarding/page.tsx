@@ -169,7 +169,72 @@ function StyledSelect({
   )
 }
 
+// Filter out Airbnb branding images (logos, icons, illustrations)
+function filterAirbnbBranding(photos: string[]): string[] {
+  const brandingPatterns = [
+    'airbnb-static',
+    'airbnb_logo',
+    'airbnb-logo',
+    '/logo',
+    '/icon',
+    'belo',
+    'brandmark',
+    '/illustrations/',
+    '/platform-assets/',
+    '/airbnb-platform-assets/',
+    '/original_application/',
+    'placeholder',
+    'empty',
+    'default',
+    '/em/',
+    '/social/',
+    'badge',
+    'superhost',
+    'verified',
+    'safety',
+  ]
+  
+  return photos.filter(url => {
+    const lowerUrl = url.toLowerCase()
+    
+    // Check patterns
+    for (const pattern of brandingPatterns) {
+      if (lowerUrl.includes(pattern)) return false
+    }
+    
+    // Check for small dimensions (icons)
+    const dimMatch = url.match(/\/(\d+)x(\d+)/)
+    if (dimMatch && (parseInt(dimMatch[1]) < 200 || parseInt(dimMatch[2]) < 200)) {
+      return false
+    }
+    
+    return true
+  })
+}
+
 export default function HostOnboardingPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  
+  // Redirect to the new onboarding flow
+  useEffect(() => {
+    if (status !== "loading") {
+      router.replace("/onboarding/host")
+    }
+  }, [status, router])
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA]">
+      <div className="text-center">
+        <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+        <p className="text-sm font-medium text-black/60">Redirecting...</p>
+      </div>
+    </div>
+  )
+}
+
+// Keep the old component code commented out for reference
+function OldHostOnboardingPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [step, setStep] = useState(1)
@@ -281,8 +346,8 @@ export default function HostOnboardingPage() {
           maxGuests: result.guests?.toString() || prev.maxGuests,
           priceRange: result.price || prev.priceRange,
           amenities: prev.amenities,
-          photos: result.photos || [],
-          heroImageUrl: result.photos?.[0] || "",
+          photos: filterAirbnbBranding(result.photos || []),
+          heroImageUrl: filterAirbnbBranding(result.photos || [])?.[0] || "",
         }))
         
         setImportSuccess(true)
