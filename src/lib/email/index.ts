@@ -102,6 +102,7 @@ function emailWrapper(content: string): string {
   <div style="${styles.container}">
     <div style="${styles.header}">
       <a href="${BASE_URL}" style="${styles.logo}">CreatorStays</a>
+      <span style="display: inline-block; background: #FFD84A; color: #000; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle;">BETA</span>
     </div>
     <div style="${styles.body}">
       ${content}
@@ -1982,7 +1983,7 @@ export function hostMembershipWelcomeEmail(data: {
     
     <div style="background: #FFFDF7; border: 2px solid #000; border-radius: 12px; padding: 20px; margin: 24px 0;">
       <p style="font-size: 14px; font-weight: 700; margin: 0 0 16px;">What's included in your membership:</p>
-      <p style="font-size: 14px; margin: 0 0 12px;">✓ &nbsp; Access to creator directory (500+ verified creators)</p>
+      <p style="font-size: 14px; margin: 0 0 12px;">✓ &nbsp; Access to our creator directory</p>
       <p style="font-size: 14px; margin: 0 0 12px;">✓ &nbsp; Send unlimited collaboration offers</p>
       <p style="font-size: 14px; margin: 0 0 12px;">✓ &nbsp; Tracked affiliate links & performance analytics</p>
       <p style="font-size: 14px; margin: 0 0 12px;">✓ &nbsp; Secure payment processing</p>
@@ -2032,7 +2033,7 @@ Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long',
 Billed to: ${hostEmail}
 
 WHAT'S INCLUDED:
-✓ Access to creator directory (500+ verified creators)
+✓ Access to our creator directory
 ✓ Send unlimited collaboration offers
 ✓ Tracked affiliate links & performance analytics
 ✓ Secure payment processing
