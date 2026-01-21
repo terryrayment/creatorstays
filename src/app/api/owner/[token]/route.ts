@@ -87,7 +87,7 @@ export async function GET(
         },
         offer: {
           cashCents: c.offer?.cashCents || 0,
-          stayLengthNights: c.offer?.stayLengthNights || 0,
+          stayNights: c.offer?.stayNights || 0,
         },
         contentUrls: c.contentUrls || [],
         contentSubmittedAt: c.contentSubmittedAt,
