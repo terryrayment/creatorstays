@@ -370,13 +370,13 @@ function decodeHtmlEntities(str: string): string {
 }
 
 /**
- * Detect if a URL is an Airbnb logo, icon, or non-property image
+ * Detect if a URL is an Airbnb logo, icon, host photo, or non-property image
  */
 function isAirbnbLogo(url: string): boolean {
   const lowerUrl = url.toLowerCase()
   
-  // Known logo/icon patterns
-  const logoPatterns = [
+  // Known logo/icon/non-property patterns
+  const excludePatterns = [
     'airbnb-static',
     'airbnb_logo',
     'airbnb-logo',
@@ -407,16 +407,32 @@ function isAirbnbLogo(url: string): boolean {
     'placeholder',
     'blank',
     'empty',
+    '/users/',        // Host profile photos
+    '/user-',         // User images
+    'im/users',       // User profile images
+    'im/pictures/user', // User pictures
+    '/host/',         // Host images
+    '/miso/',         // Airbnb illustration system
+    '/lottie/',       // Animated graphics
+    '/aircover/',     // AirCover marketing
+    '/trips/',        // Trip-related graphics
+    '/guidebook/',    // Guidebook images
+    'drawing',        // Illustrated content
+    'cartoon',        // Cartoon graphics
+    'illustration',   // Illustrations
+    'artwork',        // Artwork
+    '/im/pictures/e2', // Experience/marketing images
+    '/im/pictures/c8', // Category images
+    'mediacdn',       // Media CDN (often profile pics)
   ]
   
-  for (const pattern of logoPatterns) {
+  for (const pattern of excludePatterns) {
     if (lowerUrl.includes(pattern)) {
       return true
     }
   }
   
   // Check for very small image dimensions in URL (icons are usually small)
-  // Pattern: im/pictures or im/users followed by small dimensions
   const dimensionMatch = url.match(/\/(\d+)x(\d+)/)
   if (dimensionMatch) {
     const width = parseInt(dimensionMatch[1])
@@ -425,10 +441,13 @@ function isAirbnbLogo(url: string): boolean {
     if (width < 200 || height < 200) {
       return true
     }
+    // Also skip very square small images (likely profile photos)
+    if (width === height && width < 400) {
+      return true
+    }
   }
   
   // Airbnb logo has specific red/pink color scheme - check for known logo image IDs
-  // These are common Airbnb logo image identifiers
   const logoImageIds = [
     'airbnb-logo',
     'rbw4n0bgz',  // Common Airbnb Bélo logo ID
@@ -444,8 +463,7 @@ function isAirbnbLogo(url: string): boolean {
   }
   
   // Filter out images that are likely Airbnb brand assets by checking URL patterns
-  // Airbnb property photos usually come from /im/pictures/hosting/
-  // Brand assets often come from /im/pictures/airbnb-platform-assets/
+  // Airbnb property photos usually come from /im/pictures/hosting/ or /im/pictures/miso-*
   if (lowerUrl.includes('/airbnb-platform-assets/') || 
       lowerUrl.includes('/platform-assets/') ||
       lowerUrl.includes('/original_application/') ||
@@ -459,8 +477,31 @@ function isAirbnbLogo(url: string): boolean {
       (lowerUrl.includes('illustration') || 
        lowerUrl.includes('graphic') || 
        lowerUrl.includes('icon') ||
-       lowerUrl.includes('brand'))) {
+       lowerUrl.includes('brand') ||
+       lowerUrl.includes('asset'))) {
     return true
+  }
+  
+  // Property photos should contain certain patterns
+  // If it doesn't look like a property photo path, be more cautious
+  const propertyPhotoPatterns = [
+    '/im/pictures/hosting/',
+    '/im/pictures/miso-listing/',
+    '/im/pictures/prohost-api/',
+    '/pictures/hosting/',
+    'a0.muscache.com/im/pictures/',
+  ]
+  
+  // If URL contains muscache but doesn't match property patterns, it might be non-property
+  if (lowerUrl.includes('muscache.com') && !propertyPhotoPatterns.some(p => lowerUrl.includes(p))) {
+    // Additional check - if it's in a suspicious path, exclude it
+    if (lowerUrl.includes('/im/pictures/') && 
+        !lowerUrl.includes('hosting') && 
+        !lowerUrl.includes('miso-listing') &&
+        !lowerUrl.includes('prohost')) {
+      // Could be marketing/illustration content - be cautious
+      // But don't exclude all, as some property photos use other paths
+    }
   }
   
   return false
