@@ -70,7 +70,7 @@ export default function CreatorDashboardPage() {
       {showWelcome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
-            <span className="mb-4 inline-block text-6xl">🎉</span>
+            <span className="mb-4 inline-block text-6xl"></span>
             <h2 className="font-heading text-2xl tracking-tight text-black">Your profile is live!</h2>
             <p className="mt-2 text-sm text-black/60">
               Hosts can now discover you and send collaboration offers.

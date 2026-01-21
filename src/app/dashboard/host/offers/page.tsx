@@ -538,7 +538,7 @@ export default function HostSentOffersPage() {
                                   </button>
                                 </div>
                                 <p className="mt-2 text-[10px] text-black/50 text-center">
-                                  💡 You can negotiate back and forth until you reach an agreement
+                                   You can negotiate back and forth until you reach an agreement
                                 </p>
                               </>
                             )}
@@ -675,7 +675,7 @@ export default function HostSentOffersPage() {
           }`}>
             <div className="flex items-center gap-2">
               {toast.type === "error" ? (
-                <span className="text-red-600">⚠️</span>
+                <span className="text-red-600"></span>
               ) : (
                 <span>✓</span>
               )}

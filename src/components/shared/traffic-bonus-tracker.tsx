@@ -124,7 +124,7 @@ export function TrafficBonusTracker({
         <div className="mt-1.5 flex items-center justify-between text-[10px]">
           <span className={isUnlocked ? 'font-bold text-[#28D17C]' : 'text-black/50'}>
             {isUnlocked 
-              ? '🎉 Bonus earned!' 
+              ? ' Bonus earned!' 
               : `${remaining.toLocaleString()} more clicks to unlock`
             }
           </span>
@@ -154,7 +154,7 @@ export function TrafficBonusExplainer({
     <div className="rounded-xl border-2 border-[#28D17C]/50 bg-[#28D17C]/10 p-4">
       <div className="flex items-start gap-3">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#28D17C] bg-white text-sm">
-          🎯
+          
         </div>
         <div>
           <p className="font-bold text-black">Performance Bonus Available</p>

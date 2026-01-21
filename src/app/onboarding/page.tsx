@@ -161,7 +161,7 @@ function OnboardingContent() {
           {/* Beta Badge */}
           <div className="mb-4 rounded-2xl border-[3px] border-black bg-[#28D17C] p-4 text-center">
             <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full border-[2px] border-black bg-white">
-              <span className="text-lg">🎉</span>
+              <span className="text-lg"></span>
             </div>
             <p className="text-[9px] font-black uppercase tracking-wider text-black">Welcome to Beta</p>
             <p className="mt-1 text-[12px] font-medium text-black">

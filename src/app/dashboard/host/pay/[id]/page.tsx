@@ -185,7 +185,7 @@ export default function PayCollaborationPage() {
           {/* Error */}
           {error && (
             <div className="rounded-xl border-2 border-red-300 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
-              ⚠️ {error}
+               {error}
             </div>
           )}
 
@@ -239,7 +239,7 @@ export default function PayCollaborationPage() {
                   {bonusEarned && (
                     <div className="flex items-center justify-between text-sm text-[#28D17C]">
                       <span className="flex items-center gap-1">
-                        <span>🎯</span>
+                        <span></span>
                         Performance bonus ({collaboration.clicksGenerated.toLocaleString()} clicks)
                       </span>
                       <span className="font-bold">+ {formatCurrency(earnedBonusCents)}</span>
@@ -248,7 +248,7 @@ export default function PayCollaborationPage() {
                   {bonusEnabled && !bonusEarned && (
                     <div className="flex items-center justify-between text-sm text-black/50">
                       <span className="flex items-center gap-1">
-                        <span>🎯</span>
+                        <span></span>
                         Performance bonus (not reached)
                       </span>
                       <span className="font-bold">$0.00</span>
@@ -293,7 +293,7 @@ export default function PayCollaborationPage() {
               {/* Creator Stripe warning */}
               {!collaboration.creator.stripeAccountId && (
                 <div className="rounded-xl border-2 border-amber-400 bg-amber-50 p-4">
-                  <p className="text-sm font-bold text-amber-800">⚠️ Creator hasn't connected Stripe</p>
+                  <p className="text-sm font-bold text-amber-800"> Creator hasn't connected Stripe</p>
                   <p className="mt-1 text-xs text-amber-700">
                     Payment will be held until they complete Stripe onboarding. They'll receive an email.
                   </p>
@@ -352,7 +352,7 @@ export default function PayCollaborationPage() {
 
             {/* Important: Direct Transfer Disclosure */}
             <div className="mt-4 rounded-lg border-2 border-[#FFD84A] bg-[#FFD84A]/10 p-3">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-black">⚠️ Direct Payment — No Escrow</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-black"> Direct Payment — No Escrow</p>
               <p className="mt-1 text-xs text-black/70">
                 This is <strong className="text-black">not an escrow payment</strong>. Funds transfer immediately to the creator upon checkout completion. 
                 Only pay after you've reviewed and approved the submitted content.

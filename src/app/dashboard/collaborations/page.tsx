@@ -238,7 +238,7 @@ export default function CollaborationsListPage() {
                     {/* Action hint - now driven by statusDisplay */}
                     {statusDisplay.actionRequired && statusDisplay.description && (
                       <div className="mt-3 rounded-lg bg-[#FFD84A]/30 px-3 py-2 text-xs font-bold text-black">
-                        ⚠️ {statusDisplay.description}
+                         {statusDisplay.description}
                       </div>
                     )}
                   </Link>

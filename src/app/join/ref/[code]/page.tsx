@@ -49,7 +49,7 @@ export default function ReferralJoinPage() {
     <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA] p-4">
       <div className="w-full max-w-md">
         <div className="rounded-2xl border-4 border-black bg-white p-8 text-center">
-          <span className="mb-4 inline-block text-6xl">🎁</span>
+          <span className="mb-4 inline-block text-6xl"></span>
           
           <h1 className="font-heading text-3xl tracking-tight text-black">
             You've been invited!
@@ -84,10 +84,10 @@ export default function ReferralJoinPage() {
             </p>
             <div className="space-y-2 text-left">
               {[
-                "🏡 Free stays at beautiful properties",
-                "💰 Paid collaborations with hosts",
-                "📈 Analytics & tracking tools",
-                "🤝 Direct booking requests",
+                " Free stays at beautiful properties",
+                " Paid collaborations with hosts",
+                " Analytics & tracking tools",
+                " Direct booking requests",
               ].map((benefit, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm text-black">
                   {benefit}

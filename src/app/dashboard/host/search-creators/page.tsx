@@ -484,7 +484,7 @@ export default function SearchCreatorsPage() {
 
                 {/* Location with distance */}
                 <p className="mt-2 text-[10px] text-black">
-                  📍 {creator.location}
+                   {creator.location}
                   {creator.distance !== null && (
                     <span className="ml-1 text-black/50">({Math.round(creator.distance)} mi away)</span>
                   )}

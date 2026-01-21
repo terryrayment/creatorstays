@@ -305,7 +305,7 @@ export function CreatorPublicProfile({ creator }: { creator: CreatorProfile }) {
                 {creator.pastCollabs.map(collab => (
                   <div key={collab.id} className="flex items-center gap-3 rounded-lg border border-black/10 bg-white p-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-black/20 bg-black/5 text-lg">
-                      🏠
+                      
                     </div>
                     <div>
                       <p className="font-bold text-black">{collab.propertyTitle}</p>

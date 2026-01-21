@@ -310,7 +310,7 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
       {/* Important clarification about clicks vs bookings */}
       {viewAs === 'host' && (
         <div className="rounded-lg border-2 border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-bold text-amber-800">📊 Understanding Your Click Data</p>
+          <p className="text-sm font-bold text-amber-800"> Understanding Your Click Data</p>
           <p className="mt-1 text-xs text-amber-700">
             <strong>Clicks measure engagement, not bookings.</strong> CreatorStays tracks how many people 
             clicked through to your Airbnb listing from creator content. We do not have access to your 

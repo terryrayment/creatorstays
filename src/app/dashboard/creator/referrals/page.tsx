@@ -192,7 +192,7 @@ export default function CreatorReferralPage() {
             {[
               { step: "1", icon: "📤", title: "Share your link", desc: "Send to creator friends" },
               { step: "2", icon: "✅", title: "They sign up", desc: "And complete their profile" },
-              { step: "3", icon: "💰", title: "You earn $10", desc: "For each qualified referral" },
+              { step: "3", icon: "", title: "You earn $10", desc: "For each qualified referral" },
             ].map((item, i) => (
               <div key={i} className="text-center">
                 <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white border-2 border-black text-2xl">
@@ -213,7 +213,7 @@ export default function CreatorReferralPage() {
           
           {!stats?.referrals || stats.referrals.length === 0 ? (
             <div className="p-8 text-center">
-              <span className="mb-2 inline-block text-4xl">🎯</span>
+              <span className="mb-2 inline-block text-4xl"></span>
               <p className="text-sm text-black/60">No referrals yet. Share your link to get started!</p>
             </div>
           ) : (

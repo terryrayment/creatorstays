@@ -538,7 +538,7 @@ export function CreatorOffersInbox() {
                 rel="noopener noreferrer"
                 className="block rounded-lg border-2 border-black/20 p-3 text-xs font-bold text-black hover:border-black transition-colors"
               >
-                🏠 View Property on Airbnb →
+                 View Property on Airbnb →
               </a>
             )}
 

@@ -23,7 +23,7 @@ export function PropertyGallery({ photos, heroImage, title, size = "md" }: Prope
       <div className={`flex items-center justify-center rounded-xl border-2 border-dashed border-black/20 bg-black/5 ${
         size === "sm" ? "h-24" : size === "lg" ? "h-80" : "h-48"
       }`}>
-        <span className="text-2xl">🏠</span>
+        <span className="text-2xl"></span>
       </div>
     )
   }
@@ -173,7 +173,7 @@ export function PropertyThumbnail({
   if (!photo) {
     return (
       <div className={`flex items-center justify-center rounded-lg border-2 border-dashed border-black/20 bg-black/5 ${className}`}>
-        <span className="text-xl">🏠</span>
+        <span className="text-xl"></span>
       </div>
     )
   }

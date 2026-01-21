@@ -89,7 +89,7 @@ export default function JoinBetaPage() {
         {/* Beta Access Card */}
         <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-6 text-center">
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-black bg-white">
-            <span className="text-2xl">🎉</span>
+            <span className="text-2xl"></span>
           </div>
           <p className="text-[10px] font-black uppercase tracking-wider text-black/60">Private Beta</p>
           <h1 className="mt-2 font-heading text-2xl font-black text-black">

@@ -180,7 +180,7 @@ export default function CreatorSignupClient() {
             </div>
             <p className="text-[9px] font-black uppercase tracking-wider text-black">Check Your Email</p>
             <h1 className="mt-2 font-heading text-[1.75rem] leading-[0.85] tracking-[-0.02em] text-black" style={{ fontWeight: 900 }}>
-              YOU'RE IN! 🎉
+              YOU'RE IN! 
             </h1>
             <p className="mt-3 text-[13px] font-medium text-black">
               We sent a sign-in link to <strong>{submittedEmail}</strong>

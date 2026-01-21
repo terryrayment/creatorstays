@@ -669,7 +669,7 @@ export default function CollaborationDetailPage() {
                   disabled={sendingReminder}
                   className="shrink-0 rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-bold text-black transition-all hover:bg-[#FFD84A] disabled:opacity-50"
                 >
-                  {sendingReminder ? "Sending..." : "📧 Send Reminder"}
+                  {sendingReminder ? "Sending..." : " Send Reminder"}
                 </button>
               </div>
               <p className="mt-2 text-[10px] text-black/40">
@@ -1046,7 +1046,7 @@ export default function CollaborationDetailPage() {
               {/* Zero clicks troubleshooting - only show for creators with 0 clicks */}
               {userRole === "creator" && collaboration.clicksGenerated === 0 && collaboration.status === "active" && (
                 <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3">
-                  <p className="text-xs font-bold text-amber-800">📊 No clicks yet? Here's what to check:</p>
+                  <p className="text-xs font-bold text-amber-800"> No clicks yet? Here's what to check:</p>
                   <ul className="mt-2 space-y-1 text-xs text-amber-700">
                     <li>• <strong>Link in bio:</strong> Make sure the tracking link is clickable (not just displayed as text)</li>
                     <li>• <strong>Content is live:</strong> The post/reel/story with your link must be published</li>
@@ -1098,7 +1098,7 @@ export default function CollaborationDetailPage() {
                       rel="noopener noreferrer"
                       className="block rounded-lg border-2 border-black bg-white px-4 py-2 text-sm font-bold text-black hover:bg-black/5"
                     >
-                      📱 View Content {i + 1} →
+                       View Content {i + 1} →
                     </a>
                   ))}
                 </div>
@@ -1184,7 +1184,7 @@ export default function CollaborationDetailPage() {
               </p>
               <div className="mt-4 rounded-xl border-2 border-black bg-white p-4">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A] text-lg">🏠</span>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A] text-lg"></span>
                   <div>
                     <p className="font-bold text-black">Post-for-Stay Deal</p>
                     <p className="text-xs text-black/60">No payment required — confirm when stay is complete</p>
@@ -1280,7 +1280,7 @@ export default function CollaborationDetailPage() {
               ) : (
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-black bg-white">
-                    <span className="text-2xl">⭐</span>
+                    <span className="text-2xl"></span>
                   </div>
                   <div className="flex-1">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">
@@ -1312,7 +1312,7 @@ export default function CollaborationDetailPage() {
             <div className="rounded-2xl border-[3px] border-orange-400 bg-orange-50 p-5">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-orange-400 bg-white">
-                  <span className="text-lg">⚠️</span>
+                  <span className="text-lg"></span>
                 </div>
                 <div className="flex-1">
                   <p className="text-lg font-black text-black">Cancellation Requested</p>
@@ -1496,7 +1496,7 @@ export default function CollaborationDetailPage() {
                 </p>
                 <div className="mt-4 rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">🎉</span>
+                    <span className="text-2xl"></span>
                     <div>
                       <p className="font-bold text-black">Post-for-Stay Complete</p>
                       <p className="text-xs text-black/60">Both parties fulfilled their commitments</p>

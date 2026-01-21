@@ -90,7 +90,7 @@ export default function AgencyUpgradePage() {
       <main className="mx-auto max-w-4xl px-4 py-12">
         {/* Hero */}
         <div className="text-center mb-12">
-          <span className="mb-4 inline-block text-6xl">🏢</span>
+          <span className="mb-4 inline-block text-6xl"></span>
           <h1 className="font-heading text-4xl tracking-tight text-black sm:text-5xl">
             Agency Pro
           </h1>
@@ -109,11 +109,11 @@ export default function AgencyUpgradePage() {
 
           <div className="space-y-4 mb-8">
             {[
-              { icon: "🏠", title: "Unlimited Properties", desc: "Manage as many listings as you need" },
+              { icon: "", title: "Unlimited Properties", desc: "Manage as many listings as you need" },
               { icon: "👥", title: "5 Team Logins", desc: "Invite your team to help manage ($29/extra seat)" },
               { icon: "📁", title: "Organize by Owner", desc: "Group properties by owner or portfolio" },
               { icon: "🔑", title: "Owner Access Portals", desc: "Give owners view-only access to their properties" },
-              { icon: "📊", title: "Multi-Property Dashboard", desc: "See all properties at a glance, filter by owner" },
+              { icon: "", title: "Multi-Property Dashboard", desc: "See all properties at a glance, filter by owner" },
             ].map((feature, i) => (
               <div key={i} className="flex items-start gap-3">
                 <span className="text-xl">{feature.icon}</span>

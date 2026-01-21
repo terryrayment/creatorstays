@@ -13,7 +13,7 @@ function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
     <div className="border-b-2 border-black bg-[#4AA3FF]">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
-          <span className="text-xl">🏠</span>
+          <span className="text-xl"></span>
           <div>
             <p className="text-sm font-bold text-black">Complete your setup to start finding creators!</p>
             <p className="text-xs text-black/70">Add your first property to get started</p>
@@ -80,7 +80,7 @@ function NextStepStrip() {
             href="/dashboard/analytics"
             className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
           >
-            📊 Analytics
+             Analytics
           </Link>
         </div>
       </div>
@@ -259,7 +259,7 @@ export default function HostDashboardPage() {
       {showWelcome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
-            <span className="mb-4 inline-block text-6xl">🎉</span>
+            <span className="mb-4 inline-block text-6xl"></span>
             <h2 className="font-heading text-2xl tracking-tight text-black">Welcome to CreatorStays!</h2>
             <p className="mt-2 text-sm text-black/60">
               Your profile is live and your property is ready to attract creators.

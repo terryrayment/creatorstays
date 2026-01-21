@@ -334,7 +334,7 @@ export default function MessagesPage() {
                           />
                         )}
                         <span className="truncate text-[10px] font-medium text-black/50">
-                          🏠 {conv.collaboration.property.title}
+                           {conv.collaboration.property.title}
                         </span>
                       </div>
                     )}

@@ -129,7 +129,7 @@ export default function WaitlistPage() {
           {/* Left: Hero Block */}
           <div className="block-hover rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-6">
             <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border-[2px] border-black bg-white px-3 py-1">
-              <span className="text-sm">🚀</span>
+              <span className="text-sm"></span>
               <span className="text-[10px] font-black uppercase tracking-wider text-black">First of its kind</span>
             </div>
             

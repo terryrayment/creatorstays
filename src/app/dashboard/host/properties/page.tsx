@@ -103,9 +103,9 @@ function PropertyListItem({ property, isSelected, onSelect }: { property: Proper
     <button onClick={onSelect} className={`w-full rounded-lg border-2 border-black p-3 text-left transition-all ${isSelected ? 'bg-[#FFD84A]' : 'bg-white hover:bg-gray-50'}`}>
       <div className="flex items-start gap-3">
         <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded border-2 border-black bg-gray-100">
-          {property.heroImageUrl ? <img src={property.heroImageUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-lg text-black/30">🏠</div>}
+          {property.heroImageUrl ? <img src={property.heroImageUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-lg text-black/30"></div>}
           {property.isBoosted && (
-            <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px]">🚀</div>
+            <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#28D17C] text-[10px]"></div>
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -466,10 +466,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" style={{ position: 'fixed' }}>
           <div className="w-full max-w-lg rounded-2xl border-[3px] border-black bg-white p-6" style={{ transform: 'none' }}>
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">🏢</span>
-                <h3 className="text-xl font-black text-black">Upgrade to Agency Plan</h3>
-              </div>
+              <h3 className="text-xl font-black text-black">Upgrade to Agency Plan</h3>
               <button onClick={() => setShowUpgradeModal(false)} className="text-gray-400 hover:text-black">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -481,7 +478,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               Your current plan allows 1 published property. Upgrade to Agency to manage multiple properties and unlock team features.
             </p>
 
-            <div className="rounded-xl border-2 border-black bg-[#FFD84A]/10 p-4 mb-6">
+            <div className="rounded-xl border-2 border-black bg-white p-4 mb-6">
               <p className="font-bold text-black mb-3">Agency Plan includes:</p>
               <ul className="space-y-2 text-sm text-black">
                 <li className="flex items-center gap-2">
@@ -505,8 +502,8 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                   Advanced analytics dashboard
                 </li>
               </ul>
-              <div className="mt-4 pt-4 border-t border-black/10">
-                <p className="text-2xl font-black text-black">$149<span className="text-sm font-medium text-black">/month</span></p>
+              <div className="mt-4 pt-4 border-t border-black/20">
+                <p className="text-2xl font-black" style={{ color: '#000000' }}>$149<span className="text-sm font-bold" style={{ color: '#000000' }}>/month</span></p>
               </div>
             </div>
 
@@ -724,7 +721,7 @@ export default function HostPropertiesPage() {
               {isLoading ? <p className="text-sm text-black/60">Loading...</p> : properties.length === 0 ? (
                 <div className="rounded-xl border-2 border-black bg-[#FFD84A] p-5 text-center">
                   <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-white">
-                    <span className="text-xl">🏠</span>
+                    <span className="text-xl"></span>
                   </div>
                   <p className="font-bold text-black">No properties yet</p>
                   <p className="mt-1 text-xs text-black/70">Add your first property to start finding creators.</p>
@@ -765,7 +762,7 @@ export default function HostPropertiesPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xl">🚀</span>
+                        <span className="text-xl"></span>
                         <h3 className="font-bold text-black">Boost This Property</h3>
                       </div>
                       <p className="mt-1 text-xs text-black/60">

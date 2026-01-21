@@ -742,7 +742,7 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
 
               {/* Confirmation email notice */}
               <div className="rounded-lg bg-black/5 p-3 text-[11px] text-black/60">
-                <span className="font-bold">📧 Confirmation sent to your email</span> with a copy of this offer
+                <span className="font-bold"> Confirmation sent to your email</span> with a copy of this offer
               </div>
 
               {/* Actions */}

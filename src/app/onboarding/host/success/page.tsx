@@ -50,7 +50,7 @@ function SuccessContent() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA] p-4">
         <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
-          <span className="mb-4 inline-block text-5xl">⚠️</span>
+          <span className="mb-4 inline-block text-5xl"></span>
           <h1 className="font-heading text-2xl tracking-tight text-black">Something went wrong</h1>
           <p className="mt-2 text-sm text-black/60">{error}</p>
           <Link

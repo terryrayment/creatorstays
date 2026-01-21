@@ -14,13 +14,13 @@ interface ActionItem {
 }
 
 const typeIcons: Record<string, string> = {
-  'counter-offer': '💬',
+  'counter-offer': '',
   'review-offer': '📩',
   'sign-agreement': '✍️',
   'review-content': '👀',
   'submit-content': '📤',
   'complete-payment': '💳',
-  'cancellation-request': '⚠️',
+  'cancellation-request': '',
   'deadline-passed': '🚨',
 }
 
