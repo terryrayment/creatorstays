@@ -159,8 +159,8 @@ export default function HostDashboardPage() {
         if (res.ok) {
           const profile = await res.json()
           
-          // Check if onboarding is complete
-          if (!profile.onboardingComplete) {
+          // Check if onboarding is complete AND membership is paid
+          if (!profile.onboardingComplete || !profile.membershipPaid) {
             router.push("/onboarding/host")
             return
           }

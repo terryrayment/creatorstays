@@ -51,7 +51,7 @@ function HeroSection() {
                 <svg className="h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-[10px] font-black text-black">First 100 hosts: $199 fee waived</span>
+                <span className="text-[10px] font-black text-black">One-time $199 • Lifetime access</span>
               </div>
               
               <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] sm:text-[2.5rem]" style={{ fontWeight: 900 }}>

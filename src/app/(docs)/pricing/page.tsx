@@ -38,11 +38,11 @@ export default function PricingPage() {
                 <div className="flex justify-between items-start pb-3 border-b-2 border-black">
                   <div>
                     <p className="font-bold text-black">One-time membership</p>
-                    <p className="text-[13px] text-black/70 mt-0.5">Access to creator directory and campaign tools</p>
+                    <p className="text-[13px] text-black/70 mt-0.5">Lifetime access to creator directory and campaign tools</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-black">$199</p>
-                    <p className="text-[11px] text-[#28D17C] font-bold">First 100 hosts: FREE</p>
+                    <p className="text-[11px] text-black/60">One-time, never again</p>
                   </div>
                 </div>
                 <div className="flex justify-between items-start">

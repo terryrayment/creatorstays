@@ -294,6 +294,18 @@ export default function HostOnboardingPage() {
   const [importSuccess, setImportSuccess] = useState(false)
   const [manualEntry, setManualEntry] = useState(false)
   
+  // Checkout state
+  const [promoCode, setPromoCode] = useState("")
+  const [promoValidating, setPromoValidating] = useState(false)
+  const [promoResult, setPromoResult] = useState<{
+    valid: boolean
+    finalPrice: number
+    discountAmount: number
+    description: string
+    isFree: boolean
+  } | null>(null)
+  const [checkingOut, setCheckingOut] = useState(false)
+  
   const [data, setData] = useState<OnboardingData>({
     displayName: "",
     contactEmail: "",
@@ -319,7 +331,7 @@ export default function HostOnboardingPage() {
     timeline: "",
   })
 
-  const totalSteps = 4
+  const totalSteps = 5 // Now includes checkout step
   
   const updateField = <K extends keyof OnboardingData>(
     field: K, 
@@ -494,67 +506,121 @@ export default function HostOnboardingPage() {
     window.scrollTo(0, 0)
   }
 
-  // Final submission
-  const handleComplete = async () => {
-    if (!validateStep(step)) return
+  // Validate promo code
+  const validatePromoCode = async () => {
+    if (!promoCode.trim()) {
+      setPromoResult(null)
+      return
+    }
     
-    setSaving(true)
+    setPromoValidating(true)
     setError("")
     
     try {
-      // Create/update host profile
-      const profileRes = await fetch("/api/host/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          displayName: data.displayName,
-          contactEmail: data.contactEmail,
-          phone: data.phone,
-          location: data.location,
-          bio: data.bio,
-          avatarUrl: data.avatarUrl,
-          idealCreators: data.idealCreators,
-          contentNeeds: data.contentNeeds,
-          budgetRange: data.budgetRange,
-          onboardingComplete: true,
-        }),
-      })
+      const res = await fetch(`/api/host/membership/validate-promo?code=${encodeURIComponent(promoCode)}`)
+      const result = await res.json()
       
-      if (!profileRes.ok) {
-        throw new Error("Failed to save profile")
+      if (result.valid) {
+        setPromoResult(result)
+      } else {
+        setPromoResult(null)
+        setError(result.error || "Invalid promo code")
       }
+    } catch {
+      setError("Failed to validate promo code")
+    }
+    
+    setPromoValidating(false)
+  }
+
+  // Save profile and property (before checkout)
+  const saveProfileAndProperty = async () => {
+    // Create/update host profile (NOT marking onboardingComplete yet)
+    const profileRes = await fetch("/api/host/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        displayName: data.displayName,
+        contactEmail: data.contactEmail,
+        phone: data.phone,
+        location: data.location,
+        bio: data.bio,
+        avatarUrl: data.avatarUrl,
+        idealCreators: data.idealCreators,
+        contentNeeds: data.contentNeeds,
+        budgetRange: data.budgetRange,
+        onboardingComplete: false, // Will be set after payment
+      }),
+    })
+    
+    if (!profileRes.ok) {
+      throw new Error("Failed to save profile")
+    }
+    
+    // Create property
+    const propertyRes = await fetch("/api/properties", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        airbnbUrl: data.airbnbUrl,
+        title: data.propertyTitle,
+        propertyType: data.propertyType,
+        cityRegion: data.cityRegion,
+        priceNightlyRange: data.priceRange,
+        bedrooms: data.bedrooms ? parseInt(data.bedrooms) : undefined,
+        baths: data.bathrooms ? parseInt(data.bathrooms) : undefined,
+        guests: data.maxGuests ? parseInt(data.maxGuests) : undefined,
+        amenities: data.amenities,
+        vibeTags: data.vibeTags,
+        photos: data.photos,
+        heroImageUrl: data.heroImageUrl || data.photos[0],
+        isActive: true,
+        isDraft: false,
+      }),
+    })
+    
+    if (!propertyRes.ok) {
+      throw new Error("Failed to save property")
+    }
+  }
+
+  // Handle checkout
+  const handleCheckout = async () => {
+    setCheckingOut(true)
+    setError("")
+    
+    try {
+      // First save profile and property
+      await saveProfileAndProperty()
       
-      // Create property
-      const propertyRes = await fetch("/api/properties", {
+      // Then initiate checkout
+      const res = await fetch("/api/host/membership/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          airbnbUrl: data.airbnbUrl,
-          title: data.propertyTitle,
-          propertyType: data.propertyType,
-          cityRegion: data.cityRegion,
-          priceNightlyRange: data.priceRange,
-          bedrooms: data.bedrooms ? parseInt(data.bedrooms) : undefined,
-          baths: data.bathrooms ? parseInt(data.bathrooms) : undefined,
-          guests: data.maxGuests ? parseInt(data.maxGuests) : undefined,
-          amenities: data.amenities,
-          vibeTags: data.vibeTags,
-          photos: data.photos,
-          heroImageUrl: data.heroImageUrl || data.photos[0],
-          isActive: true,
-          isDraft: false,
+          promoCode: promoResult?.isFree ? promoCode : promoCode || undefined,
         }),
       })
       
-      if (!propertyRes.ok) {
-        throw new Error("Failed to save property")
-      }
+      const result = await res.json()
       
-      // Success! Redirect to dashboard
-      router.push("/dashboard/host?welcome=true")
+      if (result.freeAccess) {
+        // Promo code gave free access - mark onboarding complete and redirect
+        await fetch("/api/host/profile", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ onboardingComplete: true }),
+        })
+        router.push("/onboarding/host/success")
+      } else if (result.checkoutUrl) {
+        // Redirect to Stripe checkout
+        window.location.href = result.checkoutUrl
+      } else {
+        throw new Error(result.error || "Failed to start checkout")
+      }
     } catch (e) {
-      setError("Something went wrong. Please try again.")
-      setSaving(false)
+      setError(e instanceof Error ? e.message : "Something went wrong")
+      setCheckingOut(false)
     }
   }
 
@@ -981,13 +1047,13 @@ export default function HostOnboardingPage() {
           </div>
         )}
 
-        {/* STEP 4: Review & Launch */}
+        {/* STEP 4: Review */}
         {step === 4 && (
           <div>
             <StepHeader
-              emoji="🚀"
-              title="You're all set!"
-              subtitle="Review your profile and launch"
+              emoji="👀"
+              title="Review your profile"
+              subtitle="Make sure everything looks good before checkout"
             />
 
             <div className="space-y-6">
@@ -1061,22 +1127,102 @@ export default function HostOnboardingPage() {
                   <p><strong>Budget:</strong> {BUDGET_RANGES.find(b => b.value === data.budgetRange)?.label || 'Flexible'}</p>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
 
-              {/* What's Next */}
-              <div className="rounded-xl border-2 border-black bg-white p-4">
-                <h4 className="mb-3 text-sm font-bold text-black">What happens next?</h4>
+        {/* STEP 5: Checkout */}
+        {step === 5 && (
+          <div>
+            <StepHeader
+              emoji="💳"
+              title="Complete your membership"
+              subtitle="One-time payment for lifetime access"
+            />
+
+            <div className="space-y-6">
+              {/* What's Included */}
+              <div className="rounded-xl border-2 border-black bg-white p-6">
+                <h3 className="mb-4 text-sm font-bold text-black">Your membership includes:</h3>
                 <div className="space-y-3">
                   {[
-                    { emoji: "🔍", text: "Browse our creator marketplace" },
-                    { emoji: "💌", text: "Send offers to creators you like" },
-                    { emoji: "🤝", text: "Agree on terms and book their stay" },
-                    { emoji: "📸", text: "Get amazing content for your property" },
+                    { emoji: "🔍", text: "Unlimited access to creator directory" },
+                    { emoji: "💌", text: "Send unlimited offers to creators" },
+                    { emoji: "📊", text: "Tracked links & performance analytics" },
+                    { emoji: "💸", text: "Secure payment processing" },
+                    { emoji: "🎯", text: "Priority support" },
+                    { emoji: "♾️", text: "Lifetime access — pay once, never again" },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <span className="text-xl">{item.emoji}</span>
                       <span className="text-sm text-black">{item.text}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Pricing */}
+              <div className="rounded-xl border-2 border-black bg-[#28D17C]/10 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-black">Host Membership</p>
+                    <p className="text-xs text-black/60">One-time payment</p>
+                  </div>
+                  <div className="text-right">
+                    {promoResult ? (
+                      <>
+                        <p className="text-2xl font-bold text-black">
+                          {promoResult.isFree ? "FREE" : `$${promoResult.finalPrice}`}
+                        </p>
+                        <p className="text-xs text-black/60 line-through">$199</p>
+                        <p className="text-xs font-bold text-[#28D17C]">{promoResult.description}</p>
+                      </>
+                    ) : (
+                      <p className="text-2xl font-bold text-black">$199</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Promo Code */}
+              <div className="rounded-xl border-2 border-black bg-white p-4">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">
+                  Have a promo code?
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={e => {
+                      setPromoCode(e.target.value.toUpperCase())
+                      setPromoResult(null)
+                    }}
+                    placeholder="Enter code"
+                    className={`${inputClass} flex-1 uppercase`}
+                  />
+                  <button
+                    onClick={validatePromoCode}
+                    disabled={promoValidating || !promoCode.trim()}
+                    className="rounded-lg border-2 border-black bg-black px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                  >
+                    {promoValidating ? "..." : "Apply"}
+                  </button>
+                </div>
+                {promoResult && promoResult.valid && (
+                  <p className="mt-2 text-sm font-bold text-[#28D17C]">
+                    ✓ {promoResult.description} applied!
+                  </p>
+                )}
+              </div>
+
+              {/* Security Note */}
+              <div className="flex items-start gap-3 rounded-xl border-2 border-black/20 bg-black/5 p-4">
+                <span className="text-xl">🔒</span>
+                <div>
+                  <p className="text-sm font-bold text-black">Secure checkout</p>
+                  <p className="text-xs text-black/60">
+                    Payments processed securely by Stripe. We never store your card details.
+                  </p>
                 </div>
               </div>
             </div>
@@ -1112,11 +1258,11 @@ export default function HostOnboardingPage() {
             </button>
           ) : (
             <button
-              onClick={handleComplete}
-              disabled={saving}
+              onClick={handleCheckout}
+              disabled={checkingOut}
               className="rounded-full border-2 border-black bg-[#28D17C] px-8 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
             >
-              {saving ? "Launching..." : "Launch My Profile 🚀"}
+              {checkingOut ? "Processing..." : promoResult?.isFree ? "Activate Free Access 🎉" : "Pay $199 & Launch 🚀"}
             </button>
           )}
         </div>

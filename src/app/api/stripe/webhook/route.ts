@@ -37,6 +37,37 @@ export async function POST(request: NextRequest) {
         const checkoutSession = event.data.object as Stripe.Checkout.Session
         console.log('[Stripe Webhook] Checkout completed:', checkoutSession.id)
 
+        // Handle HOST MEMBERSHIP payment
+        if (checkoutSession.metadata?.userId && !checkoutSession.metadata?.collaborationId && !checkoutSession.metadata?.type) {
+          const userId = checkoutSession.metadata.userId
+          const promoCode = checkoutSession.metadata.promoCode || null
+          const originalAmount = parseInt(checkoutSession.metadata.originalAmount || '0')
+          const discountAmount = parseInt(checkoutSession.metadata.discountAmount || '0')
+          
+          // Update host profile to mark as paid
+          await prisma.hostProfile.update({
+            where: { userId },
+            data: {
+              membershipPaid: true,
+              membershipPaidAt: new Date(),
+              membershipAmount: checkoutSession.amount_total,
+              stripePaymentId: checkoutSession.payment_intent as string,
+              promoCodeUsed: promoCode,
+            },
+          })
+          
+          // If promo code was used, increment usage
+          if (promoCode) {
+            await prisma.hostPromoCode.update({
+              where: { code: promoCode },
+              data: { uses: { increment: 1 } },
+            }).catch(err => console.error('[Webhook] Failed to update promo usage:', err))
+          }
+          
+          console.log('[Stripe Webhook] Host membership paid:', userId, 'Amount:', checkoutSession.amount_total)
+          break
+        }
+
         // Handle platform fee payment (post-for-stay)
         if (checkoutSession.metadata?.type === 'platform_fee') {
           const collaborationId = checkoutSession.metadata.collaborationId

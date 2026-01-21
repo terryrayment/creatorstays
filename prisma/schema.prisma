@@ -185,6 +185,57 @@ model CreatorInvite {
 }
 
 // ============================================================================
+// HOST PROMO CODES
+// ============================================================================
+
+model HostPromoCode {
+  id          String    @id @default(cuid())
+  
+  // The promo code (e.g., "LAUNCH2024", "FRIEND50")
+  code        String    @unique
+  
+  // Discount settings
+  discountType    String    @default("full")  // "full" = waive entire fee, "percent" = percentage off, "fixed" = fixed amount off
+  discountAmount  Int?      // For percent: 50 = 50% off. For fixed: 50 = $50 off
+  
+  // Usage limits
+  maxUses     Int?      // null = unlimited
+  uses        Int       @default(0)
+  
+  // Validity
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime?
+  
+  // Audit
+  createdBy   String?   // Admin who created it
+  note        String?   // e.g., "For podcast guests"
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Track who used it
+  redemptions HostPromoRedemption[]
+
+  @@index([code])
+  @@map("host_promo_codes")
+}
+
+model HostPromoRedemption {
+  id            String    @id @default(cuid())
+  promoCodeId   String
+  promoCode     HostPromoCode @relation(fields: [promoCodeId], references: [id])
+  hostProfileId String
+  
+  // What they saved
+  amountSaved   Int       // In cents
+  
+  createdAt     DateTime  @default(now())
+
+  @@unique([promoCodeId, hostProfileId])
+  @@map("host_promo_redemptions")
+}
+
+// ============================================================================
 // HOST
 // ============================================================================
 
@@ -202,6 +253,13 @@ model HostProfile {
   id          String   @id @default(cuid())
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Payment status
+  membershipPaid      Boolean   @default(false)
+  membershipPaidAt    DateTime?
+  membershipAmount    Int?      // Amount paid in cents (19900 = $199)
+  stripePaymentId     String?   // Stripe PaymentIntent ID
+  promoCodeUsed       String?   // If they used a promo code
   
   // Platform vertical
   vertical      Vertical  @default(STR)

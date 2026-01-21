@@ -40,7 +40,7 @@ const faqSchema = {
       name: "How much does CreatorStays cost?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "CreatorStays is free to join for both hosts and creators. We charge a small platform fee only when a collaboration is successfully completed and payment is processed."
+        text: "Hosts pay a one-time $199 membership fee for lifetime access to the platform. Creators join for free. We charge a 15% platform fee on both sides when payments are processed."
       }
     },
     {
