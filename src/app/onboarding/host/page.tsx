@@ -554,7 +554,9 @@ export default function HostOnboardingPage() {
     })
     
     if (!profileRes.ok) {
-      throw new Error("Failed to save profile")
+      const errorData = await profileRes.json().catch(() => ({}))
+      console.error("Profile save error:", errorData)
+      throw new Error(errorData.error || "Failed to save profile")
     }
     
     // Create property
@@ -564,23 +566,24 @@ export default function HostOnboardingPage() {
       body: JSON.stringify({
         airbnbUrl: data.airbnbUrl,
         title: data.propertyTitle,
-        propertyType: data.propertyType,
         cityRegion: data.cityRegion,
         priceNightlyRange: data.priceRange,
-        bedrooms: data.bedrooms ? parseInt(data.bedrooms) : undefined,
+        beds: data.bedrooms ? parseInt(data.bedrooms) : undefined,
         baths: data.bathrooms ? parseInt(data.bathrooms) : undefined,
         guests: data.maxGuests ? parseInt(data.maxGuests) : undefined,
         amenities: data.amenities,
         vibeTags: data.vibeTags,
         photos: data.photos,
-        heroImageUrl: data.heroImageUrl || data.photos[0],
+        heroImageUrl: data.heroImageUrl || (data.photos && data.photos[0]) || null,
         isActive: true,
         isDraft: false,
       }),
     })
     
     if (!propertyRes.ok) {
-      throw new Error("Failed to save property")
+      const errorData = await propertyRes.json().catch(() => ({}))
+      console.error("Property save error:", errorData)
+      throw new Error(errorData.error || "Failed to save property")
     }
   }
 
