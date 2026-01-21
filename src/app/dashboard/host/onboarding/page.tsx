@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import LocationAutocomplete from "@/components/ui/location-autocomplete"
 
 interface OnboardingData {
   // Step 1: About You
@@ -482,10 +483,9 @@ export default function HostOnboardingPage() {
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
                   Location
                 </label>
-                <input
-                  type="text"
+                <LocationAutocomplete
                   value={data.location}
-                  onChange={e => updateField("location", e.target.value)}
+                  onChange={val => updateField("location", val)}
                   placeholder="City, State"
                   className={inputClass}
                 />
@@ -686,10 +686,9 @@ export default function HostOnboardingPage() {
                     <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
                       Location *
                     </label>
-                    <input
-                      type="text"
+                    <LocationAutocomplete
                       value={data.cityRegion}
-                      onChange={e => updateField("cityRegion", e.target.value)}
+                      onChange={val => updateField("cityRegion", val)}
                       placeholder="Lake Tahoe, CA"
                       className={inputClass}
                     />

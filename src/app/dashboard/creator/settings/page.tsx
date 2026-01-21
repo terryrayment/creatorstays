@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useSession, signOut } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
+import LocationAutocomplete from "@/components/ui/location-autocomplete"
 
 function CreatorSettingsContent() {
   const { data: session, status } = useSession()
@@ -265,9 +266,9 @@ function CreatorSettingsContent() {
               </div>
               <div>
                 <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Location</label>
-                <input
+                <LocationAutocomplete
                   value={profile.location}
-                  onChange={e => setProfile({ ...profile, location: e.target.value })}
+                  onChange={val => setProfile({ ...profile, location: val })}
                   placeholder="Los Angeles, CA"
                   className={inputClass}
                 />

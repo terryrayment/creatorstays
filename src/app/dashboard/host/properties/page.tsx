@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import LocationAutocomplete from "@/components/ui/location-autocomplete"
 
 interface Property {
   id: string
@@ -277,41 +278,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess }: {
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div><label className="mb-1.5 block text-[11px] font-bold text-black">Title *</label><Input value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Cozy Mountain Cabin" /></div>
-            <div className="relative">
+            <div>
               <label className="mb-1.5 block text-[11px] font-bold text-black">City / Region *</label>
-              <Input 
+              <LocationAutocomplete
                 value={form.cityRegion || ''} 
-                onChange={e => {
-                  setForm({ ...form, cityRegion: e.target.value })
-                  setShowLocationSuggestions(e.target.value.length > 1)
-                }}
-                onFocus={() => setShowLocationSuggestions((form.cityRegion?.length || 0) > 1)}
+                onChange={val => setForm({ ...form, cityRegion: val })}
                 placeholder="Start typing..." 
+                className="flex h-10 w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
               />
-              {showLocationSuggestions && (
-                <div className="absolute z-50 mt-1 w-full rounded-lg border-2 border-black bg-white py-1 shadow-lg max-h-48 overflow-y-auto">
-                  {LOCATION_SUGGESTIONS
-                    .filter(loc => loc.toLowerCase().includes((form.cityRegion || '').toLowerCase()))
-                    .slice(0, 6)
-                    .map(loc => (
-                      <button
-                        key={loc}
-                        type="button"
-                        onClick={() => {
-                          setForm({ ...form, cityRegion: loc })
-                          setShowLocationSuggestions(false)
-                        }}
-                        className="w-full px-3 py-2 text-left text-sm font-medium text-black hover:bg-[#FFD84A]"
-                      >
-                        {loc}
-                      </button>
-                    ))
-                  }
-                  {LOCATION_SUGGESTIONS.filter(loc => loc.toLowerCase().includes((form.cityRegion || '').toLowerCase())).length === 0 && (
-                    <div className="px-3 py-2 text-sm text-black">No suggestions - you can enter a custom location</div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-4">

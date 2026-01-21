@@ -3,92 +3,8 @@
 import { useState, useRef, useEffect } from "react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
+import LocationAutocomplete from "@/components/ui/location-autocomplete"
 
-// Mock city data
-const MOCK_CITIES = [
-  "Lake Arrowhead, CA",
-  "Lake Tahoe, CA",
-  "Los Angeles, CA",
-  "San Diego, CA",
-  "San Francisco, CA",
-  "Big Bear Lake, CA",
-  "Palm Springs, CA",
-  "Joshua Tree, CA",
-  "Malibu, CA",
-  "Austin, TX",
-  "Denver, CO",
-  "Miami, FL",
-  "Nashville, TN",
-  "Scottsdale, AZ",
-  "Seattle, WA",
-  "New York, NY",
-  "Chicago, IL",
-]
-
-function CityAutocomplete({ 
-  value, 
-  onChange 
-}: { 
-  value: string
-  onChange: (value: string) => void 
-}) {
-  const [open, setOpen] = useState(false)
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const wrapperRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (value.length >= 2) {
-      const filtered = MOCK_CITIES.filter(city => 
-        city.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 6)
-      setSuggestions(filtered)
-      setOpen(filtered.length > 0)
-    } else {
-      setSuggestions([])
-      setOpen(false)
-    }
-  }, [value])
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  return (
-    <div ref={wrapperRef} className="relative">
-      <input
-        required
-        placeholder="Start typing a city..."
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        onFocus={() => suggestions.length > 0 && setOpen(true)}
-        className="h-10 w-full rounded-lg border-[2px] border-black bg-white px-3 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-2 focus:ring-black/20"
-      />
-      {open && suggestions.length > 0 && (
-        <div className="absolute z-20 mt-1 w-full rounded-lg border-[2px] border-black bg-white py-1">
-          {suggestions.map((city, i) => (
-            <button
-              key={i}
-              type="button"
-              className="w-full px-3 py-2 text-left text-[12px] font-medium text-black transition-colors hover:bg-[#FFD84A]"
-              onClick={() => {
-                onChange(city)
-                setOpen(false)
-              }}
-            >
-              {city}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
 
 function normalizeUrl(url: string): string {
   if (!url) return url
@@ -326,12 +242,14 @@ export function HostSignupForm() {
 
         <div>
           <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">City / Region *</label>
-          <CityAutocomplete
+          <LocationAutocomplete
             value={form.cityRegion}
             onChange={(value) => { 
               setForm({ ...form, cityRegion: value })
               setManuallyEdited(true)
             }}
+            placeholder="Start typing a city..."
+            className="flex h-10 w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
           />
         </div>
 

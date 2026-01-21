@@ -1,9 +1,79 @@
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
 
 export function Footer() {
+  const [email, setEmail] = useState("")
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+
+    setStatus("loading")
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          email, 
+          type: "newsletter",
+          source: "footer" 
+        }),
+      })
+      
+      if (res.ok) {
+        setStatus("success")
+        setEmail("")
+      } else {
+        setStatus("error")
+      }
+    } catch {
+      setStatus("error")
+    }
+
+    // Reset status after 3 seconds
+    setTimeout(() => setStatus("idle"), 3000)
+  }
+
   return (
     <footer className="bg-black px-3 pb-4 pt-2 lg:px-4">
       <div className="mx-auto max-w-7xl">
+        {/* Newsletter Bar */}
+        <div className="mb-2 rounded-2xl border-[3px] border-black bg-[#FFD84A] p-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-wider text-black/60">
+                Stay in the loop
+              </p>
+              <p className="mt-1 text-lg font-black text-black">
+                Get the latest creator marketing tips & platform updates
+              </p>
+            </div>
+            <form onSubmit={handleNewsletterSubmit} className="flex w-full gap-2 md:w-auto">
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@email.com"
+                className="h-11 flex-1 rounded-full border-[3px] border-black bg-white px-4 text-sm font-medium text-black placeholder:text-black/40 focus:outline-none md:w-64"
+                required
+              />
+              <button
+                type="submit"
+                disabled={status === "loading"}
+                className="h-11 whitespace-nowrap rounded-full border-[3px] border-black bg-black px-6 text-[11px] font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+              >
+                {status === "loading" ? "..." : status === "success" ? "✓ Subscribed!" : "Subscribe"}
+              </button>
+            </form>
+          </div>
+          {status === "error" && (
+            <p className="mt-2 text-xs font-bold text-red-600">Something went wrong. Try again!</p>
+          )}
+        </div>
+
         <div className="grid gap-2 md:grid-cols-[1.5fr_1fr_1fr]">
           {/* Brand block - Green */}
           <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-5">
