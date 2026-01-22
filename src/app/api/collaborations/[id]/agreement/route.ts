@@ -59,7 +59,7 @@ export async function GET(
       agreement: collaboration.agreement,
       userRole: isHost ? 'host' : 'creator',
       affiliateLink: collaboration.affiliateToken 
-        ? `https://creatorstays.com/r/${collaboration.affiliateToken}`
+        ? `https://crtrstys.com/${collaboration.affiliateToken}`
         : null,
     })
   } catch (error) {
@@ -211,7 +211,7 @@ export async function POST(
         success: true,
         message: 'Agreement fully executed! Collaboration is now active.',
         fullyExecuted: true,
-        affiliateLink: `https://creatorstays.com/r/${collaboration.affiliateToken}`,
+        affiliateLink: `https://crtrstys.com/${collaboration.affiliateToken}`,
       })
     }
 

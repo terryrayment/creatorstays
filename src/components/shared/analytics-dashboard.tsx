@@ -108,7 +108,7 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
   }, [session, viewAs, days])
 
   const copyLink = (token: string) => {
-    navigator.clipboard.writeText(`https://creatorstays.com/r/${token}`)
+    navigator.clipboard.writeText(`https://crtrstys.com/${token}`)
     setCopiedToken(token)
     setTimeout(() => setCopiedToken(null), 2000)
   }
@@ -358,7 +358,7 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                   </svg>
                   <code className="flex-1 truncate text-xs text-black/60">
-                    creatorstays.com/r/{item.link.token}
+                    crtrstys.com/{item.link.token}
                   </code>
                   <button 
                     className="rounded-full border border-black/20 bg-white px-3 py-1 text-[10px] font-bold text-black hover:bg-black hover:text-white transition-colors"

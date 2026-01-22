@@ -56,7 +56,7 @@ Common mistake: Being too vague about deliverables. Specify exactly what you wan
     title: "How tracked links work", 
     content: `Every creator gets a unique tracking link to your Airbnb listing. When they post content with this link, we track every click in real time. You see: total clicks, unique visitors, referral sources, device types, and geographic breakdown.
 
-The link format is creatorstays.com/r/[unique-token]. When someone clicks, we log the event and redirect them to your Airbnb listing. The redirect is instant—users won't notice any delay.
+The link format is crtrstys.com/[unique-token]. When someone clicks, we log the event and redirect them to your Airbnb listing. The redirect is instant—users won't notice any delay.
 
 Links remain active for the duration of your collaboration. After the campaign ends, you can choose to keep tracking or deactivate the link. Historical data is always preserved in your dashboard.
 
@@ -282,7 +282,7 @@ Creators found generating fake clicks are permanently banned. Hosts affected by 
         q: "Can I see which specific posts or stories drove clicks?", 
         a: `Partially. Our tracking shows referral sources, which can indicate whether traffic came from Instagram, TikTok, YouTube, or direct links. However, we can't see inside those platforms to identify specific posts.
 
-To track at the post level, ask your creator to use different link variants or add UTM parameters. Example: creatorstays.com/r/abc123?utm_source=ig_reel_1. This lets you filter by parameter in your dashboard.
+To track at the post level, ask your creator to use different link variants or add UTM parameters. Example: crtrstys.com/abc123?utm_source=ig_reel_1. This lets you filter by parameter in your dashboard.
 
 Some creators include screenshots or links to their posts when submitting deliverables. This helps you correlate content with traffic spikes manually.
 

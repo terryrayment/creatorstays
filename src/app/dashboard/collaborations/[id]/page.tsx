@@ -1011,11 +1011,11 @@ export default function CollaborationDetailPage() {
               </p>
               <div className="mt-2 flex items-center gap-2">
                 <code className="flex-1 rounded-lg border-2 border-black bg-white px-4 py-3 font-mono text-sm text-black">
-                  https://creatorstays.com/r/{collaboration.affiliateToken}
+                  https://crtrstys.com/{collaboration.affiliateToken}
                 </code>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(`https://creatorstays.com/r/${collaboration.affiliateToken}`)
+                    navigator.clipboard.writeText(`https://crtrstys.com/${collaboration.affiliateToken}`)
                     setToast("Link copied!")
                   }}
                   className="rounded-full border-2 border-black bg-black px-4 py-3 text-[10px] font-bold text-white hover:bg-black/80"

@@ -179,7 +179,7 @@ export async function PATCH(
       // Send approval email to creator with tracking link
       if (collaboration.creator.user.email) {
         const trackingLink = collaboration.affiliateToken 
-          ? `https://creatorstays.com/r/${collaboration.affiliateToken}`
+          ? `https://crtrstys.com/${collaboration.affiliateToken}`
           : 'Link will be generated shortly'
 
         await sendEmail({
