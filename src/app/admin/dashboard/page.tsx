@@ -320,7 +320,7 @@ export default function AdminDashboardPage() {
                               rel="noopener noreferrer"
                               className="text-[10px] text-[#4AA3FF] hover:underline break-all"
                             >
-                              {host.propertyUrl.includes('airbnb') ? '🏠 Airbnb' : '🏠 VRBO'}: View Listing →
+                              🏠 Airbnb: View Listing →
                             </a>
                           )}
                         </div>

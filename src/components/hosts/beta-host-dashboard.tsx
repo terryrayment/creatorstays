@@ -247,7 +247,7 @@ export function BetaHostDashboard() {
                 <PrepItem
                   done={prepStatus.hasProperty}
                   title="Add your property"
-                  description="Import from Airbnb/VRBO or add manually. Include great photos."
+                  description="Import from Airbnb or add manually. Include great photos."
                   href="/dashboard/host/properties"
                   priority={!prepStatus.hasProperty}
                 />

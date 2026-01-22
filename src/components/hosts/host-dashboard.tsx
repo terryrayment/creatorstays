@@ -27,7 +27,7 @@ function GettingStartedChecklist({
       label: 'Add your first property', 
       done: hasProperty, 
       href: '/dashboard/host/properties',
-      description: 'Add your Airbnb or VRBO listing to get started'
+      description: 'Add your Airbnb listing to get started'
     },
     { 
       id: 'profile', 
