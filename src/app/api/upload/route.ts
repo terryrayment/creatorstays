@@ -5,14 +5,8 @@ import { uploadToCloudinary, type UploadResult } from '@/lib/cloudinary'
 
 export const dynamic = 'force-dynamic'
 
-// Increase body size limit for file uploads (100MB)
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb',
-    },
-  },
-}
+// For large file uploads, body size is handled by vercel.json or next.config.js
+// In App Router, we don't use the old `config` export
 
 // POST /api/upload - Upload a file to Cloudinary
 export async function POST(request: NextRequest) {
