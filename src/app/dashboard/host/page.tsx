@@ -314,7 +314,6 @@ export default function HostDashboardPage() {
             {/* Header */}
             <div className="text-center mb-6">
               <div className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1 mb-4">
-                <span className="text-sm">✨</span>
                 <span className="text-xs font-bold uppercase tracking-wider">Beta Access</span>
               </div>
               <h2 className="font-heading text-2xl tracking-tight text-black">Welcome to CreatorStays!</h2>

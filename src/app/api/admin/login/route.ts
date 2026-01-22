@@ -1,24 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
-// Admin credentials - hardcoded for reliability
-const ADMIN_EMAIL = 'terry@creatorstays.com'
-const ADMIN_PASSWORD = 'Rapp195312!'
+// Simple 4-digit admin passcode
+const ADMIN_PASSCODE = '0606'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const email = (body.email || '').trim().toLowerCase()
-    const password = (body.password || '').trim()
+    const passcode = (body.passcode || '').trim()
 
-    // Debug logging (remove in production)
-    console.log('[Admin Login] Attempt:', { 
-      emailProvided: email, 
-      emailExpected: ADMIN_EMAIL.toLowerCase(),
-      passwordMatch: password === ADMIN_PASSWORD 
-    })
-
-    if (email === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD) {
+    if (passcode === ADMIN_PASSCODE) {
       // Set secure HTTP-only cookie
       const cookieStore = await cookies()
       cookieStore.set('admin_session', 'authenticated', {
@@ -32,7 +23,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true })
     }
 
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+    return NextResponse.json({ error: 'Invalid code' }, { status: 401 })
   } catch (error) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }

@@ -172,16 +172,14 @@ export const authOptions: NextAuthOptions = {
         isNewUser,
       })
       
-      // Track last login time
+      // Track last login time (non-blocking, fails silently if column doesn't exist yet)
       if (user.id) {
-        try {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { lastLoginAt: new Date() }
-          })
-        } catch (e) {
-          console.error("[CreatorStays] Failed to update lastLoginAt:", e)
-        }
+        prisma.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() }
+        }).catch(() => {
+          // Silently ignore - lastLoginAt column might not exist yet
+        })
       }
     },
   },

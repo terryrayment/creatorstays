@@ -62,7 +62,7 @@ function GettingStartedChecklist({
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🎉</span>
+              <span className="text-2xl"></span>
               <h3 className="font-heading text-lg font-black uppercase tracking-wider text-black">You&apos;re All Set!</h3>
             </div>
             <p className="mt-2 text-sm text-black/70">
@@ -86,7 +86,7 @@ function GettingStartedChecklist({
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-[#FFD84A] px-2.5 py-0.5 text-[10px] font-bold uppercase">
-              ✨ Beta Host
+              Beta Host
             </span>
           </div>
           <h3 className="mt-2 font-heading text-lg font-black uppercase tracking-wider text-black">Getting Started</h3>
@@ -813,7 +813,7 @@ export function HostDashboard() {
                 Welcome{hostProfile.displayName ? `, ${hostProfile.displayName.split(' ')[0]}` : ''}
               </h1>
               <span className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold uppercase">
-                ✨ Beta
+                Beta
               </span>
             </div>
             <p className="mt-1 text-sm text-black/70">
@@ -1006,11 +1006,11 @@ export function HostDashboard() {
             <Section title="Content Ideas">
               <div className="space-y-2">
                 <div className="rounded-lg bg-white p-3">
-                  <p className="text-xs font-bold text-black">🏠 Property Tour</p>
+                  <p className="text-xs font-bold text-black">Property Tour</p>
                   <p className="mt-1 text-[10px] text-black/70">"Walk through the space, highlight unique features, show the views"</p>
                 </div>
                 <div className="rounded-lg bg-white p-3">
-                  <p className="text-xs font-bold text-black">📍 Local Guide</p>
+                  <p className="text-xs font-bold text-black">Local Guide</p>
                   <p className="mt-1 text-[10px] text-black/70">"Best coffee spots, hidden gems, things to do within 10 min"</p>
                 </div>
                 <div className="rounded-lg bg-white p-3">
@@ -1018,7 +1018,7 @@ export function HostDashboard() {
                   <p className="mt-1 text-[10px] text-black/70">"Morning routine at the property, cooking breakfast, sunset views"</p>
                 </div>
                 <div className="rounded-lg bg-white p-3">
-                  <p className="text-xs font-bold text-black">✨ Vibe Check</p>
+                  <p className="text-xs font-bold text-black">Vibe Check</p>
                   <p className="mt-1 text-[10px] text-black/70">"Aesthetic shots with trending audio, cozy moments, ambiance"</p>
                 </div>
               </div>

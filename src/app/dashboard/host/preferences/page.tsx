@@ -50,13 +50,11 @@ function Option({
 function MultiOption({ 
   selected, 
   onClick, 
-  children,
-  emoji
+  children
 }: { 
   selected: boolean
   onClick: () => void
   children: React.ReactNode
-  emoji?: string
 }) {
   return (
     <button
@@ -69,7 +67,6 @@ function MultiOption({
       }`}
     >
       <div className="flex items-center gap-2">
-        {emoji && <span>{emoji}</span>}
         <span className="text-sm font-bold text-black">{children}</span>
         {selected && (
           <svg className="h-4 w-4 text-[#28D17C] ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -233,28 +230,28 @@ export default function CreatorPreferencesPage() {
                 onClick={() => setLocationPref("local")}
                 description="Best for authentic local content, easy meetups"
               >
-                📍 Same city/region as my property
+                Same city/region as my property
               </Option>
               <Option 
                 selected={locationPref === "regional"} 
                 onClick={() => setLocationPref("regional")}
                 description="Good balance of local knowledge and variety"
               >
-                🗺️ Same state/country
+                Same state/country
               </Option>
               <Option 
                 selected={locationPref === "travel"} 
                 onClick={() => setLocationPref("travel")}
                 description="Great for travel content, they'll visit specifically"
               >
-                ✈️ Willing to travel (I'll cover travel costs)
+                Willing to travel (I&apos;ll cover travel costs)
               </Option>
               <Option 
                 selected={locationPref === "anywhere"} 
                 onClick={() => setLocationPref("anywhere")}
                 description="Maximum flexibility, focus on content quality"
               >
-                🌎 Anywhere (remote content or any location)
+                Anywhere (remote content or any location)
               </Option>
             </div>
           </div>
@@ -270,40 +267,40 @@ export default function CreatorPreferencesPage() {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <MultiOption selected={niches.includes("travel")} onClick={() => toggleNiche("travel")} emoji="✈️">
+              <MultiOption selected={niches.includes("travel")} onClick={() => toggleNiche("travel")}>
                 Travel
               </MultiOption>
-              <MultiOption selected={niches.includes("lifestyle")} onClick={() => toggleNiche("lifestyle")} emoji="🌿">
+              <MultiOption selected={niches.includes("lifestyle")} onClick={() => toggleNiche("lifestyle")}>
                 Lifestyle
               </MultiOption>
-              <MultiOption selected={niches.includes("luxury")} onClick={() => toggleNiche("luxury")} emoji="✨">
+              <MultiOption selected={niches.includes("luxury")} onClick={() => toggleNiche("luxury")}>
                 Luxury
               </MultiOption>
-              <MultiOption selected={niches.includes("family")} onClick={() => toggleNiche("family")} emoji="👨‍👩‍👧‍👦">
+              <MultiOption selected={niches.includes("family")} onClick={() => toggleNiche("family")}>
                 Family
               </MultiOption>
-              <MultiOption selected={niches.includes("adventure")} onClick={() => toggleNiche("adventure")} emoji="🏔️">
+              <MultiOption selected={niches.includes("adventure")} onClick={() => toggleNiche("adventure")}>
                 Adventure
               </MultiOption>
-              <MultiOption selected={niches.includes("food")} onClick={() => toggleNiche("food")} emoji="🍕">
+              <MultiOption selected={niches.includes("food")} onClick={() => toggleNiche("food")}>
                 Food & Dining
               </MultiOption>
-              <MultiOption selected={niches.includes("wellness")} onClick={() => toggleNiche("wellness")} emoji="🧘">
+              <MultiOption selected={niches.includes("wellness")} onClick={() => toggleNiche("wellness")}>
                 Wellness
               </MultiOption>
-              <MultiOption selected={niches.includes("photography")} onClick={() => toggleNiche("photography")} emoji="📸">
+              <MultiOption selected={niches.includes("photography")} onClick={() => toggleNiche("photography")}>
                 Photography
               </MultiOption>
-              <MultiOption selected={niches.includes("couples")} onClick={() => toggleNiche("couples")} emoji="💑">
+              <MultiOption selected={niches.includes("couples")} onClick={() => toggleNiche("couples")}>
                 Couples
               </MultiOption>
-              <MultiOption selected={niches.includes("digital-nomad")} onClick={() => toggleNiche("digital-nomad")} emoji="💻">
+              <MultiOption selected={niches.includes("digital-nomad")} onClick={() => toggleNiche("digital-nomad")}>
                 Digital Nomad
               </MultiOption>
-              <MultiOption selected={niches.includes("pet")} onClick={() => toggleNiche("pet")} emoji="🐕">
+              <MultiOption selected={niches.includes("pet")} onClick={() => toggleNiche("pet")}>
                 Pet-Friendly
               </MultiOption>
-              <MultiOption selected={niches.includes("budget")} onClick={() => toggleNiche("budget")} emoji="💰">
+              <MultiOption selected={niches.includes("budget")} onClick={() => toggleNiche("budget")}>
                 Budget Travel
               </MultiOption>
             </div>
@@ -349,8 +346,8 @@ export default function CreatorPreferencesPage() {
                 Large creators
               </Option>
             </div>
-            <p className="text-xs text-black/40">
-              💡 Tip: Most successful hosts work with a mix of micro and small creators for best ROI.
+            <p className="text-xs text-black/40 italic">
+              Tip: Most successful hosts work with a mix of micro and small creators for best ROI.
             </p>
           </div>
         )}
@@ -370,28 +367,28 @@ export default function CreatorPreferencesPage() {
                 onClick={() => toggleContentStyle("polished")}
                 description="High production value, professional lighting, edited"
               >
-                ✨ Polished & Editorial
+                Polished &amp; Editorial
               </Option>
               <Option 
                 selected={contentStyle.includes("authentic")} 
                 onClick={() => toggleContentStyle("authentic")}
                 description="Real, unfiltered, relatable content"
               >
-                📱 Authentic & Raw
+                Authentic &amp; Raw
               </Option>
               <Option 
                 selected={contentStyle.includes("cinematic")} 
                 onClick={() => toggleContentStyle("cinematic")}
                 description="Drone shots, transitions, storytelling"
               >
-                🎬 Cinematic
+                Cinematic
               </Option>
               <Option 
                 selected={contentStyle.includes("casual")} 
                 onClick={() => toggleContentStyle("casual")}
                 description="Day-in-the-life, casual vlogs, stories"
               >
-                🎯 Casual & Everyday
+                Casual &amp; Everyday
               </Option>
             </div>
           </div>
@@ -412,35 +409,35 @@ export default function CreatorPreferencesPage() {
                 onClick={() => setBudgetRange("trade")}
                 description="Free stay in exchange for content"
               >
-                🏠 Trade only (free stay)
+                Trade only (free stay)
               </Option>
               <Option 
                 selected={budgetRange === "low"} 
                 onClick={() => setBudgetRange("low")}
                 description="Free stay + small fee"
               >
-                💵 $0 - $250 + free stay
+                $0 - $250 + free stay
               </Option>
               <Option 
                 selected={budgetRange === "medium"} 
                 onClick={() => setBudgetRange("medium")}
                 description="Good for established micro/small creators"
               >
-                💵💵 $250 - $750 + free stay
+                $250 - $750 + free stay
               </Option>
               <Option 
                 selected={budgetRange === "high"} 
                 onClick={() => setBudgetRange("high")}
                 description="For medium creators with proven results"
               >
-                💵💵💵 $750 - $2,000 + free stay
+                $750 - $2,000 + free stay
               </Option>
               <Option 
                 selected={budgetRange === "premium"} 
                 onClick={() => setBudgetRange("premium")}
                 description="For large creators and campaign-style content"
               >
-                💎 $2,000+ per collaboration
+                $2,000+ per collaboration
               </Option>
             </div>
           </div>

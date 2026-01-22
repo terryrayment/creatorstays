@@ -61,7 +61,7 @@ function PrepItem({
             {title}
             {priority && !done && (
               <span className="ml-2 rounded-full bg-[#FFD84A] px-2 py-0.5 text-[9px] font-bold uppercase">
-                Do this first
+                Next Step
               </span>
             )}
           </p>
@@ -75,11 +75,46 @@ function PrepItem({
   )
 }
 
-// Coming soon feature item
-function ComingSoonItem({ icon, title, description }: { icon: string; title: string; description: string }) {
+// Coming soon feature item - using SVG icons instead of emojis
+function ComingSoonItem({ iconType, title, description }: { iconType: string; title: string; description: string }) {
+  const icons: Record<string, React.ReactNode> = {
+    search: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    ),
+    target: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
+      </svg>
+    ),
+    message: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      </svg>
+    ),
+    document: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    ),
+    payment: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+      </svg>
+    ),
+    chart: (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+  }
+
   return (
     <div className="flex items-start gap-3 rounded-lg bg-[#FAFAFA] p-3">
-      <span className="text-lg">{icon}</span>
+      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-black/20 text-black/60">
+        {icons[iconType] || icons.search}
+      </div>
       <div>
         <p className="text-xs font-bold text-black">{title}</p>
         <p className="text-[10px] text-black/60">{description}</p>
@@ -181,8 +216,8 @@ export function BetaHostDashboard() {
         const profileData = await profileRes.json()
         const profile = profileData.profile || profileData
         
-        // Profile complete = has displayName AND bio
-        const hasProfile = Boolean(profile?.displayName && profile?.bio && profile.displayName !== 'Host')
+        // Profile complete = has displayName that's not the default "Host"
+        const hasProfile = Boolean(profile?.displayName && profile.displayName !== 'Host' && profile.displayName.trim() !== '')
         
         // Preferences complete = has completed the creator preferences quiz
         const hasPreferences = Boolean(profile?.creatorPrefs?.completedAt)
@@ -278,7 +313,11 @@ export function BetaHostDashboard() {
             {/* All complete message */}
             {completedCount === totalSteps && (
               <div className="mt-4 rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4 text-center">
-                <span className="text-2xl">🎉</span>
+                <div className="flex h-10 w-10 mx-auto items-center justify-center rounded-full border-2 border-[#28D17C] bg-[#28D17C]">
+                  <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
                 <p className="mt-2 text-sm font-bold text-black">You&apos;re ready!</p>
                 <p className="mt-1 text-xs text-black/60">
                   We&apos;ll email you at <span className="font-bold">{session?.user?.email}</span> as soon as creators are live.
@@ -288,9 +327,12 @@ export function BetaHostDashboard() {
 
             {/* Auto-notify callout for incomplete users too */}
             {completedCount < totalSteps && completedCount > 0 && (
-              <div className="mt-4 rounded-lg border border-black/10 bg-[#4AA3FF]/5 p-3">
+              <div className="mt-4 rounded-lg border border-black/10 bg-[#4AA3FF]/5 p-3 flex items-start gap-2">
+                <svg className="h-4 w-4 mt-0.5 shrink-0 text-[#4AA3FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
                 <p className="text-[11px] text-black/60">
-                  📬 <span className="font-medium">You&apos;ll be notified automatically</span> when creators launch — no action needed.
+                  <span className="font-medium">You&apos;ll be notified automatically</span> when creators launch — no action needed.
                 </p>
               </div>
             )}
@@ -360,32 +402,32 @@ export function BetaHostDashboard() {
           <Section title="Coming Soon">
             <div className="space-y-2">
               <ComingSoonItem
-                icon="🔍"
+                iconType="search"
                 title="Creator Discovery"
                 description="Browse real creator profiles with verified stats"
               />
               <ComingSoonItem
-                icon="🎯"
+                iconType="target"
                 title="Smart Matching"
                 description="Get creator recommendations based on your property"
               />
               <ComingSoonItem
-                icon="💬"
+                iconType="message"
                 title="Direct Messaging"
                 description="Chat with creators before sending offers"
               />
               <ComingSoonItem
-                icon="📝"
+                iconType="document"
                 title="Easy Agreements"
                 description="One-click contracts and deliverable tracking"
               />
               <ComingSoonItem
-                icon="💳"
+                iconType="payment"
                 title="Secure Payments"
                 description="Pay creators safely through the platform"
               />
               <ComingSoonItem
-                icon="📊"
+                iconType="chart"
                 title="Performance Analytics"
                 description="Track clicks and engagement from creator content"
               />

@@ -10,14 +10,12 @@ function Option({
   selected, 
   onClick, 
   children,
-  description,
-  emoji
+  description
 }: { 
   selected: boolean
   onClick: () => void
   children: React.ReactNode
   description?: string
-  emoji?: string
 }) {
   return (
     <button
@@ -30,12 +28,9 @@ function Option({
       }`}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-start gap-3">
-          {emoji && <span className="text-xl">{emoji}</span>}
-          <div>
-            <p className="font-bold text-black">{children}</p>
-            {description && <p className="mt-1 text-xs text-black/60">{description}</p>}
-          </div>
+        <div>
+          <p className="font-bold text-black">{children}</p>
+          {description && <p className="mt-1 text-xs text-black/60">{description}</p>}
         </div>
         <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
           selected ? 'border-[#28D17C] bg-[#28D17C]' : 'border-black/30'
@@ -184,7 +179,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={contentTypes.includes("property-tour")} 
                 onClick={() => toggleContentType("property-tour")}
-                emoji="🏠"
+
                 description="Walkthrough video showing off your space"
               >
                 Property Tour
@@ -192,7 +187,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={contentTypes.includes("local-guide")} 
                 onClick={() => toggleContentType("local-guide")}
-                emoji="📍"
+
                 description="Nearby restaurants, attractions, hidden gems"
               >
                 Local Area Guide
@@ -200,7 +195,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={contentTypes.includes("day-in-life")} 
                 onClick={() => toggleContentType("day-in-life")}
-                emoji="☀️"
+
                 description="Morning coffee to evening sunset"
               >
                 Day-in-the-Life
@@ -208,7 +203,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={contentTypes.includes("review")} 
                 onClick={() => toggleContentType("review")}
-                emoji="⭐"
+
                 description="Honest review and recommendation"
               >
                 Review / Testimonial
@@ -216,7 +211,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={contentTypes.includes("reels-tiktok")} 
                 onClick={() => toggleContentType("reels-tiktok")}
-                emoji="🎬"
+
                 description="Short-form vertical video (15-60 seconds)"
               >
                 Reels / TikToks
@@ -224,7 +219,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={contentTypes.includes("photos")} 
                 onClick={() => toggleContentType("photos")}
-                emoji="📸"
+
                 description="High-quality still images for your feed"
               >
                 Photo Set
@@ -232,7 +227,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={contentTypes.includes("stories")} 
                 onClick={() => toggleContentType("stories")}
-                emoji="📱"
+
                 description="Behind-the-scenes, casual content"
               >
                 Instagram Stories
@@ -254,7 +249,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={usageRights === "creator-only"} 
                 onClick={() => setUsageRights("creator-only")}
-                emoji="📱"
+
                 description="Creator posts on their channels, tags you"
               >
                 Creator's social media only
@@ -262,7 +257,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={usageRights === "shared"} 
                 onClick={() => setUsageRights("shared")}
-                emoji="🔄"
+
                 description="You can repost and share on your socials"
               >
                 Shared usage (repost rights)
@@ -270,7 +265,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={usageRights === "full"} 
                 onClick={() => setUsageRights("full")}
-                emoji="✅"
+
                 description="Website, Airbnb listing, social media"
               >
                 Full usage rights (all platforms)
@@ -278,14 +273,14 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={usageRights === "ads"} 
                 onClick={() => setUsageRights("ads")}
-                emoji="📢"
+
                 description="Paid advertising, boosted posts (premium)"
               >
                 Advertising rights included
               </Option>
             </div>
             <p className="text-xs text-black/40">
-              💡 Tip: More rights = higher cost. Most hosts start with "Shared usage".
+              Tip: More rights = higher cost. Most hosts start with "Shared usage".
             </p>
           </div>
         )}
@@ -345,7 +340,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={primaryGoal === "bookings"} 
                 onClick={() => setPrimaryGoal("bookings")}
-                emoji="📅"
+
                 description="Drive direct or platform bookings"
               >
                 Get more bookings
@@ -353,7 +348,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={primaryGoal === "awareness"} 
                 onClick={() => setPrimaryGoal("awareness")}
-                emoji="👀"
+
                 description="More people knowing about your property"
               >
                 Build brand awareness
@@ -361,7 +356,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={primaryGoal === "content-library"} 
                 onClick={() => setPrimaryGoal("content-library")}
-                emoji="🖼️"
+
                 description="Quality photos/videos for your own marketing"
               >
                 Build content library
@@ -369,7 +364,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={primaryGoal === "social-proof"} 
                 onClick={() => setPrimaryGoal("social-proof")}
-                emoji="✨"
+
                 description="Reviews and recommendations from trusted voices"
               >
                 Social proof & credibility
@@ -377,7 +372,7 @@ export default function ContentGoalsPage() {
               <Option 
                 selected={primaryGoal === "seo"} 
                 onClick={() => setPrimaryGoal("seo")}
-                emoji="🔍"
+
                 description="Backlinks and mentions to improve search"
               >
                 Improve SEO / search visibility
