@@ -191,9 +191,8 @@ function SetupChecklist() {
             <Link
               key={i}
               href={item.href}
-              className={`flex items-center gap-2 rounded-lg border-2 border-black p-3 transition-all hover:-translate-y-0.5 ${
-                item.done ? "bg-[#28D17C]" : "bg-white hover:bg-black/5"
-              }`}
+              className="flex items-center gap-2 rounded-lg border-2 border-black p-3 transition-all hover:-translate-y-0.5"
+              style={{ backgroundColor: item.done ? '#28D17C' : '#ffffff' }}
             >
               <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 border-black text-[10px] font-bold ${
                 item.done ? "bg-black text-white" : "bg-white text-black"
@@ -231,8 +230,9 @@ export default function HostDashboardPage() {
         if (res.ok) {
           const profile = await res.json()
           
-          // Check if agency
-          setIsAgency(profile.isAgency || false)
+          // Check if agency from profile or localStorage (for testing)
+          const isAgencyFromStorage = localStorage.getItem('creatorstays_agency') === 'true'
+          setIsAgency(profile.isAgency || isAgencyFromStorage)
           
           // Check if onboarding is complete AND membership is paid
           if (!profile.onboardingComplete || !profile.membershipPaid) {
@@ -249,6 +249,13 @@ export default function HostDashboardPage() {
           const params = new URLSearchParams(window.location.search)
           if (params.get("welcome") === "true") {
             setShowWelcome(true)
+            window.history.replaceState({}, "", "/dashboard/host")
+          }
+          
+          // Check for agency param (for testing)
+          if (params.get("agency") === "true") {
+            localStorage.setItem('creatorstays_agency', 'true')
+            setIsAgency(true)
             window.history.replaceState({}, "", "/dashboard/host")
           }
         }
