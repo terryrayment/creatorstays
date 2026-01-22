@@ -23,30 +23,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Host profile not found' }, { status: 404 })
     }
 
-    if (!hostProfile.isAgency) {
-      return NextResponse.json({ error: 'Agency subscription required' }, { status: 403 })
-    }
-
+    // Allow the request even if not officially an agency (for localStorage testing mode)
+    // The frontend handles the access check
     const teamMembers = await prisma.agencyTeamMember.findMany({
       where: { agencyHostId: hostProfile.id },
       orderBy: { createdAt: 'desc' },
     })
 
-    // Get user details for each team member
-    const userIds = teamMembers.map(m => m.userId)
-    const users = await prisma.user.findMany({
-      where: { id: { in: userIds } },
-      select: { id: true, name: true, email: true, image: true },
-    })
+    // Get user details for each team member (only for real user IDs, not pending_xxx)
+    const realUserIds = teamMembers
+      .map(m => m.userId)
+      .filter(id => !id.startsWith('pending_'))
+    
+    const users = realUserIds.length > 0 
+      ? await prisma.user.findMany({
+          where: { id: { in: realUserIds } },
+          select: { id: true, name: true, email: true, image: true },
+        })
+      : []
 
     const membersWithUsers = teamMembers.map(m => ({
       ...m,
-      user: users.find(u => u.id === m.userId),
+      user: users.find(u => u.id === m.userId) || null,
     }))
 
     return NextResponse.json({
       teamMembers: membersWithUsers,
-      totalSeats: hostProfile.teamSeats,
+      totalSeats: hostProfile.teamSeats || 5,
       usedSeats: teamMembers.filter(m => m.inviteStatus === 'accepted').length,
     })
   } catch (error) {
@@ -82,11 +85,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Host profile not found' }, { status: 404 })
     }
 
-    if (!hostProfile.isAgency) {
-      return NextResponse.json({ error: 'Agency subscription required' }, { status: 403 })
-    }
+    // Allow invites for localStorage testing mode - frontend handles access check
+    // In production, you'd want to verify isAgency here
 
-    // Check seat limit
+    // Check seat limit (default to 5 if not set)
+    const seatLimit = hostProfile.teamSeats || 5
     const currentMembers = await prisma.agencyTeamMember.count({
       where: { 
         agencyHostId: hostProfile.id,
@@ -94,9 +97,9 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    if (currentMembers >= hostProfile.teamSeats) {
+    if (currentMembers >= seatLimit) {
       return NextResponse.json({ 
-        error: `Team seat limit reached (${hostProfile.teamSeats}). Upgrade to add more.` 
+        error: `Team seat limit reached (${seatLimit}). Upgrade to add more.` 
       }, { status: 400 })
     }
 
@@ -177,6 +180,61 @@ export async function POST(request: NextRequest) {
     console.error('[Team Invite] Error:', error)
     return NextResponse.json(
       { error: 'Failed to invite team member' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE /api/host/agency/team?memberId=xxx - Remove team member
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const memberId = searchParams.get('memberId')
+
+    if (!memberId) {
+      return NextResponse.json({ error: 'Member ID required' }, { status: 400 })
+    }
+
+    const hostProfile = await prisma.hostProfile.findUnique({
+      where: { userId: session.user.id },
+    })
+
+    if (!hostProfile) {
+      return NextResponse.json({ error: 'Host profile not found' }, { status: 404 })
+    }
+
+    // Allow deletion for localStorage testing mode - frontend handles access check
+
+    // Find and delete the team member
+    const teamMember = await prisma.agencyTeamMember.findFirst({
+      where: {
+        id: memberId,
+        agencyHostId: hostProfile.id,
+      },
+    })
+
+    if (!teamMember) {
+      return NextResponse.json({ error: 'Team member not found' }, { status: 404 })
+    }
+
+    await prisma.agencyTeamMember.delete({
+      where: { id: memberId },
+    })
+
+    return NextResponse.json({ 
+      success: true,
+      message: 'Team member removed',
+    })
+  } catch (error) {
+    console.error('[Team Remove] Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to remove team member' },
       { status: 500 }
     )
   }

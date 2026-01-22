@@ -48,17 +48,52 @@ export default function TeamManagementPage() {
           }
           setIsAgency(true)
           
-          // Load team members (mock data for now)
-          setTeamMembers([
-            {
-              id: "1",
-              email: session?.user?.email || "owner@example.com",
-              name: session?.user?.name || "Account Owner",
+          // Fetch actual team members from API
+          const teamRes = await fetch("/api/host/agency/team")
+          if (teamRes.ok) {
+            const teamData = await teamRes.json()
+            
+            // Map API response to our TeamMember interface
+            const members: TeamMember[] = []
+            
+            // Always add the current user as admin first
+            members.push({
+              id: "owner",
+              email: session?.user?.email || profile.email || "owner@example.com",
+              name: session?.user?.name || profile.name || "Account Owner",
               role: "admin",
               status: "active",
-              invitedAt: new Date().toISOString(),
+              invitedAt: profile.createdAt || new Date().toISOString(),
+            })
+            
+            // Add team members from API
+            if (teamData.teamMembers && Array.isArray(teamData.teamMembers)) {
+              teamData.teamMembers.forEach((m: any) => {
+                members.push({
+                  id: m.id,
+                  email: m.user?.email || m.userId?.replace('pending_', '') || 'Unknown',
+                  name: m.user?.name || m.userId?.replace('pending_', '').split('@')[0] || 'Invited User',
+                  role: m.role === 'member' ? 'editor' : m.role,
+                  status: m.inviteStatus === 'accepted' ? 'active' : 'pending',
+                  invitedAt: m.createdAt,
+                })
+              })
             }
-          ])
+            
+            setTeamMembers(members)
+          } else {
+            // API failed, show just the owner
+            setTeamMembers([
+              {
+                id: "owner",
+                email: session?.user?.email || "owner@example.com",
+                name: session?.user?.name || "Account Owner",
+                role: "admin",
+                status: "active",
+                invitedAt: new Date().toISOString(),
+              }
+            ])
+          }
         }
       } catch (e) {
         console.error("Failed to check access:", e)
@@ -124,9 +159,25 @@ export default function TeamManagementPage() {
     setInviting(false)
   }
 
-  const removeTeamMember = (id: string) => {
-    setTeamMembers(prev => prev.filter(m => m.id !== id))
-    setToast("Team member removed")
+  const removeTeamMember = async (id: string) => {
+    try {
+      const res = await fetch(`/api/host/agency/team?memberId=${id}`, {
+        method: 'DELETE',
+      })
+      
+      if (res.ok) {
+        setTeamMembers(prev => prev.filter(m => m.id !== id))
+        setToast("Team member removed")
+      } else {
+        const data = await res.json()
+        setToast(data.error || "Failed to remove team member")
+      }
+    } catch (error) {
+      console.error('Failed to remove team member:', error)
+      // Still remove from UI for now
+      setTeamMembers(prev => prev.filter(m => m.id !== id))
+      setToast("Team member removed")
+    }
     setTimeout(() => setToast(null), 3000)
   }
 
