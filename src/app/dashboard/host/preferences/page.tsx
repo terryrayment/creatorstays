@@ -446,39 +446,32 @@ export default function CreatorPreferencesPage() {
             </div>
             <div className="space-y-3">
               <Option 
-                selected={budgetRange === "trade"} 
-                onClick={() => setBudgetRange("trade")}
+                selected={budgetRange === "post-for-stay"} 
+                onClick={() => setBudgetRange("post-for-stay")}
                 description="Free stay in exchange for content"
               >
-                Trade only (free stay)
+                Post-for-Stay Only
               </Option>
               <Option 
-                selected={budgetRange === "low"} 
-                onClick={() => setBudgetRange("low")}
-                description="Free stay + small fee"
+                selected={budgetRange === "under-250"} 
+                onClick={() => setBudgetRange("under-250")}
+                description="+ optional free stay"
               >
-                $0 - $250 + free stay
+                Under $250
               </Option>
               <Option 
-                selected={budgetRange === "medium"} 
-                onClick={() => setBudgetRange("medium")}
-                description="Good for established micro/small creators"
+                selected={budgetRange === "under-1000"} 
+                onClick={() => setBudgetRange("under-1000")}
+                description="+ optional free stay"
               >
-                $250 - $750 + free stay
+                Under $1,000
               </Option>
               <Option 
-                selected={budgetRange === "high"} 
-                onClick={() => setBudgetRange("high")}
-                description="For medium creators with proven results"
+                selected={budgetRange === "over-1000"} 
+                onClick={() => setBudgetRange("over-1000")}
+                description="+ optional free stay"
               >
-                $750 - $2,000 + free stay
-              </Option>
-              <Option 
-                selected={budgetRange === "premium"} 
-                onClick={() => setBudgetRange("premium")}
-                description="For large creators and campaign-style content"
-              >
-                $2,000+ per collaboration
+                Over $1,000
               </Option>
             </div>
           </div>

@@ -73,10 +73,10 @@ const CONTENT_NEEDS = [
 ]
 
 const BUDGET_RANGES = [
-  { value: "post-for-stay", label: "Post-for-Stay Only", desc: "Free stay for content" },
-  { value: "under-500", label: "Under $500", desc: "Plus free stay" },
-  { value: "500-2500", label: "$500 - $2,500", desc: "Plus free stay" },
-  { value: "2500-plus", label: "$2,500+", desc: "Premium creators" },
+  { value: "post-for-stay", label: "Post-for-Stay Only", desc: "Free stay in exchange for content" },
+  { value: "under-250", label: "Under $250", desc: "+ optional free stay" },
+  { value: "under-1000", label: "Under $1,000", desc: "+ optional free stay" },
+  { value: "over-1000", label: "Over $1,000", desc: "+ optional free stay" },
 ]
 
 // Filter out Airbnb branding images
@@ -241,6 +241,18 @@ export default function HostOnboardingPage() {
 
   const totalSteps = 3
   
+  // Compute whether Step 1 is complete for visual feedback
+  const step1Complete = (importSuccess || manualEntry) && 
+    data.propertyTitle.trim() && 
+    data.cityRegion.trim() && 
+    parseInt(data.bedrooms) >= 1 &&
+    parseFloat(data.bathrooms) >= 0.5 &&
+    parseInt(data.maxGuests) >= 1 &&
+    data.propertyType
+  
+  // Compute whether Step 2 is complete
+  const step2Complete = data.idealCreators.length > 0 && data.contentNeeds.length > 0
+  
   const updateField = <K extends keyof OnboardingData>(field: K, value: OnboardingData[K]) => {
     setData(prev => ({ ...prev, [field]: value }))
     setError("")
@@ -345,12 +357,38 @@ export default function HostOnboardingPage() {
   // Validation
   const validateStep = (): boolean => {
     if (step === 1) {
+      // Must have either imported from Airbnb or clicked manual entry
+      if (!importSuccess && !manualEntry) {
+        setError("Please import your property from Airbnb or click 'enter details manually' to continue")
+        return false
+      }
       if (!data.propertyTitle.trim()) {
         setError("Please enter your property title")
         return false
       }
       if (!data.cityRegion.trim()) {
-        setError("Please enter the property location")
+        setError("Please select a location from the dropdown")
+        return false
+      }
+      // Validate beds, baths, guests
+      const beds = parseInt(data.bedrooms)
+      const baths = parseFloat(data.bathrooms)
+      const guests = parseInt(data.maxGuests)
+      
+      if (!beds || beds < 1) {
+        setError("Please enter the number of bedrooms")
+        return false
+      }
+      if (!baths || baths < 0.5) {
+        setError("Please enter the number of bathrooms")
+        return false
+      }
+      if (!guests || guests < 1) {
+        setError("Please enter the maximum number of guests")
+        return false
+      }
+      if (!data.propertyType) {
+        setError("Please select a property type")
         return false
       }
     }
@@ -591,7 +629,7 @@ export default function HostOnboardingPage() {
                   )}
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Property Title</label>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Property Title <span className="text-red-500">*</span></label>
                     <input
                       type="text"
                       value={data.propertyTitle}
@@ -602,7 +640,7 @@ export default function HostOnboardingPage() {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Location</label>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Location <span className="text-red-500">*</span></label>
                     <LocationAutocomplete
                       value={data.cityRegion}
                       onChange={(val) => updateField("cityRegion", val)}
@@ -613,21 +651,21 @@ export default function HostOnboardingPage() {
 
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Beds</label>
-                      <input type="number" value={data.bedrooms} onChange={e => updateField("bedrooms", e.target.value)} placeholder="3" className={inputClass} />
+                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Beds <span className="text-red-500">*</span></label>
+                      <input type="number" min="1" value={data.bedrooms} onChange={e => updateField("bedrooms", e.target.value)} placeholder="3" className={inputClass} />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Baths</label>
-                      <input type="number" value={data.bathrooms} onChange={e => updateField("bathrooms", e.target.value)} placeholder="2" className={inputClass} />
+                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Baths <span className="text-red-500">*</span></label>
+                      <input type="number" min="0.5" step="0.5" value={data.bathrooms} onChange={e => updateField("bathrooms", e.target.value)} placeholder="2" className={inputClass} />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Guests</label>
-                      <input type="number" value={data.maxGuests} onChange={e => updateField("maxGuests", e.target.value)} placeholder="6" className={inputClass} />
+                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Guests <span className="text-red-500">*</span></label>
+                      <input type="number" min="1" value={data.maxGuests} onChange={e => updateField("maxGuests", e.target.value)} placeholder="6" className={inputClass} />
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">Property Type</label>
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">Property Type <span className="text-red-500">*</span></label>
                     <div className="flex flex-wrap gap-2">
                       {PROPERTY_TYPES.map(type => (
                         <button
@@ -668,6 +706,45 @@ export default function HostOnboardingPage() {
                       ))}
                     </div>
                   </div>
+                  
+                  {/* Completion Checklist */}
+                  {!step1Complete && (
+                    <div className="rounded-xl border-2 border-[#FFD84A] bg-[#FFD84A]/10 p-4">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black/60">Required to continue:</p>
+                      <div className="space-y-1.5">
+                        {!data.propertyTitle.trim() && (
+                          <p className="flex items-center gap-2 text-sm text-black/70">
+                            <span className="text-[#FFD84A]">○</span> Property title
+                          </p>
+                        )}
+                        {!data.cityRegion.trim() && (
+                          <p className="flex items-center gap-2 text-sm text-black/70">
+                            <span className="text-[#FFD84A]">○</span> Location (select from dropdown)
+                          </p>
+                        )}
+                        {(!data.bedrooms || parseInt(data.bedrooms) < 1) && (
+                          <p className="flex items-center gap-2 text-sm text-black/70">
+                            <span className="text-[#FFD84A]">○</span> Number of bedrooms
+                          </p>
+                        )}
+                        {(!data.bathrooms || parseFloat(data.bathrooms) < 0.5) && (
+                          <p className="flex items-center gap-2 text-sm text-black/70">
+                            <span className="text-[#FFD84A]">○</span> Number of bathrooms
+                          </p>
+                        )}
+                        {(!data.maxGuests || parseInt(data.maxGuests) < 1) && (
+                          <p className="flex items-center gap-2 text-sm text-black/70">
+                            <span className="text-[#FFD84A]">○</span> Maximum guests
+                          </p>
+                        )}
+                        {!data.propertyType && (
+                          <p className="flex items-center gap-2 text-sm text-black/70">
+                            <span className="text-[#FFD84A]">○</span> Property type
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -887,7 +964,15 @@ export default function HostOnboardingPage() {
           ) : <div />}
           
           {step < totalSteps ? (
-            <button onClick={nextStep} className="rounded-full border-2 border-black bg-black px-8 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-transform hover:-translate-y-0.5">
+            <button 
+              onClick={nextStep} 
+              disabled={(step === 1 && !step1Complete) || (step === 2 && !step2Complete)}
+              className={`rounded-full border-2 border-black px-8 py-2.5 text-xs font-bold uppercase tracking-wider transition-transform ${
+                (step === 1 && !step1Complete) || (step === 2 && !step2Complete)
+                  ? 'bg-black/30 text-white/60 cursor-not-allowed'
+                  : 'bg-black text-white hover:-translate-y-0.5'
+              }`}
+            >
               Continue
             </button>
           ) : (
