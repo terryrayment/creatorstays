@@ -216,7 +216,7 @@ export default function HostSentOffersPage() {
             setToast({ message: "Counter accepted! Setting up collaboration...", type: "success" })
             // Redirect to collaborations if accepted
             if (data.collaborationId) {
-              setTimeout(() => { window.location.href = "/dashboard/collaborations" }, 1500)
+              setTimeout(() => { window.location.href = "/beta/dashboard/collaborations" }, 1500)
             }
           } else {
             setToast({ message: "Counter offer declined.", type: "success" })

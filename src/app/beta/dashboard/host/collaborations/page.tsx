@@ -7,7 +7,7 @@ export default function HostCollaborationsPage() {
   const router = useRouter()
   
   useEffect(() => {
-    router.replace("/dashboard/collaborations")
+    router.replace("/beta/dashboard/collaborations")
   }, [router])
 
   return (

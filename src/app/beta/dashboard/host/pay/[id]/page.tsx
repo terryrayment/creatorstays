@@ -162,7 +162,7 @@ export default function PayCollaborationPage() {
             </span>
           </div>
           <Link 
-            href={`/dashboard/collaborations/${collaborationId}`}
+            href="/beta/dashboard/collaborations"
             className="rounded-full border-2 border-black bg-white px-4 py-1 text-[10px] font-black uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5"
           >
             ← Back
@@ -310,10 +310,10 @@ export default function PayCollaborationPage() {
                 Both parties must sign the agreement before payment can be processed.
               </p>
               <Link
-                href={`/dashboard/collaborations/${collaborationId}`}
+                href="/beta/dashboard/collaborations"
                 className="mt-3 inline-block text-sm font-bold text-red-700 underline"
               >
-                View Agreement →
+                View Collaborations →
               </Link>
             </div>
           )}
