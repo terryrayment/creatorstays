@@ -885,12 +885,15 @@ export function HostDashboard() {
               </div>
 
               {/* Traffic Bonus Toggle */}
-              <div className="rounded-xl border-2 border-black p-4">
+              <div className="rounded-xl border-2 border-black p-4" style={{ border: '2px solid black' }}>
                 <div 
                   className="flex cursor-pointer items-center gap-3"
                   onClick={() => setMessage({...message, trafficBonusEnabled: !message.trafficBonusEnabled})}
                 >
-                  <div className={`flex h-5 w-5 items-center justify-center rounded border-2 border-black ${message.trafficBonusEnabled ? 'bg-black' : 'bg-white'}`}>
+                  <div 
+                    className={`flex h-5 w-5 items-center justify-center rounded border-2 ${message.trafficBonusEnabled ? 'bg-black' : 'bg-white'}`}
+                    style={{ border: '2px solid black' }}
+                  >
                     {message.trafficBonusEnabled && (
                       <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -916,11 +919,12 @@ export function HostDashboard() {
                             key={t}
                             type="button"
                             onClick={() => setMessage({...message, trafficBonusThreshold: t})}
-                            className={`flex-1 rounded-full border-2 px-3 py-2 text-sm font-bold transition-colors ${
-                              message.trafficBonusThreshold === t 
-                                ? "border-black bg-[#FFD84A] text-black" 
-                                : "border-black bg-white text-black hover:bg-black/5"
-                            }`}
+                            className="flex-1 rounded-full px-3 py-2 text-sm font-bold transition-colors"
+                            style={{ 
+                              border: '2px solid black',
+                              backgroundColor: message.trafficBonusThreshold === t ? '#FFD84A' : 'white',
+                              color: 'black'
+                            }}
                           >
                             {parseInt(t).toLocaleString()}
                           </button>
@@ -937,11 +941,12 @@ export function HostDashboard() {
                             key={a}
                             type="button"
                             onClick={() => setMessage({...message, trafficBonusAmount: a})}
-                            className={`flex-1 rounded-full border-2 px-4 py-2 text-sm font-bold transition-colors ${
-                              message.trafficBonusAmount === a 
-                                ? "border-black bg-[#FFD84A] text-black" 
-                                : "border-black bg-white text-black hover:bg-black/5"
-                            }`}
+                            className="flex-1 rounded-full px-4 py-2 text-sm font-bold transition-colors"
+                            style={{ 
+                              border: '2px solid black',
+                              backgroundColor: message.trafficBonusAmount === a ? '#FFD84A' : 'white',
+                              color: 'black'
+                            }}
                           >
                             ${a}
                           </button>
@@ -950,7 +955,10 @@ export function HostDashboard() {
                     </div>
 
                     {/* Summary */}
-                    <div className="rounded-lg border-2 border-black bg-[#28D17C]/20 px-4 py-3">
+                    <div 
+                      className="rounded-lg px-4 py-3"
+                      style={{ border: '2px solid black', backgroundColor: 'rgba(40, 209, 124, 0.2)' }}
+                    >
                       <p className="text-sm font-bold text-black">
                         +${message.trafficBonusAmount || "0"} bonus at {parseInt(message.trafficBonusThreshold || "0").toLocaleString()} clicks
                       </p>
@@ -963,7 +971,8 @@ export function HostDashboard() {
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-black">Message</label>
                 <textarea 
-                  className="w-full rounded-lg border-2 border-black px-3 py-2 text-sm text-black focus:outline-none"
+                  className="w-full rounded-lg px-3 py-2 text-sm text-black focus:outline-none"
+                  style={{ border: '2px solid black' }}
                   rows={4}
                   value={message.text}
                   onChange={e => setMessage({...message, text: e.target.value})}
@@ -972,7 +981,10 @@ export function HostDashboard() {
 
               {/* Total Summary */}
               {message.basePay && (
-                <div className="rounded-lg border-2 border-black bg-[#FFD84A] p-3">
+                <div 
+                  className="rounded-lg p-3"
+                  style={{ border: '2px solid black', backgroundColor: '#FFD84A' }}
+                >
                   <p className="text-sm font-bold text-black">
                     Offer: ${message.basePay} base
                     {message.trafficBonusEnabled && ` + $${message.trafficBonusAmount} at ${parseInt(message.trafficBonusThreshold).toLocaleString()} clicks`}
