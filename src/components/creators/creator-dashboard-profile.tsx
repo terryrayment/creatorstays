@@ -797,7 +797,7 @@ export function CreatorDashboardProfile() {
             </div>
             <div className="flex items-center gap-2">
               <Link 
-                href="/beta/dashboard/creator/onboarding"
+                href="/dashboard/creator/onboarding"
                 className="rounded-full border-2 border-black bg-black px-4 py-1.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5"
               >
                 Complete Setup →
@@ -1125,13 +1125,13 @@ export function CreatorDashboardProfile() {
           <h1 className="text-xl font-semibold">Creator Dashboard</h1>
           <div className="flex items-center gap-2">
             <Link 
-              href="/beta/dashboard/messages"
+              href="/dashboard/messages"
               className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-medium text-black hover:bg-black/5"
             >
               Messages
             </Link>
             <Link 
-              href="/beta/dashboard/creator/offers"
+              href="/dashboard/creator/offers"
               className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-medium text-white hover:bg-primary/90"
             >
               View Offers
@@ -1446,11 +1446,11 @@ export function CreatorDashboardProfile() {
             <Panel>
               <PanelHeader title="Pending Offers" actions={<span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">2 new</span>} />
               <PanelContent className="p-0">
-                <Link href="/beta/dashboard/creator/offers" className="block px-4 py-3 transition-colors hover:bg-black/[0.02]">
+                <Link href="/dashboard/creator/offers" className="block px-4 py-3 transition-colors hover:bg-black/[0.02]">
                   <p className="text-sm font-medium">Mountain View Retreats</p>
                   <p className="text-xs text-black/60">$400/post + bonus · Cozy A-Frame Cabin</p>
                 </Link>
-                <Link href="/beta/dashboard/creator/offers" className="block border-t border-black/5 px-4 py-3 transition-colors hover:bg-black/[0.02]">
+                <Link href="/dashboard/creator/offers" className="block border-t border-black/5 px-4 py-3 transition-colors hover:bg-black/[0.02]">
                   <p className="text-sm font-medium">Coastal Getaways</p>
                   <p className="text-xs text-black/60">$500/post · Modern Beach House</p>
                 </Link>
@@ -1460,13 +1460,13 @@ export function CreatorDashboardProfile() {
             {/* Quick links */}
             <Panel>
               <PanelContent className="space-y-1.5 py-3">
-                <Link href="/beta/dashboard/creator/offers" className="flex items-center justify-between rounded-lg bg-black/[0.02] px-3 py-2 text-xs transition-colors hover:bg-black/[0.04]">
+                <Link href="/dashboard/creator/offers" className="flex items-center justify-between rounded-lg bg-black/[0.02] px-3 py-2 text-xs transition-colors hover:bg-black/[0.04]">
                   View all offers
                   <svg className="h-3.5 w-3.5 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </Link>
-                <Link href="/beta/dashboard/analytics" className="flex items-center justify-between rounded-lg bg-black/[0.02] px-3 py-2 text-xs transition-colors hover:bg-black/[0.04]">
+                <Link href="/dashboard/analytics" className="flex items-center justify-between rounded-lg bg-black/[0.02] px-3 py-2 text-xs transition-colors hover:bg-black/[0.04]">
                   Link analytics
                   <svg className="h-3.5 w-3.5 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />

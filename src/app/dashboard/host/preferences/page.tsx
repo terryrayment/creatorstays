@@ -78,6 +78,47 @@ function MultiOption({
   )
 }
 
+// Multi-select option with description
+function MultiOptionWithDesc({ 
+  selected, 
+  onClick, 
+  children,
+  description
+}: { 
+  selected: boolean
+  onClick: () => void
+  children: React.ReactNode
+  description?: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-xl border-2 px-4 py-4 text-left transition-all hover:-translate-y-0.5 ${
+        selected 
+          ? 'border-[#28D17C] bg-[#28D17C]/10' 
+          : 'border-black bg-white hover:bg-[#FAFAFA]'
+      }`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <span className="text-sm font-bold text-black">{children}</span>
+          {description && <p className="mt-1 text-xs text-black/60">{description}</p>}
+        </div>
+        <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 mt-0.5 ${
+          selected ? 'border-[#28D17C] bg-[#28D17C]' : 'border-black/30 bg-white'
+        }`}>
+          {selected && (
+            <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+        </div>
+      </div>
+    </button>
+  )
+}
+
 export default function CreatorPreferencesPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -313,38 +354,38 @@ export default function CreatorPreferencesPage() {
             <div>
               <h2 className="text-2xl font-bold text-black">What audience size works for you?</h2>
               <p className="mt-2 text-sm text-black/60">
-                Larger isn't always better—micro-influencers often have higher engagement.
+                Select all that apply. Larger isn't always better—micro-influencers often have higher engagement.
               </p>
             </div>
-            <div className="space-y-3">
-              <Option 
+            <div className="grid grid-cols-2 gap-3">
+              <MultiOptionWithDesc 
                 selected={audienceSize.includes("micro")} 
                 onClick={() => toggleAudienceSize("micro")}
-                description="1K-10K followers • High engagement, affordable, authentic"
+                description="1K-10K followers"
               >
                 Micro-creators
-              </Option>
-              <Option 
+              </MultiOptionWithDesc>
+              <MultiOptionWithDesc 
                 selected={audienceSize.includes("small")} 
                 onClick={() => toggleAudienceSize("small")}
-                description="10K-50K followers • Good reach, still personal"
+                description="10K-50K followers"
               >
                 Small creators
-              </Option>
-              <Option 
+              </MultiOptionWithDesc>
+              <MultiOptionWithDesc 
                 selected={audienceSize.includes("medium")} 
                 onClick={() => toggleAudienceSize("medium")}
-                description="50K-100K followers • Established, wider reach"
+                description="50K-100K followers"
               >
                 Medium creators
-              </Option>
-              <Option 
+              </MultiOptionWithDesc>
+              <MultiOptionWithDesc 
                 selected={audienceSize.includes("large")} 
                 onClick={() => toggleAudienceSize("large")}
-                description="100K+ followers • Maximum exposure, premium pricing"
+                description="100K+ followers"
               >
                 Large creators
-              </Option>
+              </MultiOptionWithDesc>
             </div>
             <p className="text-xs text-black/40 italic">
               Tip: Most successful hosts work with a mix of micro and small creators for best ROI.
@@ -358,38 +399,38 @@ export default function CreatorPreferencesPage() {
             <div>
               <h2 className="text-2xl font-bold text-black">What content style do you prefer?</h2>
               <p className="mt-2 text-sm text-black/60">
-                Different styles resonate with different audiences.
+                Select all that apply. Different styles resonate with different audiences.
               </p>
             </div>
-            <div className="space-y-3">
-              <Option 
+            <div className="grid grid-cols-2 gap-3">
+              <MultiOptionWithDesc 
                 selected={contentStyle.includes("polished")} 
                 onClick={() => toggleContentStyle("polished")}
-                description="High production value, professional lighting, edited"
+                description="Professional, edited"
               >
                 Polished &amp; Editorial
-              </Option>
-              <Option 
+              </MultiOptionWithDesc>
+              <MultiOptionWithDesc 
                 selected={contentStyle.includes("authentic")} 
                 onClick={() => toggleContentStyle("authentic")}
-                description="Real, unfiltered, relatable content"
+                description="Real, unfiltered"
               >
                 Authentic &amp; Raw
-              </Option>
-              <Option 
+              </MultiOptionWithDesc>
+              <MultiOptionWithDesc 
                 selected={contentStyle.includes("cinematic")} 
                 onClick={() => toggleContentStyle("cinematic")}
-                description="Drone shots, transitions, storytelling"
+                description="Drone shots, storytelling"
               >
                 Cinematic
-              </Option>
-              <Option 
+              </MultiOptionWithDesc>
+              <MultiOptionWithDesc 
                 selected={contentStyle.includes("casual")} 
                 onClick={() => toggleContentStyle("casual")}
-                description="Day-in-the-life, casual vlogs, stories"
+                description="Day-in-the-life, vlogs"
               >
                 Casual &amp; Everyday
-              </Option>
+              </MultiOptionWithDesc>
             </div>
           </div>
         )}

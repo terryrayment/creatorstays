@@ -267,7 +267,7 @@ export default function CreatorBetaPage() {
                 Complete your profile, set your rates, and start receiving offers from hosts.
               </p>
               <Link
-                href="/dashboard/creator"
+                href="/beta/dashboard/creator"
                 className="mt-6 inline-flex items-center gap-2 rounded-full border-[3px] border-black bg-black px-8 py-3 text-sm font-black text-white transition-transform hover:-translate-y-0.5"
               >
                 Continue to Creator Dashboard

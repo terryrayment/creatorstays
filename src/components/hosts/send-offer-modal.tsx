@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { StyledSelect } from "@/components/ui/styled-select"
+import { useDashboardPath } from "@/hooks/use-dashboard-path"
 
 interface Creator {
   id: string | number
@@ -53,6 +54,7 @@ const DELIVERABLE_OPTIONS = [
 ]
 
 export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalProps) {
+  const { hostPath } = useDashboardPath()
   const [step, setStep] = useState(1) // 1: Deal Type, 2: Terms, 3: Review, 4: Confirmation
   const [loading, setLoading] = useState(false)
   const [properties, setProperties] = useState<Property[]>([])
@@ -290,7 +292,7 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                 ) : properties.length === 0 ? (
                   <div className="rounded-lg border-2 border-dashed border-black/30 p-4 text-center">
                     <p className="text-sm text-black/70">No properties yet</p>
-                    <a href="/dashboard/host/properties" className="text-xs font-bold text-[#4AA3FF] underline">
+                    <a href={`${hostPath}/properties`} className="text-xs font-bold text-[#4AA3FF] underline">
                       Add a property first →
                     </a>
                   </div>
@@ -747,7 +749,7 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                   Done
                 </button>
                 <a
-                  href="/dashboard/host/offers"
+                  href={`${hostPath}/offers`}
                   className="flex-1 rounded-full border-2 border-black py-3 text-center text-[11px] font-black uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5"
                 >
                   View All Offers →

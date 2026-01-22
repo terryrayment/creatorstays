@@ -548,7 +548,7 @@ export default function HostSentOffersPage() {
                         {/* Status Actions */}
                         {offer.status === "accepted" && (
                           <Link
-                            href="/dashboard/collaborations"
+                            href="/beta/dashboard/host/collaborations"
                             className="block rounded-full border-2 border-black bg-[#28D17C] py-3 text-center text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
                           >
                             View Collaboration →

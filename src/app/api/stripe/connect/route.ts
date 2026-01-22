@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
       // Create a new account link for existing account
       const accountLink = await stripe.accountLinks.create({
         account: creator.stripeAccountId,
-        refresh_url: `${process.env.NEXTAUTH_URL}/dashboard/creator/settings?stripe=refresh`,
-        return_url: `${process.env.NEXTAUTH_URL}/dashboard/creator/settings?stripe=success`,
+        refresh_url: `${process.env.NEXTAUTH_URL}/beta/dashboard/creator/settings?stripe=refresh`,
+        return_url: `${process.env.NEXTAUTH_URL}/beta/dashboard/creator/settings?stripe=success`,
         type: 'account_onboarding',
       })
 
@@ -76,8 +76,8 @@ export async function POST(request: NextRequest) {
     // Create account link for onboarding
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `${process.env.NEXTAUTH_URL}/dashboard/creator/settings?stripe=refresh`,
-      return_url: `${process.env.NEXTAUTH_URL}/dashboard/creator/settings?stripe=success`,
+      refresh_url: `${process.env.NEXTAUTH_URL}/beta/dashboard/creator/settings?stripe=refresh`,
+      return_url: `${process.env.NEXTAUTH_URL}/beta/dashboard/creator/settings?stripe=success`,
       type: 'account_onboarding',
     })
 

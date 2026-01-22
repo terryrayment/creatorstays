@@ -21,7 +21,7 @@ function OnboardingContent() {
   const [showCreatorForm, setShowCreatorForm] = useState(false)
   const [creatorError, setCreatorError] = useState("")
 
-  // Redirect if already has a profile - route to beta dashboards
+  // Redirect if already has a profile
   useEffect(() => {
     if (status === "authenticated" && session?.user?.hasProfile) {
       if (session.user.role === "host") {
@@ -62,10 +62,10 @@ function OnboardingContent() {
         })
         
         if (res.ok) {
-          // Profile created, redirect to beta host onboarding to add property
+          // Profile created, redirect to host onboarding to add property
           router.push("/beta/dashboard/host/onboarding")
         } else {
-          // Fallback to beta settings page
+          // Fallback to settings page
           router.push("/beta/dashboard/host/settings?setup=true")
         }
       } catch (error) {
@@ -128,7 +128,7 @@ function OnboardingContent() {
         if (typeof window !== 'undefined') {
           localStorage.removeItem("betaInviteCode")
         }
-        // Redirect to beta creator dashboard
+        // Redirect to creator dashboard
         router.push("/beta/dashboard/creator")
       } else {
         setCreatorError(data.error || "Failed to create profile")

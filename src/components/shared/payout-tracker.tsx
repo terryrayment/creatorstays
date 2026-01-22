@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useDashboardPath } from "@/hooks/use-dashboard-path"
 
 interface PayoutStatus {
   status: 'pending' | 'processing' | 'in_transit' | 'paid' | 'failed' | 'not_started'

@@ -67,8 +67,8 @@ export async function POST(
         propertyId: property.id,
         type: 'property_boost',
       },
-      success_url: `${process.env.NEXTAUTH_URL}/dashboard/host/properties?boosted=${property.id}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/dashboard/host/properties`,
+      success_url: `${process.env.NEXTAUTH_URL}/beta/dashboard/host/properties?boosted=${property.id}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/beta/dashboard/host/properties`,
     })
 
     return NextResponse.json({ 

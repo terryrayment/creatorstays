@@ -22,7 +22,7 @@ export async function GET() {
   const redirectUri = process.env.META_REDIRECT_URI || 'http://localhost:3000/api/instagram/callback'
   
   if (!appId) {
-    return NextResponse.redirect(new URL('/dashboard/creator?ig_error=not_configured', process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'))
+    return NextResponse.redirect(new URL('/beta/dashboard/creator?ig_error=not_configured', process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'))
   }
 
   // Generate random state for CSRF protection

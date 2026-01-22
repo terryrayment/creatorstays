@@ -52,7 +52,7 @@ export async function GET() {
           type: 'counter-offer',
           title: `Counter offer from @${offer.creatorProfile.handle}`,
           description: `Review and respond to their counter for ${offer.property?.title || 'your property'}`,
-          href: `/dashboard/host/offers`,
+          href: `/beta/dashboard/host/offers`,
           priority: 'high',
           createdAt: offer.updatedAt,
         })
@@ -131,7 +131,7 @@ export async function GET() {
           type: 'complete-payment',
           title: `Complete payment to @${collab.creator.handle}`,
           description: `Content approved - payment pending`,
-          href: `/dashboard/host/pay/${collab.id}`,
+          href: `/beta/dashboard/host/pay/${collab.id}`,
           priority: 'high',
           createdAt: collab.contentApprovedAt || collab.updatedAt,
         })
@@ -182,7 +182,7 @@ export async function GET() {
           type: 'review-offer',
           title: `New offer from ${offer.hostProfile.displayName}`,
           description: `Review offer for ${offer.property?.title || 'a property'}`,
-          href: `/dashboard/creator/offers`,
+          href: `/beta/dashboard/creator/offers`,
           priority: 'high',
           createdAt: offer.createdAt,
         })

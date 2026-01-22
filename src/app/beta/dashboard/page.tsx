@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
-export default function DashboardPage() {
+export default function BetaDashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
@@ -18,9 +18,9 @@ export default function DashboardPage() {
 
     // Redirect based on role
     if (session.user?.role === "creator") {
-      router.push("/dashboard/creator")
+      router.push("/beta/dashboard/creator")
     } else if (session.user?.role === "host") {
-      router.push("/dashboard/host")
+      router.push("/beta/dashboard/host")
     } else {
       // No role yet - go to onboarding
       router.push("/onboarding")

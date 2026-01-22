@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { HostDashboard } from "@/components/hosts/host-dashboard"
 import { BetaHostDashboard } from "@/components/hosts/beta-host-dashboard"
 import { HostDashboardStats } from "@/components/dashboard/dashboard-stats"
 import { ActionRequiredBanner } from "@/components/dashboard/action-required-banner"
@@ -13,6 +14,7 @@ function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
     <div className="border-b-2 border-black bg-[#4AA3FF]">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
+          <span className="text-xl"></span>
           <div>
             <p className="text-sm font-bold text-black">Complete your setup to start finding creators!</p>
             <p className="text-xs text-black/70">Add your first property to get started</p>
@@ -49,6 +51,13 @@ function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
             className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
           >
             My Properties
+          </Link>
+          <Link 
+            href="/beta/dashboard/collaborations"
+            className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
+          >
+            Collaborations
+            <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
           </Link>
           <Link 
             href="/beta/dashboard/host/settings"
@@ -135,16 +144,16 @@ function SetupChecklist() {
         setChecklist([
           { label: "Save 1 property", done: hasPublishedProperty, href: "/beta/dashboard/host/properties" },
           { label: "Invite 1 creator", done: hasInvitedCreator, href: "/beta/dashboard/host/search-creators" },
-          { label: "Create 1 tracked link", done: hasTrackedLink, href: "/beta/dashboard/host/collaborations" },
-          { label: "Pay 1 creator", done: hasPaidCreator, href: "/beta/dashboard/host/pay" },
+          { label: "Create 1 tracked link", done: hasTrackedLink, href: "/beta/dashboard/collaborations" },
+          { label: "Pay 1 creator", done: hasPaidCreator, href: "/beta/dashboard/collaborations" },
         ])
       } catch (error) {
         console.error("Error fetching checklist data:", error)
         setChecklist([
           { label: "Save 1 property", done: false, href: "/beta/dashboard/host/properties" },
           { label: "Invite 1 creator", done: false, href: "/beta/dashboard/host/search-creators" },
-          { label: "Create 1 tracked link", done: false, href: "/beta/dashboard/host/collaborations" },
-          { label: "Pay 1 creator", done: false, href: "/beta/dashboard/host/pay" },
+          { label: "Create 1 tracked link", done: false, href: "/beta/dashboard/collaborations" },
+          { label: "Pay 1 creator", done: false, href: "/beta/dashboard/collaborations" },
         ])
       } finally {
         setLoading(false)
@@ -178,26 +187,15 @@ function SetupChecklist() {
             <Link
               key={i}
               href={item.href}
-              className={`flex items-center gap-2 rounded-lg border-2 px-3 py-2 text-xs font-medium transition-all hover:-translate-y-0.5 ${
-                item.done 
-                  ? 'border-[#28D17C] bg-[#28D17C]/10 text-black/50' 
-                  : 'border-black bg-white text-black'
-              }`}
+              className="flex items-center gap-2 rounded-lg border-2 border-black p-3 transition-all hover:-translate-y-0.5"
+              style={{ backgroundColor: item.done ? '#28D17C' : '#ffffff' }}
             >
-              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-                item.done 
-                  ? 'border-[#28D17C] bg-[#28D17C] text-white' 
-                  : 'border-black bg-white'
+              <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 border-black text-[10px] font-bold ${
+                item.done ? "bg-black text-white" : "bg-white text-black"
               }`}>
-                {item.done ? (
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  <span className="text-[10px] font-bold">{i + 1}</span>
-                )}
+                {item.done ? "✓" : i + 1}
               </span>
-              <span className={item.done ? 'line-through' : ''}>{item.label}</span>
+              <span className="text-xs font-bold text-black">{item.label}</span>
             </Link>
           ))}
         </div>
@@ -206,51 +204,66 @@ function SetupChecklist() {
   )
 }
 
-export default function BetaHostDashboardPage() {
+export default function HostDashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
   const [showOnboardingBanner, setShowOnboardingBanner] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [showWelcome, setShowWelcome] = useState(false)
   const [showAgencyWelcome, setShowAgencyWelcome] = useState(false)
   const [isAgency, setIsAgency] = useState(false)
+  const [showBetaWelcome, setShowBetaWelcome] = useState(false)
 
   useEffect(() => {
     async function checkProfile() {
-      if (status === "unauthenticated") {
-        router.push("/login/host")
-        return
-      }
-      
       if (status !== "authenticated") return
       
       try {
-        // Check for agency status from localStorage
-        if (typeof window !== 'undefined') {
-          const agencyFlag = localStorage.getItem('creatorstays_agency')
-          setIsAgency(agencyFlag === 'true')
-        }
-        
         const res = await fetch("/api/host/profile")
         if (res.status === 404) {
-          // No profile - redirect to onboarding
-          router.push("/onboarding")
+          // No profile, redirect to onboarding
+          router.push("/onboarding/host")
           return
         }
-        
         if (res.ok) {
           const profile = await res.json()
           
-          // Check if agency
-          if (profile.tier === 'agency') {
-            setIsAgency(true)
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('creatorstays_agency', 'true')
-            }
+          // Check if agency from profile (database is source of truth)
+          // Also check localStorage for testing
+          const isAgencyFromStorage = localStorage.getItem('creatorstays_agency') === 'true'
+          const isAgencyUser = profile.isAgency || isAgencyFromStorage
+          setIsAgency(isAgencyUser)
+          
+          // If database says they're an agency, also set localStorage for consistency
+          if (profile.isAgency) {
+            localStorage.setItem('creatorstays_agency', 'true')
           }
           
-          // Check for new host welcome (first visit)
+          // Check if onboarding is complete AND membership is paid
+          if (!profile.onboardingComplete || !profile.membershipPaid) {
+            router.push("/onboarding/host")
+            return
+          }
+          
+          // Check if this is a new host who hasn't seen the welcome guide
+          const hasSeenWelcomeGuide = localStorage.getItem('hostOnboardingComplete') === 'true'
           const params = new URLSearchParams(window.location.search)
+          const justCompletedOnboarding = params.get("welcome") === "true"
+          
+          // If just completed payment onboarding and haven't seen the guide, redirect to welcome
+          if (justCompletedOnboarding && !hasSeenWelcomeGuide) {
+            router.push("/beta/dashboard/host/welcome")
+            return
+          }
+          
+          // No properties yet, show banner
+          if (!profile.properties || profile.properties.length === 0) {
+            setShowOnboardingBanner(true)
+          }
+          
+          // Check URL params
+          
+          // Check for welcome param (just completed onboarding)
           if (params.get("welcome") === "true") {
             // Check if they've seen the beta welcome before
             const hasSeenBetaWelcome = localStorage.getItem('hasSeenBetaWelcome') === 'true'
@@ -318,7 +331,7 @@ export default function BetaHostDashboardPage() {
 
             {/* What's working now */}
             <div className="rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4 mb-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#28D17C] mb-2">What you can do now</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#28D17C] mb-2">✓ What you can do now</p>
               <ul className="space-y-1.5 text-sm text-black">
                 <li className="flex items-start gap-2">
                   <span className="text-[#28D17C] mt-0.5">•</span>
@@ -341,7 +354,7 @@ export default function BetaHostDashboardPage() {
 
             {/* What's coming */}
             <div className="rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-4 mb-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#4AA3FF] mb-2">Coming soon</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#4AA3FF] mb-2">🚀 Coming soon</p>
               <ul className="space-y-1.5 text-sm text-black">
                 <li className="flex items-start gap-2">
                   <span className="text-[#4AA3FF] mt-0.5">•</span>
@@ -360,7 +373,7 @@ export default function BetaHostDashboardPage() {
 
             {/* What we need */}
             <div className="rounded-xl border-2 border-black bg-[#FAFAFA] p-4 mb-6">
-              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">How you can help</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">🤝 How you can help</p>
               <p className="text-sm text-black/70">
                 Get your property ready now. When creators join, hosts with complete profiles get matched first. Your early feedback shapes what we build.
               </p>
@@ -396,12 +409,12 @@ export default function BetaHostDashboardPage() {
               Your upgrade is complete. You now have access to unlimited properties, team management, and more.
             </p>
             <div className="mt-4 rounded-xl border-2 border-black bg-[#FAFAFA] p-4 text-left">
-              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">What&apos;s new:</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">What's new:</p>
               <ul className="space-y-1 text-sm text-black">
-                <li>Unlimited properties</li>
-                <li>5 team member seats</li>
-                <li>Priority creator matching</li>
-                <li>Advanced analytics</li>
+                <li>✓ Unlimited properties</li>
+                <li>✓ 5 team member seats</li>
+                <li>✓ Priority creator matching</li>
+                <li>✓ Advanced analytics</li>
               </ul>
             </div>
             <div className="mt-6 space-y-3">

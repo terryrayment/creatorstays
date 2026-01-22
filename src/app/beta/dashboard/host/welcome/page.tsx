@@ -12,7 +12,7 @@ export default function HostWelcomePage() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('hostOnboardingComplete', 'true')
     }
-    router.push('/dashboard/host')
+    router.push('/beta/dashboard/host')
   }
 
   return (

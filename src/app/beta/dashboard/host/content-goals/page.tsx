@@ -110,7 +110,7 @@ export default function ContentGoalsPage() {
       })
       
       if (res.ok) {
-        router.push('/dashboard/host?goalsComplete=true')
+        router.push('/beta/dashboard/host?goalsComplete=true')
       }
     } catch (e) {
       console.error('Failed to save goals:', e)

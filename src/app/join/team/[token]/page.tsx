@@ -76,7 +76,7 @@ export default function JoinTeamPage() {
         return
       }
       
-      // Success! Redirect to beta dashboard
+      // Success! Redirect to dashboard
       router.push("/beta/dashboard/host?welcome=team")
     } catch (e) {
       setError("Something went wrong")

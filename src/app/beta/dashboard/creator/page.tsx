@@ -18,26 +18,7 @@ function DashboardLoading() {
   )
 }
 
-function BetaHeader() {
-  return (
-    <div className="border-b-2 border-black bg-white">
-      <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <span className="rounded border border-black bg-[#D7B6FF] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
-          <span className="text-sm font-bold text-black">Creator Dashboard</span>
-        </div>
-        <Link 
-          href="/" 
-          className="rounded-full border-2 border-black bg-[#D7B6FF] px-4 py-1.5 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
-        >
-          ← Back to site
-        </Link>
-      </div>
-    </div>
-  )
-}
-
-export default function BetaCreatorDashboardPage() {
+export default function CreatorDashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -85,18 +66,11 @@ export default function BetaCreatorDashboardPage() {
 
   return (
     <div className="dashboard">
-      {/* Beta Header */}
-      <BetaHeader />
-      
       {/* Welcome Modal */}
       {showWelcome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-black bg-[#D7B6FF]">
-              <svg className="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+            <span className="mb-4 inline-block text-6xl"></span>
             <h2 className="font-heading text-2xl tracking-tight text-black">Your profile is live!</h2>
             <p className="mt-2 text-sm text-black/60">
               Hosts can now discover you and send collaboration offers.

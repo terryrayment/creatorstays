@@ -93,7 +93,7 @@ function CreatorSettingsContent() {
     if (stripeStatus === 'success') {
       setToast('Stripe account connected successfully!')
       setActiveTab('payout')
-      window.history.replaceState({}, '', '/dashboard/creator/settings')
+      window.history.replaceState({}, '', '/beta/dashboard/creator/settings')
       // Refresh Stripe status
       fetch('/api/stripe/connect').then(res => res.json()).then(data => {
         setPayout({
@@ -107,7 +107,7 @@ function CreatorSettingsContent() {
     } else if (stripeStatus === 'refresh') {
       setToast('Please complete Stripe onboarding')
       setActiveTab('payout')
-      window.history.replaceState({}, '', '/dashboard/creator/settings')
+      window.history.replaceState({}, '', '/beta/dashboard/creator/settings')
       setTimeout(() => setToast(null), 5000)
     }
   }, [searchParams])

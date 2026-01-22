@@ -36,13 +36,13 @@ export async function GET(request: NextRequest) {
   if (error) {
     console.error('Instagram OAuth error:', error, errorDescription)
     return NextResponse.redirect(
-      new URL(`/dashboard/creator?error=instagram_denied&message=${encodeURIComponent(errorDescription || error)}`, request.url)
+      new URL(`/beta/dashboard/creator?error=instagram_denied&message=${encodeURIComponent(errorDescription || error)}`, request.url)
     )
   }
 
   if (!code || !state) {
     return NextResponse.redirect(
-      new URL('/dashboard/creator?error=instagram_invalid', request.url)
+      new URL('/beta/dashboard/creator?error=instagram_invalid', request.url)
     )
   }
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   if (!storedState || storedState !== state) {
     console.error('State mismatch:', { storedState, receivedState: state })
     return NextResponse.redirect(
-      new URL('/dashboard/creator?error=instagram_csrf', request.url)
+      new URL('/beta/dashboard/creator?error=instagram_csrf', request.url)
     )
   }
 
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
 
   if (!appId || !appSecret) {
     return NextResponse.redirect(
-      new URL('/dashboard/creator?error=instagram_config', request.url)
+      new URL('/beta/dashboard/creator?error=instagram_config', request.url)
     )
   }
 
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     if (tokenData.error || !tokenData.access_token) {
       console.error('Token exchange failed:', tokenData.error)
       return NextResponse.redirect(
-        new URL('/dashboard/creator?error=instagram_token', request.url)
+        new URL('/beta/dashboard/creator?error=instagram_token', request.url)
       )
     }
 
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
 
     // Create response with redirect
     const response = NextResponse.redirect(
-      new URL('/dashboard/creator?connected=instagram', request.url)
+      new URL('/beta/dashboard/creator?connected=instagram', request.url)
     )
 
     // Set the token cookie
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error('Instagram OAuth callback error:', err)
     return NextResponse.redirect(
-      new URL('/dashboard/creator?error=instagram_failed', request.url)
+      new URL('/beta/dashboard/creator?error=instagram_failed', request.url)
     )
   }
 }

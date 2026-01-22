@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation"
 
 export default function LoginClient() {
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  const callbackUrl = searchParams.get("callbackUrl") || "/beta/dashboard"
   const error = searchParams.get("error")
   
   const [email, setEmail] = useState("")

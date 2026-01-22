@@ -117,8 +117,8 @@ export async function POST(request: NextRequest) {
         agencyName: agencyName || hostProfile.displayName,
         type: 'agency_subscription',
       },
-      success_url: `${process.env.NEXTAUTH_URL}/dashboard/host?agency=success`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/dashboard/host/upgrade`,
+      success_url: `${process.env.NEXTAUTH_URL}/beta/dashboard/host?agency=success`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/beta/dashboard/host/upgrade`,
     })
 
     return NextResponse.json({ 

@@ -53,8 +53,8 @@ export async function POST() {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXTAUTH_URL}/dashboard/host/properties?upgraded=true`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/dashboard/host/properties`,
+      success_url: `${process.env.NEXTAUTH_URL}/beta/dashboard/host/properties?upgraded=true`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/beta/dashboard/host/properties`,
       metadata: {
         hostProfileId: hostProfile.id,
         type: "agency_upgrade",

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
+import { useDashboardPath } from "@/hooks/use-dashboard-path"
 
 // Section wrapper
 function Section({ title, children, badge }: { title: string; children: React.ReactNode; badge?: React.ReactNode }) {
@@ -193,6 +194,7 @@ function FeedbackSection() {
 
 export function BetaHostDashboard() {
   const { data: session } = useSession()
+  const { hostPath } = useDashboardPath()
   const [prepStatus, setPrepStatus] = useState({
     hasProperty: false,
     hasProfile: false,
@@ -283,28 +285,28 @@ export function BetaHostDashboard() {
                   done={prepStatus.hasProperty}
                   title="Add your property"
                   description="Import from Airbnb or add manually. Include great photos."
-                  href="/beta/dashboard/host/properties"
+                  href={`${hostPath}/properties`}
                   priority={!prepStatus.hasProperty}
                 />
                 <PrepItem
                   done={prepStatus.hasProfile}
                   title="Complete your host profile"
                   description="Add your name, bio, and contact info. Creators see this when you reach out."
-                  href="/beta/dashboard/host/settings"
+                  href={`${hostPath}/settings`}
                   priority={prepStatus.hasProperty && !prepStatus.hasProfile}
                 />
                 <PrepItem
                   done={prepStatus.hasPreferences}
                   title="Set creator preferences"
                   description="Location, niche, audience size, content style, budget — a 2-minute quiz."
-                  href="/beta/dashboard/host/preferences"
+                  href={`${hostPath}/preferences`}
                   priority={prepStatus.hasProfile && !prepStatus.hasPreferences}
                 />
                 <PrepItem
                   done={prepStatus.hasContentGoals}
                   title="Define your content goals"
                   description="What content do you want? How will you use it? What's your #1 goal?"
-                  href="/beta/dashboard/host/content-goals"
+                  href={`${hostPath}/content-goals`}
                   priority={prepStatus.hasPreferences && !prepStatus.hasContentGoals}
                 />
               </div>
@@ -437,11 +439,11 @@ export function BetaHostDashboard() {
           {/* Quick Links */}
           <Section title="Quick Links">
             <div className="space-y-1.5">
-              <Link href="/beta/dashboard/host/properties" className="flex items-center justify-between rounded-lg bg-[#FAFAFA] px-3 py-2 text-xs text-black transition-colors hover:bg-black/10">
+              <Link href={`${hostPath}/properties`} className="flex items-center justify-between rounded-lg bg-[#FAFAFA] px-3 py-2 text-xs text-black transition-colors hover:bg-black/10">
                 My Properties
                 <span className="text-black/40">→</span>
               </Link>
-              <Link href="/beta/dashboard/host/settings" className="flex items-center justify-between rounded-lg bg-[#FAFAFA] px-3 py-2 text-xs text-black transition-colors hover:bg-black/10">
+              <Link href={`${hostPath}/settings`} className="flex items-center justify-between rounded-lg bg-[#FAFAFA] px-3 py-2 text-xs text-black transition-colors hover:bg-black/10">
                 Settings
                 <span className="text-black/40">→</span>
               </Link>
