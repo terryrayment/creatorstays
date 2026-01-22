@@ -34,6 +34,13 @@ interface AdminStats {
     email: string
     propertyCount: number
     createdAt: string
+    lastLoginAt: string | null
+    location: string | null
+    propertyUrl: string | null
+    propertyTitle: string | null
+    bio: string | null
+    onboardingComplete: boolean
+    membershipPaid: boolean
   }[]
   recentCollaborations: {
     id: string
@@ -94,7 +101,9 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [activeTab, setActiveTab] = useState<"overview" | "creators" | "hosts" | "offers" | "collabs">("overview")
+  const [activeTab, setActiveTab] = useState<"overview" | "creators" | "hosts" | "offers" | "collabs" | "announce">("overview")
+  const [sendingAnnouncement, setSendingAnnouncement] = useState(false)
+  const [announcementResult, setAnnouncementResult] = useState<{ success: boolean; message: string; count?: number } | null>(null)
 
   useEffect(() => {
     async function fetchStats() {
@@ -175,6 +184,7 @@ export default function AdminDashboardPage() {
             { id: "hosts", label: "Hosts" },
             { id: "offers", label: "Offers" },
             { id: "collabs", label: "Collaborations" },
+            { id: "announce", label: "📢 Announce" },
           ].map(tab => (
             <button
               key={tab.id}
@@ -271,22 +281,73 @@ export default function AdminDashboardPage() {
 
         {activeTab === "hosts" && (
           <div className="rounded-xl border-2 border-black bg-white">
-            <div className="border-b border-black/10 p-4">
+            <div className="border-b border-black/10 p-4 flex items-center justify-between">
               <h3 className="font-bold text-black">Recent Hosts</h3>
+              <span className="text-xs text-black/50">{stats.recentHosts.length} hosts</span>
             </div>
             <div className="divide-y divide-black/10">
               {stats.recentHosts.map(host => (
-                <div key={host.id} className="flex items-center justify-between p-4">
-                  <div>
-                    <p className="font-bold text-black">{host.displayName}</p>
-                    <p className="text-xs text-black/60">{host.email}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-black">{host.propertyCount} properties</p>
-                    <p className="text-xs text-black/60">{formatDate(host.createdAt)}</p>
+                <div key={host.id} className="p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    {/* Left side - Host info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-bold text-black">{host.displayName}</p>
+                        {host.membershipPaid ? (
+                          <span className="rounded-full bg-[#28D17C] px-2 py-0.5 text-[9px] font-bold text-black">PAID</span>
+                        ) : (
+                          <span className="rounded-full bg-[#FFD84A] px-2 py-0.5 text-[9px] font-bold text-black">UNPAID</span>
+                        )}
+                        {!host.onboardingComplete && (
+                          <span className="rounded-full bg-red-400 px-2 py-0.5 text-[9px] font-bold text-black">INCOMPLETE</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-black/60 mt-0.5">{host.email}</p>
+                      
+                      {/* Location */}
+                      {host.location && (
+                        <p className="text-xs text-black/50 mt-1">📍 {host.location}</p>
+                      )}
+                      
+                      {/* Property info */}
+                      {host.propertyTitle && (
+                        <div className="mt-2 rounded-lg bg-[#FAFAFA] p-2">
+                          <p className="text-xs font-bold text-black">{host.propertyTitle}</p>
+                          {host.propertyUrl && (
+                            <a 
+                              href={host.propertyUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-[#4AA3FF] hover:underline break-all"
+                            >
+                              {host.propertyUrl.includes('airbnb') ? '🏠 Airbnb' : '🏠 VRBO'}: View Listing →
+                            </a>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Bio preview */}
+                      {host.bio && (
+                        <p className="text-[10px] text-black/40 mt-2 line-clamp-2">{host.bio}</p>
+                      )}
+                    </div>
+                    
+                    {/* Right side - Stats */}
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-bold text-black">{host.propertyCount} {host.propertyCount === 1 ? 'property' : 'properties'}</p>
+                      <p className="text-[10px] text-black/50 mt-1">Joined: {formatDate(host.createdAt)}</p>
+                      {host.lastLoginAt && (
+                        <p className="text-[10px] text-black/50">Last login: {formatDate(host.lastLoginAt)}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
+              {stats.recentHosts.length === 0 && (
+                <div className="p-8 text-center text-black/40">
+                  No hosts yet
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -331,6 +392,98 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "announce" && (
+          <div className="space-y-6">
+            {/* Creators Launch Announcement */}
+            <div className="rounded-xl border-2 border-black bg-white p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#28D17C] text-2xl">
+                  🚀
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-black">Creators Are Live!</h3>
+                  <p className="mt-1 text-sm text-black/60">
+                    Send an email to all beta hosts notifying them that creators are now available on the platform.
+                  </p>
+                  <div className="mt-4 rounded-lg bg-[#FAFAFA] p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">Email Preview</p>
+                    <p className="text-sm font-bold text-black">Subject: 🎉 Creators are now live on CreatorStays!</p>
+                    <p className="mt-2 text-sm text-black/70">
+                      Great news! We&apos;ve onboarded our first batch of creators to CreatorStays. 
+                      You can now browse real creator profiles and send collaboration offers.
+                    </p>
+                    <p className="mt-2 text-sm text-black/70">
+                      As a beta host, you&apos;re first in line. Log in now to start connecting with creators 
+                      who match your property.
+                    </p>
+                  </div>
+                  <div className="mt-4 flex items-center gap-4">
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`Send "Creators are live" email to ${stats.overview.totalHosts} hosts?`)) return
+                        setSendingAnnouncement(true)
+                        setAnnouncementResult(null)
+                        try {
+                          const res = await fetch('/api/admin/announce', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ type: 'creators_live' })
+                          })
+                          const data = await res.json()
+                          if (res.ok) {
+                            setAnnouncementResult({ success: true, message: 'Emails sent!', count: data.count })
+                          } else {
+                            setAnnouncementResult({ success: false, message: data.error || 'Failed to send' })
+                          }
+                        } catch (e) {
+                          setAnnouncementResult({ success: false, message: 'Network error' })
+                        }
+                        setSendingAnnouncement(false)
+                      }}
+                      disabled={sendingAnnouncement}
+                      className="rounded-full border-2 border-black bg-[#28D17C] px-6 py-2 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                    >
+                      {sendingAnnouncement ? 'Sending...' : `Send to ${stats.overview.totalHosts} Hosts`}
+                    </button>
+                    <p className="text-xs text-black/50">
+                      This will email all hosts with paid memberships
+                    </p>
+                  </div>
+                  {announcementResult && (
+                    <div className={`mt-4 rounded-lg p-3 text-sm font-bold ${
+                      announcementResult.success 
+                        ? 'bg-[#28D17C]/20 text-[#28D17C]' 
+                        : 'bg-red-100 text-red-600'
+                    }`}>
+                      {announcementResult.success 
+                        ? `✓ ${announcementResult.message} (${announcementResult.count} emails)` 
+                        : `✗ ${announcementResult.message}`}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Announcement */}
+            <div className="rounded-xl border-2 border-black bg-white p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A] text-2xl">
+                  📣
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-black">Custom Announcement</h3>
+                  <p className="mt-1 text-sm text-black/60">
+                    Send a custom message to all beta hosts.
+                  </p>
+                  <p className="mt-4 text-xs text-black/40">
+                    Coming soon - for now, use the preset announcements above.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}

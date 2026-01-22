@@ -282,7 +282,16 @@ export function BetaHostDashboard() {
                 <span className="text-2xl">🎉</span>
                 <p className="mt-2 text-sm font-bold text-black">You&apos;re ready!</p>
                 <p className="mt-1 text-xs text-black/60">
-                  We&apos;ll notify you as soon as creators start joining the platform.
+                  We&apos;ll email you at <span className="font-bold">{session?.user?.email}</span> as soon as creators are live.
+                </p>
+              </div>
+            )}
+
+            {/* Auto-notify callout for incomplete users too */}
+            {completedCount < totalSteps && completedCount > 0 && (
+              <div className="mt-4 rounded-lg border border-black/10 bg-[#4AA3FF]/5 p-3">
+                <p className="text-[11px] text-black/60">
+                  📬 <span className="font-medium">You&apos;ll be notified automatically</span> when creators launch — no action needed.
                 </p>
               </div>
             )}
@@ -325,6 +334,21 @@ export function BetaHostDashboard() {
                 <div>
                   <p className="text-sm font-bold text-black">Send offers & collaborate</p>
                   <p className="text-xs text-black/60">Reach out, negotiate, create content, track results</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Notification confirmation */}
+            <div className="mt-5 rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#28D17C]">
+                  <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-black">You&apos;re on the list!</p>
+                  <p className="text-xs text-black/60">We&apos;ll email you at <span className="font-medium">{session?.user?.email}</span> when creators are ready.</p>
                 </div>
               </div>
             </div>

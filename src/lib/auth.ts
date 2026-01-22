@@ -171,6 +171,18 @@ export const authOptions: NextAuthOptions = {
         provider: account?.provider,
         isNewUser,
       })
+      
+      // Track last login time
+      if (user.id) {
+        try {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLoginAt: new Date() }
+          })
+        } catch (e) {
+          console.error("[CreatorStays] Failed to update lastLoginAt:", e)
+        }
+      }
     },
   },
   

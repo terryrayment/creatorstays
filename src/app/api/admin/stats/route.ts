@@ -77,12 +77,21 @@ export async function GET() {
       },
     })
 
-    // Get recent hosts
+    // Get recent hosts with more details
     const recentHosts = await prisma.hostProfile.findMany({
-      take: 10,
+      take: 20,
       orderBy: { createdAt: 'desc' },
       include: {
-        user: { select: { email: true, createdAt: true } },
+        user: { select: { email: true, createdAt: true, lastLoginAt: true } },
+        properties: { 
+          take: 1, 
+          select: { 
+            airbnbUrl: true, 
+            vrboUrl: true, 
+            cityRegion: true,
+            title: true,
+          } 
+        },
         _count: { select: { properties: true } },
       },
     })
@@ -134,10 +143,17 @@ export async function GET() {
       })),
       recentHosts: recentHosts.map(h => ({
         id: h.id,
-        displayName: h.displayName,
+        displayName: h.displayName || 'Unknown',
         email: h.user.email,
         propertyCount: h._count.properties,
         createdAt: h.createdAt,
+        lastLoginAt: h.user.lastLoginAt,
+        location: h.location || h.properties[0]?.cityRegion || null,
+        propertyUrl: h.properties[0]?.airbnbUrl || h.properties[0]?.vrboUrl || null,
+        propertyTitle: h.properties[0]?.title || null,
+        bio: h.bio || null,
+        onboardingComplete: h.onboardingComplete,
+        membershipPaid: h.membershipPaid,
       })),
       recentCollaborations: recentCollaborations.map(c => ({
         id: c.id,
