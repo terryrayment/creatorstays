@@ -253,13 +253,23 @@ export default function HostDashboardPage() {
             return
           }
           
+          // Check if this is a new host who hasn't seen the welcome guide
+          const hasSeenWelcomeGuide = localStorage.getItem('hostOnboardingComplete') === 'true'
+          const params = new URLSearchParams(window.location.search)
+          const justCompletedOnboarding = params.get("welcome") === "true"
+          
+          // If just completed payment onboarding and haven't seen the guide, redirect to welcome
+          if (justCompletedOnboarding && !hasSeenWelcomeGuide) {
+            router.push("/dashboard/host/welcome")
+            return
+          }
+          
           // No properties yet, show banner
           if (!profile.properties || profile.properties.length === 0) {
             setShowOnboardingBanner(true)
           }
           
           // Check URL params
-          const params = new URLSearchParams(window.location.search)
           
           // Check for welcome param (just completed onboarding)
           if (params.get("welcome") === "true") {
