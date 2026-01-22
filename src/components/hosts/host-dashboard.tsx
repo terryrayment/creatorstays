@@ -727,7 +727,80 @@ export function HostDashboard() {
 
           {/* Right sidebar */}
           <div className="space-y-6">
-            {/* Taste Optimizer */}
+            {/* Quick Stats - FIRST */}
+            <Section title="Your Stats">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-white p-3 text-center">
+                  <p className="text-2xl font-bold text-black">0</p>
+                  <p className="text-[10px] text-black">Offers Sent</p>
+                </div>
+                <div className="rounded-lg bg-white p-3 text-center">
+                  <p className="text-2xl font-bold text-black">0</p>
+                  <p className="text-[10px] text-black">Active Collabs</p>
+                </div>
+                <div className="rounded-lg bg-white p-3 text-center">
+                  <p className="text-2xl font-bold text-black">0</p>
+                  <p className="text-[10px] text-black">Total Clicks</p>
+                </div>
+                <div className="rounded-lg bg-white p-3 text-center">
+                  <p className="text-2xl font-bold text-black">$0</p>
+                  <p className="text-[10px] text-black">Spent</p>
+                </div>
+              </div>
+              <Link 
+                href="/dashboard/analytics" 
+                className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-bold text-black transition-colors hover:bg-black/5"
+              >
+                View Analytics →
+              </Link>
+            </Section>
+
+            {/* Quick Links - SECOND */}
+            <Section title="Quick Links">
+              <div className="space-y-1.5">
+                <Link href="/dashboard/host/properties" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
+                  My Properties
+                  <span className="text-black">→</span>
+                </Link>
+                <Link href="/dashboard/collaborations" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
+                  Collaborations
+                  <span className="text-black">→</span>
+                </Link>
+                <Link href="/dashboard/host/offers" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
+                  Sent Offers
+                  <span className="text-black">→</span>
+                </Link>
+                <Link href="/dashboard/host/settings" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
+                  Settings
+                  <span className="text-black">→</span>
+                </Link>
+              </div>
+            </Section>
+
+            {/* Content Ideas - THIRD */}
+            <Section title="Content Ideas">
+              <div className="space-y-2">
+                <div className="rounded-lg bg-white p-3">
+                  <p className="text-xs font-bold text-black">🏠 Property Tour</p>
+                  <p className="mt-1 text-[10px] text-black/70">"Walk through the space, highlight unique features, show the views"</p>
+                </div>
+                <div className="rounded-lg bg-white p-3">
+                  <p className="text-xs font-bold text-black">📍 Local Guide</p>
+                  <p className="mt-1 text-[10px] text-black/70">"Best coffee spots, hidden gems, things to do within 10 min"</p>
+                </div>
+                <div className="rounded-lg bg-white p-3">
+                  <p className="text-xs font-bold text-black">🌅 Day in the Life</p>
+                  <p className="mt-1 text-[10px] text-black/70">"Morning routine at the property, cooking breakfast, sunset views"</p>
+                </div>
+                <div className="rounded-lg bg-white p-3">
+                  <p className="text-xs font-bold text-black">✨ Vibe Check</p>
+                  <p className="mt-1 text-[10px] text-black/70">"Aesthetic shots with trending audio, cozy moments, ambiance"</p>
+                </div>
+              </div>
+              <p className="mt-2 text-[10px] text-black/50">Suggest these to creators when sending offers</p>
+            </Section>
+
+            {/* Taste Optimizer - FOURTH */}
             <Section title="Taste Optimizer">
               <div className="space-y-4">
                 <div>
@@ -759,49 +832,15 @@ export function HostDashboard() {
               </div>
             </Section>
 
-            {/* Creator Brief Preview */}
-            <Section title="Creator Brief Preview">
-              <div className="rounded-lg bg-white p-3">
-                <p className="text-xs leading-relaxed text-black">{generateBrief()}</p>
-              </div>
-              <p className="mt-2 text-[10px] text-black">This is auto-generated from your profile and taste settings.</p>
-            </Section>
-
-            {/* Quick Stats */}
-            <Section title="Your Stats">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg bg-white p-3 text-center">
-                  <p className="text-2xl font-bold text-black">0</p>
-                  <p className="text-[10px] text-black">Messages Sent</p>
-                </div>
-                <div className="rounded-lg bg-white p-3 text-center">
-                  <p className="text-2xl font-bold text-black">0</p>
-                  <p className="text-[10px] text-black">Active Collabs</p>
-                </div>
-                <div className="rounded-lg bg-white p-3 text-center">
-                  <p className="text-2xl font-bold text-black">0</p>
-                  <p className="text-[10px] text-black">Total Clicks</p>
-                </div>
-                <div className="rounded-lg bg-white p-3 text-center">
-                  <p className="text-2xl font-bold text-black">$0</p>
-                  <p className="text-[10px] text-black">Spent</p>
-                </div>
-              </div>
-            </Section>
-
-            {/* Quick Links */}
-            <Section title="Quick Links">
+            {/* Resources - FOURTH */}
+            <Section title="Resources">
               <div className="space-y-1.5">
-                <Link href="/dashboard/host/settings" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
-                  Account Settings
+                <Link href="/dashboard/host/welcome" className="flex items-center justify-between rounded-lg bg-[#FFD84A] px-3 py-2 text-xs font-bold text-black transition-colors hover:bg-[#FFD84A]/80">
+                  📚 Host Guide
                   <span className="text-black">→</span>
                 </Link>
                 <Link href="/how-to/hosts" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
                   How It Works
-                  <span className="text-black">→</span>
-                </Link>
-                <Link href="/pricing" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
-                  Pricing
                   <span className="text-black">→</span>
                 </Link>
                 <Link href="/help" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs text-black transition-colors hover:bg-black/5">
