@@ -152,7 +152,7 @@ export default function HowItWorksPage() {
 
         {/* Image Block */}
         <div className="mt-8">
-          <ImageBlock src={pageImages[0]} aspectRatio="aspect-[21/9]" />
+          <ImageBlock src="/images/creator-laptop-support.jpg" aspectRatio="aspect-[21/9]" />
         </div>
 
         {/* Bottom CTA */}
