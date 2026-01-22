@@ -253,10 +253,25 @@ export default function SearchCreatorsPage() {
   const [creators, setCreators] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 })
+  const [isMockData, setIsMockData] = useState(false)
+  const [showEducationalModal, setShowEducationalModal] = useState(false)
 
   // Modal state
   const [selectedCreator, setSelectedCreator] = useState<any | null>(null)
   const [toast, setToast] = useState("")
+
+  // Check if user has seen the educational modal before
+  useEffect(() => {
+    const hasSeenModal = localStorage.getItem('cs_seen_mock_creator_modal')
+    if (!hasSeenModal && isMockData) {
+      setShowEducationalModal(true)
+    }
+  }, [isMockData])
+
+  const dismissEducationalModal = () => {
+    localStorage.setItem('cs_seen_mock_creator_modal', 'true')
+    setShowEducationalModal(false)
+  }
 
   // Fetch creators from API
   useEffect(() => {
@@ -289,6 +304,7 @@ export default function SearchCreatorsPage() {
           const data = await res.json()
           setCreators(data.creators || [])
           setPagination(data.pagination || { page: 1, pages: 1, total: 0 })
+          setIsMockData(data.isMockData || false)
         }
       } catch (e) {
         console.error('Failed to fetch creators:', e)
@@ -317,6 +333,7 @@ export default function SearchCreatorsPage() {
     engagementRate: c.engagementRate ? `${c.engagementRate}%` : 'N/A',
     openToGiftedStays: c.openToGiftedStays,
     isVerified: c.isVerified,
+    isMock: c.isMock || false,
     distance: null,
   }))
 
@@ -348,6 +365,31 @@ export default function SearchCreatorsPage() {
               Browse approved creators and send collaboration offers.
             </p>
           </div>
+
+          {/* Mock Data Banner */}
+          {isMockData && (
+            <div className="mb-4 rounded-xl border-2 border-dashed border-[#4AA3FF] bg-[#4AA3FF]/10 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#4AA3FF] text-white">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-black">You're viewing sample creators</p>
+                  <p className="mt-1 text-xs text-black/70">
+                    These profiles show you how the platform works. Once we match you with real creators in your area, they'll appear here. Sample profiles are marked with a badge.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setShowEducationalModal(true)}
+                  className="shrink-0 rounded-full border border-[#4AA3FF] bg-white px-3 py-1 text-[10px] font-bold text-[#4AA3FF] hover:bg-[#4AA3FF] hover:text-white transition-colors"
+                >
+                  Learn more
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Filters */}
           <div className="mb-6 rounded-xl border-2 border-black bg-white p-4">
@@ -436,11 +478,22 @@ export default function SearchCreatorsPage() {
             {allCreators.map(creator => (
               <div
                 key={creator.id}
-                className="rounded-xl border-2 border-black bg-white p-4 transition-transform hover:-translate-y-1"
+                className={`relative rounded-xl border-2 bg-white p-4 transition-transform hover:-translate-y-1 ${
+                  creator.isMock ? 'border-dashed border-black/40' : 'border-black'
+                }`}
               >
+                {/* SAMPLE Badge */}
+                {creator.isMock && (
+                  <div className="absolute -top-2 -right-2 rounded-full border border-[#4AA3FF] bg-[#4AA3FF] px-2 py-0.5 text-[8px] font-black text-white uppercase tracking-wider">
+                    Sample
+                  </div>
+                )}
+
                 {/* Header */}
                 <div className="flex items-start gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A] text-sm font-bold text-black">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-full border-2 text-sm font-bold text-black ${
+                    creator.isMock ? 'border-dashed border-black/40 bg-[#4AA3FF]/20' : 'border-black bg-[#FFD84A]'
+                  }`}>
                     {creator.avatar}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -491,13 +544,22 @@ export default function SearchCreatorsPage() {
                 </p>
 
                 {/* Action */}
-                <Button 
-                  className="mt-4 w-full" 
-                  size="sm"
-                  onClick={() => setSelectedCreator(creator)}
-                >
-                  Send Offer
-                </Button>
+                {creator.isMock ? (
+                  <button 
+                    className="mt-4 w-full rounded-full border-2 border-dashed border-black/40 bg-black/5 py-2 text-xs font-bold text-black/50 cursor-not-allowed"
+                    disabled
+                  >
+                    Sample Profile
+                  </button>
+                ) : (
+                  <Button 
+                    className="mt-4 w-full" 
+                    size="sm"
+                    onClick={() => setSelectedCreator(creator)}
+                  >
+                    Send Offer
+                  </Button>
+                )}
               </div>
             ))}
           </div>
@@ -551,6 +613,71 @@ export default function SearchCreatorsPage() {
 
       {/* Toast */}
       {toast && <Toast message={toast} onClose={() => setToast("")} />}
+
+      {/* Educational Modal for Mock Data */}
+      {showEducationalModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-lg rounded-2xl border-[3px] border-black bg-white overflow-hidden">
+            {/* Header with illustration */}
+            <div className="bg-gradient-to-br from-[#4AA3FF]/20 to-[#FFD84A]/20 p-6 text-center border-b-2 border-black">
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 border-black bg-white">
+                <svg className="h-10 w-10 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                </svg>
+              </div>
+              <h2 className="font-heading text-2xl font-black text-black">Preview Mode</h2>
+              <p className="mt-2 text-sm text-black/70">You're viewing sample creator profiles</p>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFD84A] text-black font-bold text-sm">1</div>
+                <div>
+                  <p className="font-bold text-black">These are example profiles</p>
+                  <p className="text-sm text-black/70">They show you how real creator cards will look, including stats, rates, and niches.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#4AA3FF] text-white font-bold text-sm">2</div>
+                <div>
+                  <p className="font-bold text-black">Real creators coming soon</p>
+                  <p className="text-sm text-black/70">We're actively onboarding creators. Once matched with your property's location and vibe, they'll appear here.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#28D17C] text-black font-bold text-sm">3</div>
+                <div>
+                  <p className="font-bold text-black">You can't send offers to samples</p>
+                  <p className="text-sm text-black/70">Sample profiles are for preview only. When real creators are available, you'll be able to send offers directly.</p>
+                </div>
+              </div>
+
+              {/* Visual indicator */}
+              <div className="mt-4 rounded-lg border-2 border-dashed border-[#4AA3FF]/50 bg-[#4AA3FF]/5 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full border border-[#4AA3FF] bg-[#4AA3FF] px-2 py-0.5 text-[8px] font-black text-white uppercase tracking-wider">
+                    Sample
+                  </div>
+                  <p className="text-xs text-black/70">Look for this badge to identify sample profiles</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t-2 border-black p-4 bg-black/5">
+              <button
+                onClick={dismissEducationalModal}
+                className="w-full rounded-full border-2 border-black bg-black py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+              >
+                Got it, let me explore
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
