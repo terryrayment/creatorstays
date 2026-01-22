@@ -58,7 +58,7 @@ export async function GET(
       valid: true,
       email: inviteEmail,
       role: teamMember.role === 'member' ? 'editor' : teamMember.role,
-      agencyName: hostProfile.agencyName || hostProfile.name || 'CreatorStays Agency',
+      agencyName: hostProfile.agencyName || hostProfile.displayName || 'CreatorStays Agency',
       inviterName: inviter?.name || inviter?.email || 'Agency Admin',
       alreadyAccepted: teamMember.inviteStatus === 'accepted',
     })
