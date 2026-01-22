@@ -7,7 +7,7 @@ import Link from "next/link"
 
 function CreatorLoginContent() {
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard/creator"
+  const callbackUrl = searchParams.get("callbackUrl") || "/beta/dashboard/creator"
   const errorParam = searchParams.get("error")
   const welcomeEmail = searchParams.get("email")
   const isWelcome = searchParams.get("welcome") === "true"

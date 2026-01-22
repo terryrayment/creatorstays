@@ -16,11 +16,11 @@ export default function DashboardPage() {
       return
     }
 
-    // Redirect based on role
+    // Redirect based on role - route to BETA dashboards
     if (session.user?.role === "creator") {
-      router.push("/dashboard/creator")
+      router.push("/beta/dashboard/creator")
     } else if (session.user?.role === "host") {
-      router.push("/dashboard/host")
+      router.push("/beta/dashboard/host")
     } else {
       // No role yet - go to onboarding
       router.push("/onboarding")

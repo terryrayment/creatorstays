@@ -131,7 +131,7 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
     verifyRequest: "/login/check-email",
     error: "/login/error",
-    newUser: "/onboarding",
+    newUser: "/onboarding", // Onboarding handles routing to /beta/dashboard/...
   },
   
   callbacks: {

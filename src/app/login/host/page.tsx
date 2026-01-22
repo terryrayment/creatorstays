@@ -7,7 +7,7 @@ import Link from "next/link"
 
 function HostLoginContent() {
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard/host"
+  const callbackUrl = searchParams.get("callbackUrl") || "/beta/dashboard/host"
   const errorParam = searchParams.get("error")
   
   const [email, setEmail] = useState("")

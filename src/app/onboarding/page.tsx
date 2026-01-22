@@ -21,13 +21,13 @@ function OnboardingContent() {
   const [showCreatorForm, setShowCreatorForm] = useState(false)
   const [creatorError, setCreatorError] = useState("")
 
-  // Redirect if already has a profile
+  // Redirect if already has a profile - route to beta dashboards
   useEffect(() => {
     if (status === "authenticated" && session?.user?.hasProfile) {
       if (session.user.role === "host") {
-        router.push("/dashboard/host")
+        router.push("/beta/dashboard/host")
       } else if (session.user.role === "creator") {
-        router.push("/dashboard/creator")
+        router.push("/beta/dashboard/creator")
       }
     }
   }, [session, status, router])
@@ -62,15 +62,15 @@ function OnboardingContent() {
         })
         
         if (res.ok) {
-          // Profile created, redirect to host onboarding to add property
-          router.push("/dashboard/host/onboarding")
+          // Profile created, redirect to beta host onboarding to add property
+          router.push("/beta/dashboard/host/onboarding")
         } else {
-          // Fallback to settings page
-          router.push("/dashboard/host/settings?setup=true")
+          // Fallback to beta settings page
+          router.push("/beta/dashboard/host/settings?setup=true")
         }
       } catch (error) {
         console.error("Failed to create host profile:", error)
-        router.push("/dashboard/host/settings?setup=true")
+        router.push("/beta/dashboard/host/settings?setup=true")
       }
     } else {
       // Check if user has a beta invite stored
@@ -128,8 +128,8 @@ function OnboardingContent() {
         if (typeof window !== 'undefined') {
           localStorage.removeItem("betaInviteCode")
         }
-        // Redirect to creator dashboard
-        router.push("/dashboard/creator")
+        // Redirect to beta creator dashboard
+        router.push("/beta/dashboard/creator")
       } else {
         setCreatorError(data.error || "Failed to create profile")
         setLoading(null)
