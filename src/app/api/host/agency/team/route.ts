@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { sendEmail, teamInviteEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -137,11 +138,37 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // TODO: Send invite email
+    // Get inviter info for email
+    const inviter = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { name: true, email: true },
+    })
+
+    // Send invite email
+    const emailData = teamInviteEmail({
+      inviteeName: invitedUser?.name || email.split('@')[0],
+      inviteeEmail: email.toLowerCase(),
+      inviterName: inviter?.name || 'A team admin',
+      agencyName: hostProfile.agencyName || 'CreatorStays Agency',
+      role: role,
+    })
+
+    const emailResult = await sendEmail({
+      to: email.toLowerCase(),
+      subject: emailData.subject,
+      html: emailData.html,
+      text: emailData.text,
+    })
+
+    if (!emailResult.success) {
+      console.error('[Team Invite] Email failed:', emailResult.error)
+      // Don't fail the request - the invite was created, just log the email failure
+    }
 
     return NextResponse.json({ 
       success: true,
       teamMember,
+      emailSent: emailResult.success,
       message: invitedUser 
         ? `Invite sent to ${email}` 
         : `Invite created. ${email} will join when they sign up.`,

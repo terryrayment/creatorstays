@@ -74,26 +74,54 @@ export default function TeamManagementPage() {
     
     setInviting(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Add to local state (in production, this would be an API call)
-    const newMember: TeamMember = {
-      id: Date.now().toString(),
-      email: inviteEmail,
-      name: inviteEmail.split("@")[0],
-      role: inviteRole,
-      status: "pending",
-      invitedAt: new Date().toISOString(),
+    try {
+      const res = await fetch('/api/host/agency/team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: inviteEmail,
+          role: inviteRole,
+          permissions: {
+            canManageProperties: inviteRole === 'editor',
+            canSendOffers: inviteRole === 'editor',
+            canViewAnalytics: true,
+            canManageTeam: false,
+          },
+        }),
+      })
+      
+      const data = await res.json()
+      
+      if (!res.ok) {
+        setToast(data.error || 'Failed to send invite')
+        setTimeout(() => setToast(null), 3000)
+        setInviting(false)
+        return
+      }
+      
+      // Add to local state for immediate UI update
+      const newMember: TeamMember = {
+        id: data.teamMember?.id || Date.now().toString(),
+        email: inviteEmail,
+        name: inviteEmail.split("@")[0],
+        role: inviteRole,
+        status: "pending",
+        invitedAt: new Date().toISOString(),
+      }
+      
+      setTeamMembers(prev => [...prev, newMember])
+      setShowInviteModal(false)
+      setInviteEmail("")
+      setInviteRole("editor")
+      setToast(data.emailSent ? "Invitation sent!" : "Invite created (email will be sent)")
+      setTimeout(() => setToast(null), 3000)
+    } catch (error) {
+      console.error('Failed to invite team member:', error)
+      setToast('Failed to send invite')
+      setTimeout(() => setToast(null), 3000)
     }
     
-    setTeamMembers(prev => [...prev, newMember])
-    setShowInviteModal(false)
-    setInviteEmail("")
-    setInviteRole("editor")
     setInviting(false)
-    setToast("Invitation sent!")
-    setTimeout(() => setToast(null), 3000)
   }
 
   const removeTeamMember = (id: string) => {

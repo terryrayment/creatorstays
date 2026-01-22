@@ -2203,3 +2203,90 @@ Questions? Contact support@creatorstays.com`
 
   return { subject, html, text }
 }
+
+// =============================================================================
+// TEAM INVITE EMAILS
+// =============================================================================
+
+/**
+ * Team Member Invite Email
+ */
+export function teamInviteEmail(data: {
+  inviteeName: string
+  inviteeEmail: string
+  inviterName: string
+  agencyName: string
+  role: string
+  inviteToken?: string
+}): { subject: string; html: string; text: string } {
+  const { inviteeName, inviteeEmail, inviterName, agencyName, role, inviteToken } = data
+
+  const acceptUrl = inviteToken 
+    ? `${BASE_URL}/join/team/${inviteToken}` 
+    : `${BASE_URL}/login/host`
+
+  const subject = `You've been invited to join ${agencyName} on CreatorStays`
+
+  const html = emailWrapper(`
+    <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 8px;">You're Invited!</h1>
+    <p style="color: #666; margin: 0 0 24px;">Hi${inviteeName ? ` ${inviteeName}` : ''}, you've been invited to join a team on CreatorStays.</p>
+    
+    <div style="${styles.card}">
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Invited by</p>
+      <p style="font-size: 18px; font-weight: 700; margin: 0 0 16px;">${inviterName}</p>
+      
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Agency</p>
+      <p style="font-size: 16px; font-weight: 600; margin: 0 0 16px;">${agencyName}</p>
+      
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0 0 8px;">Your Role</p>
+      <p style="font-size: 16px; font-weight: 600; margin: 0;">
+        <span style="display: inline-block; background: ${role === 'editor' ? '#FFD84A' : '#f5f5f5'}; border: 2px solid #000; border-radius: 50px; padding: 4px 12px; font-size: 12px; font-weight: 700;">
+          ${role.charAt(0).toUpperCase() + role.slice(1)}
+        </span>
+      </p>
+    </div>
+    
+    <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <p style="font-size: 14px; font-weight: 700; margin: 0 0 12px;">What you'll be able to do:</p>
+      ${role === 'editor' ? `
+        <p style="font-size: 13px; color: #666; margin: 0 0 8px;">✓ Manage properties and listings</p>
+        <p style="font-size: 13px; color: #666; margin: 0 0 8px;">✓ Send offers to creators</p>
+        <p style="font-size: 13px; color: #666; margin: 0;">✓ View analytics and collaborations</p>
+      ` : `
+        <p style="font-size: 13px; color: #666; margin: 0 0 8px;">✓ View properties and listings</p>
+        <p style="font-size: 13px; color: #666; margin: 0;">✓ View collaborations and analytics</p>
+      `}
+    </div>
+    
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${acceptUrl}" style="${styles.buttonGreen}">Accept Invitation →</a>
+    </div>
+    
+    <p style="font-size: 12px; color: #999; text-align: center;">
+      This invitation was sent to ${inviteeEmail}.<br>
+      If you weren't expecting this, you can safely ignore this email.
+    </p>
+  `)
+
+  const text = `You're Invited to CreatorStays!
+
+Hi${inviteeName ? ` ${inviteeName}` : ''},
+
+${inviterName} has invited you to join ${agencyName} on CreatorStays.
+
+YOUR ROLE: ${role.charAt(0).toUpperCase() + role.slice(1)}
+
+${role === 'editor' ? `WHAT YOU CAN DO:
+✓ Manage properties and listings
+✓ Send offers to creators
+✓ View analytics and collaborations` : `WHAT YOU CAN DO:
+✓ View properties and listings
+✓ View collaborations and analytics`}
+
+Accept your invitation: ${acceptUrl}
+
+This invitation was sent to ${inviteeEmail}.
+If you weren't expecting this, you can safely ignore this email.`
+
+  return { subject, html, text }
+}

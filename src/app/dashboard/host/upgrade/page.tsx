@@ -121,11 +121,11 @@ export default function AgencyUpgradePage() {
                   { title: "Advanced Analytics Dashboard", desc: "Track performance across all properties" },
                   { title: "Bulk Offer Sending", desc: "Send offers to multiple creators at once" },
                 ].map((feature, i) => (
-                  <div key={i} className="flex items-start gap-3">
+                  <div key={i} className="grid grid-cols-[24px_1fr] gap-3 items-start">
                     <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#28D17C] text-xs font-bold text-black">✓</span>
-                    <div>
-                      <p className="font-bold text-black">{feature.title}</p>
-                      <p className="text-sm text-black/60">{feature.desc}</p>
+                    <div className="min-w-0">
+                      <p className="font-bold text-black leading-6">{feature.title}</p>
+                      <p className="text-sm text-black/60 mt-0.5">{feature.desc}</p>
                     </div>
                   </div>
                 ))}
