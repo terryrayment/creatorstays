@@ -9,9 +9,12 @@ import { Button } from "@/components/ui/button"
 
 interface UploadedFile {
   url: string
+  publicId?: string
   name: string
   type: "video" | "image"
   size?: number
+  thumbnailUrl?: string
+  uploaded: boolean // true = uploaded to Cloudinary, false = local preview only
 }
 
 export default function UploadContentPage() {
@@ -23,6 +26,7 @@ export default function UploadContentPage() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [notes, setNotes] = useState("")
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<string>("")
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState({ message: "", type: "" as "success" | "error" | "" })
   const [collaboration, setCollaboration] = useState<any>(null)
@@ -43,7 +47,8 @@ export default function UploadContentPage() {
               data.collaboration.uploadedContentUrls.map((url: string, i: number) => ({
                 url,
                 name: `Content ${i + 1}`,
-                type: url.includes(".mp4") || url.includes("video") ? "video" : "image",
+                type: url.includes("video") ? "video" : "image",
+                uploaded: true,
               }))
             )
           }
@@ -59,14 +64,63 @@ export default function UploadContentPage() {
     loadCollaboration()
   }, [collaborationId])
 
+  // Convert file to base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = error => reject(error)
+    })
+  }
+
+  // Upload a single file to Cloudinary
+  const uploadFileToCloudinary = async (file: File): Promise<UploadedFile | null> => {
+    try {
+      const base64 = await fileToBase64(file)
+      
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          file: base64,
+          collaborationId,
+        }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Upload failed')
+      }
+
+      const data = await res.json()
+      
+      return {
+        url: data.file.url,
+        publicId: data.file.publicId,
+        name: file.name,
+        type: data.file.type as "video" | "image",
+        size: data.file.size,
+        thumbnailUrl: data.file.thumbnailUrl,
+        uploaded: true,
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      return null
+    }
+  }
+
   // Handle file input change
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return
     
     setUploading(true)
-    const newFiles: UploadedFile[] = []
+    const fileArray = Array.from(files)
     
-    for (const file of Array.from(files)) {
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i]
+      setUploadProgress(`Uploading ${i + 1} of ${fileArray.length}: ${file.name}`)
+      
       // Validate file type
       const isVideo = file.type.startsWith("video/")
       const isImage = file.type.startsWith("image/")
@@ -86,30 +140,20 @@ export default function UploadContentPage() {
         continue
       }
       
-      try {
-        // For now, we'll create a local preview URL
-        // In production, this would upload to a storage service like S3/Cloudinary
-        const previewUrl = URL.createObjectURL(file)
-        
-        newFiles.push({
-          url: previewUrl,
-          name: file.name,
-          type: isVideo ? "video" : "image",
-          size: file.size,
-        })
-      } catch (e) {
-        console.error("File upload error:", e)
-        setToast({ message: `Failed to process ${file.name}`, type: "error" })
+      // Upload to Cloudinary
+      const uploadedFile = await uploadFileToCloudinary(file)
+      
+      if (uploadedFile) {
+        setUploadedFiles(prev => [...prev, uploadedFile])
+      } else {
+        setToast({ message: `Failed to upload ${file.name}`, type: "error" })
       }
     }
     
-    setUploadedFiles([...uploadedFiles, ...newFiles])
     setUploading(false)
-    
-    if (newFiles.length > 0) {
-      setToast({ message: `${newFiles.length} file(s) added`, type: "success" })
-      setTimeout(() => setToast({ message: "", type: "" }), 2000)
-    }
+    setUploadProgress("")
+    setToast({ message: `${fileArray.length} file(s) uploaded successfully!`, type: "success" })
+    setTimeout(() => setToast({ message: "", type: "" }), 3000)
   }
 
   // Handle drag and drop
@@ -128,7 +172,7 @@ export default function UploadContentPage() {
     e.stopPropagation()
     setDragActive(false)
     handleFileSelect(e.dataTransfer.files)
-  }, [uploadedFiles])
+  }, [collaborationId])
 
   // Remove a file
   const removeFile = (index: number) => {
@@ -139,6 +183,13 @@ export default function UploadContentPage() {
   const handleSubmit = async () => {
     if (uploadedFiles.length === 0) {
       setToast({ message: "Please upload at least one content file", type: "error" })
+      return
+    }
+
+    // Make sure all files are uploaded to Cloudinary
+    const allUploaded = uploadedFiles.every(f => f.uploaded)
+    if (!allUploaded) {
+      setToast({ message: "Some files are still uploading. Please wait.", type: "error" })
       return
     }
 
@@ -161,7 +212,7 @@ export default function UploadContentPage() {
           router.push(`/dashboard/collaborations/${collaborationId}`)
         }, 2000)
       } else {
-        setToast({ message: data.error || "Failed to upload content", type: "error" })
+        setToast({ message: data.error || "Failed to submit content", type: "error" })
       }
     } catch (e) {
       console.error("Submit error:", e)
@@ -272,47 +323,64 @@ export default function UploadContentPage() {
               className={`mt-4 relative rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
                 dragActive 
                   ? "border-[#4AA3FF] bg-[#4AA3FF]/10" 
-                  : "border-black/30 hover:border-black"
+                  : uploading
+                    ? "border-[#D7B6FF] bg-[#D7B6FF]/10"
+                    : "border-black/30 hover:border-black"
               }`}
             >
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/20 bg-black/5">
-                <svg className="h-6 w-6 text-black/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                </svg>
-              </div>
-              <p className="font-bold text-black">
-                {dragActive ? "Drop files here" : "Drag & drop files here"}
-              </p>
-              <p className="mt-1 text-xs text-black/60">
-                or click to browse
-              </p>
-              <label className="mt-3 inline-block cursor-pointer">
-                <input
-                  type="file"
-                  multiple
-                  accept="video/*,image/*"
-                  onChange={(e) => handleFileSelect(e.target.files)}
-                  className="hidden"
-                />
-                <span className="rounded-full border-2 border-black bg-black px-4 py-2 text-xs font-bold text-white hover:bg-black/80">
-                  Select Files
-                </span>
-              </label>
-              <p className="mt-3 text-[10px] text-black/40">
-                Videos up to 100MB • Images up to 10MB
-              </p>
+              {uploading ? (
+                <>
+                  <div className="h-10 w-10 mx-auto animate-spin rounded-full border-3 border-[#D7B6FF] border-t-black" />
+                  <p className="mt-3 font-bold text-black">Uploading to cloud...</p>
+                  <p className="mt-1 text-xs text-black/60">{uploadProgress}</p>
+                </>
+              ) : (
+                <>
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/20 bg-black/5">
+                    <svg className="h-6 w-6 text-black/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                  </div>
+                  <p className="font-bold text-black">
+                    {dragActive ? "Drop files here" : "Drag & drop files here"}
+                  </p>
+                  <p className="mt-1 text-xs text-black/60">
+                    or click to browse
+                  </p>
+                  <label className="mt-3 inline-block cursor-pointer">
+                    <input
+                      type="file"
+                      multiple
+                      accept="video/*,image/*"
+                      onChange={(e) => handleFileSelect(e.target.files)}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                    <span className="rounded-full border-2 border-black bg-black px-4 py-2 text-xs font-bold text-white hover:bg-black/80">
+                      Select Files
+                    </span>
+                  </label>
+                  <p className="mt-3 text-[10px] text-black/40">
+                    Videos up to 100MB • Images up to 10MB
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Uploaded files preview */}
             {uploadedFiles.length > 0 && (
               <div className="mt-4 space-y-3">
-                <p className="text-xs font-bold text-black/60">{uploadedFiles.length} file(s) ready</p>
+                <p className="text-xs font-bold text-black/60">{uploadedFiles.length} file(s) uploaded ✓</p>
                 {uploadedFiles.map((file, index) => (
-                  <div key={index} className="flex items-center gap-3 rounded-xl border-2 border-black bg-black/5 p-3">
+                  <div key={index} className="flex items-center gap-3 rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-3">
                     {/* Thumbnail */}
                     <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-black bg-black">
                       {file.type === "video" ? (
-                        <video src={file.url} className="h-full w-full object-cover" />
+                        file.thumbnailUrl ? (
+                          <img src={file.thumbnailUrl} alt={file.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center text-white text-xs">🎬</div>
+                        )
                       ) : (
                         <img src={file.url} alt={file.name} className="h-full w-full object-cover" />
                       )}
@@ -324,25 +392,20 @@ export default function UploadContentPage() {
                       <p className="text-xs text-black/60">
                         {file.type === "video" ? "🎬 Video" : "📸 Image"}
                         {file.size && ` • ${(file.size / 1024 / 1024).toFixed(1)}MB`}
+                        <span className="ml-2 text-[#28D17C]">✓ Uploaded</span>
                       </p>
                     </div>
                     
                     {/* Remove button */}
                     <button
                       onClick={() => removeFile(index)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-white text-black hover:bg-red-50"
+                      disabled={uploading}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-white text-black hover:bg-red-50 disabled:opacity-50"
                     >
                       ✕
                     </button>
                   </div>
                 ))}
-              </div>
-            )}
-
-            {uploading && (
-              <div className="mt-4 text-center">
-                <div className="h-6 w-6 mx-auto animate-spin rounded-full border-2 border-black border-t-transparent" />
-                <p className="mt-2 text-xs text-black/60">Processing files...</p>
               </div>
             )}
           </div>
@@ -373,10 +436,10 @@ export default function UploadContentPage() {
           {/* Submit Button */}
           <Button
             onClick={handleSubmit}
-            disabled={uploadedFiles.length === 0 || submitting}
+            disabled={uploadedFiles.length === 0 || submitting || uploading}
             className="w-full rounded-full border-[3px] border-black bg-[#28D17C] py-6 text-sm font-black uppercase tracking-wider text-black transition-transform hover:-translate-y-1 hover:bg-[#28D17C]/90 disabled:opacity-50"
           >
-            {submitting ? "Submitting..." : `Submit ${uploadedFiles.length} File(s) for Approval`}
+            {submitting ? "Submitting..." : uploading ? "Uploading..." : `Submit ${uploadedFiles.length} File(s) for Approval`}
           </Button>
 
           <p className="text-center text-xs text-black/60">
