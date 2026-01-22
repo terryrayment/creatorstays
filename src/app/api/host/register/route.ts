@@ -137,8 +137,9 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXTAUTH_URL || 'https://creatorstays.com'
     const magicLink = `${baseUrl}/api/auth/callback/email?callbackUrl=${encodeURIComponent('/beta/dashboard/host')}&token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`
 
+    let emailSent = false
     try {
-      await sendEmail({
+      const emailResult = await sendEmail({
         to: normalizedEmail,
         subject: 'Welcome to CreatorStays! 🏠',
         html: `
@@ -158,6 +159,10 @@ export async function POST(request: NextRequest) {
           </div>
         `,
       })
+      emailSent = emailResult.success
+      if (!emailResult.success) {
+        console.error('[Host Register] Email send failed:', emailResult.error)
+      }
     } catch (emailError) {
       console.error('[Host Register] Failed to send welcome email:', emailError)
       // Don't fail the registration if email fails - user can still sign in via login page
@@ -165,7 +170,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Account created! Check your email for a sign-in link.',
+      message: emailSent 
+        ? 'Account created! Check your email for a sign-in link.'
+        : 'Account created! Email delivery may be delayed - you can also sign in via the login page.',
+      emailSent,
       user: {
         id: result.user.id,
         email: result.user.email,
@@ -179,8 +187,8 @@ export async function POST(request: NextRequest) {
         id: result.property.id,
         title: result.property.title,
       } : null,
-      // Include magic link in dev mode for easier testing
-      ...(process.env.NODE_ENV === 'development' ? { magicLink } : {}),
+      // Include magic link in dev mode OR if email failed (for debugging)
+      ...((process.env.NODE_ENV === 'development' || !emailSent) ? { magicLink } : {}),
     })
 
   } catch (error) {

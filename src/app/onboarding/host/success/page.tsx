@@ -105,7 +105,7 @@ function SuccessContent() {
         </div>
 
         <Link
-          href="/dashboard/host?welcome=true"
+          href="/beta/dashboard/host?welcome=true"
           className="mt-6 block rounded-full border-2 border-black bg-[#28D17C] px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
         >
           Go to Dashboard →

@@ -139,7 +139,7 @@ export default function JoinTeamPage() {
             You've already accepted this invitation to join {inviteData.agencyName}.
           </p>
           <Link
-            href="/dashboard/host"
+            href="/beta/dashboard/host"
             className="mt-6 inline-block rounded-full border-2 border-black bg-[#28D17C] px-6 py-2 text-sm font-bold text-black"
           >
             Go to Dashboard

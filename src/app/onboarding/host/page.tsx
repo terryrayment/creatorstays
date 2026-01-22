@@ -273,7 +273,7 @@ export default function HostOnboardingPage() {
         if (res.ok) {
           const profile = await res.json()
           if (profile.onboardingComplete) {
-            router.push("/dashboard/host")
+            router.push("/beta/dashboard/host")
             return
           }
           setData(prev => ({
