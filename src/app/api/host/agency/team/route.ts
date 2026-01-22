@@ -147,13 +147,14 @@ export async function POST(request: NextRequest) {
       select: { name: true, email: true },
     })
 
-    // Send invite email
+    // Send invite email with the team member ID as the invite token
     const emailData = teamInviteEmail({
       inviteeName: invitedUser?.name || email.split('@')[0],
       inviteeEmail: email.toLowerCase(),
       inviterName: inviter?.name || 'A team admin',
       agencyName: hostProfile.agencyName || 'CreatorStays Agency',
       role: role,
+      inviteToken: teamMember.id, // This creates the /join/team/[token] link
     })
 
     const emailResult = await sendEmail({
