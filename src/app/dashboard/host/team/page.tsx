@@ -33,10 +33,15 @@ export default function TeamManagementPage() {
       if (status !== "authenticated") return
       
       try {
+        // Check localStorage first (for testing)
+        const isAgencyFromStorage = localStorage.getItem('creatorstays_agency') === 'true'
+        
         const res = await fetch("/api/host/profile")
         if (res.ok) {
           const profile = await res.json()
-          if (!profile.isAgency) {
+          const hasAgencyAccess = profile.isAgency || isAgencyFromStorage
+          
+          if (!hasAgencyAccess) {
             // Not an agency, redirect to upgrade
             router.push("/dashboard/host/upgrade")
             return
