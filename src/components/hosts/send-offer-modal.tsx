@@ -190,17 +190,17 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
 
         {/* Progress - hide on confirmation */}
         {step < 4 && (
-          <div className="flex border-b border-black/10 bg-black/5">
+          <div className="flex border-b-2 border-black">
             {["Deal Type", "Terms", "Review"].map((label, i) => (
               <button
                 key={label}
                 onClick={() => setStep(i + 1)}
-                className={`flex-1 py-2 text-center text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                className={`flex-1 py-3 text-center text-[10px] font-bold uppercase tracking-wider transition-colors ${
                   step === i + 1 
                     ? "bg-black text-white" 
                     : step > i + 1 
-                    ? "bg-[#28D17C] text-black"
-                    : "text-black/50"
+                    ? "bg-[#28D17C] text-black border-r border-black last:border-r-0"
+                    : "bg-[#F5F5F5] text-black/60 border-r border-black/20 last:border-r-0"
                 }`}
               >
                 {i + 1}. {label}
@@ -368,12 +368,6 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                         <div className="flex justify-between">
                           <span className="text-black/70">Platform fee (15%)</span>
                           <span className="font-medium text-black/70">+${(hostFee / 100).toFixed(2)}</span>
-                        </div>
-                        <div className="border-t border-black/10 pt-1.5">
-                          <div className="flex justify-between text-[12px] text-black/50">
-                            <span>Creator receives (after their 15% fee)</span>
-                            <span>${(creatorNet / 100).toFixed(2)}</span>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -587,10 +581,6 @@ export function SendOfferModal({ creator, onClose, onSuccess }: SendOfferModalPr
                       <div className="-mx-4 mt-2 flex justify-between border-t-2 border-black bg-black px-4 py-2">
                         <span className="font-bold text-white">You Pay</span>
                         <span className="text-lg font-black text-white">${(hostTotal / 100).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between pt-2 text-[12px] text-black/50">
-                        <span>Creator receives (after their 15% fee)</span>
-                        <span>${(creatorNet / 100).toFixed(2)}</span>
                       </div>
                     </>
                   )}
