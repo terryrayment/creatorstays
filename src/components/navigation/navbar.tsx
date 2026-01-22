@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
@@ -12,13 +12,30 @@ export function Navbar() {
   // Fallback to localStorage for demo mode
   const [demoRole, setDemoRole] = useState<'host' | 'creator' | null>(null)
   const [notifications, setNotifications] = useState({ unreadMessages: 0, pendingOffers: 0, total: 0 })
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [isAgency, setIsAgency] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   
   useEffect(() => {
     const role = localStorage.getItem('creatorstays_role')
     if (role === 'host' || role === 'creator') {
       setDemoRole(role)
     }
+    // Check agency status
+    const agencyStatus = localStorage.getItem('creatorstays_agency') === 'true'
+    setIsAgency(agencyStatus)
   }, [pathname])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Fetch notifications when logged in
   useEffect(() => {
@@ -49,7 +66,9 @@ export function Navbar() {
   const handleLogout = async () => {
     // Clear demo mode
     localStorage.removeItem('creatorstays_role')
+    localStorage.removeItem('creatorstays_agency')
     setDemoRole(null)
+    setShowDropdown(false)
     
     // Sign out from NextAuth if authenticated
     if (status === "authenticated") {
@@ -107,14 +126,103 @@ export function Navbar() {
                 )}
               </Link>
 
-              {/* User avatar/name if available */}
-              {session?.user?.image && (
-                <img 
-                  src={session.user.image} 
-                  alt="" 
-                  className="h-8 w-8 rounded-full border-2 border-white/50"
-                />
-              )}
+              {/* Profile dropdown */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/50 bg-gray-500 text-sm font-bold text-white transition-all hover:border-white"
+                >
+                  {session?.user?.image ? (
+                    <img src={session.user.image} alt="" className="h-full w-full rounded-full object-cover" />
+                  ) : (
+                    session?.user?.name?.[0]?.toUpperCase() || 'U'
+                  )}
+                </button>
+                
+                {/* Dropdown menu */}
+                {showDropdown && (
+                  <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border-2 border-black bg-white py-2 shadow-xl">
+                    {/* Quick Links Header */}
+                    <div className="px-4 py-2 border-b border-black/10">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-black/50">Quick Links</p>
+                    </div>
+                    
+                    <Link
+                      href={userRole === 'host' ? '/dashboard/host' : '/dashboard/creator'}
+                      onClick={() => setShowDropdown(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
+                    >
+                      <span>Dashboard</span>
+                    </Link>
+                    
+                    {userRole === 'host' && (
+                      <>
+                        <Link
+                          href="/dashboard/host/properties"
+                          onClick={() => setShowDropdown(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
+                        >
+                          <span>My Properties</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/host/search-creators"
+                          onClick={() => setShowDropdown(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
+                        >
+                          <span>Find Creators</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/collaborations"
+                          onClick={() => setShowDropdown(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
+                        >
+                          <span>Collaborations</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/analytics"
+                          onClick={() => setShowDropdown(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
+                        >
+                          <span>Analytics</span>
+                        </Link>
+                      </>
+                    )}
+                    
+                    {/* Account Settings Header */}
+                    <div className="px-4 py-2 border-t border-b border-black/10 mt-1">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-black/50">Account Settings</p>
+                    </div>
+                    
+                    {userRole === 'host' && isAgency && (
+                      <Link
+                        href="/dashboard/host/team"
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
+                      >
+                        <span>Manage Team</span>
+                        <span className="rounded-full bg-[#28D17C] px-1.5 py-0.5 text-[9px] font-bold text-black">AGENCY</span>
+                      </Link>
+                    )}
+                    
+                    <Link
+                      href="/dashboard/settings"
+                      onClick={() => setShowDropdown(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
+                    >
+                      <span>Settings</span>
+                    </Link>
+                    
+                    <div className="border-t border-black/10 mt-1 pt-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50"
+                      >
+                        Log Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               
               {/* Dashboard Link with notification dot */}
               <Link

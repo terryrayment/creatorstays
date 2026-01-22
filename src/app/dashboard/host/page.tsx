@@ -40,11 +40,10 @@ function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
   )
 }
 
-function NextStepStrip() {
+function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
   return (
     <div className="border-b-2 border-black bg-[#FFD84A]">
       <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:px-6">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-black">Next Steps:</span>
         <div className="flex flex-wrap gap-2">
           <Link 
             href="/dashboard/host/properties"
@@ -82,6 +81,14 @@ function NextStepStrip() {
           >
              Analytics
           </Link>
+          {isAgency && (
+            <Link 
+              href="/dashboard/host/team"
+              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+            >
+              Manage Team
+            </Link>
+          )}
         </div>
       </div>
     </div>
@@ -99,14 +106,12 @@ function BetaHeader({ isAgency }: { isAgency?: boolean }) {
             <span className="rounded-full border-2 border-black bg-[#28D17C] px-2.5 py-0.5 text-[10px] font-bold text-black">AGENCY</span>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          {isAgency && (
-            <Link href="/dashboard/host/team" className="text-xs font-bold text-black hover:underline">
-              Manage Team
-            </Link>
-          )}
-          <Link href="/" className="text-sm font-bold text-black hover:underline">← Back to site</Link>
-        </div>
+        <Link 
+          href="/" 
+          className="rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1.5 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
+        >
+          ← Back to site
+        </Link>
       </div>
     </div>
   )
@@ -310,7 +315,7 @@ export default function HostDashboardPage() {
       {showOnboardingBanner && (
         <OnboardingBanner onDismiss={() => setShowOnboardingBanner(false)} />
       )}
-      <NextStepStrip />
+      <NextStepStrip isAgency={isAgency} />
       <StatsSection />
       <SetupChecklist />
       <HostDashboard />
