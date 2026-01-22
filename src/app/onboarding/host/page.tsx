@@ -282,6 +282,37 @@ export default function HostOnboardingPage() {
             contactEmail: profile.contactEmail || session?.user?.email || "",
             avatarUrl: profile.avatarUrl || session?.user?.image || "",
           }))
+          
+          // Also fetch any existing property (created during registration)
+          try {
+            const propsRes = await fetch("/api/properties")
+            if (propsRes.ok) {
+              const propsData = await propsRes.json()
+              const properties = propsData.properties || propsData || []
+              if (properties.length > 0) {
+                const prop = properties[0] // Get the first property
+                setData(prev => ({
+                  ...prev,
+                  airbnbUrl: prop.airbnbUrl || "",
+                  propertyTitle: prop.title || "",
+                  propertyType: prop.propertyType || "",
+                  cityRegion: prop.cityRegion || "",
+                  bedrooms: prop.beds?.toString() || "",
+                  bathrooms: prop.baths?.toString() || "",
+                  maxGuests: prop.maxGuests?.toString() || "",
+                  amenities: prop.amenities || [],
+                  photos: prop.photos || [],
+                  heroImageUrl: prop.heroImageUrl || "",
+                }))
+                // If property has data, mark as imported
+                if (prop.airbnbUrl || prop.title) {
+                  setImportSuccess(true)
+                }
+              }
+            }
+          } catch (propError) {
+            console.error("Failed to fetch property:", propError)
+          }
         } else {
           // No profile yet - auto-fill from Google session
           setData(prev => ({
