@@ -825,8 +825,8 @@ export function HostDashboard() {
 
       {/* Message Composer Modal */}
       {composing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl border-2 border-black bg-white p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
+          <div className="w-full max-w-md rounded-xl border-2 border-black bg-white p-6 shadow-xl my-4 max-h-[90vh] overflow-y-auto">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold text-black">Send Offer to @{composing.handle}</h3>
               <button onClick={() => setComposing(null)} className="text-black hover:text-black">✕</button>
@@ -847,43 +847,40 @@ export function HostDashboard() {
 
               {/* Traffic Bonus Toggle */}
               <div className="rounded-xl border-2 border-black p-4">
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input 
-                    type="checkbox"
-                    checked={message.trafficBonusEnabled}
-                    onChange={e => setMessage({...message, trafficBonusEnabled: e.target.checked})}
-                    className="h-5 w-5 rounded border-2 border-black accent-black"
-                  />
+                <div 
+                  className="flex cursor-pointer items-center gap-3"
+                  onClick={() => setMessage({...message, trafficBonusEnabled: !message.trafficBonusEnabled})}
+                >
+                  <div className={`flex h-5 w-5 items-center justify-center rounded border-2 border-black ${message.trafficBonusEnabled ? 'bg-black' : 'bg-white'}`}>
+                    {message.trafficBonusEnabled && (
+                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    )}
+                  </div>
                   <span className="text-sm font-bold text-black">Add Traffic Bonus (optional)</span>
-                </label>
+                </div>
 
                 {message.trafficBonusEnabled && (
                   <div className="mt-4 space-y-4 border-t border-black/20 pt-4">
-                    {/* Metric */}
-                    <div>
-                      <label className="mb-2 block text-xs font-medium text-black/60">Metric</label>
-                      <div className="flex gap-3">
-                        <button className="flex-1 rounded-full border-2 border-black bg-white px-4 py-2 text-sm font-medium text-black">
-                          Clicks
-                        </button>
-                        <button disabled className="flex-1 rounded-full border-2 border-black/20 bg-white px-4 py-2 text-sm font-medium text-black/40">
-                          Views (coming soon)
-                        </button>
-                      </div>
+                    {/* Clicks info */}
+                    <div className="text-xs text-black/60">
+                      Bonus paid when tracking link reaches click threshold.
                     </div>
 
                     {/* Threshold */}
                     <div>
-                      <label className="mb-2 block text-xs font-medium text-black/60">Threshold</label>
+                      <label className="mb-2 block text-xs font-bold text-black">Click Threshold</label>
                       <div className="flex gap-2">
-                        {["250", "500", "1000", "2500"].map(t => (
+                        {["500", "1000", "2500", "5000"].map(t => (
                           <button 
                             key={t}
+                            type="button"
                             onClick={() => setMessage({...message, trafficBonusThreshold: t})}
-                            className={`flex-1 rounded-full border-2 px-3 py-2 text-sm font-medium transition-colors ${
+                            className={`flex-1 rounded-full border-2 px-3 py-2 text-sm font-bold transition-colors ${
                               message.trafficBonusThreshold === t 
-                                ? "border-black bg-white text-black" 
-                                : "border-black/20 bg-white text-black/60 hover:border-black/40"
+                                ? "border-black bg-[#FFD84A] text-black" 
+                                : "border-black bg-white text-black hover:bg-black/5"
                             }`}
                           >
                             {parseInt(t).toLocaleString()}
@@ -894,47 +891,29 @@ export function HostDashboard() {
 
                     {/* Bonus Amount */}
                     <div>
-                      <label className="mb-2 block text-xs font-medium text-black/60">Bonus Amount ($)</label>
+                      <label className="mb-2 block text-xs font-bold text-black">Bonus Amount</label>
                       <div className="flex gap-2">
-                        {["25", "50", "100"].map(a => (
+                        {["50", "100", "250"].map(a => (
                           <button 
                             key={a}
+                            type="button"
                             onClick={() => setMessage({...message, trafficBonusAmount: a})}
-                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-colors ${
+                            className={`flex-1 rounded-full border-2 px-4 py-2 text-sm font-bold transition-colors ${
                               message.trafficBonusAmount === a 
-                                ? "border-black bg-white text-black" 
-                                : "border-black/20 bg-white text-black/60 hover:border-black/40"
+                                ? "border-black bg-[#FFD84A] text-black" 
+                                : "border-black bg-white text-black hover:bg-black/5"
                             }`}
                           >
                             ${a}
                           </button>
                         ))}
-                        <input 
-                          placeholder="Custom"
-                          value={!["25", "50", "100"].includes(message.trafficBonusAmount) ? message.trafficBonusAmount : ""}
-                          onChange={e => setMessage({...message, trafficBonusAmount: e.target.value})}
-                          className={`w-24 rounded-full border-2 px-4 py-2 text-sm font-medium transition-colors placeholder:text-black/40 focus:outline-none ${
-                            !["25", "50", "100"].includes(message.trafficBonusAmount) && message.trafficBonusAmount
-                              ? "border-black bg-white text-black"
-                              : "border-black/20 bg-white text-black/60"
-                          }`}
-                          type="number"
-                        />
                       </div>
                     </div>
 
-                    {/* Payout Mode */}
-                    <div className="rounded-full border-2 border-black/20 bg-white px-4 py-3">
-                      <p className="text-sm font-medium text-black/60">Payout Mode: Manual Approve (Beta)</p>
-                      <p className="mt-0.5 text-xs text-black/40">
-                        You approve bonuses after the dashboard shows the threshold was reached.
-                      </p>
-                    </div>
-
                     {/* Summary */}
-                    <div className="rounded-full border-2 border-black/20 bg-white px-4 py-3">
-                      <p className="text-sm font-medium text-black/60">
-                        Bonus: ${message.trafficBonusAmount || "0"} when link hits {parseInt(message.trafficBonusThreshold || "0").toLocaleString()} clicks.
+                    <div className="rounded-lg border-2 border-black bg-[#28D17C]/20 px-4 py-3">
+                      <p className="text-sm font-bold text-black">
+                        +${message.trafficBonusAmount || "0"} bonus at {parseInt(message.trafficBonusThreshold || "0").toLocaleString()} clicks
                       </p>
                     </div>
                   </div>
@@ -955,7 +934,7 @@ export function HostDashboard() {
               {/* Total Summary */}
               {message.basePay && (
                 <div className="rounded-lg border-2 border-black bg-[#FFD84A] p-3">
-                  <p className="text-xs font-bold text-black">
+                  <p className="text-sm font-bold text-black">
                     Offer: ${message.basePay} base
                     {message.trafficBonusEnabled && ` + $${message.trafficBonusAmount} at ${parseInt(message.trafficBonusThreshold).toLocaleString()} clicks`}
                   </p>
@@ -963,10 +942,10 @@ export function HostDashboard() {
               )}
               
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => setComposing(null)}>
+                <Button variant="outline" className="flex-1 border-2 border-black" onClick={() => setComposing(null)}>
                   Cancel
                 </Button>
-                <Button className="flex-1" onClick={sendMessage} disabled={!message.basePay}>
+                <Button className="flex-1 border-2 border-black bg-black text-white" onClick={sendMessage} disabled={!message.basePay}>
                   Send Offer
                 </Button>
               </div>
