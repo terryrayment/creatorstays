@@ -518,7 +518,7 @@ export default function HostOnboardingPage() {
         })
         const result = await res.json()
         
-        if (result.free) {
+        if (result.freeAccess || result.free) {
           router.push("/onboarding/host/success")
         } else if (result.checkoutUrl) {
           window.location.href = result.checkoutUrl
