@@ -180,16 +180,15 @@ export function BetaHostDashboard() {
         const profileRes = await fetch('/api/host/profile')
         const profileData = await profileRes.json()
         const profile = profileData.profile || profileData
-        const hasProfile = Boolean(profile?.displayName && profile?.bio)
         
-        // Check if preferences are set (styleTags, location)
-        const hasPreferences = Boolean(
-          profile?.styleTags?.length > 0 || 
-          profile?.location
-        )
+        // Profile complete = has displayName AND bio
+        const hasProfile = Boolean(profile?.displayName && profile?.bio && profile.displayName !== 'Host')
         
-        // For now, content goals = has at least one property with description
-        const hasContentGoals = Array.isArray(properties) && properties.some((p: any) => p.description)
+        // Preferences complete = has completed the creator preferences quiz
+        const hasPreferences = Boolean(profile?.creatorPrefs?.completedAt)
+        
+        // Content goals complete = has completed the content goals quiz
+        const hasContentGoals = Boolean(profile?.contentGoals?.completedAt)
 
         setPrepStatus({
           hasProperty,
@@ -262,15 +261,15 @@ export function BetaHostDashboard() {
                 <PrepItem
                   done={prepStatus.hasPreferences}
                   title="Set creator preferences"
-                  description="What type of creators do you want? Travel, lifestyle, luxury? Set your vibe."
-                  href="/dashboard/host/settings"
+                  description="Location, niche, audience size, content style, budget — a 2-minute quiz."
+                  href="/dashboard/host/preferences"
                   priority={prepStatus.hasProfile && !prepStatus.hasPreferences}
                 />
                 <PrepItem
                   done={prepStatus.hasContentGoals}
                   title="Define your content goals"
-                  description="What kind of content do you want? Property tours, local guides, day-in-the-life?"
-                  href="/dashboard/host/properties"
+                  description="What content do you want? How will you use it? What's your #1 goal?"
+                  href="/dashboard/host/content-goals"
                   priority={prepStatus.hasPreferences && !prepStatus.hasContentGoals}
                 />
               </div>

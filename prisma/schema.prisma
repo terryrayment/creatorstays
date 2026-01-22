@@ -356,6 +356,10 @@ model HostProfile {
   // Onboarding status
   onboardingComplete Boolean @default(false)
   
+  // Creator matching preferences (JSON)
+  creatorPrefs Json?  // { locationPref, niches, audienceSize, contentStyle, budgetRange }
+  contentGoals Json?  // { contentTypes, usageRights, postingGoal, primaryGoal }
+  
   // Agency Pro subscription ($199/month)
   isAgency            Boolean   @default(false)
   agencyName          String?
