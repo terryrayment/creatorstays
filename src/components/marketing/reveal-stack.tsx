@@ -15,27 +15,12 @@ interface RevealStackProps {
 /**
  * RevealStack - Animates children sequentially on load (top to bottom)
  * 
- * Each child animates from: opacity 0, translateY(18px), blur(10px)
- * to: opacity 1, translateY(0), blur(0)
+ * Each child animates from: opacity 0, translateY(18px)
+ * to: opacity 1, translateY(0)
  * 
  * Respects prefers-reduced-motion.
  * 
- * Usage:
- * <RevealStack>
- *   <Section1 />
- *   <Section2 />
- *   <Section3 />
- * </RevealStack>
- * 
- * TODO: Apply to other marketing pages:
- * - /waitlist/page.tsx
- * - /hosts/page.tsx
- * - /creators/page.tsx
- * - /how-to/hosts/page.tsx
- * - /how-to/creators/page.tsx
- * - /pricing/page.tsx
- * - /privacy/page.tsx
- * - /trust-safety/page.tsx
+ * Note: Removed blur filter as it causes text rendering issues in Safari.
  */
 export function RevealStack({
   children,
@@ -73,20 +58,29 @@ export function RevealStack({
           animation-delay: var(--reveal-delay, 0ms);
           opacity: 0;
           transform: translateY(18px);
-          filter: blur(10px);
+          /* Safari rendering fixes */
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          transform-style: preserve-3d;
+          -webkit-transform-style: preserve-3d;
         }
 
         @keyframes revealUp {
           from {
             opacity: 0;
             transform: translateY(18px);
-            filter: blur(10px);
           }
           to {
             opacity: 1;
             transform: translateY(0);
-            filter: blur(0);
           }
+        }
+
+        /* After animation completes, remove transform to fix Safari text rendering */
+        .reveal-item[style] {
+          animation-fill-mode: forwards;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -94,7 +88,6 @@ export function RevealStack({
             animation: none;
             opacity: 1;
             transform: none;
-            filter: none;
           }
         }
       `}</style>

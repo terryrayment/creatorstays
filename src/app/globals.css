@@ -850,6 +850,11 @@
 
 .block-hover {
   transition: transform 200ms ease-out;
+  /* Safari text rendering fixes */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .block-hover:hover {
