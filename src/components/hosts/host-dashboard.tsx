@@ -285,13 +285,13 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 // Match badge
 function MatchBadge({ score }: { score: number }) {
   const tier = score >= 70 
-    ? { label: "Strong Match", color: "bg-emerald-100 text-emerald-700 border-emerald-200" }
+    ? { label: "Strong Match", color: "bg-[#28D17C] text-black border-black" }
     : score >= 45 
-    ? { label: "Good Match", color: "bg-blue-100 text-blue-700 border-blue-200" }
-    : { label: "Possible Fit", color: "bg-slate-100 text-slate-600 border-slate-200" }
+    ? { label: "Good Match", color: "bg-[#FFD84A] text-black border-black" }
+    : { label: "Possible Fit", color: "bg-white text-black border-black" }
   
   return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${tier.color}`}>
+    <span className={`inline-flex items-center whitespace-nowrap rounded-full border-2 px-2.5 py-1 text-[10px] font-bold ${tier.color}`}>
       {tier.label}
     </span>
   )
@@ -309,6 +309,7 @@ const mockCreators = [
     platform: "Instagram",
     openToOffers: true,
     matchScore: 82,
+    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
   },
   { 
     id: 2, 
@@ -320,6 +321,7 @@ const mockCreators = [
     platform: "TikTok",
     openToOffers: true,
     matchScore: 68,
+    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
   },
   { 
     id: 3, 
@@ -331,6 +333,7 @@ const mockCreators = [
     platform: "Instagram",
     openToOffers: false,
     matchScore: 55,
+    avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
   },
   { 
     id: 4, 
@@ -342,6 +345,7 @@ const mockCreators = [
     platform: "YouTube",
     openToOffers: true,
     matchScore: 74,
+    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
   },
   { 
     id: 5, 
@@ -353,6 +357,7 @@ const mockCreators = [
     platform: "TikTok",
     openToOffers: true,
     matchScore: 41,
+    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
   },
   { 
     id: 6, 
@@ -364,6 +369,7 @@ const mockCreators = [
     platform: "Instagram",
     openToOffers: true,
     matchScore: 89,
+    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
   },
 ]
 
@@ -688,22 +694,31 @@ export function HostDashboard() {
 
               <div className="mt-4 space-y-2">
                 {filteredCreators.map(creator => (
-                  <div key={creator.id} className="flex items-center justify-between rounded-lg border border-black bg-white p-3 transition-all hover:border-black hover:shadow-sm">
+                  <div key={creator.id} className="flex items-center justify-between rounded-xl border-2 border-black bg-white p-4 transition-all hover:shadow-md">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100 text-sm font-semibold text-blue-600">
-                        {creator.name.split(" ")[0][0]}{creator.name.split(" ")[2]?.[0] || ""}
+                      {/* Avatar */}
+                      <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-black bg-gradient-to-br from-blue-100 to-purple-100">
+                        {creator.avatarUrl ? (
+                          <img src={creator.avatarUrl} alt={creator.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-sm font-bold text-blue-600">
+                            {creator.name.split(" ")[0][0]}{creator.name.split(" ")[1]?.[0] || ""}
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-black">{creator.name}</p>
-                          <MatchBadge score={creator.matchScore} />
-                        </div>
-                        <p className="text-xs text-black">@{creator.handle} · {creator.niches[0]} · {creator.audience}</p>
+                      {/* Info */}
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-black">{creator.name}</p>
+                        <p className="text-xs text-black/70">@{creator.handle} · {creator.niches[0]} · {creator.audience}</p>
                       </div>
                     </div>
-                    <Button size="sm" variant="outline" className="text-xs" onClick={() => openComposer(creator)}>
-                      Message
-                    </Button>
+                    {/* Right side - Badge and Button */}
+                    <div className="flex items-center gap-3">
+                      <MatchBadge score={creator.matchScore} />
+                      <Button size="sm" variant="outline" className="border-2 border-black text-xs font-bold" onClick={() => openComposer(creator)}>
+                        Message
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
