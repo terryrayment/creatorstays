@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { Panel, PanelHeader, PanelContent } from "@/components/ui/panel"
-import { Metric } from "@/components/ui/metric"
+import Link from "next/link"
 
 interface ClickData {
   date: string
@@ -22,6 +21,12 @@ interface LinkAnalytics {
     propertyId: string | null
     isActive: boolean
     createdAt: string
+  }
+  collaboration?: {
+    id: string
+    property?: { title: string; location: string }
+    creator?: { displayName: string; handle: string }
+    host?: { displayName: string }
   }
   analytics: {
     allTime: {
@@ -55,27 +60,6 @@ interface AnalyticsDashboardProps {
   viewAs: 'host' | 'creator'
 }
 
-function MiniBarChart({ data, maxDays = 7 }: { data: ClickData[]; maxDays?: number }) {
-  const recent = data.slice(-maxDays)
-  const maxClicks = Math.max(...recent.map(d => d.clicks), 1)
-  
-  return (
-    <div className="flex h-8 items-end gap-1">
-      {recent.map((day, i) => {
-        const height = (day.clicks / maxClicks) * 100
-        return (
-          <div
-            key={i}
-            className="flex-1 rounded-sm bg-primary/20 transition-all hover:bg-primary/40"
-            style={{ height: `${Math.max(height, 8)}%` }}
-            title={`${day.date}: ${day.clicks} clicks`}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
 export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
   const { data: session } = useSession()
   const [loading, setLoading] = useState(true)
@@ -89,7 +73,6 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
       
       setLoading(true)
       try {
-        // Get user profile ID
         const profileRes = await fetch(
           viewAs === "host" ? "/api/host/profile" : "/api/creator/profile"
         )
@@ -107,7 +90,6 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
           return
         }
 
-        // Fetch analytics
         const analyticsRes = await fetch(
           `/api/analytics?${viewAs === "host" ? "hostId" : "creatorId"}=${profileId}&days=${days}`
         )
@@ -134,12 +116,12 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 animate-pulse rounded-xl bg-black/5" />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-28 animate-pulse rounded-2xl border-[3px] border-black/20 bg-black/5" />
           ))}
         </div>
-        <div className="h-64 animate-pulse rounded-xl bg-black/5" />
+        <div className="h-64 animate-pulse rounded-2xl border-[3px] border-black/20 bg-black/5" />
       </div>
     )
   }
@@ -153,6 +135,26 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
 
   const links = analyticsData?.links || []
 
+  // Calculate aggregated daily data for chart
+  const aggregatedDaily: ClickData[] = []
+  if (links.length > 0) {
+    const dateMap = new Map<string, { clicks: number; uniqueClicks: number }>()
+    links.forEach(link => {
+      link.analytics.daily.forEach(day => {
+        const existing = dateMap.get(day.date) || { clicks: 0, uniqueClicks: 0 }
+        dateMap.set(day.date, {
+          clicks: existing.clicks + day.clicks,
+          uniqueClicks: existing.uniqueClicks + day.uniqueClicks,
+        })
+      })
+    })
+    dateMap.forEach((value, key) => {
+      aggregatedDaily.push({ date: key, ...value })
+    })
+    aggregatedDaily.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  }
+
+  // Empty state
   if (links.length === 0) {
     return (
       <div className="rounded-2xl border-[3px] border-black bg-white p-8 text-center">
@@ -163,176 +165,243 @@ export function AnalyticsDashboard({ viewAs }: AnalyticsDashboardProps) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
           </svg>
         </div>
-        <h3 className="text-lg font-bold text-black">No Tracking Data Yet</h3>
+        <h3 className="text-xl font-black text-black">No Tracking Data Yet</h3>
         <p className="mx-auto mt-2 max-w-sm text-sm text-black/60">
           {viewAs === "host"
             ? "Start collaborations with creators to get tracking links and see analytics here."
             : "Once you have active collaborations with tracking links, click data will appear here."}
         </p>
-        <a
+        <Link
           href={viewAs === "host" ? "/dashboard/host/search-creators" : "/dashboard/creator/offers"}
-          className="mt-4 inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-6 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-1"
+          className="mt-6 inline-flex items-center gap-2 rounded-full border-[3px] border-black bg-black px-6 py-3 text-sm font-black text-white transition-transform hover:-translate-y-1"
         >
           {viewAs === "host" ? "Find Creators" : "View Offers"}
-          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-          </svg>
-        </a>
+          <span>→</span>
+        </Link>
       </div>
     )
   }
 
+  const maxDailyClicks = Math.max(...aggregatedDaily.map(d => d.clicks), 1)
+
   return (
     <div className="space-y-6">
-      {/* Time Period Selector */}
-      <div className="flex justify-end">
-        <div className="flex rounded-full border-2 border-black bg-white">
-          {[7, 14, 30].map(d => (
+      {/* Period Selector */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-black/60">
+          Showing data for the last <span className="font-bold text-black">{days} days</span>
+        </p>
+        <div className="flex gap-2">
+          {[7, 30, 90].map(d => (
             <button
               key={d}
               onClick={() => setDays(d)}
-              className={`px-4 py-1.5 text-xs font-bold transition-colors ${
-                days === d ? "bg-black text-white" : "text-black hover:bg-black/5"
-              } ${d === 7 ? "rounded-l-full" : d === 30 ? "rounded-r-full" : ""}`}
+              className={`rounded-full border-2 border-black px-4 py-1.5 text-xs font-bold transition-all ${
+                days === d
+                  ? "bg-black text-white"
+                  : "bg-white text-black hover:bg-black/5"
+              }`}
             >
-              {d}d
+              {d} Days
             </button>
           ))}
         </div>
       </div>
 
-      {/* Summary metrics */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Metric value={totals.activeLinks} label="Active Links" size="md" />
-        <Metric value={totals.allTime.totalClicks.toLocaleString()} label="Total Clicks" size="md" />
-        <Metric value={totals.allTime.uniqueClicks.toLocaleString()} label="Unique Visitors" size="md" />
-        <Metric 
-          value={`${totals.period.totalClicks}`} 
-          label={`Last ${days} Days`}
-          size="md" 
-        />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border-[3px] border-black bg-[#FFD84A] p-5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Total Clicks</p>
+          <p className="mt-2 text-4xl font-black text-black">{totals.allTime.totalClicks.toLocaleString()}</p>
+          <p className="mt-1 text-xs text-black/70">All time</p>
+        </div>
+        
+        <div className="rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Unique Visitors</p>
+          <p className="mt-2 text-4xl font-black text-black">{totals.allTime.uniqueClicks.toLocaleString()}</p>
+          <p className="mt-1 text-xs text-black/70">All time</p>
+        </div>
+        
+        <div className="rounded-2xl border-[3px] border-black bg-[#28D17C] p-5 sm:col-span-1 col-span-2">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Last {days} Days</p>
+          <p className="mt-2 text-4xl font-black text-black">{totals.period.totalClicks.toLocaleString()}</p>
+          <p className="mt-1 text-xs text-black/70">
+            {totals.period.uniqueClicks} unique visitors
+          </p>
+        </div>
       </div>
 
-      {/* Per-link breakdown */}
-      <Panel>
-        <PanelHeader 
-          title="Tracking Links" 
-          description="Click performance by collaboration"
-        />
-        <PanelContent className="p-0">
-          <div className="divide-y divide-foreground/5">
-            {links.map(item => (
-              <div key={item.link.id} className="p-5">
+      {/* Click Chart */}
+      {aggregatedDaily.length > 0 && (
+        <div className="rounded-2xl border-[3px] border-black bg-white p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-black text-black">Clicks Over Time</h2>
+              <p className="text-xs text-black/60">Daily click activity</p>
+            </div>
+          </div>
+          
+          {/* Bar chart */}
+          <div className="flex items-end justify-between gap-1 h-40">
+            {aggregatedDaily.slice(-Math.min(days, 30)).map((day, i) => {
+              const height = (day.clicks / maxDailyClicks) * 100
+              return (
+                <div key={i} className="flex flex-col items-center flex-1 group">
+                  <div className="relative w-full">
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
+                      <div className="rounded-lg border-2 border-black bg-white px-2 py-1 text-xs font-bold shadow-lg whitespace-nowrap">
+                        {day.clicks} clicks
+                      </div>
+                    </div>
+                    <div 
+                      className="w-full bg-[#4AA3FF] rounded-t border-2 border-black border-b-0 transition-all hover:bg-[#3B8FE8] cursor-pointer"
+                      style={{ height: `${Math.max(height, 4)}%`, minHeight: '4px' }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          
+          {/* X-axis labels - show every few days */}
+          <div className="flex justify-between mt-2 text-[10px] text-black/40">
+            {aggregatedDaily.slice(-Math.min(days, 30)).filter((_, i, arr) => i === 0 || i === Math.floor(arr.length / 2) || i === arr.length - 1).map((day, i) => (
+              <span key={i}>
+                {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Campaign Breakdown */}
+      <div className="rounded-2xl border-[3px] border-black bg-white overflow-hidden">
+        <div className="p-5 border-b-2 border-black bg-black/5">
+          <h2 className="text-lg font-black text-black">Campaign Performance</h2>
+          <p className="text-xs text-black/60">Click breakdown by collaboration</p>
+        </div>
+        
+        <div className="divide-y-2 divide-black/10">
+          {links.map((item) => {
+            const propertyTitle = item.collaboration?.property?.title || item.link.campaignName || "Tracking Link"
+            const propertyLocation = item.collaboration?.property?.location
+            const creatorHandle = item.collaboration?.creator?.handle
+            const recentClicks = item.analytics.daily.slice(-7)
+            const maxRecent = Math.max(...recentClicks.map(d => d.clicks), 1)
+            
+            return (
+              <div key={item.link.id} className="p-5 hover:bg-black/[0.02] transition-colors">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">{item.link.campaignName || "Tracking Link"}</p>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                        item.link.isActive 
-                          ? 'bg-emerald-100 text-emerald-700' 
-                          : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {item.link.isActive ? "active" : "inactive"}
-                      </span>
-                      {item.analytics.lastClickAt && (
-                        <span className="text-xs text-black/60">
-                          Last click: {new Date(item.analytics.lastClickAt).toLocaleDateString()}
+                  <div className="flex items-start gap-4 min-w-0 flex-1">
+                    {/* Icon */}
+                    <div className="w-12 h-12 rounded-xl border-2 border-black bg-gradient-to-br from-[#FFD84A] to-[#FF9500] flex items-center justify-center flex-shrink-0">
+                      <span className="text-xl">🏠</span>
+                    </div>
+                    
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-bold text-black truncate">{propertyTitle}</h3>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                          item.link.isActive 
+                            ? 'bg-[#28D17C] border-black text-black' 
+                            : 'bg-gray-200 border-gray-400 text-gray-600'
+                        }`}>
+                          {item.link.isActive ? 'Active' : 'Inactive'}
                         </span>
+                      </div>
+                      
+                      {propertyLocation && (
+                        <p className="text-xs text-black/60 mt-0.5">{propertyLocation}</p>
                       )}
+                      
+                      <div className="flex items-center gap-3 mt-1 text-xs text-black/50">
+                        {viewAs === 'host' && creatorHandle && (
+                          <span>Creator: <span className="font-bold text-black">@{creatorHandle}</span></span>
+                        )}
+                        {item.analytics.lastClickAt && (
+                          <span>Last click: {new Date(item.analytics.lastClickAt).toLocaleDateString()}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold">{item.analytics.allTime.totalClicks}</p>
-                    <p className="text-xs text-black/60">total clicks</p>
-                  </div>
-                </div>
-
-                {/* Stats row */}
-                <div className="mt-3 flex gap-4 text-xs">
-                  <div>
-                    <span className="text-black/60">Unique: </span>
-                    <span className="font-bold">{item.analytics.allTime.uniqueClicks}</span>
-                  </div>
-                  <div>
-                    <span className="text-black/60">Last {days}d: </span>
-                    <span className="font-bold">{item.analytics.period.totalClicks}</span>
-                  </div>
-                  <div>
-                    <span className="text-black/60">Revisits: </span>
-                    <span className="font-bold">{item.analytics.period.revisits}</span>
-                  </div>
-                </div>
-
-                {/* Mini bar chart */}
-                <div className="mt-4">
-                  <div className="mb-1 flex items-center justify-between text-[10px] text-black/60">
-                    <span>Last 7 days</span>
-                    <span>{item.analytics.period.uniqueClicks} unique</span>
-                  </div>
-                  <MiniBarChart data={item.analytics.daily} maxDays={7} />
-                </div>
-
-                {/* Top sources */}
-                {item.analytics.topSources.length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-[10px] font-medium text-black/60 mb-1">Top Sources</p>
-                    <div className="flex flex-wrap gap-2">
-                      {item.analytics.topSources.slice(0, 4).map((source, i) => (
-                        <span key={i} className="rounded-full bg-black/5 px-2 py-0.5 text-[10px] text-black/70">
-                          {source.source}: {source.count}
-                        </span>
+                  
+                  {/* Stats */}
+                  <div className="flex items-center gap-6 flex-shrink-0">
+                    <div className="text-center">
+                      <p className="text-2xl font-black text-black">{item.analytics.allTime.totalClicks.toLocaleString()}</p>
+                      <p className="text-[10px] text-black/60 uppercase tracking-wider">Clicks</p>
+                    </div>
+                    
+                    <div className="text-center">
+                      <p className="text-2xl font-black text-black/60">{item.analytics.allTime.uniqueClicks.toLocaleString()}</p>
+                      <p className="text-[10px] text-black/60 uppercase tracking-wider">Unique</p>
+                    </div>
+                    
+                    {/* Mini sparkline */}
+                    <div className="w-20 h-8 flex items-end gap-0.5">
+                      {recentClicks.map((day, i) => (
+                        <div
+                          key={i}
+                          className="flex-1 bg-[#4AA3FF] rounded-sm"
+                          style={{ height: `${Math.max((day.clicks / maxRecent) * 100, 8)}%` }}
+                          title={`${day.date}: ${day.clicks} clicks`}
+                        />
                       ))}
                     </div>
                   </div>
-                )}
-
-                {/* Tracked link */}
-                <div className="mt-3 flex items-center gap-2 rounded-lg bg-black/[0.02] px-3 py-2">
-                  <svg className="h-3.5 w-3.5 shrink-0 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                </div>
+                
+                {/* Tracking link */}
+                <div className="mt-3 flex items-center gap-2 rounded-xl bg-black/5 px-3 py-2">
+                  <svg className="h-3.5 w-3.5 shrink-0 text-black/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                   </svg>
                   <code className="flex-1 truncate text-xs text-black/60">
-                    https://creatorstays.com/r/{item.link.token}
+                    creatorstays.com/r/{item.link.token}
                   </code>
                   <button 
-                    className="text-[10px] font-medium text-primary hover:underline"
+                    className="rounded-full border border-black/20 bg-white px-3 py-1 text-[10px] font-bold text-black hover:bg-black hover:text-white transition-colors"
                     onClick={() => copyLink(item.link.token)}
                   >
                     {copiedToken === item.link.token ? "Copied!" : "Copy"}
                   </button>
                 </div>
+                
+                {/* Top sources */}
+                {item.analytics.topSources.length > 0 && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="text-[10px] text-black/40">Sources:</span>
+                    {item.analytics.topSources.slice(0, 3).map((source, i) => (
+                      <span key={i} className="rounded-full bg-black/5 px-2 py-0.5 text-[10px] text-black/60">
+                        {source.source} ({source.count})
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        </PanelContent>
-      </Panel>
-
-      {/* Important clarification about clicks vs bookings */}
-      {viewAs === 'host' && (
-        <div className="rounded-lg border-2 border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-bold text-amber-800"> Understanding Your Click Data</p>
-          <p className="mt-1 text-xs text-amber-700">
-            <strong>Clicks measure engagement, not bookings.</strong> CreatorStays tracks how many people 
-            clicked through to your Airbnb listing from creator content. We do not have access to your 
-            Airbnb booking data, so we cannot track conversions.
-          </p>
-          <p className="mt-2 text-xs text-amber-700">
-            <strong>Why this matters:</strong> High clicks indicate strong creator content and audience interest. 
-            Actual booking rates depend on many factors (pricing, availability, listing quality, seasonality) 
-            that are outside the creator's control.
-          </p>
+            )
+          })}
         </div>
-      )}
+      </div>
 
-      {/* Note about tracking */}
-      <div className="rounded-lg border border-black/5 bg-black/[0.02] p-4 text-center text-xs text-black/60">
-        <p>
-          <strong>How tracking works:</strong> Each collaboration gets a unique link. 
-          We track clicks and attribute them to the creator for performance bonuses.
-          {viewAs === 'host' 
-            ? ' Bonuses are based on verified clicks, not booking conversions.' 
-            : ' Track your link performance to maximize earnings.'}
-        </p>
+      {/* Info Box */}
+      <div className="rounded-2xl border-[3px] border-black bg-[#F5F5F5] p-5">
+        <div className="flex items-start gap-3">
+          <span className="text-xl">💡</span>
+          <div>
+            <p className="font-bold text-black">Understanding Your Click Data</p>
+            <p className="mt-1 text-sm text-black/70">
+              Clicks measure how many people tapped through to your listing from creator content. 
+              This shows audience engagement and reach. We track clicks only — we don't have access 
+              to your Airbnb or booking platform data, so actual bookings aren't shown here.
+            </p>
+            <p className="mt-2 text-sm text-black/70">
+              <strong>High clicks = strong creator content.</strong> Conversion to bookings depends on 
+              your listing quality, pricing, availability, and other factors.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )
