@@ -4,6 +4,7 @@ import Script from "next/script"
 import "./globals.css"
 import { Navbar } from "@/components/navigation/navbar"
 import { Footer } from "@/components/navigation/footer"
+import { MainContent } from "@/components/navigation/main-content"
 import { AuthProvider } from "@/components/providers/auth-provider"
 
 const dmSans = DM_Sans({
@@ -202,7 +203,7 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col bg-black font-body text-foreground antialiased">
         <AuthProvider>
           <Navbar />
-          <main className="flex-1 bg-black pt-14">{children}</main>
+          <MainContent>{children}</MainContent>
           <Footer />
         </AuthProvider>
       </body>

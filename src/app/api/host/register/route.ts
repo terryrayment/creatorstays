@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
 
     // 5. Send welcome email with magic link (use raw token in URL - NextAuth will hash it to verify)
     const baseUrl = process.env.NEXTAUTH_URL || 'https://creatorstays.com'
-    const magicLink = `${baseUrl}/api/auth/callback/email?callbackUrl=${encodeURIComponent('/dashboard/host/onboarding')}&token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`
+    const magicLink = `${baseUrl}/api/auth/callback/email?callbackUrl=${encodeURIComponent('/beta/dashboard/host')}&token=${rawToken}&email=${encodeURIComponent(normalizedEmail)}`
 
     try {
       await sendEmail({

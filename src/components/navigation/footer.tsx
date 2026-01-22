@@ -2,10 +2,18 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export function Footer() {
+  const pathname = usePathname()
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+
+  // Don't render Footer on dashboard pages - they have their own layouts
+  const isDashboardPage = pathname?.startsWith('/dashboard') || pathname?.startsWith('/beta/dashboard')
+  if (isDashboardPage) {
+    return null
+  }
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

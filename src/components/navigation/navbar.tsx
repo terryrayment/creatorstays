@@ -9,6 +9,9 @@ export function Navbar() {
   const { data: session, status } = useSession()
   const pathname = usePathname()
   
+  // Don't render Navbar on dashboard pages - they have their own headers
+  const isDashboardPage = pathname?.startsWith('/dashboard') || pathname?.startsWith('/beta/dashboard')
+  
   // Fallback to localStorage for demo mode
   const [demoRole, setDemoRole] = useState<'host' | 'creator' | null>(null)
   const [notifications, setNotifications] = useState({ unreadMessages: 0, pendingOffers: 0, total: 0 })
@@ -58,6 +61,11 @@ export function Navbar() {
       return () => clearInterval(interval)
     }
   }, [status])
+
+  // Don't render on dashboard pages
+  if (isDashboardPage) {
+    return null
+  }
 
   // Use NextAuth session if available, otherwise fall back to demo mode
   const isLoggedIn = status === "authenticated" || demoRole !== null
@@ -111,7 +119,7 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
             <>
-              {/* Messages with badge */}
+              {/* Messages - hidden for now as messaging isn't available in beta
               <Link
                 href="/dashboard/messages"
                 className="relative rounded-full border-2 border-white/50 p-2 text-white transition-all hover:border-white"
@@ -125,6 +133,7 @@ export function Navbar() {
                   </span>
                 )}
               </Link>
+              */}
 
               {/* Profile dropdown */}
               <div className="relative" ref={dropdownRef}>
@@ -148,7 +157,7 @@ export function Navbar() {
                     </div>
                     
                     <Link
-                      href={userRole === 'host' ? '/dashboard/host' : '/dashboard/creator'}
+                      href={userRole === 'host' ? '/beta/dashboard/host' : '/beta/dashboard/creator'}
                       onClick={() => setShowDropdown(false)}
                       className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
                     >
@@ -158,44 +167,44 @@ export function Navbar() {
                     {userRole === 'host' && (
                       <>
                         <Link
-                          href="/dashboard/host/properties"
+                          href="/beta/dashboard/host/properties"
                           onClick={() => setShowDropdown(false)}
                           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
                         >
                           <span>My Properties</span>
                         </Link>
                         <Link
-                          href="/dashboard/host/search-creators"
+                          href="/beta/dashboard/host/search-creators"
                           onClick={() => setShowDropdown(false)}
                           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
                         >
                           <span>Find Creators</span>
                         </Link>
                         <Link
-                          href="/dashboard/collaborations"
+                          href="/beta/dashboard/collaborations"
                           onClick={() => setShowDropdown(false)}
                           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
                         >
                           <span>Collaborations</span>
                         </Link>
                         <Link
-                          href="/dashboard/analytics"
+                          href="/beta/dashboard/host/settings"
                           onClick={() => setShowDropdown(false)}
                           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
                         >
-                          <span>Analytics</span>
+                          <span>Settings</span>
                         </Link>
                       </>
                     )}
                     
                     {/* Account Settings Header */}
                     <div className="px-4 py-2 border-t border-b border-black/10 mt-1">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-black/50">Account Settings</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-black/50">Account</p>
                     </div>
                     
                     {userRole === 'host' && isAgency && (
                       <Link
-                        href="/dashboard/host/team"
+                        href="/beta/dashboard/host/team"
                         onClick={() => setShowDropdown(false)}
                         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
                       >
@@ -203,14 +212,6 @@ export function Navbar() {
                         <span className="rounded-full bg-[#28D17C] px-1.5 py-0.5 text-[9px] font-bold text-black">AGENCY</span>
                       </Link>
                     )}
-                    
-                    <Link
-                      href="/dashboard/settings"
-                      onClick={() => setShowDropdown(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
-                    >
-                      <span>Settings</span>
-                    </Link>
                     
                     <div className="border-t border-black/10 mt-1 pt-1">
                       <button
@@ -226,7 +227,7 @@ export function Navbar() {
               
               {/* Dashboard Link with notification dot */}
               <Link
-                href={userRole === 'host' ? '/dashboard/host' : '/dashboard/creator'}
+                href={userRole === 'host' ? '/beta/dashboard/host' : '/beta/dashboard/creator'}
                 className="relative rounded-full border-2 border-white/50 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white transition-all hover:border-white"
               >
                 Dashboard
