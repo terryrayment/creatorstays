@@ -7,6 +7,154 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 
+// Getting Started Checklist for beta hosts
+function GettingStartedChecklist({ 
+  hasProperty, 
+  hasProfile, 
+  hasSentOffer, 
+  hasCollaboration,
+  onDismiss
+}: { 
+  hasProperty: boolean
+  hasProfile: boolean
+  hasSentOffer: boolean
+  hasCollaboration: boolean
+  onDismiss: () => void
+}) {
+  const steps = [
+    { 
+      id: 'property', 
+      label: 'Add your first property', 
+      done: hasProperty, 
+      href: '/dashboard/host/properties',
+      description: 'Add your Airbnb or VRBO listing to get started'
+    },
+    { 
+      id: 'profile', 
+      label: 'Complete your host profile', 
+      done: hasProfile, 
+      href: '/dashboard/host/settings',
+      description: 'Add your agency name and bio'
+    },
+    { 
+      id: 'browse', 
+      label: 'Browse creators', 
+      done: hasSentOffer, 
+      href: '/dashboard/host/search-creators',
+      description: 'Find creators that match your property vibe'
+    },
+    { 
+      id: 'offer', 
+      label: 'Send your first offer', 
+      done: hasSentOffer, 
+      href: '/dashboard/host/search-creators',
+      description: 'Reach out to a creator with a collaboration offer'
+    },
+  ]
+
+  const completedCount = steps.filter(s => s.done).length
+  const progressPercent = (completedCount / steps.length) * 100
+  const allComplete = completedCount === steps.length
+
+  if (allComplete) {
+    return (
+      <div className="rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-5">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🎉</span>
+              <h3 className="font-heading text-lg font-black uppercase tracking-wider text-black">You&apos;re All Set!</h3>
+            </div>
+            <p className="mt-2 text-sm text-black/70">
+              You&apos;ve completed the getting started checklist. Now focus on finding the right creators and building great collaborations.
+            </p>
+          </div>
+          <button 
+            onClick={onDismiss}
+            className="text-black/40 hover:text-black text-xl"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-xl border-2 border-black bg-gradient-to-br from-[#FFD84A]/20 to-white p-5">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-[#FFD84A] px-2.5 py-0.5 text-[10px] font-bold uppercase">
+              ✨ Beta Host
+            </span>
+          </div>
+          <h3 className="mt-2 font-heading text-lg font-black uppercase tracking-wider text-black">Getting Started</h3>
+          <p className="mt-1 text-xs text-black/60">{completedCount} of {steps.length} complete</p>
+        </div>
+        <button 
+          onClick={onDismiss}
+          className="text-black/40 hover:text-black text-sm"
+        >
+          Hide
+        </button>
+      </div>
+
+      {/* Progress bar */}
+      <div className="mb-4 h-2 w-full rounded-full bg-black/10 overflow-hidden">
+        <div 
+          className="h-full bg-[#28D17C] transition-all duration-500"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
+      {/* Steps */}
+      <div className="space-y-2">
+        {steps.map((step, idx) => (
+          <Link 
+            key={step.id}
+            href={step.href}
+            className={`flex items-center gap-3 rounded-lg p-3 transition-all ${
+              step.done 
+                ? 'bg-[#28D17C]/10' 
+                : idx === completedCount 
+                  ? 'bg-[#FFD84A]/20 border-2 border-[#FFD84A] -mx-0.5'
+                  : 'bg-white/50'
+            }`}
+          >
+            <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
+              step.done 
+                ? 'border-[#28D17C] bg-[#28D17C] text-white' 
+                : idx === completedCount
+                  ? 'border-[#FFD84A] bg-[#FFD84A]'
+                  : 'border-black/20'
+            }`}>
+              {step.done ? (
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <span className="text-[10px] font-bold">{idx + 1}</span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={`text-xs font-bold ${step.done ? 'text-black/50 line-through' : 'text-black'}`}>
+                {step.label}
+              </p>
+              {!step.done && idx === completedCount && (
+                <p className="text-[10px] text-black/60 mt-0.5">{step.description}</p>
+              )}
+            </div>
+            {!step.done && idx === completedCount && (
+              <span className="text-xs text-black/40">→</span>
+            )}
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // Location options for search
 const ALL_LOCATIONS = [
   "Los Angeles, CA",
@@ -542,6 +690,53 @@ export function HostDashboard() {
   // Toast
   const [toast, setToast] = useState("")
 
+  // Getting Started checklist state
+  const [showGettingStarted, setShowGettingStarted] = useState(true)
+  const [stats, setStats] = useState({
+    offersSent: 0,
+    activeCollabs: 0,
+    totalClicks: 0,
+    totalSpent: 0,
+    hasProperty: false,
+    hasProfile: false,
+  })
+
+  // Fetch real stats from API
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/dashboard/stats')
+        if (res.ok) {
+          const data = await res.json()
+          setStats({
+            offersSent: data.offersSent || 0,
+            activeCollabs: data.activeCollabs || 0,
+            totalClicks: data.totalClicks || 0,
+            totalSpent: data.totalSpent || 0,
+            hasProperty: data.hasProperty || false,
+            hasProfile: data.hasProfile || false,
+          })
+        }
+      } catch (e) {
+        console.error('Failed to fetch stats:', e)
+      }
+    }
+    fetchStats()
+  }, [])
+
+  // Check if getting started was dismissed
+  useEffect(() => {
+    const dismissed = localStorage.getItem('hostGettingStartedDismissed')
+    if (dismissed === 'true') {
+      setShowGettingStarted(false)
+    }
+  }, [])
+
+  const dismissGettingStarted = () => {
+    setShowGettingStarted(false)
+    localStorage.setItem('hostGettingStartedDismissed', 'true')
+  }
+
   // Generate creator brief
   const generateBrief = () => {
     const guests = taste.guests.length ? taste.guests.join(" and ").toLowerCase() : "travelers"
@@ -611,10 +806,21 @@ export function HostDashboard() {
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-black">Welcome, Host</h1>
-            <p className="mt-1 text-black">Set up your property and start outreach.</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-black">
+                Welcome{hostProfile.displayName ? `, ${hostProfile.displayName.split(' ')[0]}` : ''}
+              </h1>
+              <span className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold uppercase">
+                ✨ Beta
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-black/70">
+              {stats.offersSent > 0 
+                ? `You've sent ${stats.offersSent} offer${stats.offersSent > 1 ? 's' : ''}. Keep building those creator relationships.`
+                : 'Set up your property and start connecting with creators.'}
+            </p>
           </div>
           <Link 
             href="/dashboard/host/search-creators"
@@ -623,6 +829,19 @@ export function HostDashboard() {
             Browse all creators
           </Link>
         </div>
+
+        {/* Getting Started Checklist */}
+        {showGettingStarted && (
+          <div className="mb-6">
+            <GettingStartedChecklist
+              hasProperty={stats.hasProperty}
+              hasProfile={stats.hasProfile || Boolean(hostProfile.displayName && hostProfile.bio)}
+              hasSentOffer={stats.offersSent > 0}
+              hasCollaboration={stats.activeCollabs > 0}
+              onDismiss={dismissGettingStarted}
+            />
+          </div>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
           {/* Main column */}
@@ -731,28 +950,34 @@ export function HostDashboard() {
             <Section title="Your Stats">
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-white p-3 text-center">
-                  <p className="text-2xl font-bold text-black">0</p>
+                  <p className="text-2xl font-bold text-black">{stats.offersSent}</p>
                   <p className="text-[10px] text-black">Offers Sent</p>
                 </div>
                 <div className="rounded-lg bg-white p-3 text-center">
-                  <p className="text-2xl font-bold text-black">0</p>
+                  <p className="text-2xl font-bold text-black">{stats.activeCollabs}</p>
                   <p className="text-[10px] text-black">Active Collabs</p>
                 </div>
                 <div className="rounded-lg bg-white p-3 text-center">
-                  <p className="text-2xl font-bold text-black">0</p>
+                  <p className="text-2xl font-bold text-black">{stats.totalClicks.toLocaleString()}</p>
                   <p className="text-[10px] text-black">Total Clicks</p>
                 </div>
                 <div className="rounded-lg bg-white p-3 text-center">
-                  <p className="text-2xl font-bold text-black">$0</p>
+                  <p className="text-2xl font-bold text-black">${stats.totalSpent.toLocaleString()}</p>
                   <p className="text-[10px] text-black">Spent</p>
                 </div>
               </div>
-              <Link 
-                href="/dashboard/analytics" 
-                className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-bold text-black transition-colors hover:bg-black/5"
-              >
-                View Analytics →
-              </Link>
+              {stats.offersSent === 0 && stats.activeCollabs === 0 ? (
+                <div className="mt-3 rounded-lg border-2 border-dashed border-black/20 bg-black/5 p-3 text-center">
+                  <p className="text-[10px] text-black/60">Stats will populate as you send offers and work with creators</p>
+                </div>
+              ) : (
+                <Link 
+                  href="/dashboard/analytics" 
+                  className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-bold text-black transition-colors hover:bg-black/5"
+                >
+                  View Analytics →
+                </Link>
+              )}
             </Section>
 
             {/* Quick Links - SECOND */}

@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { HostDashboard } from "@/components/hosts/host-dashboard"
+import { BetaHostDashboard } from "@/components/hosts/beta-host-dashboard"
 import { HostDashboardStats } from "@/components/dashboard/dashboard-stats"
 import { ActionRequiredBanner } from "@/components/dashboard/action-required-banner"
 
@@ -49,37 +50,20 @@ function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
             href="/dashboard/host/properties"
             className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
           >
-            Add / Manage Properties
+            My Properties
+          </Link>
+          <Link 
+            href="/dashboard/host/settings"
+            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+          >
+            Settings
           </Link>
           <Link 
             href="/dashboard/host/search-creators"
-            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+            className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
           >
             Find Creators
-          </Link>
-          <Link 
-            href="/dashboard/host/offers"
-            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-          >
-            Sent Offers
-          </Link>
-          <Link 
-            href="/dashboard/messages"
-            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-          >
-            Messages
-          </Link>
-          <Link 
-            href="/dashboard/collaborations"
-            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-          >
-            Collaborations
-          </Link>
-          <Link 
-            href="/dashboard/analytics"
-            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-          >
-             Analytics
+            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
           </Link>
           {isAgency && (
             <Link 
@@ -221,6 +205,7 @@ export default function HostDashboardPage() {
   const [showWelcome, setShowWelcome] = useState(false)
   const [showAgencyWelcome, setShowAgencyWelcome] = useState(false)
   const [isAgency, setIsAgency] = useState(false)
+  const [showBetaWelcome, setShowBetaWelcome] = useState(false)
 
   useEffect(() => {
     async function checkProfile() {
@@ -273,7 +258,12 @@ export default function HostDashboardPage() {
           
           // Check for welcome param (just completed onboarding)
           if (params.get("welcome") === "true") {
-            setShowWelcome(true)
+            // Check if they've seen the beta welcome before
+            const hasSeenBetaWelcome = localStorage.getItem('hasSeenBetaWelcome') === 'true'
+            if (!hasSeenBetaWelcome) {
+              setShowWelcome(true)
+              localStorage.setItem('hasSeenBetaWelcome', 'true')
+            }
             window.history.replaceState({}, "", "/dashboard/host")
           }
           
@@ -317,28 +307,83 @@ export default function HostDashboardPage() {
 
   return (
     <div className="dashboard min-h-screen bg-[#FAFAFA]">
-      {/* Welcome Modal */}
+      {/* Beta Welcome Modal */}
       {showWelcome && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
-            <span className="mb-4 inline-block text-6xl"></span>
-            <h2 className="font-heading text-2xl tracking-tight text-black">Welcome to CreatorStays!</h2>
-            <p className="mt-2 text-sm text-black/60">
-              Your profile is live and your property is ready to attract creators.
-            </p>
-            <div className="mt-6 space-y-3">
-              <Link
-                href="/dashboard/host/search-creators"
-                className="block rounded-full border-2 border-black bg-[#28D17C] px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
-              >
-                Browse Creators →
-              </Link>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
+          <div className="w-full max-w-lg rounded-2xl border-4 border-black bg-white p-6 sm:p-8 my-8">
+            {/* Header */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1 mb-4">
+                <span className="text-sm">✨</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Beta Access</span>
+              </div>
+              <h2 className="font-heading text-2xl tracking-tight text-black">Welcome to CreatorStays!</h2>
+              <p className="mt-2 text-sm text-black/60">
+                You&apos;re one of our first hosts. Here&apos;s what that means.
+              </p>
+            </div>
+
+            {/* What's working now */}
+            <div className="rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4 mb-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#28D17C] mb-2">✓ What you can do now</p>
+              <ul className="space-y-1.5 text-sm text-black">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#28D17C] mt-0.5">•</span>
+                  <span>Add your properties with photos & details</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#28D17C] mt-0.5">•</span>
+                  <span>Set up your host profile & preferences</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#28D17C] mt-0.5">•</span>
+                  <span>Define what kind of creators you want to work with</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#28D17C] mt-0.5">•</span>
+                  <span>Preview how the platform works</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* What's coming */}
+            <div className="rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-4 mb-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#4AA3FF] mb-2">🚀 Coming soon</p>
+              <ul className="space-y-1.5 text-sm text-black">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#4AA3FF] mt-0.5">•</span>
+                  <span>Real creator profiles you can browse & contact</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#4AA3FF] mt-0.5">•</span>
+                  <span>Smart matching based on your property & preferences</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#4AA3FF] mt-0.5">•</span>
+                  <span>Secure payments & agreements</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* What we need */}
+            <div className="rounded-xl border-2 border-black bg-[#FAFAFA] p-4 mb-6">
+              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">🤝 How you can help</p>
+              <p className="text-sm text-black/70">
+                Get your property ready now. When creators join, hosts with complete profiles get matched first. Your early feedback shapes what we build.
+              </p>
+            </div>
+
+            {/* CTA */}
+            <div className="space-y-3">
               <button
                 onClick={() => setShowWelcome(false)}
-                className="text-sm font-medium text-black/60 hover:text-black"
+                className="w-full rounded-full border-2 border-black bg-[#FFD84A] px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
               >
-                Explore my dashboard
+                Let&apos;s Get Started →
               </button>
+              <p className="text-center text-xs text-black/40">
+                Questions? Email us at hello@creatorstays.com
+              </p>
             </div>
           </div>
         </div>
@@ -392,7 +437,7 @@ export default function HostDashboardPage() {
       <NextStepStrip isAgency={isAgency} />
       <StatsSection />
       <SetupChecklist />
-      <HostDashboard />
+      <BetaHostDashboard />
     </div>
   )
 }

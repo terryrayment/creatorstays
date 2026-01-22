@@ -15,7 +15,10 @@ export async function GET() {
 
     // Check if user is host or creator
     const [hostProfile, creatorProfile] = await Promise.all([
-      prisma.hostProfile.findUnique({ where: { userId: session.user.id } }),
+      prisma.hostProfile.findUnique({ 
+        where: { userId: session.user.id },
+        select: { id: true, displayName: true, bio: true }
+      }),
       prisma.creatorProfile.findUnique({ where: { userId: session.user.id } }),
     ])
 
@@ -55,22 +58,35 @@ export async function GET() {
 
       return NextResponse.json({
         role: 'host',
+        // Flat structure for easy consumption
+        offersSent: offers.length,
+        offersPending: offers.filter(o => o.status === 'pending').length,
+        offersAccepted: offers.filter(o => o.status === 'accepted').length,
+        offersDeclined: offers.filter(o => o.status === 'declined').length,
+        activeCollabs: collaborations.filter(c => 
+          ['active', 'pending-agreement', 'content-submitted', 'content-uploaded', 'approved', 'content-live'].includes(c.status)
+        ).length,
+        completedCollabs: collaborations.filter(c => c.status === 'completed').length,
+        totalCollabs: collaborations.length,
+        totalClicks,
+        totalSpent: Math.round(totalSpent / 100), // Convert cents to dollars
+        propertiesCount,
+        // Getting Started checklist flags
+        hasProperty: propertiesCount > 0,
+        hasProfile: Boolean(hostProfile.displayName && hostProfile.bio),
+        // Also include nested stats for backward compatibility
         stats: {
-          // Offers
           offersSent: offers.length,
           offersPending: offers.filter(o => o.status === 'pending').length,
           offersAccepted: offers.filter(o => o.status === 'accepted').length,
           offersDeclined: offers.filter(o => o.status === 'declined').length,
-          // Collaborations
           activeCollabs: collaborations.filter(c => 
-            ['active', 'pending-agreement', 'content-submitted'].includes(c.status)
+            ['active', 'pending-agreement', 'content-submitted', 'content-uploaded', 'approved', 'content-live'].includes(c.status)
           ).length,
           completedCollabs: collaborations.filter(c => c.status === 'completed').length,
           totalCollabs: collaborations.length,
-          // Performance
           totalClicks,
           totalSpentCents: totalSpent,
-          // Properties
           propertiesCount,
         },
       })
