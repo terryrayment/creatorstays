@@ -219,6 +219,7 @@ export default function HostDashboardPage() {
   const [showOnboardingBanner, setShowOnboardingBanner] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showWelcome, setShowWelcome] = useState(false)
+  const [showAgencyWelcome, setShowAgencyWelcome] = useState(false)
   const [isAgency, setIsAgency] = useState(false)
 
   useEffect(() => {
@@ -235,9 +236,16 @@ export default function HostDashboardPage() {
         if (res.ok) {
           const profile = await res.json()
           
-          // Check if agency from profile or localStorage (for testing)
+          // Check if agency from profile (database is source of truth)
+          // Also check localStorage for testing
           const isAgencyFromStorage = localStorage.getItem('creatorstays_agency') === 'true'
-          setIsAgency(profile.isAgency || isAgencyFromStorage)
+          const isAgencyUser = profile.isAgency || isAgencyFromStorage
+          setIsAgency(isAgencyUser)
+          
+          // If database says they're an agency, also set localStorage for consistency
+          if (profile.isAgency) {
+            localStorage.setItem('creatorstays_agency', 'true')
+          }
           
           // Check if onboarding is complete AND membership is paid
           if (!profile.onboardingComplete || !profile.membershipPaid) {
@@ -250,10 +258,26 @@ export default function HostDashboardPage() {
             setShowOnboardingBanner(true)
           }
           
-          // Check for welcome param (just completed onboarding)
+          // Check URL params
           const params = new URLSearchParams(window.location.search)
+          
+          // Check for welcome param (just completed onboarding)
           if (params.get("welcome") === "true") {
             setShowWelcome(true)
+            window.history.replaceState({}, "", "/dashboard/host")
+          }
+          
+          // Check for team welcome (just joined a team)
+          if (params.get("welcome") === "team") {
+            setShowWelcome(true)
+            window.history.replaceState({}, "", "/dashboard/host")
+          }
+          
+          // Check for agency success (just upgraded to agency)
+          if (params.get("agency") === "success") {
+            setShowAgencyWelcome(true)
+            localStorage.setItem('creatorstays_agency', 'true')
+            setIsAgency(true)
             window.history.replaceState({}, "", "/dashboard/host")
           }
           
@@ -301,6 +325,46 @@ export default function HostDashboardPage() {
               </Link>
               <button
                 onClick={() => setShowWelcome(false)}
+                className="text-sm font-medium text-black/60 hover:text-black"
+              >
+                Explore my dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Agency Upgrade Success Modal */}
+      {showAgencyWelcome && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-black bg-[#28D17C]">
+              <svg className="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="font-heading text-2xl tracking-tight text-black">Welcome to Agency Pro!</h2>
+            <p className="mt-2 text-sm text-black/60">
+              Your upgrade is complete. You now have access to unlimited properties, team management, and more.
+            </p>
+            <div className="mt-4 rounded-xl border-2 border-black bg-[#FAFAFA] p-4 text-left">
+              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">What's new:</p>
+              <ul className="space-y-1 text-sm text-black">
+                <li>✓ Unlimited properties</li>
+                <li>✓ 5 team member seats</li>
+                <li>✓ Priority creator matching</li>
+                <li>✓ Advanced analytics</li>
+              </ul>
+            </div>
+            <div className="mt-6 space-y-3">
+              <Link
+                href="/dashboard/host/team"
+                className="block rounded-full border-2 border-black bg-[#28D17C] px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+              >
+                Invite Team Members →
+              </Link>
+              <button
+                onClick={() => setShowAgencyWelcome(false)}
                 className="text-sm font-medium text-black/60 hover:text-black"
               >
                 Explore my dashboard

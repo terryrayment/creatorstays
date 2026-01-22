@@ -11,6 +11,7 @@ export default function AgencyUpgradePage() {
   
   const [loading, setLoading] = useState(true)
   const [subscribing, setSubscribing] = useState(false)
+  const [testActivating, setTestActivating] = useState(false)
   const [agencyStatus, setAgencyStatus] = useState<any>(null)
   const [agencyName, setAgencyName] = useState("")
   const [error, setError] = useState("")
@@ -62,6 +63,38 @@ export default function AgencyUpgradePage() {
     } catch (e) {
       setError("Something went wrong")
       setSubscribing(false)
+    }
+  }
+
+  // Beta test activation - activates agency in database without Stripe
+  const handleTestActivation = async () => {
+    if (!agencyName) {
+      setError("Please enter an agency name")
+      return
+    }
+    
+    setTestActivating(true)
+    setError("")
+    
+    try {
+      const res = await fetch("/api/host/agency", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activate: true, agencyName }),
+      })
+      
+      const data = await res.json()
+      
+      if (data.success) {
+        localStorage.setItem('creatorstays_agency', 'true')
+        router.push("/dashboard/host?agency=success")
+      } else {
+        setError(data.error || "Failed to activate")
+        setTestActivating(false)
+      }
+    } catch (e) {
+      setError("Something went wrong")
+      setTestActivating(false)
     }
   }
 
@@ -190,6 +223,18 @@ export default function AgencyUpgradePage() {
               >
                 {subscribing ? "Starting subscription..." : "Upgrade to Agency →"}
               </button>
+
+              {/* Beta Testing Button */}
+              <button
+                onClick={handleTestActivation}
+                disabled={testActivating || !agencyName}
+                className="mt-2 w-full rounded-full border-2 border-black bg-[#FFD84A] py-3 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {testActivating ? "Activating..." : "🧪 Beta Test Activation (Free)"}
+              </button>
+              <p className="mt-1 text-center text-[10px] text-black/40">
+                For beta testers only - activates agency without payment
+              </p>
 
               <p className="mt-4 text-center text-xs text-black/50">
                 Secure payment via Stripe

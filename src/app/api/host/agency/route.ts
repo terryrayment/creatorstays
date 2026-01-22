@@ -10,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
 })
 
-const AGENCY_PRICE_CENTS = 19900 // $199/month
+const AGENCY_PRICE_CENTS = 14900 // $149/month
 
 // GET /api/host/agency - Get agency status
 export async function GET(request: NextRequest) {
@@ -175,6 +175,73 @@ export async function DELETE(request: NextRequest) {
     console.error('[Agency Cancel] Error:', error)
     return NextResponse.json(
       { error: 'Failed to cancel subscription' },
+      { status: 500 }
+    )
+  }
+}
+
+// PATCH /api/host/agency - Manually activate agency (for testing/admin)
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { activate, agencyName } = body
+
+    const hostProfile = await prisma.hostProfile.findUnique({
+      where: { userId: session.user.id },
+    })
+
+    if (!hostProfile) {
+      return NextResponse.json({ error: 'Host profile not found' }, { status: 404 })
+    }
+
+    if (activate) {
+      // Activate agency
+      const expiresAt = new Date()
+      expiresAt.setMonth(expiresAt.getMonth() + 1)
+      
+      await prisma.hostProfile.update({
+        where: { id: hostProfile.id },
+        data: {
+          isAgency: true,
+          agencyName: agencyName || hostProfile.displayName || 'My Agency',
+          agencySubscribedAt: new Date(),
+          agencyExpiresAt: expiresAt,
+          teamSeats: 5,
+        },
+      })
+
+      return NextResponse.json({ 
+        success: true,
+        message: 'Agency Pro activated',
+        isAgency: true,
+      })
+    } else {
+      // Deactivate agency
+      await prisma.hostProfile.update({
+        where: { id: hostProfile.id },
+        data: {
+          isAgency: false,
+          agencySubscriptionId: null,
+          agencyExpiresAt: null,
+        },
+      })
+
+      return NextResponse.json({ 
+        success: true,
+        message: 'Agency Pro deactivated',
+        isAgency: false,
+      })
+    }
+  } catch (error) {
+    console.error('[Agency PATCH] Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to update agency status' },
       { status: 500 }
     )
   }
