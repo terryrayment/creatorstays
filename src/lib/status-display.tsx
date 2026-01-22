@@ -181,17 +181,33 @@ export function getCollaborationStatusDisplay(
     active: {
       host: {
         label: "Active",
-        description: "The collaboration is in progress. Waiting for content delivery.",
+        description: "Waiting for the creator to upload content for review.",
         color: "bg-[#4AA3FF]",
         textColor: "text-black",
         actionRequired: false,
       },
       creator: {
-        label: "In Progress",
-        description: "Create and submit your content when ready.",
-        color: "bg-[#4AA3FF]",
+        label: "Create Content",
+        description: "Upload your content for host approval before posting.",
+        color: "bg-[#FFD84A]",
         textColor: "text-black",
         actionRequired: true,
+      },
+    },
+    "content-uploaded": {
+      host: {
+        label: "Review Content",
+        description: "The creator has uploaded content for your approval.",
+        color: "bg-[#FFD84A]",
+        textColor: "text-black",
+        actionRequired: true,
+      },
+      creator: {
+        label: "Awaiting Approval",
+        description: "Your content is being reviewed by the host.",
+        color: "bg-[#D7B6FF]",
+        textColor: "text-black",
+        actionRequired: false,
       },
     },
     "content-submitted": {
@@ -212,15 +228,31 @@ export function getCollaborationStatusDisplay(
     },
     approved: {
       host: {
-        label: "Approved — Pay Creator",
-        description: "Content approved! Complete payment to finalize.",
+        label: "Approved — Awaiting Post",
+        description: "Content approved! Waiting for creator to post live.",
+        color: "bg-[#28D17C]",
+        textColor: "text-black",
+        actionRequired: false,
+      },
+      creator: {
+        label: "Post Your Content!",
+        description: "Your content is approved! Post it with your tracking link.",
+        color: "bg-[#FFD84A]",
+        textColor: "text-black",
+        actionRequired: true,
+      },
+    },
+    "content-live": {
+      host: {
+        label: "Content Live — Pay Creator",
+        description: "Content is live and tracking. Complete payment to finalize.",
         color: "bg-[#FFD84A]",
         textColor: "text-black",
         actionRequired: true,
       },
       creator: {
-        label: "Approved",
-        description: "Your content was approved! Payment is being processed.",
+        label: "Live & Tracking",
+        description: "Your content is live! Payment will be processed soon.",
         color: "bg-[#28D17C]",
         textColor: "text-black",
         actionRequired: false,

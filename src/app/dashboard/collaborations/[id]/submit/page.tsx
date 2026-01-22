@@ -1,76 +1,167 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 
-export default function SubmitContentPage() {
+interface UploadedFile {
+  url: string
+  name: string
+  type: "video" | "image"
+  size?: number
+}
+
+export default function UploadContentPage() {
   const { data: session } = useSession()
   const params = useParams()
   const router = useRouter()
   const collaborationId = params.id as string
 
-  const [links, setLinks] = useState<string[]>([""])
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+  const [notes, setNotes] = useState("")
+  const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState({ message: "", type: "" as "success" | "error" | "" })
-  const [checklist, setChecklist] = useState([false, false, false, false])
+  const [collaboration, setCollaboration] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [dragActive, setDragActive] = useState(false)
 
-  // Add another link field
-  const addLink = () => {
-    setLinks([...links, ""])
-  }
-
-  // Remove a link field
-  const removeLink = (index: number) => {
-    setLinks(links.filter((_, i) => i !== index))
-  }
-
-  // Update a link
-  const updateLink = (index: number, value: string) => {
-    const newLinks = [...links]
-    newLinks[index] = value
-    setLinks(newLinks)
-  }
-
-  // Submit content
-  const handleSubmit = async () => {
-    const validLinks = links.filter(l => l.trim() !== "")
-    
-    if (validLinks.length === 0) {
-      setToast({ message: "Please add at least one content link", type: "error" })
-      return
-    }
-
-    // Validate URLs
-    for (const link of validLinks) {
+  // Load collaboration details
+  useEffect(() => {
+    async function loadCollaboration() {
       try {
-        new URL(link)
-      } catch {
-        setToast({ message: `Invalid URL: ${link}`, type: "error" })
-        return
+        const res = await fetch(`/api/collaborations/${collaborationId}`)
+        if (res.ok) {
+          const data = await res.json()
+          setCollaboration(data.collaboration)
+          // If content was already uploaded, pre-fill
+          if (data.collaboration?.uploadedContentUrls?.length > 0) {
+            setUploadedFiles(
+              data.collaboration.uploadedContentUrls.map((url: string, i: number) => ({
+                url,
+                name: `Content ${i + 1}`,
+                type: url.includes(".mp4") || url.includes("video") ? "video" : "image",
+              }))
+            )
+          }
+          if (data.collaboration?.uploadedContentNotes) {
+            setNotes(data.collaboration.uploadedContentNotes)
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load collaboration:", e)
       }
+      setLoading(false)
+    }
+    loadCollaboration()
+  }, [collaborationId])
+
+  // Handle file input change
+  const handleFileSelect = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    
+    setUploading(true)
+    const newFiles: UploadedFile[] = []
+    
+    for (const file of Array.from(files)) {
+      // Validate file type
+      const isVideo = file.type.startsWith("video/")
+      const isImage = file.type.startsWith("image/")
+      
+      if (!isVideo && !isImage) {
+        setToast({ message: `Invalid file type: ${file.name}. Please upload images or videos.`, type: "error" })
+        continue
+      }
+      
+      // Validate file size (100MB max for videos, 10MB for images)
+      const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024
+      if (file.size > maxSize) {
+        setToast({ 
+          message: `File too large: ${file.name}. Max ${isVideo ? "100MB" : "10MB"}.`, 
+          type: "error" 
+        })
+        continue
+      }
+      
+      try {
+        // For now, we'll create a local preview URL
+        // In production, this would upload to a storage service like S3/Cloudinary
+        const previewUrl = URL.createObjectURL(file)
+        
+        newFiles.push({
+          url: previewUrl,
+          name: file.name,
+          type: isVideo ? "video" : "image",
+          size: file.size,
+        })
+      } catch (e) {
+        console.error("File upload error:", e)
+        setToast({ message: `Failed to process ${file.name}`, type: "error" })
+      }
+    }
+    
+    setUploadedFiles([...uploadedFiles, ...newFiles])
+    setUploading(false)
+    
+    if (newFiles.length > 0) {
+      setToast({ message: `${newFiles.length} file(s) added`, type: "success" })
+      setTimeout(() => setToast({ message: "", type: "" }), 2000)
+    }
+  }
+
+  // Handle drag and drop
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true)
+    } else if (e.type === "dragleave") {
+      setDragActive(false)
+    }
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    handleFileSelect(e.dataTransfer.files)
+  }, [uploadedFiles])
+
+  // Remove a file
+  const removeFile = (index: number) => {
+    setUploadedFiles(uploadedFiles.filter((_, i) => i !== index))
+  }
+
+  // Submit content for review
+  const handleSubmit = async () => {
+    if (uploadedFiles.length === 0) {
+      setToast({ message: "Please upload at least one content file", type: "error" })
+      return
     }
 
     setSubmitting(true)
     try {
-      const res = await fetch(`/api/collaborations/${collaborationId}/content`, {
+      const res = await fetch(`/api/collaborations/${collaborationId}/content/upload`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contentLinks: validLinks }),
+        body: JSON.stringify({ 
+          contentUrls: uploadedFiles.map(f => f.url),
+          notes: notes.trim() || null,
+        }),
       })
 
       const data = await res.json()
 
       if (res.ok) {
-        setToast({ message: "Content submitted! Waiting for host review.", type: "success" })
+        setToast({ message: "Content uploaded! Waiting for host approval.", type: "success" })
         setTimeout(() => {
           router.push(`/dashboard/collaborations/${collaborationId}`)
         }, 2000)
       } else {
-        setToast({ message: data.error || "Failed to submit content", type: "error" })
+        setToast({ message: data.error || "Failed to upload content", type: "error" })
       }
     } catch (e) {
       console.error("Submit error:", e)
@@ -79,14 +170,25 @@ export default function SubmitContentPage() {
     setSubmitting(false)
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 mx-auto animate-spin rounded-full border-2 border-black border-t-transparent" />
+          <p className="mt-4 text-sm text-black/60">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Top bar */}
-      <div className="border-b-2 border-black bg-[#28D17C]">
+      <div className="border-b-2 border-black bg-[#D7B6FF]">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
             <span className="rounded-full border-2 border-black bg-white px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-black">
-              Submit Content
+              Upload Content
             </span>
           </div>
           <Link 
@@ -112,128 +214,174 @@ export default function SubmitContentPage() {
           {/* Header */}
           <div>
             <h1 className="font-heading text-[2rem] font-black tracking-tight text-black">
-              SUBMIT CONTENT
+              UPLOAD CONTENT
             </h1>
             <p className="mt-1 text-sm text-black/70">
-              Add links to your posted content for host review.
+              Upload your content files for host approval before posting.
             </p>
           </div>
 
-          {/* Instructions */}
+          {/* How it works */}
           <div className="rounded-2xl border-[3px] border-black bg-[#4AA3FF] p-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Instructions</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">How This Works</p>
             <ul className="mt-3 space-y-2 text-sm text-black">
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-black bg-white text-[10px] font-bold">1</span>
-                <span>Post your content on Instagram, TikTok, or other platforms</span>
+                <span><strong>Upload</strong> your finished video/image content here</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-black bg-white text-[10px] font-bold">2</span>
-                <span>Make sure you used your tracking link in the content</span>
+                <span><strong>Host reviews</strong> and approves (or requests changes)</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-black bg-white text-[10px] font-bold">3</span>
-                <span>Copy the URL of each post and paste it below</span>
+                <span><strong>Once approved</strong>, you get your tracking link</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-black bg-white text-[10px] font-bold">4</span>
-                <span>Include #ad or #sponsored as required by FTC guidelines</span>
+                <span><strong>Post live</strong> with the tracking link, then confirm</span>
               </li>
             </ul>
           </div>
 
-          {/* Content Links */}
-          <div className="rounded-2xl border-[3px] border-black bg-white p-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Content Links</p>
-            <p className="text-xs text-black/60">Paste the URLs of your posted content</p>
+          {/* Deliverables reminder */}
+          {collaboration?.offer?.deliverables && (
+            <div className="rounded-2xl border-[3px] border-black bg-white p-5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Required Deliverables</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {collaboration.offer.deliverables.map((d: string) => (
+                  <span key={d} className="rounded-full border-2 border-black bg-[#FFD84A] px-3 py-1 text-xs font-bold text-black">
+                    {d}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
-            <div className="mt-4 space-y-3">
-              {links.map((link, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <input
-                    type="url"
-                    placeholder="https://instagram.com/p/..."
-                    value={link}
-                    onChange={(e) => updateLink(index, e.target.value)}
-                    className="flex-1 rounded-xl border-2 border-black px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
-                  />
-                  {links.length > 1 && (
+          {/* File Upload Area */}
+          <div className="rounded-2xl border-[3px] border-black bg-white p-5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Content Files</p>
+            <p className="text-xs text-black/60 mt-1">Upload videos and images for approval</p>
+
+            {/* Drop zone */}
+            <div
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              className={`mt-4 relative rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+                dragActive 
+                  ? "border-[#4AA3FF] bg-[#4AA3FF]/10" 
+                  : "border-black/30 hover:border-black"
+              }`}
+            >
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/20 bg-black/5">
+                <svg className="h-6 w-6 text-black/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+              </div>
+              <p className="font-bold text-black">
+                {dragActive ? "Drop files here" : "Drag & drop files here"}
+              </p>
+              <p className="mt-1 text-xs text-black/60">
+                or click to browse
+              </p>
+              <label className="mt-3 inline-block cursor-pointer">
+                <input
+                  type="file"
+                  multiple
+                  accept="video/*,image/*"
+                  onChange={(e) => handleFileSelect(e.target.files)}
+                  className="hidden"
+                />
+                <span className="rounded-full border-2 border-black bg-black px-4 py-2 text-xs font-bold text-white hover:bg-black/80">
+                  Select Files
+                </span>
+              </label>
+              <p className="mt-3 text-[10px] text-black/40">
+                Videos up to 100MB • Images up to 10MB
+              </p>
+            </div>
+
+            {/* Uploaded files preview */}
+            {uploadedFiles.length > 0 && (
+              <div className="mt-4 space-y-3">
+                <p className="text-xs font-bold text-black/60">{uploadedFiles.length} file(s) ready</p>
+                {uploadedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center gap-3 rounded-xl border-2 border-black bg-black/5 p-3">
+                    {/* Thumbnail */}
+                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-black bg-black">
+                      {file.type === "video" ? (
+                        <video src={file.url} className="h-full w-full object-cover" />
+                      ) : (
+                        <img src={file.url} alt={file.name} className="h-full w-full object-cover" />
+                      )}
+                    </div>
+                    
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate font-bold text-black text-sm">{file.name}</p>
+                      <p className="text-xs text-black/60">
+                        {file.type === "video" ? "🎬 Video" : "📸 Image"}
+                        {file.size && ` • ${(file.size / 1024 / 1024).toFixed(1)}MB`}
+                      </p>
+                    </div>
+                    
+                    {/* Remove button */}
                     <button
-                      type="button"
-                      onClick={() => removeLink(index)}
-                      className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-white text-black hover:bg-red-50"
+                      onClick={() => removeFile(index)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-white text-black hover:bg-red-50"
                     >
                       ✕
                     </button>
-                  )}
-                </div>
-              ))}
-            </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            <button
-              type="button"
-              onClick={addLink}
-              className="mt-3 flex items-center gap-2 rounded-full border-2 border-dashed border-black/30 px-4 py-2 text-xs font-bold text-black/60 hover:border-black hover:text-black"
-            >
-              + Add Another Link
-            </button>
+            {uploading && (
+              <div className="mt-4 text-center">
+                <div className="h-6 w-6 mx-auto animate-spin rounded-full border-2 border-black border-t-transparent" />
+                <p className="mt-2 text-xs text-black/60">Processing files...</p>
+              </div>
+            )}
           </div>
 
-          {/* Checklist */}
+          {/* Notes */}
+          <div className="rounded-2xl border-[3px] border-black bg-white p-5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Notes for Host (Optional)</p>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Anything the host should know about this content? Special angles, music choices, etc."
+              rows={3}
+              className="mt-2 w-full rounded-xl border-2 border-black px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
+            />
+          </div>
+
+          {/* Tips */}
           <div className="rounded-2xl border-[3px] border-black bg-[#FFD84A] p-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Before Submitting</p>
-            <div className="mt-3 space-y-2">
-              {[
-                "Content is live and publicly visible",
-                "Tracking link is included (link in bio, swipe up, etc.)",
-                "FTC disclosure is included (#ad, #sponsored)",
-                "All deliverables are completed",
-              ].map((item, i) => (
-                <label key={i} className="flex items-center gap-3 text-sm text-black cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={checklist[i]}
-                    onChange={(e) => {
-                      const newChecklist = [...checklist]
-                      newChecklist[i] = e.target.checked
-                      setChecklist(newChecklist)
-                    }}
-                    className="h-4 w-4 rounded border-2 border-black" 
-                  />
-                  <span>{item}</span>
-                </label>
-              ))}
-            </div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">💡 Tips for Approval</p>
+            <ul className="mt-2 space-y-1 text-sm text-black">
+              <li>• Show the property clearly and authentically</li>
+              <li>• Mention where you'll add the tracking link</li>
+              <li>• Include #ad or #sponsored in your caption plan</li>
+              <li>• Higher quality = faster approval</li>
+            </ul>
           </div>
 
           {/* Submit Button */}
-          {(() => {
-            const hasLinks = links.filter(l => l.trim()).length > 0
-            const allChecked = checklist.every(Boolean)
-            const canSubmit = hasLinks && allChecked && !submitting
-            
-            return (
-              <>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!canSubmit}
-                  className="w-full rounded-full border-[3px] border-black bg-black py-6 text-sm font-black uppercase tracking-wider text-white transition-transform hover:-translate-y-1 hover:bg-black/90 disabled:opacity-50"
-                >
-                  {submitting ? "Submitting..." : "Submit for Review"}
-                </Button>
-                
-                {!canSubmit && !submitting && (
-                  <p className="text-center text-xs text-red-600 font-medium">
-                    {!hasLinks && "Add at least one content link"}
-                    {hasLinks && !allChecked && "Complete all checklist items above"}
-                  </p>
-                )}
-              </>
-            )
-          })()}
+          <Button
+            onClick={handleSubmit}
+            disabled={uploadedFiles.length === 0 || submitting}
+            className="w-full rounded-full border-[3px] border-black bg-[#28D17C] py-6 text-sm font-black uppercase tracking-wider text-black transition-transform hover:-translate-y-1 hover:bg-[#28D17C]/90 disabled:opacity-50"
+          >
+            {submitting ? "Submitting..." : `Submit ${uploadedFiles.length} File(s) for Approval`}
+          </Button>
 
           <p className="text-center text-xs text-black/60">
             The host will review your content and approve or request changes.
+            <br />You'll get your tracking link once approved.
           </p>
         </div>
       </Container>

@@ -715,8 +715,14 @@ model Collaboration {
   propertyId      String
   property        Property @relation(fields: [propertyId], references: [id])
   
-  // Status tracking
-  // "pending-agreement" -> "active" -> "content-submitted" -> "pending-review" -> "approved" -> "link-active" -> "completed"
+  // Status tracking - NEW FLOW:
+  // "pending-agreement" -> Agreement signing phase
+  // "active" -> Creator is preparing content
+  // "content-uploaded" -> Creator uploaded content for review
+  // "approved" -> Host approved content, creator gets tracking link
+  // "content-live" -> Creator posted content with tracking link
+  // "completed" -> All done, payment processed
+  // "cancelled" -> Collaboration was cancelled
   status          String   @default("pending-agreement")
   
   // Affiliate link (generated when collaboration starts)
@@ -724,10 +730,27 @@ model Collaboration {
   affiliateLink   AffiliateLink? @relation(fields: [affiliateLinkId], references: [id])
   affiliateToken  String?  @unique // Short token for URL: cs.link/abc123
   
-  // Content delivery
-  contentLinks    String[] // URLs to posted content
-  contentSubmittedAt DateTime?
-  contentApprovedAt DateTime?
+  // Content delivery - NEW FLOW:
+  // 1. Creator uploads content files for approval (uploadedContentUrls)
+  // 2. Host reviews and approves
+  // 3. Creator gets tracking link and posts content live
+  // 4. Creator submits live content links (contentLinks)
+  // 5. Analytics track clicks
+  
+  // Uploaded content for approval (before posting live)
+  uploadedContentUrls   String[]  // URLs to uploaded files (videos, images) for host review
+  uploadedContentNotes  String?   @db.Text // Creator's notes about the content
+  contentUploadedAt     DateTime? // When creator uploaded content for review
+  
+  // Host review
+  contentApprovedAt     DateTime? // When host approved the content
+  contentRejectedAt     DateTime? // When host requested changes
+  hostFeedback          String?   @db.Text // Feedback from host (approval notes or change requests)
+  
+  // Live content (after posting)
+  contentLinks          String[]  // URLs to LIVE posted content
+  contentSubmittedAt    DateTime? // When creator confirmed content is live
+  contentConfirmedAt    DateTime? // When we confirmed the live links are valid
   
   // Timeline
   contentDeadline DateTime? // When content must be posted
