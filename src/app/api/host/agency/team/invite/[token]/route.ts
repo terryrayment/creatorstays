@@ -45,13 +45,13 @@ export async function GET(
       : null
 
     // If not a pending invite, get the user's email
-    let inviteEmail = email
+    let inviteEmail: string | null = email
     if (!inviteEmail) {
       const user = await prisma.user.findUnique({
         where: { id: teamMember.userId },
         select: { email: true },
       })
-      inviteEmail = user?.email
+      inviteEmail = user?.email ?? null
     }
 
     return NextResponse.json({
