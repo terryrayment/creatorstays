@@ -87,7 +87,6 @@ export async function GET() {
           take: 1, 
           select: { 
             airbnbUrl: true, 
-            vrboUrl: true, 
             cityRegion: true,
             title: true,
           } 
@@ -149,7 +148,7 @@ export async function GET() {
         createdAt: h.createdAt,
         lastLoginAt: h.user.lastLoginAt,
         location: h.location || h.properties[0]?.cityRegion || null,
-        propertyUrl: h.properties[0]?.airbnbUrl || h.properties[0]?.vrboUrl || null,
+        propertyUrl: h.properties[0]?.airbnbUrl || null,
         propertyTitle: h.properties[0]?.title || null,
         bio: h.bio || null,
         onboardingComplete: h.onboardingComplete,
