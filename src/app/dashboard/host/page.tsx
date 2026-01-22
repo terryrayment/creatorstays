@@ -88,15 +88,25 @@ function NextStepStrip() {
   )
 }
 
-function BetaHeader() {
+function BetaHeader({ isAgency }: { isAgency?: boolean }) {
   return (
     <div className="border-b-2 border-black bg-white">
       <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-3">
           <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
           <span className="text-sm font-bold text-black">Host Dashboard</span>
+          {isAgency && (
+            <span className="rounded-full border-2 border-black bg-[#28D17C] px-2.5 py-0.5 text-[10px] font-bold text-black">AGENCY</span>
+          )}
         </div>
-        <Link href="/" className="text-sm font-bold text-black hover:underline">← Back to site</Link>
+        <div className="flex items-center gap-3">
+          {isAgency && (
+            <Link href="/dashboard/host/team" className="text-xs font-bold text-black hover:underline">
+              Manage Team
+            </Link>
+          )}
+          <Link href="/" className="text-sm font-bold text-black hover:underline">← Back to site</Link>
+        </div>
       </div>
     </div>
   )
@@ -205,6 +215,7 @@ export default function HostDashboardPage() {
   const [showOnboardingBanner, setShowOnboardingBanner] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showWelcome, setShowWelcome] = useState(false)
+  const [isAgency, setIsAgency] = useState(false)
 
   useEffect(() => {
     async function checkProfile() {
@@ -219,6 +230,9 @@ export default function HostDashboardPage() {
         }
         if (res.ok) {
           const profile = await res.json()
+          
+          // Check if agency
+          setIsAgency(profile.isAgency || false)
           
           // Check if onboarding is complete AND membership is paid
           if (!profile.onboardingComplete || !profile.membershipPaid) {
@@ -284,7 +298,7 @@ export default function HostDashboardPage() {
         </div>
       )}
       
-      <BetaHeader />
+      <BetaHeader isAgency={isAgency} />
       <ActionRequiredBanner />
       {showOnboardingBanner && (
         <OnboardingBanner onDismiss={() => setShowOnboardingBanner(false)} />
