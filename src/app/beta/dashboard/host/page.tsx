@@ -8,7 +8,6 @@ import { HostDashboard } from "@/components/hosts/host-dashboard"
 import { BetaHostDashboard } from "@/components/hosts/beta-host-dashboard"
 import { HostDashboardStats } from "@/components/dashboard/dashboard-stats"
 import { ActionRequiredBanner } from "@/components/dashboard/action-required-banner"
-import { DashboardFooter } from "@/components/navigation/dashboard-footer"
 
 function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
   return (
@@ -54,18 +53,10 @@ function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
             My Properties
           </Link>
           <Link 
-            href="/beta/dashboard/collaborations"
-            className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
+            href="/beta/dashboard/host/settings"
+            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
           >
-            Collaborations
-            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
-          </Link>
-          <Link 
-            href="/beta/dashboard/host/analytics"
-            className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
-          >
-            Analytics
-            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+            Settings
           </Link>
           <Link 
             href="/beta/dashboard/host/search-creators"
@@ -73,12 +64,6 @@ function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
           >
             Find Creators
             <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
-          </Link>
-          <Link 
-            href="/beta/dashboard/host/settings"
-            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-          >
-            Settings
           </Link>
           {isAgency && (
             <Link 
@@ -100,14 +85,14 @@ function BetaHeader({ isAgency }: { isAgency?: boolean }) {
       <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-3">
           <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
-          <Link href="/beta/dashboard/host" className="text-sm font-bold text-black hover:opacity-70">Host Dashboard</Link>
+          <span className="text-sm font-bold text-black">Host Dashboard</span>
           {isAgency && (
             <span className="rounded-full border-2 border-black bg-[#28D17C] px-2.5 py-0.5 text-[10px] font-bold text-black">AGENCY</span>
           )}
         </div>
         <Link 
           href="/" 
-          className="text-xs font-bold text-black hover:opacity-70"
+          className="rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1.5 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
         >
           ← Back to site
         </Link>
@@ -152,16 +137,16 @@ function SetupChecklist() {
         setChecklist([
           { label: "Save 1 property", done: hasPublishedProperty, href: "/beta/dashboard/host/properties" },
           { label: "Invite 1 creator", done: hasInvitedCreator, href: "/beta/dashboard/host/search-creators" },
-          { label: "Create 1 tracked link", done: hasTrackedLink, href: "/beta/dashboard/collaborations" },
-          { label: "Pay 1 creator", done: hasPaidCreator, href: "/beta/dashboard/collaborations" },
+          { label: "Create 1 tracked link", done: hasTrackedLink, href: "/beta/dashboard/host/collaborations" },
+          { label: "Pay 1 creator", done: hasPaidCreator, href: "/beta/dashboard/host/pay" },
         ])
       } catch (error) {
         console.error("Error fetching checklist data:", error)
         setChecklist([
           { label: "Save 1 property", done: false, href: "/beta/dashboard/host/properties" },
           { label: "Invite 1 creator", done: false, href: "/beta/dashboard/host/search-creators" },
-          { label: "Create 1 tracked link", done: false, href: "/beta/dashboard/collaborations" },
-          { label: "Pay 1 creator", done: false, href: "/beta/dashboard/collaborations" },
+          { label: "Create 1 tracked link", done: false, href: "/beta/dashboard/host/collaborations" },
+          { label: "Pay 1 creator", done: false, href: "/beta/dashboard/host/pay" },
         ])
       } finally {
         setLoading(false)
@@ -207,6 +192,139 @@ function SetupChecklist() {
             </Link>
           ))}
         </div>
+      </div>
+    </div>
+  )
+}
+
+function ReferralSection() {
+  const { data: session } = useSession()
+  const [referralLink, setReferralLink] = useState("")
+  const [inviteEmail, setInviteEmail] = useState("")
+  const [copied, setCopied] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+
+  useEffect(() => {
+    // Generate a referral code based on user ID
+    if (session?.user?.id) {
+      const code = btoa(session.user.id).slice(0, 8).toUpperCase()
+      setReferralLink(`https://creatorstays.com/join/ref/${code}`)
+    }
+  }, [session])
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(referralLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const sendInvite = async () => {
+    if (!inviteEmail || !inviteEmail.includes("@")) return
+    setSending(true)
+    // Simulate sending invite (in production, this would call an API)
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    setSending(false)
+    setSent(true)
+    setInviteEmail("")
+    setTimeout(() => setSent(false), 3000)
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-2 sm:px-6">
+      <div className="rounded-xl border-2 border-dashed border-black/30 bg-gradient-to-r from-[#FFD84A]/20 to-[#28D17C]/20 overflow-hidden">
+        {/* Collapsed view */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full flex items-center justify-between p-4 text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFD84A] border-2 border-black text-sm">
+              🎁
+            </div>
+            <div>
+              <p className="text-sm font-bold text-black">Know another host? Share the love!</p>
+              <p className="text-xs text-black/60">Get 1 month free when they sign up</p>
+            </div>
+          </div>
+          <svg 
+            className={`h-5 w-5 text-black/60 transition-transform ${expanded ? 'rotate-180' : ''}`} 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor" 
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {/* Expanded content */}
+        {expanded && (
+          <div className="px-4 pb-4 pt-0 border-t border-black/10">
+            <div className="grid gap-4 sm:grid-cols-2 mt-4">
+              {/* Share Link */}
+              <div>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-black/60">
+                  Your referral link
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={referralLink}
+                    readOnly
+                    className="flex-1 h-10 rounded-lg border-2 border-black bg-white px-3 text-xs font-medium text-black"
+                  />
+                  <button
+                    onClick={copyLink}
+                    className={`h-10 rounded-lg border-2 border-black px-4 text-xs font-bold transition-all ${
+                      copied 
+                        ? 'bg-[#28D17C] text-black' 
+                        : 'bg-black text-white hover:bg-black/80'
+                    }`}
+                  >
+                    {copied ? '✓ Copied!' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Invite by Email */}
+              <div>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-black/60">
+                  Or invite by email
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="friend@email.com"
+                    className="flex-1 h-10 rounded-lg border-2 border-black bg-white px-3 text-xs font-medium text-black placeholder:text-black/40"
+                  />
+                  <button
+                    onClick={sendInvite}
+                    disabled={sending || !inviteEmail}
+                    className={`h-10 rounded-lg border-2 border-black px-4 text-xs font-bold transition-all disabled:opacity-50 ${
+                      sent 
+                        ? 'bg-[#28D17C] text-black' 
+                        : 'bg-[#FFD84A] text-black hover:bg-[#FFD84A]/80'
+                    }`}
+                  >
+                    {sending ? '...' : sent ? '✓ Sent!' : 'Invite'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Incentive info */}
+            <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/50 p-2">
+              <span className="text-xs">💡</span>
+              <p className="text-[11px] text-black/70">
+                <span className="font-bold">Both you and your friend get 1 month free</span> when they add their first property.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -362,7 +480,7 @@ export default function HostDashboardPage() {
 
             {/* What's coming */}
             <div className="rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-4 mb-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#4AA3FF] mb-2">Coming soon</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#4AA3FF] mb-2">🚀 Coming soon</p>
               <ul className="space-y-1.5 text-sm text-black">
                 <li className="flex items-start gap-2">
                   <span className="text-[#4AA3FF] mt-0.5">•</span>
@@ -381,7 +499,7 @@ export default function HostDashboardPage() {
 
             {/* What we need */}
             <div className="rounded-xl border-2 border-black bg-[#FAFAFA] p-4 mb-6">
-              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">How you can help</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">🤝 How you can help</p>
               <p className="text-sm text-black/70">
                 Get your property ready now. When creators join, hosts with complete profiles get matched first. Your early feedback shapes what we build.
               </p>
@@ -451,8 +569,8 @@ export default function HostDashboardPage() {
       <NextStepStrip isAgency={isAgency} />
       <StatsSection />
       <SetupChecklist />
+      <ReferralSection />
       <BetaHostDashboard />
-      <DashboardFooter />
     </div>
   )
 }

@@ -265,13 +265,14 @@ export default function HostOnboardingPage() {
   
   // Photo upload state
   const [isUploading, setIsUploading] = useState(false)
+  const [draggedPhoto, setDraggedPhoto] = useState<number | null>(null)
   
   // Compute whether Step 1 is complete for visual feedback
   const step1Complete = (importSuccess || manualEntry) && 
     data.propertyTitle.trim() && 
     data.cityRegion.trim() && 
     parseInt(data.bedrooms) >= 1 &&
-    parseFloat(data.bathrooms) >= 0.5 &&
+    parseInt(data.bathrooms) >= 1 &&
     parseInt(data.maxGuests) >= 1 &&
     data.propertyType &&
     data.photos.length >= 6 &&
@@ -338,7 +339,27 @@ export default function HostOnboardingPage() {
       try {
         // Compress image before adding
         const compressed = await compressImage(file, 1200, 0.7)
-        newPhotos.push(compressed)
+        
+        // Try to upload to Cloudinary
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              file: compressed,
+              collaborationId: 'property-photos'
+            }),
+          })
+          
+          if (res.ok) {
+            const data = await res.json()
+            newPhotos.push(data.file.url) // Use Cloudinary URL
+          } else {
+            newPhotos.push(compressed) // Fallback to base64
+          }
+        } catch {
+          newPhotos.push(compressed) // Fallback to base64
+        }
       } catch (err) {
         console.error('Failed to compress image:', err)
         // Fallback to original if compression fails
@@ -355,11 +376,30 @@ export default function HostOnboardingPage() {
       }
     }
     
+    const updatedPhotos = [...data.photos, ...newPhotos]
     setData(prev => ({
       ...prev,
-      photos: [...prev.photos, ...newPhotos],
+      photos: updatedPhotos,
       heroImageUrl: prev.heroImageUrl || newPhotos[0]
     }))
+    
+    // Auto-save photos to API so they persist
+    if (existingPropertyId) {
+      try {
+        await fetch('/api/properties', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: existingPropertyId,
+            photos: updatedPhotos,
+            heroImageUrl: data.heroImageUrl || newPhotos[0],
+          }),
+        })
+      } catch (e) {
+        console.error('Failed to auto-save photos:', e)
+      }
+    }
+    
     setIsUploading(false)
     e.target.value = ''
   }
@@ -488,14 +528,14 @@ export default function HostOnboardingPage() {
       }
       // Validate beds, baths, guests
       const beds = parseInt(data.bedrooms)
-      const baths = parseFloat(data.bathrooms)
+      const baths = parseInt(data.bathrooms)
       const guests = parseInt(data.maxGuests)
       
       if (!beds || beds < 1) {
         setError("Please enter the number of bedrooms")
         return false
       }
-      if (!baths || baths < 0.5) {
+      if (!baths || baths < 1) {
         setError("Please enter the number of bathrooms")
         return false
       }
@@ -583,7 +623,7 @@ export default function HostOnboardingPage() {
         cityRegion: data.cityRegion,
         priceNightlyRange: data.priceRange,
         beds: parseInt(data.bedrooms) || 1,
-        baths: parseFloat(data.bathrooms) || 1,
+        baths: parseInt(data.bathrooms) || 1,
         maxGuests: parseInt(data.maxGuests) || 2,
         amenities: data.amenities,
         vibeTags: [],
@@ -827,15 +867,42 @@ export default function HostOnboardingPage() {
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Beds <span className="text-red-500">*</span></label>
-                      <input type="number" min="1" value={data.bedrooms} onChange={e => updateField("bedrooms", e.target.value)} placeholder="3" className={inputClass} />
+                      <input 
+                        type="number" 
+                        min="1" 
+                        step="1"
+                        value={data.bedrooms} 
+                        onChange={e => updateField("bedrooms", Math.floor(Math.abs(Number(e.target.value) || 0)).toString())} 
+                        onKeyDown={e => { if (e.key === '.' || e.key === '-' || e.key === 'e') e.preventDefault() }}
+                        placeholder="3" 
+                        className={inputClass} 
+                      />
                     </div>
                     <div>
                       <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Baths <span className="text-red-500">*</span></label>
-                      <input type="number" min="0.5" step="0.5" value={data.bathrooms} onChange={e => updateField("bathrooms", e.target.value)} placeholder="2" className={inputClass} />
+                      <input 
+                        type="number" 
+                        min="1" 
+                        step="1"
+                        value={data.bathrooms} 
+                        onChange={e => updateField("bathrooms", Math.floor(Math.abs(Number(e.target.value) || 0)).toString())} 
+                        onKeyDown={e => { if (e.key === '.' || e.key === '-' || e.key === 'e') e.preventDefault() }}
+                        placeholder="2" 
+                        className={inputClass} 
+                      />
                     </div>
                     <div>
                       <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Guests <span className="text-red-500">*</span></label>
-                      <input type="number" min="1" value={data.maxGuests} onChange={e => updateField("maxGuests", e.target.value)} placeholder="6" className={inputClass} />
+                      <input 
+                        type="number" 
+                        min="1" 
+                        step="1"
+                        value={data.maxGuests} 
+                        onChange={e => updateField("maxGuests", Math.floor(Math.abs(Number(e.target.value) || 0)).toString())} 
+                        onKeyDown={e => { if (e.key === '.' || e.key === '-' || e.key === 'e') e.preventDefault() }}
+                        placeholder="6" 
+                        className={inputClass} 
+                      />
                     </div>
                   </div>
 
@@ -915,29 +982,37 @@ export default function HostOnboardingPage() {
                       Property Photos <span className="text-red-500">*</span>
                       <span className="ml-2 font-normal text-black/50">(minimum 6)</span>
                     </label>
-                    <p className="mb-3 text-[11px] text-black/50">Click a photo to set as cover. Use arrows to reorder.</p>
+                    <p className="mb-3 text-[11px] text-black/50">Drag and drop to reorder photos. First photo is the cover.</p>
                     
-                    {/* Photo Grid */}
+                    {/* Photo Grid with Drag & Drop */}
                     {data.photos.length > 0 && (
                       <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-4">
                         {data.photos.map((photo, i) => (
                           <div 
                             key={i} 
-                            className={`group relative aspect-square overflow-hidden rounded-lg border-2 ${i === 0 ? 'border-[#FFD84A]' : 'border-black'} cursor-pointer`}
-                            onClick={() => {
-                              // Set as cover (move to first position)
-                              if (i !== 0) {
+                            draggable
+                            onDragStart={() => setDraggedPhoto(i)}
+                            onDragEnd={() => setDraggedPhoto(null)}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={() => {
+                              if (draggedPhoto !== null && draggedPhoto !== i) {
                                 const newPhotos = [...data.photos]
-                                const [moved] = newPhotos.splice(i, 1)
-                                newPhotos.unshift(moved)
+                                const [moved] = newPhotos.splice(draggedPhoto, 1)
+                                newPhotos.splice(i, 0, moved)
                                 updateField("photos", newPhotos)
                               }
+                              setDraggedPhoto(null)
                             }}
+                            className={`group relative aspect-square overflow-hidden rounded-lg border-2 cursor-grab active:cursor-grabbing transition-all ${
+                              i === 0 ? 'border-[#FFD84A] border-[3px]' : 'border-black'
+                            } ${draggedPhoto === i ? 'opacity-50 scale-95' : ''} ${
+                              draggedPhoto !== null && draggedPhoto !== i ? 'hover:border-[#4AA3FF] hover:border-[3px]' : ''
+                            }`}
                           >
                             <img 
                               src={getImageSrc(photo)} 
                               alt={`Photo ${i + 1}`} 
-                              className="h-full w-full object-cover"
+                              className="h-full w-full object-cover pointer-events-none"
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none'
                                 e.currentTarget.parentElement?.classList.add('bg-black/10')
@@ -953,42 +1028,10 @@ export default function HostOnboardingPage() {
                                 newPhotos.splice(i, 1)
                                 updateField("photos", newPhotos)
                               }}
-                              className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600"
+                              className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 z-10"
                             >
                               ×
                             </button>
-                            
-                            {/* Move arrows */}
-                            <div className="absolute bottom-1 right-1 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                              {i > 0 && (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    const newPhotos = [...data.photos]
-                                    ;[newPhotos[i], newPhotos[i - 1]] = [newPhotos[i - 1], newPhotos[i]]
-                                    updateField("photos", newPhotos)
-                                  }}
-                                  className="flex h-5 w-5 items-center justify-center rounded bg-black/70 text-white text-xs hover:bg-black"
-                                >
-                                  ←
-                                </button>
-                              )}
-                              {i < data.photos.length - 1 && (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    const newPhotos = [...data.photos]
-                                    ;[newPhotos[i], newPhotos[i + 1]] = [newPhotos[i + 1], newPhotos[i]]
-                                    updateField("photos", newPhotos)
-                                  }}
-                                  className="flex h-5 w-5 items-center justify-center rounded bg-black/70 text-white text-xs hover:bg-black"
-                                >
-                                  →
-                                </button>
-                              )}
-                            </div>
                             
                             {/* Cover badge */}
                             {i === 0 && (
@@ -997,14 +1040,12 @@ export default function HostOnboardingPage() {
                               </span>
                             )}
                             
-                            {/* Set as cover hint on hover (for non-cover photos) */}
-                            {i !== 0 && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                                <span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-black">
-                                  Set as cover
-                                </span>
-                              </div>
-                            )}
+                            {/* Drag handle indicator */}
+                            <div className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                              <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8h16M4 16h16" />
+                              </svg>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1058,7 +1099,7 @@ export default function HostOnboardingPage() {
                             <span className="text-[#FFD84A]">○</span> Number of bedrooms
                           </p>
                         )}
-                        {(!data.bathrooms || parseFloat(data.bathrooms) < 0.5) && (
+                        {(!data.bathrooms || parseInt(data.bathrooms) < 1) && (
                           <p className="flex items-center gap-2 text-sm text-black/70">
                             <span className="text-[#FFD84A]">○</span> Number of bathrooms
                           </p>

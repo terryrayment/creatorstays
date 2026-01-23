@@ -197,6 +197,139 @@ function SetupChecklist() {
   )
 }
 
+function ReferralSection() {
+  const { data: session } = useSession()
+  const [referralLink, setReferralLink] = useState("")
+  const [inviteEmail, setInviteEmail] = useState("")
+  const [copied, setCopied] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+
+  useEffect(() => {
+    // Generate a referral code based on user ID
+    if (session?.user?.id) {
+      const code = btoa(session.user.id).slice(0, 8).toUpperCase()
+      setReferralLink(`https://creatorstays.com/join/ref/${code}`)
+    }
+  }, [session])
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(referralLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const sendInvite = async () => {
+    if (!inviteEmail || !inviteEmail.includes("@")) return
+    setSending(true)
+    // Simulate sending invite (in production, this would call an API)
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    setSending(false)
+    setSent(true)
+    setInviteEmail("")
+    setTimeout(() => setSent(false), 3000)
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-2 sm:px-6">
+      <div className="rounded-xl border-2 border-dashed border-black/30 bg-gradient-to-r from-[#FFD84A]/20 to-[#28D17C]/20 overflow-hidden">
+        {/* Collapsed view */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full flex items-center justify-between p-4 text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFD84A] border-2 border-black text-sm">
+              🎁
+            </div>
+            <div>
+              <p className="text-sm font-bold text-black">Know another host? Share the love!</p>
+              <p className="text-xs text-black/60">Get 1 month free when they sign up</p>
+            </div>
+          </div>
+          <svg 
+            className={`h-5 w-5 text-black/60 transition-transform ${expanded ? 'rotate-180' : ''}`} 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor" 
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {/* Expanded content */}
+        {expanded && (
+          <div className="px-4 pb-4 pt-0 border-t border-black/10">
+            <div className="grid gap-4 sm:grid-cols-2 mt-4">
+              {/* Share Link */}
+              <div>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-black/60">
+                  Your referral link
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={referralLink}
+                    readOnly
+                    className="flex-1 h-10 rounded-lg border-2 border-black bg-white px-3 text-xs font-medium text-black"
+                  />
+                  <button
+                    onClick={copyLink}
+                    className={`h-10 rounded-lg border-2 border-black px-4 text-xs font-bold transition-all ${
+                      copied 
+                        ? 'bg-[#28D17C] text-black' 
+                        : 'bg-black text-white hover:bg-black/80'
+                    }`}
+                  >
+                    {copied ? '✓ Copied!' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Invite by Email */}
+              <div>
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-black/60">
+                  Or invite by email
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="friend@email.com"
+                    className="flex-1 h-10 rounded-lg border-2 border-black bg-white px-3 text-xs font-medium text-black placeholder:text-black/40"
+                  />
+                  <button
+                    onClick={sendInvite}
+                    disabled={sending || !inviteEmail}
+                    className={`h-10 rounded-lg border-2 border-black px-4 text-xs font-bold transition-all disabled:opacity-50 ${
+                      sent 
+                        ? 'bg-[#28D17C] text-black' 
+                        : 'bg-[#FFD84A] text-black hover:bg-[#FFD84A]/80'
+                    }`}
+                  >
+                    {sending ? '...' : sent ? '✓ Sent!' : 'Invite'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Incentive info */}
+            <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/50 p-2">
+              <span className="text-xs">💡</span>
+              <p className="text-[11px] text-black/70">
+                <span className="font-bold">Both you and your friend get 1 month free</span> when they add their first property.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function HostDashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -436,6 +569,7 @@ export default function HostDashboardPage() {
       <NextStepStrip isAgency={isAgency} />
       <StatsSection />
       <SetupChecklist />
+      <ReferralSection />
       <BetaHostDashboard />
     </div>
   )

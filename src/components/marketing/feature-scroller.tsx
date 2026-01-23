@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect } from "react"
 import Image from "next/image"
 
 // Process steps with expanded host-focused copy
@@ -54,7 +54,6 @@ const steps = [
 
 export function FeatureScroller() {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [isPaused, setIsPaused] = useState(false)
   const animationRef = useRef<number>()
   const scrollPosition = useRef(0)
   
@@ -72,7 +71,7 @@ export function FeatureScroller() {
     container.scrollLeft = scrollPosition.current
 
     const animate = () => {
-      if (!isPaused && container) {
+      if (container) {
         scrollPosition.current += 0.5 // Speed: pixels per frame
         
         // Reset to middle set when reaching end
@@ -92,18 +91,14 @@ export function FeatureScroller() {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [isPaused])
+  }, [])
 
   return (
-    <section 
-      className="bg-black py-6 overflow-hidden"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
+    <section className="bg-black py-6 overflow-hidden">
       {/* Scroll container with extra padding for hover scale */}
       <div
         ref={scrollRef}
-        className="scrollbar-hide flex gap-2 overflow-x-hidden px-4"
+        className="scrollbar-hide flex gap-2 overflow-x-hidden px-4 pointer-events-none"
         style={{ 
           paddingTop: "20px",
           paddingBottom: "20px",
@@ -112,7 +107,7 @@ export function FeatureScroller() {
         {tripleSteps.map((step, index) => (
           <div
             key={`${step.id}-${index}`}
-            className="feature-card relative flex-shrink-0 rounded-2xl border-[3px] border-black overflow-hidden transition-transform duration-300 ease-out hover:scale-105 cursor-pointer"
+            className="feature-card relative flex-shrink-0 rounded-2xl border-[3px] border-black overflow-hidden"
             style={{
               width: "360px",
               height: "420px",
