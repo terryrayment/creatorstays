@@ -172,8 +172,8 @@ export function HostDashboardStats() {
         />
       </div>
 
-      {/* Quick Stats Bar */}
-      <div className="flex items-center justify-between rounded-lg border border-black/10 bg-black/5 px-4 py-2 text-xs">
+      {/* Quick Stats Bar - no hover animation */}
+      <div className="flex items-center justify-between rounded-xl border-2 border-black bg-white px-4 py-3 text-xs">
         <span className="text-black/60">
           <span className="font-bold text-black">{stats.propertiesCount}</span> properties
         </span>
