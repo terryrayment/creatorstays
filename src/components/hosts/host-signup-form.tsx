@@ -215,10 +215,7 @@ export function HostSignupForm() {
           <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">City / Region *</label>
           <LocationAutocomplete
             value={form.cityRegion}
-            onChange={(value) => { 
-              setForm({ ...form, cityRegion: value })
-              setManuallyEdited(true)
-            }}
+            onChange={(value) => setForm({ ...form, cityRegion: value })}
             placeholder="Start typing a city..."
             className="flex h-10 w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
           />
