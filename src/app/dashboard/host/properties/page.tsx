@@ -380,7 +380,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                   <p className="text-sm font-medium">{form.title || 'Untitled'}</p>
                   <p className="text-[11px] text-black/60">{form.cityRegion || 'No location'}</p>
                   {form.lastImportedAt && <p className="mt-2 text-[10px] text-black/60">Last imported: {formatDate(form.lastImportedAt)}</p>}
-                  <Button size="sm" variant="outline" className="mt-2 h-7 text-[10px]" onClick={handleImport} disabled={isImporting}>Refresh from Airbnb</Button>
                 </div>
               </div>
             </div>

@@ -381,7 +381,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                   <p className="text-sm font-medium">{form.title || 'Untitled'}</p>
                   <p className="text-[11px] text-black/60">{form.cityRegion || 'No location'}</p>
                   {form.lastImportedAt && <p className="mt-2 text-[10px] text-black/60">Last imported: {formatDate(form.lastImportedAt)}</p>}
-                  <Button size="sm" variant="outline" className="mt-2 h-7 text-[10px]" onClick={handleImport} disabled={isImporting}>Refresh from Airbnb</Button>
                 </div>
               </div>
             </div>
@@ -792,7 +791,7 @@ export default function HostPropertiesPage() {
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
-            <span className="rounded bg-[#FFD84A] px-2 py-0.5 text-sm font-bold text-black">Host Dashboard</span>
+            <Link href="/beta/dashboard/host" className="text-sm font-bold text-black hover:underline">Host Dashboard</Link>
           </div>
           <Link 
             href="/" 

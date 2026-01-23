@@ -358,7 +358,7 @@ export default function SearchCreatorsPage() {
             </Link>
           </div>
 
-          {/* Header */}
+          {/* Header - no hover animation on outer container */}
           <div className="mb-6 rounded-xl border-2 border-black bg-white p-5">
             <h1 className="font-heading text-[2rem] font-black text-black">FIND CREATORS</h1>
             <p className="mt-1 text-sm text-black">
@@ -366,7 +366,7 @@ export default function SearchCreatorsPage() {
             </p>
           </div>
 
-          {/* Mock Data Banner */}
+          {/* Mock Data Banner - no hover animation on outer container */}
           {isMockData && (
             <div className="mb-4 rounded-xl border-2 border-dashed border-[#4AA3FF] bg-[#4AA3FF]/10 p-4">
               <div className="flex items-start gap-3">
@@ -391,7 +391,7 @@ export default function SearchCreatorsPage() {
             </div>
           )}
 
-          {/* Filters */}
+          {/* Filters - no hover animation on outer container */}
           <div className="mb-6 rounded-xl border-2 border-black bg-white p-4">
             <div className="flex flex-wrap items-center gap-3">
               {/* Search */}
@@ -472,13 +472,13 @@ export default function SearchCreatorsPage() {
             </div>
           )}
 
-          {/* Creator Grid */}
+          {/* Creator Grid - no hover animation on cards */}
           {!loading && (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {allCreators.map(creator => (
               <div
                 key={creator.id}
-                className={`relative rounded-xl border-2 bg-white p-4 transition-transform hover:-translate-y-1 ${
+                className={`relative rounded-xl border-2 bg-white p-4 ${
                   creator.isMock ? 'border-dashed border-black/40' : 'border-black'
                 }`}
               >
