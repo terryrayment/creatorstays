@@ -60,6 +60,49 @@ interface AdminStats {
   }[]
 }
 
+interface Conversation {
+  id: string
+  hostProfile: { id: string; displayName: string; contactEmail: string }
+  creatorProfile: { id: string; displayName: string; email: string; handle: string }
+  messages: { id: string; senderType: string; body: string; sentAt: string }[]
+  lastMessageAt: string
+}
+
+interface FinancialData {
+  subscriptions: {
+    totalPaidHosts: number
+    paidMemberships: number
+    freeMemberships: number
+    membershipRevenue: number
+    hostsPaidThisMonth: number
+    recentSubscriptions: any[]
+  }
+  deals: {
+    totalDealVolume: number
+    totalPlatformFees: number
+    completedDeals: number
+    activeDeals: number
+    pendingDeals: number
+    avgDealSize: number
+    recentCollaborations: any[]
+  }
+  forecasting: {
+    thisMonthSignups: number
+    lastMonthSignups: number
+    growthRate: string
+    projectedNewHosts: number
+    projectedMembershipRevenue: number
+    projectedDealRevenue: number
+    projectedTotalRevenue: number
+  }
+  affiliateLinks: {
+    links: any[]
+    totalClicks: number
+    totalUniqueClicks: number
+    activeLinks: number
+  }
+}
+
 function formatCurrency(cents: number): string {
   return (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 })
 }
@@ -88,6 +131,7 @@ function StatusBadge({ status }: { status: string }) {
     active: "bg-[#4AA3FF]",
     "pending-agreement": "bg-[#FFD84A]",
     "content-submitted": "bg-[#D7B6FF]",
+    paid: "bg-[#28D17C]",
   }
   return (
     <span className={`rounded-full border border-black px-2 py-0.5 text-[9px] font-bold text-black ${colors[status] || "bg-gray-200"}`}>
@@ -96,21 +140,35 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
+type TabType = "overview" | "creators" | "hosts" | "offers" | "collabs" | "messages" | "financials" | "announce"
+
 export default function AdminDashboardPage() {
   const router = useRouter()
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [activeTab, setActiveTab] = useState<"overview" | "creators" | "hosts" | "offers" | "collabs" | "announce">("overview")
+  const [activeTab, setActiveTab] = useState<TabType>("overview")
   const [sendingAnnouncement, setSendingAnnouncement] = useState(false)
   const [announcementResult, setAnnouncementResult] = useState<{ success: boolean; message: string; count?: number } | null>(null)
+
+  // Messages state
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [hosts, setHosts] = useState<any[]>([])
+  const [creators, setCreators] = useState<any[]>([])
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
+  const [newMessage, setNewMessage] = useState({ hostId: "", creatorId: "", message: "", senderType: "host" })
+  const [sendingMessage, setSendingMessage] = useState(false)
+  const [messageSuccess, setMessageSuccess] = useState("")
+
+  // Financials state
+  const [financials, setFinancials] = useState<FinancialData | null>(null)
+  const [loadingFinancials, setLoadingFinancials] = useState(false)
 
   useEffect(() => {
     async function fetchStats() {
       try {
         const res = await fetch("/api/admin/stats")
         if (res.status === 401) {
-          // Not authenticated, redirect to login
           router.push("/admin/login")
           return
         }
@@ -129,9 +187,102 @@ export default function AdminDashboardPage() {
     fetchStats()
   }, [router])
 
+  // Fetch messages when tab changes
+  useEffect(() => {
+    if (activeTab === "messages") {
+      fetchMessages()
+    }
+  }, [activeTab])
+
+  // Fetch financials when tab changes
+  useEffect(() => {
+    if (activeTab === "financials" && !financials) {
+      fetchFinancials()
+    }
+  }, [activeTab])
+
+  const fetchMessages = async () => {
+    try {
+      const res = await fetch("/api/admin/messages")
+      if (res.ok) {
+        const data = await res.json()
+        setConversations(data.conversations || [])
+        setHosts(data.hosts || [])
+        setCreators(data.creators || [])
+      }
+    } catch (e) {
+      console.error("Failed to fetch messages:", e)
+    }
+  }
+
+  const fetchFinancials = async () => {
+    setLoadingFinancials(true)
+    try {
+      const res = await fetch("/api/admin/financials")
+      if (res.ok) {
+        const data = await res.json()
+        setFinancials(data)
+      }
+    } catch (e) {
+      console.error("Failed to fetch financials:", e)
+    }
+    setLoadingFinancials(false)
+  }
+
+  const fetchConversation = async (conversationId: string) => {
+    try {
+      const res = await fetch(`/api/admin/messages?conversationId=${conversationId}`)
+      if (res.ok) {
+        const data = await res.json()
+        setSelectedConversation(data.conversation)
+      }
+    } catch (e) {
+      console.error("Failed to fetch conversation:", e)
+    }
+  }
+
+  const sendMessage = async () => {
+    if (!newMessage.hostId || !newMessage.creatorId || !newMessage.message) return
+    setSendingMessage(true)
+    try {
+      const res = await fetch("/api/admin/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newMessage)
+      })
+      if (res.ok) {
+        setMessageSuccess("Message sent!")
+        setNewMessage({ ...newMessage, message: "" })
+        fetchMessages()
+        setTimeout(() => setMessageSuccess(""), 3000)
+      }
+    } catch (e) {
+      console.error("Failed to send message:", e)
+    }
+    setSendingMessage(false)
+  }
+
   const handleLogout = async () => {
     await fetch("/api/admin/logout", { method: "POST" })
     router.push("/admin/login")
+  }
+
+  const handleSendAnnouncement = async (type: string) => {
+    setSendingAnnouncement(true)
+    setAnnouncementResult(null)
+    
+    try {
+      const res = await fetch("/api/admin/announce", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type })
+      })
+      const data = await res.json()
+      setAnnouncementResult(data)
+    } catch (e) {
+      setAnnouncementResult({ success: false, message: "Network error" })
+    }
+    setSendingAnnouncement(false)
   }
 
   if (loading) {
@@ -157,6 +308,17 @@ export default function AdminDashboardPage() {
 
   if (!stats) return null
 
+  const tabs: { id: TabType; label: string }[] = [
+    { id: "overview", label: "Overview" },
+    { id: "creators", label: "Creators" },
+    { id: "hosts", label: "Hosts" },
+    { id: "offers", label: "Offers" },
+    { id: "collabs", label: "Collaborations" },
+    { id: "messages", label: "💬 Messages" },
+    { id: "financials", label: "💰 Financials" },
+    { id: "announce", label: "📢 Announce" },
+  ]
+
   return (
     <div className="min-h-screen bg-black pt-16">
       {/* Header */}
@@ -177,19 +339,12 @@ export default function AdminDashboardPage() {
 
       {/* Tabs */}
       <div className="border-b-2 border-white/20 bg-black px-4">
-        <div className="mx-auto flex max-w-7xl gap-1">
-          {[
-            { id: "overview", label: "Overview" },
-            { id: "creators", label: "Creators" },
-            { id: "hosts", label: "Hosts" },
-            { id: "offers", label: "Offers" },
-            { id: "collabs", label: "Collaborations" },
-            { id: "announce", label: "📢 Announce" },
-          ].map(tab => (
+        <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto">
+          {tabs.map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`border-b-2 px-4 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+              onClick={() => setActiveTab(tab.id)}
+              className={`whitespace-nowrap border-b-2 px-4 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
                 activeTab === tab.id
                   ? "border-[#28D17C] text-white"
                   : "border-transparent text-white/50 hover:text-white"
@@ -200,7 +355,7 @@ export default function AdminDashboardPage() {
           ))}
           <Link
             href="/admin/promo-codes"
-            className="border-b-2 border-transparent px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#FFD84A] hover:text-white transition-colors"
+            className="whitespace-nowrap border-b-2 border-transparent px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#FFD84A] hover:text-white transition-colors"
           >
             🎟️ Promo Codes
           </Link>
@@ -209,9 +364,9 @@ export default function AdminDashboardPage() {
 
       {/* Content */}
       <div className="mx-auto max-w-7xl px-4 py-6">
+        {/* OVERVIEW TAB */}
         {activeTab === "overview" && (
           <div className="space-y-6">
-            {/* Main Stats */}
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5">
               <StatCard label="Total Users" value={stats.overview.totalUsers} subValue={`+${stats.overview.recentUsers} this week`} color="bg-white" />
               <StatCard label="Creators" value={stats.overview.totalCreators} color="bg-[#4AA3FF]" />
@@ -220,7 +375,6 @@ export default function AdminDashboardPage() {
               <StatCard label="Payment Volume" value={formatCurrency(stats.overview.paymentVolume)} color="bg-[#D7B6FF]" />
             </div>
 
-            {/* Secondary Stats */}
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <StatCard label="Total Offers" value={stats.overview.totalOffers} subValue={`+${stats.overview.recentOffers} this week`} color="bg-white" />
               <StatCard label="Collaborations" value={stats.overview.totalCollaborations} color="bg-white" />
@@ -228,7 +382,6 @@ export default function AdminDashboardPage() {
               <StatCard label="Reviews" value={stats.overview.totalReviews} color="bg-white" />
             </div>
 
-            {/* Offer Status Breakdown */}
             <div className="rounded-xl border-2 border-black bg-white p-4">
               <h3 className="mb-3 text-sm font-bold text-black">Offer Status Breakdown</h3>
               <div className="flex flex-wrap gap-3">
@@ -241,7 +394,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Collaboration Status Breakdown */}
             <div className="rounded-xl border-2 border-black bg-white p-4">
               <h3 className="mb-3 text-sm font-bold text-black">Collaboration Status Breakdown</h3>
               <div className="flex flex-wrap gap-3">
@@ -256,22 +408,25 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
+        {/* CREATORS TAB */}
         {activeTab === "creators" && (
-          <div className="rounded-xl border-2 border-black bg-white">
-            <div className="border-b border-black/10 p-4">
-              <h3 className="font-bold text-black">Recent Creators</h3>
+          <div className="rounded-xl border-2 border-black bg-white p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-black">Recent Creators</h3>
+              <span className="text-xs text-black/60">{stats.recentCreators.length} creators</span>
             </div>
-            <div className="divide-y divide-black/10">
+            <div className="space-y-3">
               {stats.recentCreators.map(creator => (
-                <div key={creator.id} className="flex items-center justify-between p-4">
+                <div key={creator.id} className="flex items-center justify-between border-b border-black/10 pb-3 last:border-0">
                   <div>
                     <p className="font-bold text-black">{creator.displayName}</p>
                     <p className="text-xs text-black/60">@{creator.handle} · {creator.email}</p>
-                    {creator.location && <p className="text-xs text-black/40">{creator.location}</p>}
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-black/60">{formatDate(creator.createdAt)}</p>
-                    <Link href={`/creators/${creator.handle}`} className="text-xs font-bold text-[#4AA3FF]">View Profile →</Link>
+                    <Link href={`/creators/${creator.handle}`} className="text-xs font-bold text-[#4AA3FF] hover:underline">
+                      View Profile →
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -279,211 +434,392 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
+        {/* HOSTS TAB */}
         {activeTab === "hosts" && (
-          <div className="rounded-xl border-2 border-black bg-white">
-            <div className="border-b border-black/10 p-4 flex items-center justify-between">
-              <h3 className="font-bold text-black">Recent Hosts</h3>
-              <span className="text-xs text-black/50">{stats.recentHosts.length} hosts</span>
+          <div className="rounded-xl border-2 border-black bg-white p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-black">Recent Hosts</h3>
+              <span className="text-xs text-black/60">{stats.recentHosts.length} hosts</span>
             </div>
-            <div className="divide-y divide-black/10">
+            <div className="space-y-4">
               {stats.recentHosts.map(host => (
-                <div key={host.id} className="p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    {/* Left side - Host info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
+                <div key={host.id} className="border-b border-black/10 pb-4 last:border-0">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
                         <p className="font-bold text-black">{host.displayName}</p>
-                        {host.membershipPaid ? (
-                          <span className="rounded-full bg-[#28D17C] px-2 py-0.5 text-[9px] font-bold text-black">PAID</span>
-                        ) : (
-                          <span className="rounded-full bg-[#FFD84A] px-2 py-0.5 text-[9px] font-bold text-black">UNPAID</span>
-                        )}
+                        <span className={`rounded-full border border-black px-2 py-0.5 text-[9px] font-bold ${host.membershipPaid ? "bg-[#28D17C]" : "bg-gray-200"}`}>
+                          {host.membershipPaid ? "PAID" : "UNPAID"}
+                        </span>
                         {!host.onboardingComplete && (
-                          <span className="rounded-full bg-red-400 px-2 py-0.5 text-[9px] font-bold text-black">INCOMPLETE</span>
+                          <span className="rounded-full border border-black bg-[#FFD84A] px-2 py-0.5 text-[9px] font-bold">INCOMPLETE</span>
                         )}
                       </div>
-                      <p className="text-xs text-black/60 mt-0.5">{host.email}</p>
-                      
-                      {/* Location */}
-                      {host.location && (
-                        <p className="text-xs text-black/50 mt-1">📍 {host.location}</p>
-                      )}
-                      
-                      {/* Property info */}
-                      {host.propertyTitle && (
-                        <div className="mt-2 rounded-lg bg-[#FAFAFA] p-2">
-                          <p className="text-xs font-bold text-black">{host.propertyTitle}</p>
-                          {host.propertyUrl && (
-                            <a 
-                              href={host.propertyUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-[10px] text-[#4AA3FF] hover:underline break-all"
-                            >
-                              🏠 Airbnb: View Listing →
-                            </a>
-                          )}
-                        </div>
-                      )}
-                      
-                      {/* Bio preview */}
-                      {host.bio && (
-                        <p className="text-[10px] text-black/40 mt-2 line-clamp-2">{host.bio}</p>
-                      )}
+                      <p className="text-xs text-black/60">{host.email}</p>
+                      {host.location && <p className="text-xs text-black/40">📍 {host.location}</p>}
                     </div>
-                    
-                    {/* Right side - Stats */}
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-bold text-black">{host.propertyCount} {host.propertyCount === 1 ? 'property' : 'properties'}</p>
-                      <p className="text-[10px] text-black/50 mt-1">Joined: {formatDate(host.createdAt)}</p>
-                      {host.lastLoginAt && (
-                        <p className="text-[10px] text-black/50">Last login: {formatDate(host.lastLoginAt)}</p>
-                      )}
+                    <div className="text-right">
+                      <p className="font-bold text-black">{host.propertyCount} property</p>
+                      <p className="text-xs text-black/60">Joined: {formatDate(host.createdAt)}</p>
+                      {host.lastLoginAt && <p className="text-xs text-black/40">Last login: {formatDate(host.lastLoginAt)}</p>}
                     </div>
                   </div>
-                </div>
-              ))}
-              {stats.recentHosts.length === 0 && (
-                <div className="p-8 text-center text-black/40">
-                  No hosts yet
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "offers" && (
-          <div className="rounded-xl border-2 border-black bg-white">
-            <div className="border-b border-black/10 p-4">
-              <h3 className="font-bold text-black">Recent Offers</h3>
-            </div>
-            <div className="divide-y divide-black/10">
-              {stats.recentOffers.map(offer => (
-                <div key={offer.id} className="flex items-center justify-between p-4">
-                  <div>
-                    <p className="font-bold text-black">{offer.hostName} → {offer.creatorName}</p>
-                    <p className="text-xs text-black/60">{formatCurrency(offer.cashCents)}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <StatusBadge status={offer.status} />
-                    <p className="text-xs text-black/60">{formatDate(offer.createdAt)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "collabs" && (
-          <div className="rounded-xl border-2 border-black bg-white">
-            <div className="border-b border-black/10 p-4">
-              <h3 className="font-bold text-black">Recent Collaborations</h3>
-            </div>
-            <div className="divide-y divide-black/10">
-              {stats.recentCollaborations.map(collab => (
-                <div key={collab.id} className="flex items-center justify-between p-4">
-                  <div>
-                    <p className="font-bold text-black">{collab.creatorName} × {collab.hostName}</p>
-                    <p className="text-xs text-black/60">{collab.propertyTitle || "Property"}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <StatusBadge status={collab.status} />
-                    <p className="text-xs text-black/60">{formatDate(collab.createdAt)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "announce" && (
-          <div className="space-y-6">
-            {/* Creators Launch Announcement */}
-            <div className="rounded-xl border-2 border-black bg-white p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#28D17C] text-2xl">
-                  🚀
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-black">Creators Are Live!</h3>
-                  <p className="mt-1 text-sm text-black/60">
-                    Send an email to all beta hosts notifying them that creators are now available on the platform.
-                  </p>
-                  <div className="mt-4 rounded-lg bg-[#FAFAFA] p-4">
-                    <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">Email Preview</p>
-                    <p className="text-sm font-bold text-black">Subject: 🎉 Creators are now live on CreatorStays!</p>
-                    <p className="mt-2 text-sm text-black/70">
-                      Great news! We&apos;ve onboarded our first batch of creators to CreatorStays. 
-                      You can now browse real creator profiles and send collaboration offers.
-                    </p>
-                    <p className="mt-2 text-sm text-black/70">
-                      As a beta host, you&apos;re first in line. Log in now to start connecting with creators 
-                      who match your property.
-                    </p>
-                  </div>
-                  <div className="mt-4 flex items-center gap-4">
-                    <button
-                      onClick={async () => {
-                        if (!confirm(`Send "Creators are live" email to ${stats.overview.totalHosts} hosts?`)) return
-                        setSendingAnnouncement(true)
-                        setAnnouncementResult(null)
-                        try {
-                          const res = await fetch('/api/admin/announce', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ type: 'creators_live' })
-                          })
-                          const data = await res.json()
-                          if (res.ok) {
-                            setAnnouncementResult({ success: true, message: 'Emails sent!', count: data.count })
-                          } else {
-                            setAnnouncementResult({ success: false, message: data.error || 'Failed to send' })
-                          }
-                        } catch (e) {
-                          setAnnouncementResult({ success: false, message: 'Network error' })
-                        }
-                        setSendingAnnouncement(false)
-                      }}
-                      disabled={sendingAnnouncement}
-                      className="rounded-full border-2 border-black bg-[#28D17C] px-6 py-2 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
-                    >
-                      {sendingAnnouncement ? 'Sending...' : `Send to ${stats.overview.totalHosts} Hosts`}
-                    </button>
-                    <p className="text-xs text-black/50">
-                      This will email all hosts with paid memberships
-                    </p>
-                  </div>
-                  {announcementResult && (
-                    <div className={`mt-4 rounded-lg p-3 text-sm font-bold ${
-                      announcementResult.success 
-                        ? 'bg-[#28D17C]/20 text-[#28D17C]' 
-                        : 'bg-red-100 text-red-600'
-                    }`}>
-                      {announcementResult.success 
-                        ? `✓ ${announcementResult.message} (${announcementResult.count} emails)` 
-                        : `✗ ${announcementResult.message}`}
+                  {host.propertyTitle && (
+                    <div className="mt-2 rounded-lg bg-black/5 p-2">
+                      <p className="text-sm font-bold text-black">{host.propertyTitle}</p>
+                      {host.propertyUrl && (
+                        <a href={host.propertyUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[#4AA3FF] hover:underline">
+                          🏠 Airbnb: View Listing →
+                        </a>
+                      )}
                     </div>
                   )}
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* OFFERS TAB */}
+        {activeTab === "offers" && (
+          <div className="rounded-xl border-2 border-black bg-white p-4">
+            <h3 className="mb-4 text-sm font-bold text-black">Recent Offers</h3>
+            <div className="space-y-3">
+              {stats.recentOffers.map(offer => (
+                <div key={offer.id} className="flex items-center justify-between border-b border-black/10 pb-3 last:border-0">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-black">{offer.hostName} → {offer.creatorName}</p>
+                      <StatusBadge status={offer.status} />
+                    </div>
+                    <p className="text-xs text-black/60">{formatCurrency(offer.cashCents)}</p>
+                  </div>
+                  <p className="text-xs text-black/60">{formatDate(offer.createdAt)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* COLLABORATIONS TAB */}
+        {activeTab === "collabs" && (
+          <div className="rounded-xl border-2 border-black bg-white p-4">
+            <h3 className="mb-4 text-sm font-bold text-black">Recent Collaborations</h3>
+            <div className="space-y-3">
+              {stats.recentCollaborations.map(collab => (
+                <div key={collab.id} className="flex items-center justify-between border-b border-black/10 pb-3 last:border-0">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-black">{collab.hostName} + {collab.creatorName}</p>
+                      <StatusBadge status={collab.status} />
+                    </div>
+                    {collab.propertyTitle && <p className="text-xs text-black/60">{collab.propertyTitle}</p>}
+                  </div>
+                  <p className="text-xs text-black/60">{formatDate(collab.createdAt)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* MESSAGES TAB */}
+        {activeTab === "messages" && (
+          <div className="space-y-6">
+            {/* Send New Message */}
+            <div className="rounded-xl border-2 border-black bg-white p-4">
+              <h3 className="mb-4 text-sm font-bold text-black">Send Message as Admin</h3>
+              {messageSuccess && (
+                <div className="mb-4 rounded-lg border-2 border-[#28D17C] bg-[#28D17C] p-2 text-sm font-bold text-black">
+                  {messageSuccess}
+                </div>
+              )}
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-black">Host</label>
+                  <select
+                    value={newMessage.hostId}
+                    onChange={e => setNewMessage({ ...newMessage, hostId: e.target.value })}
+                    className="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm"
+                  >
+                    <option value="">Select host...</option>
+                    {hosts.map(h => (
+                      <option key={h.id} value={h.id}>{h.displayName} ({h.contactEmail})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-black">Creator</label>
+                  <select
+                    value={newMessage.creatorId}
+                    onChange={e => setNewMessage({ ...newMessage, creatorId: e.target.value })}
+                    className="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm"
+                  >
+                    <option value="">Select creator...</option>
+                    {creators.map(c => (
+                      <option key={c.id} value={c.id}>{c.displayName} (@{c.handle})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-black">Send As</label>
+                  <select
+                    value={newMessage.senderType}
+                    onChange={e => setNewMessage({ ...newMessage, senderType: e.target.value })}
+                    className="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm"
+                  >
+                    <option value="host">Host</option>
+                    <option value="creator">Creator</option>
+                  </select>
+                </div>
+                <div className="flex items-end">
+                  <button
+                    onClick={sendMessage}
+                    disabled={sendingMessage || !newMessage.hostId || !newMessage.creatorId || !newMessage.message}
+                    className="w-full rounded-full border-2 border-black bg-[#28D17C] px-4 py-2 text-sm font-bold text-black disabled:opacity-50"
+                  >
+                    {sendingMessage ? "Sending..." : "Send"}
+                  </button>
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="mb-1 block text-xs font-bold text-black">Message</label>
+                <textarea
+                  value={newMessage.message}
+                  onChange={e => setNewMessage({ ...newMessage, message: e.target.value })}
+                  placeholder="Type your message..."
+                  rows={3}
+                  className="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm"
+                />
+                <p className="mt-1 text-xs text-black/40">Message will be prefixed with [ADMIN]</p>
               </div>
             </div>
 
-            {/* Custom Announcement */}
-            <div className="rounded-xl border-2 border-black bg-white p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A] text-2xl">
-                  📣
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-black">Custom Announcement</h3>
-                  <p className="mt-1 text-sm text-black/60">
-                    Send a custom message to all beta hosts.
-                  </p>
-                  <p className="mt-4 text-xs text-black/40">
-                    Coming soon - for now, use the preset announcements above.
-                  </p>
+            {/* Conversation List */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="rounded-xl border-2 border-black bg-white p-4">
+                <h3 className="mb-4 text-sm font-bold text-black">All Conversations ({conversations.length})</h3>
+                <div className="max-h-[500px] space-y-2 overflow-y-auto">
+                  {conversations.map(conv => (
+                    <button
+                      key={conv.id}
+                      onClick={() => fetchConversation(conv.id)}
+                      className={`w-full rounded-lg border-2 p-3 text-left transition-colors ${
+                        selectedConversation?.id === conv.id ? "border-[#28D17C] bg-[#28D17C]/10" : "border-black/10 hover:border-black"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="font-bold text-black">{conv.hostProfile.displayName}</p>
+                        <span className="text-[10px] text-black/40">{formatDate(conv.lastMessageAt)}</span>
+                      </div>
+                      <p className="text-xs text-black/60">↔ {conv.creatorProfile.displayName} (@{conv.creatorProfile.handle})</p>
+                      {conv.messages[0] && (
+                        <p className="mt-1 truncate text-xs text-black/40">{conv.messages[0].body}</p>
+                      )}
+                    </button>
+                  ))}
+                  {conversations.length === 0 && (
+                    <p className="text-sm text-black/60">No conversations yet</p>
+                  )}
                 </div>
               </div>
+
+              {/* Selected Conversation */}
+              <div className="rounded-xl border-2 border-black bg-white p-4">
+                <h3 className="mb-4 text-sm font-bold text-black">
+                  {selectedConversation 
+                    ? `${selectedConversation.hostProfile.displayName} ↔ ${selectedConversation.creatorProfile.displayName}`
+                    : "Select a conversation"
+                  }
+                </h3>
+                {selectedConversation ? (
+                  <div className="max-h-[500px] space-y-3 overflow-y-auto">
+                    {selectedConversation.messages.map(msg => (
+                      <div
+                        key={msg.id}
+                        className={`rounded-lg p-3 ${
+                          msg.senderType === "host" ? "bg-[#FFD84A]/20" : "bg-[#4AA3FF]/20"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-black">
+                            {msg.senderType === "host" ? "Host" : "Creator"}
+                          </span>
+                          <span className="text-[10px] text-black/40">{formatDate(msg.sentAt)}</span>
+                        </div>
+                        <p className="mt-1 text-sm text-black">{msg.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-black/60">Click a conversation to view messages</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* FINANCIALS TAB */}
+        {activeTab === "financials" && (
+          <div className="space-y-6">
+            {loadingFinancials ? (
+              <div className="text-white">Loading financials...</div>
+            ) : financials ? (
+              <>
+                {/* Subscription Stats */}
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  <StatCard label="Total Paid Hosts" value={financials.subscriptions.totalPaidHosts} color="bg-[#28D17C]" />
+                  <StatCard label="Paid Memberships" value={financials.subscriptions.paidMemberships} subValue="@ $199" color="bg-white" />
+                  <StatCard label="Free (Promo)" value={financials.subscriptions.freeMemberships} color="bg-[#FFD84A]" />
+                  <StatCard label="Membership Revenue" value={`$${financials.subscriptions.membershipRevenue.toLocaleString()}`} color="bg-[#D7B6FF]" />
+                </div>
+
+                {/* Deal Stats */}
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                  <StatCard label="Deal Volume" value={formatCurrency(financials.deals.totalDealVolume)} color="bg-[#4AA3FF]" />
+                  <StatCard label="Platform Fees" value={formatCurrency(financials.deals.totalPlatformFees)} color="bg-[#28D17C]" />
+                  <StatCard label="Active Deals" value={financials.deals.activeDeals} color="bg-white" />
+                  <StatCard label="Completed" value={financials.deals.completedDeals} color="bg-white" />
+                  <StatCard label="Avg Deal Size" value={formatCurrency(financials.deals.avgDealSize)} color="bg-white" />
+                </div>
+
+                {/* Forecasting */}
+                <div className="rounded-xl border-2 border-[#FFD84A] bg-[#FFD84A] p-4">
+                  <h3 className="mb-4 text-sm font-bold text-black">📈 30-Day Forecast</h3>
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    <div>
+                      <p className="text-xs text-black/60">This Month Signups</p>
+                      <p className="text-xl font-black text-black">{financials.forecasting.thisMonthSignups}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-black/60">Last Month</p>
+                      <p className="text-xl font-black text-black">{financials.forecasting.lastMonthSignups}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-black/60">Growth Rate</p>
+                      <p className="text-xl font-black text-black">{financials.forecasting.growthRate}%</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-black/60">Projected Revenue</p>
+                      <p className="text-xl font-black text-black">${financials.forecasting.projectedTotalRevenue.toLocaleString()}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Affiliate Links */}
+                <div className="rounded-xl border-2 border-black bg-white p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold text-black">Affiliate Links</h3>
+                    <div className="flex gap-4 text-xs text-black/60">
+                      <span>{financials.affiliateLinks.activeLinks} active</span>
+                      <span>{financials.affiliateLinks.totalClicks} total clicks</span>
+                      <span>{financials.affiliateLinks.totalUniqueClicks} unique</span>
+                    </div>
+                  </div>
+                  <div className="max-h-[300px] space-y-2 overflow-y-auto">
+                    {financials.affiliateLinks.links.map(link => (
+                      <div key={link.id} className="flex items-center justify-between rounded-lg border border-black/10 p-2">
+                        <div>
+                          <p className="font-mono text-xs text-black">{link.token.slice(0, 12)}...</p>
+                          {link.campaignName && <p className="text-xs text-black/60">{link.campaignName}</p>}
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm font-bold text-black">{link.clickCount} clicks</span>
+                          <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${link.isActive ? "bg-[#28D17C]" : "bg-gray-200"}`}>
+                            {link.isActive ? "ACTIVE" : "INACTIVE"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    {financials.affiliateLinks.links.length === 0 && (
+                      <p className="text-sm text-black/60">No affiliate links yet</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Recent Subscriptions */}
+                <div className="rounded-xl border-2 border-black bg-white p-4">
+                  <h3 className="mb-4 text-sm font-bold text-black">Recent Subscriptions</h3>
+                  <div className="space-y-2">
+                    {financials.subscriptions.recentSubscriptions.slice(0, 10).map((sub: any) => (
+                      <div key={sub.id} className="flex items-center justify-between border-b border-black/10 pb-2 last:border-0">
+                        <div>
+                          <p className="font-bold text-black">{sub.displayName}</p>
+                          <p className="text-xs text-black/60">{sub.contactEmail}</p>
+                        </div>
+                        <div className="text-right">
+                          {sub.promoCodeUsed ? (
+                            <span className="rounded-full bg-[#FFD84A] px-2 py-0.5 text-[9px] font-bold">{sub.promoCodeUsed}</span>
+                          ) : (
+                            <span className="text-sm font-bold text-[#28D17C]">$199</span>
+                          )}
+                          {sub.membershipPaidAt && (
+                            <p className="text-xs text-black/40">{formatDate(sub.membershipPaidAt)}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-white">Failed to load financials</p>
+            )}
+          </div>
+        )}
+
+        {/* ANNOUNCE TAB */}
+        {activeTab === "announce" && (
+          <div className="space-y-6">
+            <div className="rounded-xl border-2 border-black bg-white p-4">
+              <h3 className="mb-4 text-sm font-bold text-black">Send Announcement to Beta Hosts</h3>
+              
+              {announcementResult && (
+                <div className={`mb-4 rounded-lg p-3 ${announcementResult.success ? "bg-[#28D17C]/20" : "bg-red-100"}`}>
+                  <p className="text-sm font-bold text-black">{announcementResult.message}</p>
+                  {announcementResult.count !== undefined && (
+                    <p className="text-xs text-black/60">Sent to {announcementResult.count} hosts</p>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <button
+                  onClick={() => handleSendAnnouncement("welcome")}
+                  disabled={sendingAnnouncement}
+                  className="w-full rounded-lg border-2 border-black bg-[#FFD84A] p-4 text-left transition-colors hover:bg-[#FFD84A]/80 disabled:opacity-50"
+                >
+                  <p className="font-bold text-black">👋 Welcome Reminder</p>
+                  <p className="text-xs text-black/60">Remind hosts to complete their profile setup</p>
+                </button>
+
+                <button
+                  onClick={() => handleSendAnnouncement("creator-launch")}
+                  disabled={sendingAnnouncement}
+                  className="w-full rounded-lg border-2 border-black bg-[#28D17C] p-4 text-left transition-colors hover:bg-[#28D17C]/80 disabled:opacity-50"
+                >
+                  <p className="font-bold text-black">🚀 Creator Launch</p>
+                  <p className="text-xs text-black/60">Announce that creators are now on the platform</p>
+                </button>
+
+                <button
+                  onClick={() => handleSendAnnouncement("feature-update")}
+                  disabled={sendingAnnouncement}
+                  className="w-full rounded-lg border-2 border-black bg-[#4AA3FF] p-4 text-left transition-colors hover:bg-[#4AA3FF]/80 disabled:opacity-50"
+                >
+                  <p className="font-bold text-black">✨ Feature Update</p>
+                  <p className="text-xs text-black/60">Notify hosts about new platform features</p>
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-xl border-2 border-dashed border-white/30 bg-white/5 p-4">
+              <h3 className="mb-2 text-sm font-bold text-white">Custom Announcement</h3>
+              <p className="text-xs text-white/60">
+                Send a custom message to all beta hosts.
+              </p>
+              <p className="mt-4 text-xs text-white/40">
+                Coming soon - for now, use the preset announcements above.
+              </p>
             </div>
           </div>
         )}
