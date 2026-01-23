@@ -244,6 +244,9 @@ export default function HostOnboardingPage() {
 
   const totalSteps = 3
   
+  // Photo upload state
+  const [isUploading, setIsUploading] = useState(false)
+  
   // Compute whether Step 1 is complete for visual feedback
   const step1Complete = (importSuccess || manualEntry) && 
     data.propertyTitle.trim() && 
@@ -251,7 +254,9 @@ export default function HostOnboardingPage() {
     parseInt(data.bedrooms) >= 1 &&
     parseFloat(data.bathrooms) >= 0.5 &&
     parseInt(data.maxGuests) >= 1 &&
-    data.propertyType
+    data.propertyType &&
+    data.photos.length >= 6 &&
+    data.priceRange
   
   // Compute whether Step 2 is complete
   const step2Complete = data.idealCreators.length > 0 && data.contentNeeds.length > 0
@@ -259,6 +264,37 @@ export default function HostOnboardingPage() {
   const updateField = <K extends keyof OnboardingData>(field: K, value: OnboardingData[K]) => {
     setData(prev => ({ ...prev, [field]: value }))
     setError("")
+  }
+  
+  // Handle photo upload
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    
+    setIsUploading(true)
+    const newPhotos: string[] = []
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      const reader = new FileReader()
+      await new Promise<void>((resolve) => {
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            newPhotos.push(reader.result)
+          }
+          resolve()
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+    
+    setData(prev => ({
+      ...prev,
+      photos: [...prev.photos, ...newPhotos],
+      heroImageUrl: prev.heroImageUrl || newPhotos[0]
+    }))
+    setIsUploading(false)
+    e.target.value = ''
   }
 
   // Check auth and existing profile - auto-fill from session
@@ -466,7 +502,7 @@ export default function HostOnboardingPage() {
           title: data.propertyTitle,
           propertyType: data.propertyType,
           cityRegion: data.cityRegion,
-          priceRange: data.priceRange,
+          priceNightlyRange: data.priceRange,
           beds: parseInt(data.bedrooms) || 1,
           baths: parseFloat(data.bathrooms) || 1,
           maxGuests: parseInt(data.maxGuests) || 2,
@@ -475,6 +511,8 @@ export default function HostOnboardingPage() {
           photos: data.photos,
           heroImageUrl: data.photos[0] || "",
           airbnbUrl: data.airbnbUrl,
+          isDraft: false, // Publish the property
+          isActive: true,
         }),
       })
 
@@ -743,6 +781,86 @@ export default function HostOnboardingPage() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Nightly Price */}
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Nightly Price Range <span className="text-red-500">*</span></label>
+                    <select
+                      value={data.priceRange}
+                      onChange={e => updateField("priceRange", e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="">Select price range</option>
+                      <option value="$50-$100">$50 - $100 / night</option>
+                      <option value="$100-$150">$100 - $150 / night</option>
+                      <option value="$150-$250">$150 - $250 / night</option>
+                      <option value="$250-$400">$250 - $400 / night</option>
+                      <option value="$400-$600">$400 - $600 / night</option>
+                      <option value="$600+">$600+ / night</option>
+                    </select>
+                  </div>
+
+                  {/* Photo Upload */}
+                  <div>
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">
+                      Property Photos <span className="text-red-500">*</span>
+                      <span className="ml-2 font-normal text-black/50">(minimum 6)</span>
+                    </label>
+                    
+                    {/* Photo Grid */}
+                    {data.photos.length > 0 && (
+                      <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                        {data.photos.map((photo, i) => (
+                          <div key={i} className="relative aspect-square overflow-hidden rounded-lg border-2 border-black">
+                            <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newPhotos = [...data.photos]
+                                newPhotos.splice(i, 1)
+                                updateField("photos", newPhotos)
+                              }}
+                              className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600"
+                            >
+                              ×
+                            </button>
+                            {i === 0 && (
+                              <span className="absolute bottom-1 left-1 rounded-full bg-[#FFD84A] px-1.5 py-0.5 text-[8px] font-bold text-black">
+                                Cover
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Upload Button */}
+                    <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-black/30 bg-white p-6 transition-colors hover:border-black hover:bg-black/5">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                      />
+                      {isUploading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                          <span className="text-sm font-medium text-black">Uploading...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <svg className="mb-2 h-8 w-8 text-black/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="text-sm font-bold text-black">Click to upload photos</span>
+                          <span className="mt-1 text-xs text-black/50">
+                            {data.photos.length}/6 uploaded {data.photos.length >= 6 && "✓"}
+                          </span>
+                        </>
+                      )}
+                    </label>
+                  </div>
                   
                   {/* Completion Checklist */}
                   {!step1Complete && (
@@ -777,6 +895,16 @@ export default function HostOnboardingPage() {
                         {!data.propertyType && (
                           <p className="flex items-center gap-2 text-sm text-black/70">
                             <span className="text-[#FFD84A]">○</span> Property type
+                          </p>
+                        )}
+                        {!data.priceRange && (
+                          <p className="flex items-center gap-2 text-sm text-black/70">
+                            <span className="text-[#FFD84A]">○</span> Nightly price range
+                          </p>
+                        )}
+                        {data.photos.length < 6 && (
+                          <p className="flex items-center gap-2 text-sm text-black/70">
+                            <span className="text-[#FFD84A]">○</span> At least 6 photos ({data.photos.length}/6)
                           </p>
                         )}
                       </div>

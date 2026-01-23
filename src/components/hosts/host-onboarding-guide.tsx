@@ -29,7 +29,13 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
             of content actually drives bookings.
           </p>
           <div className="rounded-xl border-2 border-black bg-[#FFD84A] p-4 mt-6">
-            <p className="font-bold text-black">⏱️ Takes about 3 minutes</p>
+            <p className="font-bold text-black flex items-center gap-2">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+              Takes about 3 minutes
+            </p>
             <p className="text-sm text-black/70">No right or wrong answers — just figuring out what works for you.</p>
           </div>
         </div>
@@ -47,7 +53,11 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
           <div className="space-y-3 mt-4">
             <div className="rounded-xl border-2 border-black bg-white p-4">
               <div className="flex items-start gap-3">
-                <span className="text-2xl">🏠</span>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#FFD84A]">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                </div>
                 <div>
                   <p className="font-bold text-black">Property Tour / Review</p>
                   <p className="text-sm text-black/70">
@@ -61,7 +71,12 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
             
             <div className="rounded-xl border-2 border-black bg-white p-4">
               <div className="flex items-start gap-3">
-                <span className="text-2xl">✂️</span>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#4AA3FF]">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
                 <div>
                   <p className="font-bold text-black">Remote Edit / Story</p>
                   <p className="text-sm text-black/70">
@@ -75,7 +90,12 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
             
             <div className="rounded-xl border-2 border-black bg-white p-4">
               <div className="flex items-start gap-3">
-                <span className="text-2xl">📍</span>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#D7B6FF]">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
                 <div>
                   <p className="font-bold text-black">Destination Content</p>
                   <p className="text-sm text-black/70">
@@ -90,7 +110,7 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
           
           <div className="rounded-xl border-2 border-black bg-black/5 p-4 mt-4">
             <p className="text-sm text-black/70">
-              <strong>💡 Pro tip:</strong> The best performing content usually combines authentic 
+              <strong>Pro tip:</strong> The best performing content usually combines authentic 
               experience with good production value. A creator staying at your property and 
               creating content there typically outperforms remote edits.
             </p>
@@ -211,7 +231,12 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
           
           <div className="grid gap-4 mt-4">
             <div className="rounded-xl border-2 border-black bg-white p-4">
-              <p className="font-bold text-black">📊 Typical results</p>
+              <p className="font-bold text-black flex items-center gap-2">
+                <svg className="h-5 w-5 text-[#4AA3FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Typical results
+              </p>
               <ul className="mt-2 space-y-1 text-sm text-black/70">
                 <li>• A Reel might get 5,000 - 50,000 views</li>
                 <li>• Click-through rates are usually 1-3%</li>
@@ -221,7 +246,12 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
             </div>
             
             <div className="rounded-xl border-2 border-black bg-white p-4">
-              <p className="font-bold text-black">🎯 What actually matters</p>
+              <p className="font-bold text-black flex items-center gap-2">
+                <svg className="h-5 w-5 text-[#28D17C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                What actually matters
+              </p>
               <ul className="mt-2 space-y-1 text-sm text-black/70">
                 <li>• <strong>Authenticity</strong> beats production value</li>
                 <li>• <strong>The right audience</strong> matters more than size</li>
@@ -232,7 +262,12 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
           </div>
           
           <div className="rounded-xl border-2 border-black bg-[#FFD84A] p-4 mt-4">
-            <p className="font-bold text-black">💡 The real value</p>
+            <p className="font-bold text-black flex items-center gap-2">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              The real value
+            </p>
             <p className="text-sm text-black/80 mt-1">
               Beyond direct bookings, creator content gives you professional marketing 
               assets you can use on your own listing, social media, and ads. A good 
@@ -261,7 +296,7 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
                 <span className="rounded-full bg-[#28D17C] px-3 py-1 text-xs font-bold text-black">Most Popular</span>
               </div>
               <p className="mt-2 text-sm text-black/70">
-                Best reach and engagement. Can go viral. Works for tours, vibes, tips.
+                Best reach and engagement. Great for tours, vibes, and tips.
               </p>
             </div>
             
@@ -274,7 +309,7 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
                 <span className="rounded-full bg-[#4AA3FF] px-3 py-1 text-xs font-bold text-black">High Reach</span>
               </div>
               <p className="mt-2 text-sm text-black/70">
-                Younger audience, higher chance of going viral, great for unique properties.
+                Younger audience, higher chance of wide reach, great for unique properties.
               </p>
             </div>
             
@@ -336,15 +371,20 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
           </div>
           
           <div className="rounded-xl border-2 border-black bg-white p-4 mt-4">
-            <p className="font-bold text-black">📚 Resources</p>
+            <p className="font-bold text-black flex items-center gap-2">
+              <svg className="h-5 w-5 text-[#4AA3FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              Resources
+            </p>
             <ul className="mt-2 space-y-1 text-sm">
               <li>
-                <Link href="/how-to/hosts" className="text-[#4AA3FF] hover:underline">
+                <Link href="/how-to/hosts" target="_blank" rel="noopener noreferrer" className="text-[#4AA3FF] hover:underline">
                   Full Host Guide →
                 </Link>
               </li>
               <li>
-                <Link href="/help" className="text-[#4AA3FF] hover:underline">
+                <Link href="/help" target="_blank" rel="noopener noreferrer" className="text-[#4AA3FF] hover:underline">
                   FAQs & Support →
                 </Link>
               </li>
