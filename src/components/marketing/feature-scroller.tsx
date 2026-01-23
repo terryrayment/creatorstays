@@ -171,16 +171,23 @@ export function FeatureScroller() {
         {steps.map((step) => (
           <div
             key={step.id}
-            className="feature-card flex-shrink-0 snap-center rounded-2xl border-[3px] border-black p-4"
+            className="feature-card relative flex-shrink-0 snap-center rounded-2xl border-[3px] border-black overflow-hidden"
             style={{
-              backgroundColor: step.color,
               width: "min(360px, 82vw)",
               height: "min(420px, 75vh)",
               willChange: "transform"
             }}
           >
-            <div className="flex h-full flex-col justify-between">
-              <div>
+            {/* Full-bleed background image */}
+            <Image 
+              src={step.image} 
+              alt={step.line1 + " " + step.line2}
+              fill
+              className="object-cover"
+            />
+            {/* Content overlay */}
+            <div className="relative z-10 flex h-full flex-col justify-between p-4">
+              <div className="rounded-xl bg-white/90 backdrop-blur-sm p-3 self-start">
                 {/* Big number */}
                 <span 
                   className="font-heading text-[3.5rem] leading-none tracking-[-0.04em] text-black"
@@ -211,17 +218,6 @@ export function FeatureScroller() {
                 <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-black">
                   {step.benefit}
                 </p>
-              </div>
-              {/* Image in bottom right */}
-              <div className="self-end">
-                <div className="relative h-20 w-20 overflow-hidden rounded-xl border-2 border-black">
-                  <Image 
-                    src={step.image} 
-                    alt={step.line1 + " " + step.line2}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
               </div>
             </div>
           </div>
