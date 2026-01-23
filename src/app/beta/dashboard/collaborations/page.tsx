@@ -71,33 +71,67 @@ const DEMO_STEPS = [
     step: 1,
     title: "Creator Accepts Your Offer",
     description: "When a creator accepts your offer, a collaboration is created and both parties sign a digital agreement.",
-    icon: "✅",
+    iconType: "check",
   },
   {
     step: 2,
     title: "Creator Creates Content",
     description: "The creator visits your property, captures content, and uses their unique tracking link in posts.",
-    icon: "📸",
+    iconType: "camera",
   },
   {
     step: 3,
     title: "You Review & Approve",
     description: "Once content is submitted, you review it here. Approve to release payment, or request changes.",
-    icon: "👀",
+    iconType: "eye",
   },
   {
     step: 4,
     title: "Track Performance",
     description: "Monitor clicks, engagement, and ROI. Performance bonuses are automatically calculated.",
-    icon: "📊",
+    iconType: "chart",
   },
   {
     step: 5,
     title: "Payment & Completion",
     description: "Approve the content to trigger secure payment. Leave reviews for each other.",
-    icon: "💰",
+    iconType: "payment",
   },
 ]
+
+// Icon component for steps
+function StepIcon({ type }: { type: string }) {
+  const icons: Record<string, React.ReactNode> = {
+    check: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+    ),
+    camera: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+    eye: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      </svg>
+    ),
+    chart: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+    payment: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  }
+  return <>{icons[type] || icons.check}</>
+}
 
 function DemoCollaborationCard({ collab, onView }: { collab: typeof DEMO_COLLABORATIONS[0], onView: () => void }) {
   return (
@@ -152,8 +186,11 @@ function DemoCollaborationCard({ collab, onView }: { collab: typeof DEMO_COLLABO
 
       {/* Action hint */}
       {collab.actionRequired && collab.actionText && (
-        <div className="mt-3 rounded-lg bg-[#FFD84A]/30 px-3 py-2 text-xs font-bold text-black">
-          ⚡ {collab.actionText}
+        <div className="mt-3 rounded-lg bg-[#FFD84A]/30 px-3 py-2 text-xs font-bold text-black flex items-center gap-2">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          {collab.actionText}
         </div>
       )}
     </div>
@@ -365,7 +402,11 @@ function DemoDetailModal({ collab, onClose }: { collab: typeof DEMO_COLLABORATIO
 
               {/* Demo chart placeholder */}
               <div className="rounded-xl border-2 border-dashed border-black/20 bg-black/5 p-8 text-center">
-                <span className="text-3xl">📈</span>
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/20 bg-white">
+                  <svg className="h-6 w-6 text-black/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                  </svg>
+                </div>
                 <p className="mt-2 text-sm font-bold text-black/40">Click Analytics Chart</p>
                 <p className="text-xs text-black/30">Daily clicks over time would appear here</p>
               </div>
@@ -408,7 +449,9 @@ function HowItWorksModal({ onClose }: { onClose: () => void }) {
         {/* Step Content */}
         <div className="p-6">
           <div className="text-center mb-6">
-            <span className="text-5xl">{DEMO_STEPS[currentStep].icon}</span>
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A]">
+              <StepIcon type={DEMO_STEPS[currentStep].iconType} />
+            </div>
             <div className="mt-4">
               <span className="rounded-full border-2 border-black bg-black px-3 py-1 text-xs font-bold text-white">
                 Step {DEMO_STEPS[currentStep].step} of {DEMO_STEPS.length}
@@ -449,7 +492,7 @@ function HowItWorksModal({ onClose }: { onClose: () => void }) {
                 onClick={onClose}
                 className="flex-1 rounded-full border-2 border-black bg-[#28D17C] py-2 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
               >
-                Got It! ✓
+                Got It!
               </button>
             ) : (
               <button
@@ -482,7 +525,7 @@ export default function BetaCollaborationsPage() {
           </div>
           <Link 
             href="/" 
-            className="rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1.5 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
+            className="text-xs text-black/60 hover:text-black"
           >
             ← Back to site
           </Link>
@@ -504,6 +547,13 @@ export default function BetaCollaborationsPage() {
               className="rounded-full border-2 border-black bg-black px-3 py-1 text-[10px] font-bold text-white"
             >
               Collaborations
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
+            </Link>
+            <Link 
+              href="/beta/dashboard/host/analytics"
+              className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
+            >
+              Analytics
               <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
             </Link>
             <Link 
@@ -538,7 +588,11 @@ export default function BetaCollaborationsPage() {
         {/* Demo Banner */}
         <div className="mb-6 rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-4">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">👋</span>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-[#4AA3FF] bg-white">
+              <svg className="h-5 w-5 text-[#4AA3FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
             <div className="flex-1">
               <p className="font-bold text-black">This is a demo preview</p>
               <p className="text-sm text-black/70 mt-1">
@@ -584,8 +638,12 @@ export default function BetaCollaborationsPage() {
 
         {/* Coming Soon Note */}
         <div className="mt-8 rounded-xl border-2 border-dashed border-black/20 bg-white p-6 text-center">
-          <span className="text-3xl">🚀</span>
-          <p className="mt-2 font-bold text-black">Real creators coming soon!</p>
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A]">
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <p className="mt-3 font-bold text-black">Real creators coming soon!</p>
           <p className="text-sm text-black/60 mt-1">
             We're onboarding creators now. Get your properties and preferences set up 
             so you're ready when matching begins.
@@ -598,6 +656,21 @@ export default function BetaCollaborationsPage() {
           </Link>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t-2 border-black bg-white mt-12">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A] font-black text-sm">
+                CS
+              </div>
+              <span className="font-bold text-black">CreatorStays</span>
+            </div>
+            <p className="text-xs text-black/60">© 2026 CreatorStays. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
 
       {/* Modals */}
       {selectedCollab && (

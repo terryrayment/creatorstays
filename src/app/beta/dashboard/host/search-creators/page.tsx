@@ -359,7 +359,7 @@ export default function SearchCreatorsPage() {
           </div>
           <Link 
             href="/" 
-            className="rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1.5 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
+            className="text-xs text-black/60 hover:text-black"
           >
             ← Back to site
           </Link>
@@ -381,6 +381,13 @@ export default function SearchCreatorsPage() {
               className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
             >
               Collaborations
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
+            </Link>
+            <Link 
+              href="/beta/dashboard/host/analytics"
+              className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
+            >
+              Analytics
               <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
             </Link>
             <Link 
@@ -442,7 +449,7 @@ export default function SearchCreatorsPage() {
           )}
 
           {/* Filters */}
-          <div className="mb-6 rounded-xl border-2 border-black bg-white p-4">
+          <div className="mb-6 rounded-xl border-2 border-black bg-white p-4 relative z-20">
             <div className="flex flex-wrap items-center gap-3">
               {/* Search */}
               <div className="flex-1 min-w-[200px]">
@@ -502,16 +509,12 @@ export default function SearchCreatorsPage() {
                   />
                   Gifted stays only
                 </label>
-                <select
+                <Select
+                  className="w-40"
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value)}
-                  className="h-10 rounded-full border-2 border-black bg-white px-4 pr-8 text-[12px] font-bold text-black focus:outline-none cursor-pointer appearance-none"
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
-                >
-                  {SORT_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                  options={SORT_OPTIONS}
+                />
               </div>
             </div>
           </div>

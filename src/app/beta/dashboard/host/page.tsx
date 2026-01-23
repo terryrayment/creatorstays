@@ -60,6 +60,13 @@ function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
             <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
           </Link>
           <Link 
+            href="/beta/dashboard/host/analytics"
+            className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
+          >
+            Analytics
+            <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
+          </Link>
+          <Link 
             href="/beta/dashboard/host/settings"
             className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
           >
@@ -99,7 +106,7 @@ function BetaHeader({ isAgency }: { isAgency?: boolean }) {
         </div>
         <Link 
           href="/" 
-          className="rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1.5 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
+          className="text-xs text-black/60 hover:text-black"
         >
           ← Back to site
         </Link>
