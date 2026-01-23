@@ -1,84 +1,7 @@
 "use client"
 
 import { useRef, useState, useEffect, useCallback } from "react"
-
-// Step 1: House icon
-function HouseIcon() {
-  return (
-    <svg viewBox="0 0 100 100" fill="none" className="h-20 w-20">
-      <rect x="18" y="38" width="70" height="50" rx="4" fill="#000" opacity="0.15" />
-      <rect x="12" y="32" width="70" height="50" rx="4" fill="white" stroke="black" strokeWidth="3" />
-      <path d="M12 42L47 12L82 42" stroke="black" strokeWidth="3" fill="none" />
-      <rect x="38" y="52" width="18" height="30" rx="2" fill="#4AA3FF" stroke="black" strokeWidth="2" />
-      <circle cx="52" cy="67" r="2" fill="black" />
-      <rect x="20" y="45" width="12" height="12" rx="1" fill="#FFD84A" stroke="black" strokeWidth="2" />
-      <rect x="62" y="45" width="12" height="12" rx="1" fill="#FFD84A" stroke="black" strokeWidth="2" />
-    </svg>
-  )
-}
-
-// Step 2: Person/Creator icon
-function CreatorIcon() {
-  return (
-    <svg viewBox="0 0 100 100" fill="none" className="h-20 w-20">
-      <circle cx="54" cy="38" r="18" fill="#000" opacity="0.15" />
-      <circle cx="50" cy="34" r="18" fill="#D7B6FF" stroke="black" strokeWidth="3" />
-      <circle cx="44" cy="30" r="3" fill="black" />
-      <circle cx="56" cy="30" r="3" fill="black" />
-      <path d="M44 40Q50 46 56 40" stroke="black" strokeWidth="2" fill="none" />
-      <rect x="28" y="58" width="50" height="34" rx="6" fill="#000" opacity="0.15" />
-      <rect x="24" y="54" width="50" height="34" rx="6" fill="#4AA3FF" stroke="black" strokeWidth="3" />
-      <circle cx="34" cy="64" r="4" fill="#FFD84A" stroke="black" strokeWidth="2" />
-    </svg>
-  )
-}
-
-// Step 3: Link/Chain icon
-function LinkIcon() {
-  return (
-    <svg viewBox="0 0 100 100" fill="none" className="h-20 w-20">
-      <ellipse cx="54" cy="54" rx="28" ry="28" fill="#000" opacity="0.15" />
-      <ellipse cx="50" cy="50" rx="28" ry="28" fill="white" stroke="black" strokeWidth="3" />
-      <rect x="20" y="38" width="28" height="24" rx="12" fill="#28D17C" stroke="black" strokeWidth="3" />
-      <rect x="28" y="44" width="12" height="12" rx="6" fill="white" stroke="black" strokeWidth="2" />
-      <rect x="52" y="38" width="28" height="24" rx="12" fill="#FFD84A" stroke="black" strokeWidth="3" />
-      <rect x="60" y="44" width="12" height="12" rx="6" fill="white" stroke="black" strokeWidth="2" />
-      <circle cx="50" cy="50" r="6" fill="#4AA3FF" stroke="black" strokeWidth="2" />
-    </svg>
-  )
-}
-
-// Step 4: Chart/Analytics icon
-function ChartIcon() {
-  return (
-    <svg viewBox="0 0 100 100" fill="none" className="h-20 w-20">
-      <rect x="18" y="18" width="70" height="70" rx="10" fill="#000" opacity="0.15" />
-      <rect x="12" y="12" width="70" height="70" rx="10" fill="white" stroke="black" strokeWidth="3" />
-      <rect x="22" y="50" width="12" height="24" rx="2" fill="#28D17C" stroke="black" strokeWidth="2" />
-      <rect x="40" y="36" width="12" height="38" rx="2" fill="#4AA3FF" stroke="black" strokeWidth="2" />
-      <rect x="58" y="24" width="12" height="50" rx="2" fill="#FFD84A" stroke="black" strokeWidth="2" />
-      <path d="M28 48L46 34L64 22" stroke="black" strokeWidth="3" strokeLinecap="round" />
-      <circle cx="64" cy="22" r="4" fill="#FF5A1F" stroke="black" strokeWidth="2" />
-    </svg>
-  )
-}
-
-// Step 5: Payment/Doc icon
-function PaymentIcon() {
-  return (
-    <svg viewBox="0 0 100 100" fill="none" className="h-20 w-20">
-      <rect x="28" y="18" width="50" height="70" rx="4" fill="#000" opacity="0.15" />
-      <rect x="22" y="12" width="50" height="70" rx="4" fill="white" stroke="black" strokeWidth="3" />
-      <circle cx="62" cy="22" r="12" fill="#28D17C" stroke="black" strokeWidth="2" />
-      <text x="62" y="27" textAnchor="middle" fontSize="14" fontWeight="bold" fill="black">$</text>
-      <rect x="30" y="40" width="28" height="4" rx="2" fill="#4AA3FF" />
-      <rect x="30" y="50" width="20" height="4" rx="2" fill="#D7B6FF" />
-      <rect x="30" y="60" width="32" height="4" rx="2" fill="#FFD84A" />
-      <rect x="30" y="68" width="24" height="10" rx="2" fill="black" />
-      <text x="42" y="76" textAnchor="middle" fontSize="7" fontWeight="bold" fill="white">1099</text>
-    </svg>
-  )
-}
+import Image from "next/image"
 
 // Process steps with expanded host-focused copy
 const steps = [
@@ -90,7 +13,7 @@ const steps = [
     copy: "Paste your Airbnb link. We pull in your photos, description, and details automatically.",
     benefit: "Live in 60 seconds.",
     color: "#FFD84A",
-    Icon: HouseIcon,
+    image: "/images/hp-step-1.jpg",
   },
   {
     id: "step-2",
@@ -100,7 +23,7 @@ const steps = [
     copy: "Browse creators by niche and audience. Send collaboration offers with your terms and budget.",
     benefit: "No cold DMs. No guesswork.",
     color: "#4AA3FF",
-    Icon: CreatorIcon,
+    image: "/images/hp-step-2.jpg",
   },
   {
     id: "step-3",
@@ -110,7 +33,7 @@ const steps = [
     copy: "Creators share your tracked link in their content. Every click is attributed to you.",
     benefit: "Real reach. Real attribution.",
     color: "#28D17C",
-    Icon: LinkIcon,
+    image: "/images/hp-step-3.jpg",
   },
   {
     id: "step-4",
@@ -120,7 +43,7 @@ const steps = [
     copy: "See clicks, unique visitors, and traffic sources in real time. Know exactly what's working.",
     benefit: "More bookings, without learning ads.",
     color: "#D7B6FF",
-    Icon: ChartIcon,
+    image: "/images/hp-step-4.jpg",
   },
   {
     id: "step-5",
@@ -130,7 +53,7 @@ const steps = [
     copy: "Pay creators via Stripe. We handle contracts, payouts, and 1099s at year-end.",
     benefit: "Clean paperwork. Repeatable outreach.",
     color: "#FF5A1F",
-    Icon: PaymentIcon,
+    image: "/images/hp-step-5.jpg",
   },
 ]
 
@@ -289,8 +212,16 @@ export function FeatureScroller() {
                   {step.benefit}
                 </p>
               </div>
+              {/* Image in bottom right */}
               <div className="self-end">
-                {step.Icon && <step.Icon />}
+                <div className="relative h-20 w-20 overflow-hidden rounded-xl border-2 border-black">
+                  <Image 
+                    src={step.image} 
+                    alt={step.line1 + " " + step.line2}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
               </div>
             </div>
           </div>

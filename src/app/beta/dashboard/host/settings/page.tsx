@@ -17,6 +17,7 @@ function HostSettingsContent() {
   const [saving, setSaving] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState("")
+  const [isEditing, setIsEditing] = useState(false)
   
   // Profile form
   const [profile, setProfile] = useState({
@@ -243,96 +244,180 @@ function HostSettingsContent() {
               {/* Profile Tab */}
               {(activeTab === "profile" || isSetup) && (
                 <div className="space-y-5">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                      Full Name
-                    </label>
-                    <input
-                      value={profile.fullName}
-                      onChange={e => setProfile({ ...profile, fullName: e.target.value })}
-                      placeholder="Your name"
-                      className={inputClass}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={profile.email}
-                      disabled
-                      className={`${inputClass} bg-black/5 cursor-not-allowed`}
-                    />
-                    <p className="mt-1 text-[10px] text-black/50">Email is linked to your login and cannot be changed here. Contact support to update.</p>
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                        Phone <span className="font-medium text-black/40">(optional)</span>
-                      </label>
-                      <input
-                        type="tel"
-                        value={profile.phone}
-                        onChange={e => setProfile({ ...profile, phone: e.target.value })}
-                        placeholder="+1 (555) 123-4567"
-                        className={inputClass}
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                        Location <span className="font-medium text-black/40">(optional)</span>
-                      </label>
-                      <input
-                        value={profile.location}
-                        onChange={e => setProfile({ ...profile, location: e.target.value })}
-                        placeholder="City, State"
-                        className={inputClass}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                      Company / Brand <span className="font-medium text-black/40">(optional)</span>
-                    </label>
-                    <input
-                      value={profile.company}
-                      onChange={e => setProfile({ ...profile, company: e.target.value })}
-                      placeholder="Your property management company"
-                      className={inputClass}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                      Bio <span className="font-medium text-black/40">(optional)</span>
-                    </label>
-                    <textarea
-                      value={profile.bio}
-                      onChange={e => setProfile({ ...profile, bio: e.target.value })}
-                      placeholder="Tell creators a bit about your properties and what makes them special..."
-                      rows={3}
-                      className="w-full rounded-xl border-2 border-black bg-white px-4 py-3 text-[14px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
-                    />
-                  </div>
-                  
-                  <div className="flex gap-3 pt-2">
-                    <button
-                      onClick={handleProfileSave}
-                      disabled={saving || !profile.fullName}
-                      className="rounded-full border-2 border-black bg-black px-6 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
-                    >
-                      {saving ? "Saving..." : isSetup ? "Continue to Dashboard →" : "Save Changes"}
-                    </button>
-                    
-                    {isSetup && (
+                  {/* View Mode Header with Edit Button */}
+                  {!isSetup && !isEditing && (
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A] text-xl font-black">
+                          {profile.fullName ? profile.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '👋'}
+                        </div>
+                        <div>
+                          <p className="font-bold text-black">{profile.fullName || 'Your Name'}</p>
+                          <p className="text-xs text-black/60">{profile.email}</p>
+                        </div>
+                      </div>
                       <button
-                        onClick={() => router.push("/beta/dashboard/host")}
-                        className="rounded-full border-2 border-black bg-white px-6 py-2.5 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+                        onClick={() => setIsEditing(true)}
+                        className="rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5 flex items-center gap-2"
                       >
-                        Skip for now
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Edit Profile
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
+
+                  {/* View Mode - Show profile summary */}
+                  {!isSetup && !isEditing && (
+                    <div className="space-y-4">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-lg border-2 border-black bg-black/5 p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-black/50">Phone</p>
+                          <p className="mt-1 text-sm font-medium text-black">{profile.phone || '—'}</p>
+                        </div>
+                        <div className="rounded-lg border-2 border-black bg-black/5 p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-black/50">Location</p>
+                          <p className="mt-1 text-sm font-medium text-black">{profile.location || '—'}</p>
+                        </div>
+                        <div className="rounded-lg border-2 border-black bg-black/5 p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-black/50">Company</p>
+                          <p className="mt-1 text-sm font-medium text-black">{profile.company || '—'}</p>
+                        </div>
+                        <div className="rounded-lg border-2 border-black bg-black/5 p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-black/50">Bio</p>
+                          <p className="mt-1 text-sm font-medium text-black">{profile.bio || '—'}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Fun Stats Section */}
+                      <div className="mt-6 rounded-xl border-2 border-dashed border-black/30 bg-[#28D17C]/10 p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-black/50 mb-2">Your Host Journey</p>
+                        <div className="flex items-center gap-6">
+                          <div className="text-center">
+                            <p className="text-2xl font-black text-black">🏠</p>
+                            <p className="text-xs text-black/60">Properties listed</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-black text-black">📸</p>
+                            <p className="text-xs text-black/60">Creator collabs</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-black text-black">✨</p>
+                            <p className="text-xs text-black/60">Getting started</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Edit Mode - Show form fields */}
+                  {(isSetup || isEditing) && (
+                    <>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                          Full Name
+                        </label>
+                        <input
+                          value={profile.fullName}
+                          onChange={e => setProfile({ ...profile, fullName: e.target.value })}
+                          placeholder="Your name"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          value={profile.email}
+                          disabled
+                          className={`${inputClass} bg-black/5 cursor-not-allowed`}
+                        />
+                        <p className="mt-1 text-[10px] text-black/50">Email is linked to your login and cannot be changed here. Contact support to update.</p>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                            Phone <span className="font-medium text-black/40">(optional)</span>
+                          </label>
+                          <input
+                            type="tel"
+                            value={profile.phone}
+                            onChange={e => setProfile({ ...profile, phone: e.target.value })}
+                            placeholder="+1 (555) 123-4567"
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                            Location <span className="font-medium text-black/40">(optional)</span>
+                          </label>
+                          <input
+                            value={profile.location}
+                            onChange={e => setProfile({ ...profile, location: e.target.value })}
+                            placeholder="City, State"
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                          Company / Brand <span className="font-medium text-black/40">(optional)</span>
+                        </label>
+                        <input
+                          value={profile.company}
+                          onChange={e => setProfile({ ...profile, company: e.target.value })}
+                          placeholder="Your property management company"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                          Bio <span className="font-medium text-black/40">(optional)</span>
+                        </label>
+                        <textarea
+                          value={profile.bio}
+                          onChange={e => setProfile({ ...profile, bio: e.target.value })}
+                          placeholder="Tell creators a bit about your properties and what makes them special..."
+                          rows={3}
+                          className="w-full rounded-xl border-2 border-black bg-white px-4 py-3 text-[14px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
+                        />
+                      </div>
+                      
+                      <div className="flex gap-3 pt-2">
+                        <button
+                          onClick={() => {
+                            handleProfileSave()
+                            if (!isSetup) setIsEditing(false)
+                          }}
+                          disabled={saving || !profile.fullName}
+                          className="rounded-full border-2 border-black bg-black px-6 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                        >
+                          {saving ? "Saving..." : isSetup ? "Continue to Dashboard →" : "Save Changes"}
+                        </button>
+                        
+                        {isSetup && (
+                          <button
+                            onClick={() => router.push("/beta/dashboard/host")}
+                            className="rounded-full border-2 border-black bg-white px-6 py-2.5 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+                          >
+                            Skip for now
+                          </button>
+                        )}
+                        
+                        {!isSetup && isEditing && (
+                          <button
+                            onClick={() => setIsEditing(false)}
+                            className="rounded-full border-2 border-black bg-white px-6 py-2.5 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -377,7 +462,7 @@ function HostSettingsContent() {
                   {/* Account Info */}
                   <div>
                     <h3 className="mb-3 text-sm font-bold text-black">Account Information</h3>
-                    <div className="space-y-2 rounded-xl border-2 border-black/10 bg-black/5 p-4">
+                    <div className="space-y-2 rounded-xl border-2 border-black bg-black/5 p-4">
                       <div className="flex justify-between">
                         <span className="text-xs text-black/60">Account Type</span>
                         <span className="text-xs font-bold text-black">Host</span>
@@ -408,9 +493,9 @@ function HostSettingsContent() {
                   </div>
 
                   {/* Danger Zone */}
-                  <div className="border-t-2 border-black/10 pt-6">
+                  <div className="border-t-2 border-black pt-6">
                     <h3 className="mb-3 text-sm font-bold text-red-600">Danger Zone</h3>
-                    <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4">
+                    <div className="rounded-xl border-2 border-red-500 bg-red-50 p-4">
                       <p className="mb-3 text-xs text-black/60">
                         Permanently delete your account and all associated data. This action cannot be undone.
                       </p>
@@ -431,7 +516,7 @@ function HostSettingsContent() {
                             value={deleteConfirmText}
                             onChange={e => setDeleteConfirmText(e.target.value)}
                             placeholder="Type DELETE"
-                            className="h-10 w-full rounded-lg border-2 border-red-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                            className="h-10 w-full rounded-lg border-2 border-red-500 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
                           />
                           <div className="flex gap-2">
                             <button
