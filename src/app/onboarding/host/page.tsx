@@ -802,20 +802,36 @@ export default function HostOnboardingPage() {
 
                   {/* Photo Upload */}
                   <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-black">
                       Property Photos <span className="text-red-500">*</span>
                       <span className="ml-2 font-normal text-black/50">(minimum 6)</span>
                     </label>
+                    <p className="mb-3 text-[11px] text-black/50">Click a photo to set as cover. Use arrows to reorder.</p>
                     
                     {/* Photo Grid */}
                     {data.photos.length > 0 && (
                       <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-4">
                         {data.photos.map((photo, i) => (
-                          <div key={i} className="relative aspect-square overflow-hidden rounded-lg border-2 border-black">
+                          <div 
+                            key={i} 
+                            className={`group relative aspect-square overflow-hidden rounded-lg border-2 ${i === 0 ? 'border-[#FFD84A]' : 'border-black'} cursor-pointer`}
+                            onClick={() => {
+                              // Set as cover (move to first position)
+                              if (i !== 0) {
+                                const newPhotos = [...data.photos]
+                                const [moved] = newPhotos.splice(i, 1)
+                                newPhotos.unshift(moved)
+                                updateField("photos", newPhotos)
+                              }
+                            }}
+                          >
                             <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+                            
+                            {/* Delete button */}
                             <button
                               type="button"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation()
                                 const newPhotos = [...data.photos]
                                 newPhotos.splice(i, 1)
                                 updateField("photos", newPhotos)
@@ -824,10 +840,53 @@ export default function HostOnboardingPage() {
                             >
                               ×
                             </button>
+                            
+                            {/* Move arrows */}
+                            <div className="absolute bottom-1 right-1 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                              {i > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    const newPhotos = [...data.photos]
+                                    ;[newPhotos[i], newPhotos[i - 1]] = [newPhotos[i - 1], newPhotos[i]]
+                                    updateField("photos", newPhotos)
+                                  }}
+                                  className="flex h-5 w-5 items-center justify-center rounded bg-black/70 text-white text-xs hover:bg-black"
+                                >
+                                  ←
+                                </button>
+                              )}
+                              {i < data.photos.length - 1 && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    const newPhotos = [...data.photos]
+                                    ;[newPhotos[i], newPhotos[i + 1]] = [newPhotos[i + 1], newPhotos[i]]
+                                    updateField("photos", newPhotos)
+                                  }}
+                                  className="flex h-5 w-5 items-center justify-center rounded bg-black/70 text-white text-xs hover:bg-black"
+                                >
+                                  →
+                                </button>
+                              )}
+                            </div>
+                            
+                            {/* Cover badge */}
                             {i === 0 && (
                               <span className="absolute bottom-1 left-1 rounded-full bg-[#FFD84A] px-1.5 py-0.5 text-[8px] font-bold text-black">
                                 Cover
                               </span>
+                            )}
+                            
+                            {/* Set as cover hint on hover (for non-cover photos) */}
+                            {i !== 0 && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                                <span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-black">
+                                  Set as cover
+                                </span>
+                              </div>
                             )}
                           </div>
                         ))}
