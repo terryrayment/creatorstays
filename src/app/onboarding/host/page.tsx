@@ -584,10 +584,6 @@ export default function HostOnboardingPage() {
       setCheckingOut(false)
     }
   }
-      setError(e.message || "Something went wrong")
-      setCheckingOut(false)
-    }
-  }
 
   if (loading) {
     return (
