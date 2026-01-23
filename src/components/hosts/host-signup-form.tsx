@@ -107,10 +107,15 @@ export function HostSignupForm() {
           fullName: form.fullName,
           phone: form.phone,
           companyName: form.companyName,
-          cityRegion: form.cityRegion,
+          cityRegion: form.cityRegion || prefill?.cityRegion,
           listingUrl: form.listingUrl,
           listingTitle: prefill?.title,
           listingPhotos: prefill?.photos,
+          // Include property details from Airbnb prefill
+          listingBeds: prefill?.beds || prefill?.bedrooms,
+          listingBaths: prefill?.baths,
+          listingGuests: prefill?.guests,
+          listingPropertyType: prefill?.propertyType,
         }),
       })
 

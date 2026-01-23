@@ -304,7 +304,7 @@ export default function HostOnboardingPage() {
                   cityRegion: prop.cityRegion || "",
                   bedrooms: prop.beds?.toString() || "",
                   bathrooms: prop.baths?.toString() || "",
-                  maxGuests: prop.maxGuests?.toString() || "",
+                  maxGuests: (prop.maxGuests || prop.guests)?.toString() || "",
                   amenities: prop.amenities || [],
                   photos: prop.photos || [],
                   heroImageUrl: prop.heroImageUrl || "",
@@ -312,6 +312,30 @@ export default function HostOnboardingPage() {
                 // If property has data, mark as imported
                 if (prop.airbnbUrl || prop.title) {
                   setImportSuccess(true)
+                }
+                
+                // If we have Airbnb URL but missing key data, auto-import
+                const missingData = !prop.beds || !prop.baths || !prop.guests || !prop.title
+                if (prop.airbnbUrl && missingData) {
+                  console.log("[Onboarding] Auto-importing missing data from Airbnb...")
+                  try {
+                    const importRes = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(prop.airbnbUrl)}`)
+                    const importData = await importRes.json()
+                    if (importData.ok) {
+                      setData(prev => ({
+                        ...prev,
+                        propertyTitle: prev.propertyTitle || importData.title || "",
+                        cityRegion: prev.cityRegion || importData.cityRegion || "",
+                        bedrooms: prev.bedrooms || (importData.beds || importData.bedrooms)?.toString() || "",
+                        bathrooms: prev.bathrooms || importData.baths?.toString() || "",
+                        maxGuests: prev.maxGuests || importData.guests?.toString() || "",
+                        photos: prev.photos?.length ? prev.photos : (importData.photos || []),
+                      }))
+                      setImportSuccess(true)
+                    }
+                  } catch (importErr) {
+                    console.error("[Onboarding] Auto-import failed:", importErr)
+                  }
                 }
               }
             }

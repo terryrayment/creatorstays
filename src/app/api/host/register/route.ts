@@ -28,6 +28,10 @@ export async function POST(request: NextRequest) {
       listingUrl,
       listingTitle,
       listingPhotos,
+      listingBeds,
+      listingBaths,
+      listingGuests,
+      listingPropertyType,
     } = body
 
     // Validate required fields
@@ -104,6 +108,10 @@ export async function POST(request: NextRequest) {
             cityRegion: cityRegion || null,
             photos: listingPhotos || [],
             heroImageUrl: listingPhotos?.[0] || null,
+            beds: listingBeds ? parseInt(listingBeds) : null,
+            baths: listingBaths ? parseFloat(listingBaths) : null,
+            guests: listingGuests ? parseInt(listingGuests) : null,
+            propertyType: listingPropertyType || null,
             isDraft: true,
             isActive: true,
           },
