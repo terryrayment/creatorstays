@@ -21,21 +21,6 @@ function isValidAirbnbUrl(url: string): boolean {
   return normalized.includes("airbnb.com")
 }
 
-interface ListingPrefill {
-  title?: string
-  city?: string
-  cityRegion?: string
-  rating?: number
-  reviewCount?: number
-  price?: string
-  photos?: string[]
-  beds?: number
-  bedrooms?: number
-  baths?: number
-  guests?: number
-  propertyType?: string
-}
-
 export function HostSignupForm() {
   const [submitted, setSubmitted] = useState(false)
   const [submittedEmail, setSubmittedEmail] = useState("")
@@ -51,14 +36,10 @@ export function HostSignupForm() {
     agreeTerms: false,
   })
   
-  const [prefill, setPrefill] = useState<ListingPrefill | null>(null)
-  const [prefillStatus, setPrefillStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
-  const [manuallyEdited, setManuallyEdited] = useState(false)
-  const [prefillAttempted, setPrefillAttempted] = useState(false)
+  const [prefillStatus, setPrefillStatus] = useState<"idle" | "success" | "error">("idle")
 
   const listingUrlError = form.listingUrl && !isValidAirbnbUrl(form.listingUrl)
   const canSubmit = !listingUrlError && !loading && form.agreeTerms
-  const showPrefillButton = form.listingUrl && isValidAirbnbUrl(form.listingUrl) && form.listingUrl.includes("airbnb.com")
 
   const handleListingUrlBlur = () => {
     if (form.listingUrl) {
@@ -255,53 +236,14 @@ export function HostSignupForm() {
               onBlur={handleListingUrlBlur}
               className={`flex-1 ${inputClass} ${listingUrlError ? "border-[#FF6B6B]" : ""}`}
             />
-            {showPrefillButton && (
-              <button
-                type="button"
-                disabled={prefillStatus === "loading"}
-                onClick={() => fetchPrefill(form.listingUrl)}
-                className="shrink-0 rounded-lg border-[2px] border-black bg-white px-3 text-[10px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
-              >
-                {prefillStatus === "loading" ? "..." : "Pull"}
-              </button>
-            )}
           </div>
           {listingUrlError && (
             <p className="mt-1 text-[10px] font-medium text-[#FF6B6B]">Only Airbnb listings supported during beta.</p>
           )}
-          {prefillStatus === "error" && (
-            <p className="mt-1 text-[10px] font-medium text-[#FF6B6B]">Couldn&apos;t pull details. Enter manually.</p>
+          {prefillStatus === "success" && (
+            <p className="mt-1 text-[10px] font-medium text-[#28D17C]">✓ Valid Airbnb URL</p>
           )}
         </div>
-
-        {/* Listing preview */}
-        {prefillStatus === "success" && prefill && (
-          <div className="rounded-lg border-[2px] border-black bg-[#28D17C]/20 p-3">
-            <div className="flex items-start gap-3">
-              <div className="min-w-0 flex-1">
-                {prefill.title && (
-                  <h4 className="font-bold text-[12px] text-black leading-tight">{prefill.title}</h4>
-                )}
-                {prefill.city && (
-                  <p className="text-[10px] font-medium text-black mt-0.5">{prefill.city}</p>
-                )}
-                <div className="flex items-center gap-3 mt-1 text-[10px] font-medium text-black">
-                  {prefill.rating && (
-                    <span>★ {prefill.rating}{prefill.reviewCount && ` (${prefill.reviewCount})`}</span>
-                  )}
-                  {prefill.price && <span>{prefill.price}/night</span>}
-                </div>
-              </div>
-              {prefill.photos && prefill.photos[0] && (
-                <img 
-                  src={prefill.photos[0]} 
-                  alt="Listing" 
-                  className="h-14 w-18 rounded-md border-[2px] border-black object-cover shrink-0"
-                />
-              )}
-            </div>
-          </div>
-        )}
 
         <div className="flex items-start gap-2 pt-1">
           <input
