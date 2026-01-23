@@ -63,7 +63,7 @@ interface AdminStats {
 interface Conversation {
   id: string
   hostProfile: { id: string; displayName: string; contactEmail: string }
-  creatorProfile: { id: string; displayName: string; email: string; handle: string }
+  creatorProfile: { id: string; displayName: string; handle: string; user: { email: string } }
   messages: { id: string; senderType: string; body: string; sentAt: string }[]
   lastMessageAt: string
 }

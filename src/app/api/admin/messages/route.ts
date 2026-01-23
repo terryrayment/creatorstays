@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
             select: { id: true, displayName: true, contactEmail: true }
           },
           creatorProfile: {
-            select: { id: true, displayName: true, email: true, handle: true }
+            select: { id: true, displayName: true, handle: true, user: { select: { email: true } } }
           },
           messages: {
             orderBy: { sentAt: "asc" }
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
           select: { id: true, displayName: true, contactEmail: true }
         },
         creatorProfile: {
-          select: { id: true, displayName: true, email: true, handle: true }
+          select: { id: true, displayName: true, handle: true, user: { select: { email: true } } }
         },
         messages: {
           orderBy: { sentAt: "desc" },
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
 
     // Get all creators for dropdown
     const creators = await prisma.creatorProfile.findMany({
-      select: { id: true, displayName: true, email: true, handle: true },
+      select: { id: true, displayName: true, handle: true, user: { select: { email: true } } },
       orderBy: { displayName: "asc" }
     })
 
