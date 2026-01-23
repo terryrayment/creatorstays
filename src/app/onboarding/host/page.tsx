@@ -552,8 +552,13 @@ export default function HostOnboardingPage() {
 
     try {
       console.log("[Checkout] Saving data...")
-      await saveData()
-      console.log("[Checkout] Data saved successfully")
+      try {
+        await saveData()
+        console.log("[Checkout] Data saved successfully")
+      } catch (saveError: any) {
+        console.error("[Checkout] Save error (continuing anyway):", saveError)
+        // Continue with checkout even if save partially failed
+      }
 
       if (selectedPlan === 'agency') {
         console.log("[Checkout] Processing agency plan...")
@@ -784,20 +789,29 @@ export default function HostOnboardingPage() {
 
                   {/* Nightly Price */}
                   <div>
-                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Nightly Price Range <span className="text-red-500">*</span></label>
-                    <select
-                      value={data.priceRange}
-                      onChange={e => updateField("priceRange", e.target.value)}
-                      className={inputClass}
-                    >
-                      <option value="">Select price range</option>
-                      <option value="$50-$100">$50 - $100 / night</option>
-                      <option value="$100-$150">$100 - $150 / night</option>
-                      <option value="$150-$250">$150 - $250 / night</option>
-                      <option value="$250-$400">$250 - $400 / night</option>
-                      <option value="$400-$600">$400 - $600 / night</option>
-                      <option value="$600+">$600+ / night</option>
-                    </select>
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">Nightly Price Range <span className="text-red-500">*</span></label>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {[
+                        { value: "$250-$400", label: "$250 - $400" },
+                        { value: "$400-$550", label: "$400 - $550" },
+                        { value: "$550-$750", label: "$550 - $750" },
+                        { value: "$750-$1000", label: "$750 - $1,000" },
+                        { value: "$1000-$1250", label: "$1,000 - $1,250" },
+                        { value: "$1250-$1500", label: "$1,250 - $1,500" },
+                      ].map(price => (
+                        <button
+                          key={price.value}
+                          type="button"
+                          onClick={() => updateField("priceRange", price.value)}
+                          className={`rounded-lg border-2 border-black px-3 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5 ${
+                            data.priceRange === price.value ? "bg-[#FFD84A]" : "bg-white hover:bg-black/5"
+                          }`}
+                        >
+                          {price.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-[11px] text-black/50">per night</p>
                   </div>
 
                   {/* Photo Upload */}
@@ -1070,8 +1084,12 @@ export default function HostOnboardingPage() {
               {/* Property Preview */}
               <div className="overflow-hidden rounded-xl border-2 border-black bg-white">
                 {data.photos[0] && (
-                  <div className="relative aspect-video">
-                    <img src={`/api/image-proxy?url=${encodeURIComponent(data.photos[0])}`} alt="" className="h-full w-full object-cover" />
+                  <div className="relative aspect-video bg-black/5">
+                    <img 
+                      src={data.photos[0].startsWith('data:') ? data.photos[0] : `/api/image-proxy?url=${encodeURIComponent(data.photos[0])}`} 
+                      alt="" 
+                      className="h-full w-full object-cover" 
+                    />
                   </div>
                 )}
                 <div className="p-4">
