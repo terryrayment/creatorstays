@@ -58,7 +58,7 @@ function PrepItem({
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-bold ${done ? 'text-black/70' : 'text-black'}`}>
+          <p className="text-sm font-bold text-black">
             {title}
             {priority && !done && (
               <span className="ml-2 rounded-full border border-black bg-white px-2 py-0.5 text-[9px] font-bold uppercase">
@@ -457,9 +457,6 @@ export function BetaHostDashboard() {
               </Link>
             </div>
           </Section>
-
-          {/* Feedback */}
-          <FeedbackSection />
 
           {/* Contact */}
           <div className="rounded-xl border-2 border-dashed border-black/20 bg-[#FAFAFA] p-4 text-center">
