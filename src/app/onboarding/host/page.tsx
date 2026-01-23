@@ -157,6 +157,20 @@ function StepIcon({ icon }: { icon: 'home' | 'target' | 'card' }) {
   )
 }
 
+// Helper to get the correct image src based on URL type
+function getImageSrc(photo: string): string {
+  // If it's a base64 data URL, use directly
+  if (photo.startsWith('data:')) {
+    return photo
+  }
+  // If it's from Airbnb (muscache.com), use the proxy
+  if (photo.includes('muscache.com')) {
+    return `/api/image-proxy?url=${encodeURIComponent(photo)}`
+  }
+  // Otherwise use directly (could be from cloud storage, etc.)
+  return photo
+}
+
 function PhotoGrid({ photos, onRemove }: { photos: string[]; onRemove: (i: number) => void }) {
   if (!photos.length) return null
   
@@ -165,9 +179,14 @@ function PhotoGrid({ photos, onRemove }: { photos: string[]; onRemove: (i: numbe
       {photos.slice(0, 8).map((photo, i) => (
         <div key={i} className="relative aspect-square overflow-hidden rounded-lg border-2 border-black">
           <img 
-            src={`/api/image-proxy?url=${encodeURIComponent(photo)}`} 
+            src={getImageSrc(photo)} 
             alt="" 
-            className="h-full w-full object-cover" 
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              // If image fails to load, show placeholder
+              e.currentTarget.style.display = 'none'
+              e.currentTarget.parentElement?.classList.add('bg-black/10')
+            }}
           />
           <button
             type="button"
@@ -915,7 +934,15 @@ export default function HostOnboardingPage() {
                               }
                             }}
                           >
-                            <img src={photo} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+                            <img 
+                              src={getImageSrc(photo)} 
+                              alt={`Photo ${i + 1}`} 
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none'
+                                e.currentTarget.parentElement?.classList.add('bg-black/10')
+                              }}
+                            />
                             
                             {/* Delete button */}
                             <button
@@ -1162,9 +1189,12 @@ export default function HostOnboardingPage() {
                 {data.photos[0] && (
                   <div className="relative aspect-video bg-black/5">
                     <img 
-                      src={data.photos[0].startsWith('data:') ? data.photos[0] : `/api/image-proxy?url=${encodeURIComponent(data.photos[0])}`} 
+                      src={getImageSrc(data.photos[0])} 
                       alt="" 
-                      className="h-full w-full object-cover" 
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                      }}
                     />
                   </div>
                 )}

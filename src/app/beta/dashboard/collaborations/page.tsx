@@ -311,7 +311,13 @@ function DemoDetailModal({ collab, onClose }: { collab: typeof DEMO_COLLABORATIO
               {collab.status === "content-submitted" ? (
                 <>
                   <div className="rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-4">
-                    <p className="text-sm font-bold text-black mb-2">📸 Content Ready for Review</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <svg className="h-5 w-5 text-[#4AA3FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                      </svg>
+                      <p className="text-sm font-bold text-black">Content Ready for Review</p>
+                    </div>
                     <p className="text-xs text-black/70">
                       The creator has submitted their content. In a real collaboration, you would see:
                     </p>
@@ -328,7 +334,9 @@ function DemoDetailModal({ collab, onClose }: { collab: typeof DEMO_COLLABORATIO
                     {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="aspect-square rounded-xl border-2 border-dashed border-black/20 bg-black/5 flex items-center justify-center">
                         <div className="text-center">
-                          <span className="text-2xl">📱</span>
+                          <svg className="h-8 w-8 text-black/30 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                          </svg>
                           <p className="text-[10px] text-black/40 mt-1">Demo Content {i}</p>
                         </div>
                       </div>
@@ -337,7 +345,7 @@ function DemoDetailModal({ collab, onClose }: { collab: typeof DEMO_COLLABORATIO
 
                   <div className="flex gap-2">
                     <button className="flex-1 rounded-full border-2 border-black bg-[#28D17C] py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5">
-                      ✓ Approve Content
+                      Approve Content
                     </button>
                     <button className="rounded-full border-2 border-black bg-white px-4 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5">
                       Request Changes
@@ -346,7 +354,9 @@ function DemoDetailModal({ collab, onClose }: { collab: typeof DEMO_COLLABORATIO
                 </>
               ) : collab.status === "active" ? (
                 <div className="rounded-xl border-2 border-[#FFD84A] bg-[#FFD84A]/10 p-4 text-center">
-                  <span className="text-3xl">⏳</span>
+                  <svg className="h-10 w-10 text-[#FFD84A] mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   <p className="mt-2 font-bold text-black">Waiting for Content</p>
                   <p className="text-sm text-black/60 mt-1">
                     The creator is working on their content. You'll be notified when they submit.
@@ -354,7 +364,9 @@ function DemoDetailModal({ collab, onClose }: { collab: typeof DEMO_COLLABORATIO
                 </div>
               ) : (
                 <div className="rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4 text-center">
-                  <span className="text-3xl">✅</span>
+                  <svg className="h-10 w-10 text-[#28D17C] mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   <p className="mt-2 font-bold text-black">Content Approved</p>
                   <p className="text-sm text-black/60 mt-1">
                     This collaboration is complete. View the live content links below.

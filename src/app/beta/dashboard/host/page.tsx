@@ -362,7 +362,7 @@ export default function HostDashboardPage() {
 
             {/* What's coming */}
             <div className="rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-4 mb-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#4AA3FF] mb-2">🚀 Coming soon</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#4AA3FF] mb-2">Coming soon</p>
               <ul className="space-y-1.5 text-sm text-black">
                 <li className="flex items-start gap-2">
                   <span className="text-[#4AA3FF] mt-0.5">•</span>
@@ -381,7 +381,7 @@ export default function HostDashboardPage() {
 
             {/* What we need */}
             <div className="rounded-xl border-2 border-black bg-[#FAFAFA] p-4 mb-6">
-              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">🤝 How you can help</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">How you can help</p>
               <p className="text-sm text-black/70">
                 Get your property ready now. When creators join, hosts with complete profiles get matched first. Your early feedback shapes what we build.
               </p>
