@@ -24,10 +24,16 @@ function isValidAirbnbUrl(url: string): boolean {
 interface ListingPrefill {
   title?: string
   city?: string
+  cityRegion?: string
   rating?: number
   reviewCount?: number
   price?: string
   photos?: string[]
+  beds?: number
+  bedrooms?: number
+  baths?: number
+  guests?: number
+  propertyType?: string
 }
 
 export function HostSignupForm() {
@@ -107,7 +113,7 @@ export function HostSignupForm() {
           fullName: form.fullName,
           phone: form.phone,
           companyName: form.companyName,
-          cityRegion: form.cityRegion || prefill?.cityRegion,
+          cityRegion: form.cityRegion || prefill?.cityRegion || prefill?.city,
           listingUrl: form.listingUrl,
           listingTitle: prefill?.title,
           listingPhotos: prefill?.photos,
