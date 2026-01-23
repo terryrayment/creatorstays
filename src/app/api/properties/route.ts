@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
       id,
       airbnbUrl,
       title,
-      propertyType,
+      propertyType, // Aliased to venueType in schema
+      venueType,    // Direct schema field
       cityRegion,
       priceNightlyRange,
       rating,
@@ -100,7 +101,10 @@ export async function POST(request: NextRequest) {
     const finalIsActive = isActive !== undefined ? isActive : true
     const finalIsDraft = isDraft !== undefined ? isDraft : true
     
-    console.log('[Properties API] Received:', { title, propertyType, isDraft, isActive, finalIsDraft, finalIsActive })
+    // Use venueType if provided, otherwise fall back to propertyType
+    const finalVenueType = venueType || propertyType || null
+    
+    console.log('[Properties API] Received:', { title, venueType: finalVenueType, isDraft, isActive, finalIsDraft, finalIsActive })
 
     // If no ID provided but host already has a property, find and update it
     let propertyIdToUse = id
@@ -141,7 +145,7 @@ export async function POST(request: NextRequest) {
       hostProfileId: hostProfile.id,
       airbnbUrl: airbnbUrl || null,
       title: title || null,
-      propertyType: propertyType || null,
+      venueType: finalVenueType,
       cityRegion: cityRegion || null,
       priceNightlyRange: priceNightlyRange || null,
       rating: rating ? parseFloat(String(rating)) : null,
@@ -162,7 +166,7 @@ export async function POST(request: NextRequest) {
     
     console.log('[Properties API] Property data to save:', { 
       title: propertyData.title, 
-      propertyType: propertyData.propertyType,
+      venueType: propertyData.venueType,
       isDraft: propertyData.isDraft, 
       isActive: propertyData.isActive,
       propertyIdToUse 
