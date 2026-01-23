@@ -78,20 +78,14 @@ export default function BetaAnalyticsPage() {
               className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
             >
               Collaborations
-              <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
             </Link>
             <Link 
               href="/beta/dashboard/host/analytics"
               className="rounded-full border-2 border-black bg-black px-3 py-1 text-[10px] font-bold text-white"
             >
               Analytics
-              <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
-            </Link>
-            <Link 
-              href="/beta/dashboard/host/settings"
-              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-            >
-              Settings
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
             </Link>
             <Link 
               href="/beta/dashboard/host/search-creators"
@@ -99,6 +93,12 @@ export default function BetaAnalyticsPage() {
             >
               Find Creators
               <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+            </Link>
+            <Link 
+              href="/beta/dashboard/host/settings"
+              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+            >
+              Settings
             </Link>
           </div>
         </div>

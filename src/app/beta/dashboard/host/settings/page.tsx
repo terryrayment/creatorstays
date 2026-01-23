@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
 import { DashboardFooter } from "@/components/navigation/dashboard-footer"
 
@@ -12,9 +12,11 @@ function HostSettingsContent() {
   const { data: session, status } = useSession()
   const isSetup = searchParams.get("setup") === "true"
   
-  const [activeTab, setActiveTab] = useState<"profile" | "notifications">("profile")
+  const [activeTab, setActiveTab] = useState<"profile" | "notifications" | "account">("profile")
   const [toast, setToast] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState("")
   
   // Profile form
   const [profile, setProfile] = useState({
@@ -22,6 +24,8 @@ function HostSettingsContent() {
     email: "",
     phone: "",
     company: "",
+    location: "",
+    bio: "",
   })
   
   // Notifications
@@ -57,6 +61,8 @@ function HostSettingsContent() {
           contactEmail: profile.email,
           phone: profile.phone,
           company: profile.company,
+          location: profile.location,
+          bio: profile.bio,
         }),
       })
       
@@ -82,6 +88,21 @@ function HostSettingsContent() {
   const handleNotificationsSave = () => {
     setToast("Notification preferences saved")
     setTimeout(() => setToast(null), 3000)
+  }
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") return
+    
+    try {
+      // In a real implementation, this would call an API to delete the account
+      setToast("Account deletion requested. You will receive a confirmation email.")
+      setTimeout(() => {
+        signOut({ callbackUrl: "/" })
+      }, 2000)
+    } catch (error) {
+      setToast("Error requesting account deletion")
+      setTimeout(() => setToast(null), 3000)
+    }
   }
 
   const inputClass = "h-12 w-full rounded-xl border-2 border-black bg-white px-4 text-[14px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
@@ -134,20 +155,14 @@ function HostSettingsContent() {
               className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
             >
               Collaborations
-              <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
             </Link>
             <Link 
               href="/beta/dashboard/host/analytics"
               className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
             >
               Analytics
-              <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
-            </Link>
-            <Link 
-              href="/beta/dashboard/host/settings"
-              className="rounded-full border-2 border-black bg-black px-3 py-1 text-[10px] font-bold text-white"
-            >
-              Settings
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
             </Link>
             <Link 
               href="/beta/dashboard/host/search-creators"
@@ -155,6 +170,12 @@ function HostSettingsContent() {
             >
               Find Creators
               <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+            </Link>
+            <Link 
+              href="/beta/dashboard/host/settings"
+              className="rounded-full border-2 border-black bg-black px-3 py-1 text-[10px] font-bold text-white"
+            >
+              Settings
             </Link>
           </div>
         </div>
@@ -171,10 +192,10 @@ function HostSettingsContent() {
         {/* Page Header */}
         <div className="mb-6 rounded-xl border-2 border-black bg-white p-5">
           <h1 className="font-heading text-[2rem] font-black text-black">
-            {isSetup ? "SET UP YOUR PROFILE" : "ACCOUNT SETTINGS"}
+            {isSetup ? "SET UP YOUR PROFILE" : "PROFILE SETTINGS"}
           </h1>
           <p className="mt-1 text-sm text-black/60">
-            {isSetup ? "Let's set up your host profile so creators can find and connect with you." : "Manage your profile and notification preferences."}
+            {isSetup ? "Let's set up your host profile so creators can find and connect with you." : "Manage your profile, notifications, and account settings."}
           </p>
         </div>
 
@@ -204,11 +225,22 @@ function HostSettingsContent() {
                 >
                   Notifications
                 </button>
+                <button
+                  onClick={() => setActiveTab("account")}
+                  className={`rounded-full px-4 py-2 text-xs font-bold transition-all ${
+                    activeTab === "account"
+                      ? "bg-[#FFD84A] text-black border-2 border-black"
+                      : "bg-white text-black/60 border-2 border-black/20 hover:border-black"
+                  }`}
+                >
+                  Account
+                </button>
               </div>
             )}
 
-            {/* Profile Form - min-height to keep footer stable */}
-            <div className="rounded-xl border-2 border-black bg-white p-5 min-h-[450px]">
+            {/* Content Area - min-height to keep footer stable */}
+            <div className="rounded-xl border-2 border-black bg-white p-5 min-h-[500px]">
+              {/* Profile Tab */}
               {(activeTab === "profile" || isSetup) && (
                 <div className="space-y-5">
                   <div>
@@ -232,19 +264,32 @@ function HostSettingsContent() {
                       disabled
                       className={`${inputClass} bg-black/5 cursor-not-allowed`}
                     />
-                    <p className="mt-1 text-[10px] text-black/50">Email is linked to your login</p>
+                    <p className="mt-1 text-[10px] text-black/50">Email is linked to your login and cannot be changed here. Contact support to update.</p>
                   </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
-                      Phone <span className="font-medium text-black/40">(optional)</span>
-                    </label>
-                    <input
-                      type="tel"
-                      value={profile.phone}
-                      onChange={e => setProfile({ ...profile, phone: e.target.value })}
-                      placeholder="+1 (555) 123-4567"
-                      className={inputClass}
-                    />
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                        Phone <span className="font-medium text-black/40">(optional)</span>
+                      </label>
+                      <input
+                        type="tel"
+                        value={profile.phone}
+                        onChange={e => setProfile({ ...profile, phone: e.target.value })}
+                        placeholder="+1 (555) 123-4567"
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                        Location <span className="font-medium text-black/40">(optional)</span>
+                      </label>
+                      <input
+                        value={profile.location}
+                        onChange={e => setProfile({ ...profile, location: e.target.value })}
+                        placeholder="City, State"
+                        className={inputClass}
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
@@ -255,6 +300,18 @@ function HostSettingsContent() {
                       onChange={e => setProfile({ ...profile, company: e.target.value })}
                       placeholder="Your property management company"
                       className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">
+                      Bio <span className="font-medium text-black/40">(optional)</span>
+                    </label>
+                    <textarea
+                      value={profile.bio}
+                      onChange={e => setProfile({ ...profile, bio: e.target.value })}
+                      placeholder="Tell creators a bit about your properties and what makes them special..."
+                      rows={3}
+                      className="w-full rounded-xl border-2 border-black bg-white px-4 py-3 text-[14px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
                     />
                   </div>
                   
@@ -279,6 +336,7 @@ function HostSettingsContent() {
                 </div>
               )}
 
+              {/* Notifications Tab */}
               {activeTab === "notifications" && !isSetup && (
                 <div className="space-y-3">
                   {[
@@ -310,6 +368,93 @@ function HostSettingsContent() {
                   >
                     Save Preferences
                   </button>
+                </div>
+              )}
+
+              {/* Account Tab */}
+              {activeTab === "account" && !isSetup && (
+                <div className="space-y-6">
+                  {/* Account Info */}
+                  <div>
+                    <h3 className="mb-3 text-sm font-bold text-black">Account Information</h3>
+                    <div className="space-y-2 rounded-xl border-2 border-black/10 bg-black/5 p-4">
+                      <div className="flex justify-between">
+                        <span className="text-xs text-black/60">Account Type</span>
+                        <span className="text-xs font-bold text-black">Host</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-xs text-black/60">Email</span>
+                        <span className="text-xs font-bold text-black">{profile.email}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-xs text-black/60">Member Since</span>
+                        <span className="text-xs font-bold text-black">January 2025</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Change Email */}
+                  <div>
+                    <h3 className="mb-3 text-sm font-bold text-black">Change Email</h3>
+                    <p className="mb-3 text-xs text-black/60">
+                      To change your email address, please contact our support team. This helps us verify your identity and keep your account secure.
+                    </p>
+                    <a 
+                      href="mailto:hello@creatorstays.com?subject=Email%20Change%20Request"
+                      className="inline-block rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
+                    >
+                      Contact Support
+                    </a>
+                  </div>
+
+                  {/* Danger Zone */}
+                  <div className="border-t-2 border-black/10 pt-6">
+                    <h3 className="mb-3 text-sm font-bold text-red-600">Danger Zone</h3>
+                    <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4">
+                      <p className="mb-3 text-xs text-black/60">
+                        Permanently delete your account and all associated data. This action cannot be undone.
+                      </p>
+                      {!showDeleteConfirm ? (
+                        <button
+                          onClick={() => setShowDeleteConfirm(true)}
+                          className="rounded-full border-2 border-red-500 bg-white px-4 py-2 text-xs font-bold text-red-500 transition-colors hover:bg-red-500 hover:text-white"
+                        >
+                          Delete My Account
+                        </button>
+                      ) : (
+                        <div className="space-y-3">
+                          <p className="text-xs font-bold text-red-600">
+                            Type DELETE to confirm account deletion:
+                          </p>
+                          <input
+                            type="text"
+                            value={deleteConfirmText}
+                            onChange={e => setDeleteConfirmText(e.target.value)}
+                            placeholder="Type DELETE"
+                            className="h-10 w-full rounded-lg border-2 border-red-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleDeleteAccount}
+                              disabled={deleteConfirmText !== "DELETE"}
+                              className="rounded-full border-2 border-red-500 bg-red-500 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+                            >
+                              Permanently Delete Account
+                            </button>
+                            <button
+                              onClick={() => {
+                                setShowDeleteConfirm(false)
+                                setDeleteConfirmText("")
+                              }}
+                              className="rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-bold text-black"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

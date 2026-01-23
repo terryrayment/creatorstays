@@ -58,14 +58,21 @@ function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
             className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
           >
             Collaborations
-            <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
+            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
           </Link>
           <Link 
             href="/beta/dashboard/host/analytics"
             className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
           >
             Analytics
-            <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
+            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+          </Link>
+          <Link 
+            href="/beta/dashboard/host/search-creators"
+            className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
+          >
+            Find Creators
+            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
           </Link>
           <Link 
             href="/beta/dashboard/host/settings"
@@ -73,11 +80,6 @@ function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
           >
             Settings
           </Link>
-          <Link 
-            href="/beta/dashboard/host/search-creators"
-            className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
-          >
-            Find Creators
             <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
           </Link>
           {isAgency && (

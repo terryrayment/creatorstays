@@ -560,20 +560,14 @@ export default function BetaCollaborationsPage() {
               className="rounded-full border-2 border-black bg-black px-3 py-1 text-[10px] font-bold text-white"
             >
               Collaborations
-              <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
             </Link>
             <Link 
               href="/beta/dashboard/host/analytics"
               className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
             >
               Analytics
-              <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
-            </Link>
-            <Link 
-              href="/beta/dashboard/host/settings"
-              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-            >
-              Settings
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
             </Link>
             <Link 
               href="/beta/dashboard/host/search-creators"
@@ -581,6 +575,12 @@ export default function BetaCollaborationsPage() {
             >
               Find Creators
               <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+            </Link>
+            <Link 
+              href="/beta/dashboard/host/settings"
+              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+            >
+              Settings
             </Link>
           </div>
         </div>

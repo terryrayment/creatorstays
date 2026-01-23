@@ -172,19 +172,41 @@ export function HostDashboardStats() {
         />
       </div>
 
-      {/* Quick Stats Bar - no hover animation */}
-      <div className="flex items-center justify-between rounded-xl border-2 border-black bg-white px-4 py-3 text-xs">
-        <span className="text-black/60">
-          <span className="font-bold text-black">{stats.propertiesCount}</span> properties
-        </span>
-        <span className="text-black/30">|</span>
-        <span className="text-black/60">
-          <span className="font-bold text-[#28D17C]">{stats.offersAccepted}</span> offers accepted
-        </span>
-        <span className="text-black/30">|</span>
-        <span className="text-black/60">
-          <span className="font-bold text-red-500">{stats.offersDeclined}</span> declined
-        </span>
+      {/* Quick Stats Bar - redesigned */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="flex items-center gap-3 rounded-xl border-2 border-black bg-white px-4 py-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A]">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-lg font-black text-black">{stats.propertiesCount}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Properties</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-xl border-2 border-black bg-[#28D17C] px-4 py-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-white">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-lg font-black text-black">{stats.offersAccepted}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Accepted</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-xl border-2 border-black bg-white px-4 py-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-red-100">
+            <svg className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-lg font-black text-black">{stats.offersDeclined}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Declined</p>
+          </div>
+        </div>
       </div>
     </div>
   )

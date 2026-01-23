@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     // All collaborations with payment info
     const collaborations = await prisma.collaboration.findMany({
       where: {
-        status: { in: ["active", "content-submitted", "completed", "paid"] }
+        status: { in: ["active", "content-uploaded", "approved", "content-live", "completed"] }
       },
       select: {
         id: true,
@@ -98,9 +98,9 @@ export async function GET(request: NextRequest) {
     const totalPlatformFees = Math.round(totalDealVolume * 0.15)
 
     // Completed deals
-    const completedDeals = collaborations.filter(c => c.status === "completed" || c.status === "paid").length
+    const completedDeals = collaborations.filter(c => c.status === "completed").length
     const activeDeals = collaborations.filter(c => c.status === "active").length
-    const pendingDeals = collaborations.filter(c => c.status === "content-submitted").length
+    const pendingDeals = collaborations.filter(c => c.status === "content-uploaded" || c.status === "approved" || c.status === "content-live").length
 
     // === FORECASTING ===
 
