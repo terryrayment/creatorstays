@@ -309,33 +309,9 @@ export default function HostOnboardingPage() {
                   photos: prop.photos || [],
                   heroImageUrl: prop.heroImageUrl || "",
                 }))
-                // If property has data, mark as imported
+                // If property has data, mark as ready to proceed
                 if (prop.airbnbUrl || prop.title) {
                   setImportSuccess(true)
-                }
-                
-                // If we have Airbnb URL but missing key data, auto-import
-                const missingData = !prop.beds || !prop.baths || !prop.guests || !prop.title
-                if (prop.airbnbUrl && missingData) {
-                  console.log("[Onboarding] Auto-importing missing data from Airbnb...")
-                  try {
-                    const importRes = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(prop.airbnbUrl)}`)
-                    const importData = await importRes.json()
-                    if (importData.ok) {
-                      setData(prev => ({
-                        ...prev,
-                        propertyTitle: prev.propertyTitle || importData.title || "",
-                        cityRegion: prev.cityRegion || importData.cityRegion || "",
-                        bedrooms: prev.bedrooms || (importData.beds || importData.bedrooms)?.toString() || "",
-                        bathrooms: prev.bathrooms || importData.baths?.toString() || "",
-                        maxGuests: prev.maxGuests || importData.guests?.toString() || "",
-                        photos: prev.photos?.length ? prev.photos : (importData.photos || []),
-                      }))
-                      setImportSuccess(true)
-                    }
-                  } catch (importErr) {
-                    console.error("[Onboarding] Auto-import failed:", importErr)
-                  }
                 }
               }
             }
@@ -367,51 +343,28 @@ export default function HostOnboardingPage() {
     init()
   }, [status, session, router])
 
-  // Airbnb import
+  // Handle "Import" button - just validates URL and shows manual form
   const handleAirbnbImport = async () => {
     if (!data.airbnbUrl) {
       setError("Please enter your Airbnb listing URL")
       return
     }
-
-    setImportingAirbnb(true)
-    setError("")
-
-    try {
-      const res = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(data.airbnbUrl)}`)
-      const result = await res.json()
-      
-      if (!result.ok) {
-        setError(result.error || "Couldn't import listing. Try entering details manually.")
-        setManualEntry(true)
-        setImportingAirbnb(false)
-        return
-      }
-      
-      const cleanPhotos = filterAirbnbBranding(result.photos || [])
-      
-      setData(prev => ({
-        ...prev,
-        propertyTitle: result.title || prev.propertyTitle,
-        propertyType: result.propertyType || prev.propertyType,
-        cityRegion: result.cityRegion || prev.cityRegion,
-        bedrooms: result.bedrooms?.toString() || prev.bedrooms,
-        bathrooms: result.baths?.toString() || prev.bathrooms,
-        maxGuests: result.guests?.toString() || prev.maxGuests,
-        priceRange: result.priceRange || prev.priceRange,
-        amenities: result.amenities || prev.amenities,
-        photos: cleanPhotos,
-        heroImageUrl: cleanPhotos[0] || "",
-      }))
-      
-      setImportSuccess(true)
-    } catch (e) {
-      console.error("Airbnb import error:", e)
-      setError("Import failed. Please try again or enter manually.")
-      setManualEntry(true)
-    }
     
-    setImportingAirbnb(false)
+    // Validate it looks like an Airbnb URL
+    if (!data.airbnbUrl.includes('airbnb.com') && !data.airbnbUrl.includes('airbnb.')) {
+      setError("Please enter a valid Airbnb listing URL")
+      return
+    }
+
+    // Just mark as ready for manual entry - we don't scrape Airbnb
+    setImportSuccess(true)
+    setError("")
+  }
+
+  // Handle manual entry click
+  const handleManualEntry = () => {
+    setManualEntry(true)
+    setImportSuccess(true) // Allow them to proceed
   }
 
   // Validation
@@ -656,7 +609,7 @@ export default function HostOnboardingPage() {
               {!importSuccess && !manualEntry && (
                 <div className="rounded-xl border-2 border-black bg-white p-6">
                   <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">
-                    Airbnb Listing URL
+                    Airbnb Listing URL (optional)
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -668,14 +621,16 @@ export default function HostOnboardingPage() {
                     />
                     <button
                       onClick={handleAirbnbImport}
-                      disabled={importingAirbnb}
-                      className="whitespace-nowrap rounded-lg border-2 border-black bg-black px-4 py-2 text-sm font-bold text-white hover:bg-black/80 disabled:opacity-50"
+                      className="whitespace-nowrap rounded-lg border-2 border-black bg-black px-4 py-2 text-sm font-bold text-white hover:bg-black/80"
                     >
-                      {importingAirbnb ? "Importing..." : "Import"}
+                      Continue
                     </button>
                   </div>
+                  <p className="mt-2 text-[11px] text-black/50">
+                    We'll link to your Airbnb listing. You'll enter property details on the next screen.
+                  </p>
                   <button
-                    onClick={() => setManualEntry(true)}
+                    onClick={handleManualEntry}
                     className="mt-3 text-xs font-medium text-black/50 underline hover:text-black"
                   >
                     Or enter details manually
@@ -685,9 +640,14 @@ export default function HostOnboardingPage() {
 
               {(importSuccess || manualEntry) && (
                 <>
-                  {importSuccess && (
+                  {data.airbnbUrl && (
                     <div className="rounded-lg border-2 border-[#28D17C] bg-[#28D17C]/10 p-3 text-sm font-medium text-black">
-                      Property imported! Review and edit below.
+                      ✓ Airbnb link saved! Now enter your property details below.
+                    </div>
+                  )}
+                  {!data.airbnbUrl && manualEntry && (
+                    <div className="rounded-lg border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-3 text-sm font-medium text-black">
+                      Enter your property details below.
                     </div>
                   )}
 

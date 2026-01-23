@@ -65,34 +65,19 @@ export function HostSignupForm() {
       const normalized = normalizeUrl(form.listingUrl)
       setForm({ ...form, listingUrl: normalized })
       
-      if (isValidAirbnbUrl(normalized) && normalized.includes("airbnb.com") && !manuallyEdited && !prefillAttempted) {
-        fetchPrefill(normalized)
-      }
+      // Just validate the URL format, don't scrape
+      validateListingUrl(normalized)
     }
   }
 
-  const fetchPrefill = async (url: string) => {
-    setPrefillStatus("loading")
-    setPrefillAttempted(true)
-    
-    try {
-      const res = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(url)}`)
-      const data = await res.json()
-      
-      if (data.ok) {
-        setPrefill(data)
-        setPrefillStatus("success")
-        
-        if (data.city && !form.cityRegion) {
-          setForm(prev => ({ ...prev, cityRegion: data.city }))
-        }
-      } else {
-        setPrefillStatus("error")
-        setPrefill(null)
-      }
-    } catch {
+  // Just validate the URL format, don't scrape
+  const validateListingUrl = (url: string) => {
+    if (url && (url.includes('airbnb.com') || url.includes('airbnb.'))) {
+      setPrefillStatus("success")
+    } else if (url) {
       setPrefillStatus("error")
-      setPrefill(null)
+    } else {
+      setPrefillStatus("idle")
     }
   }
 
@@ -113,15 +98,9 @@ export function HostSignupForm() {
           fullName: form.fullName,
           phone: form.phone,
           companyName: form.companyName,
-          cityRegion: form.cityRegion || prefill?.cityRegion || prefill?.city,
+          cityRegion: form.cityRegion,
           listingUrl: form.listingUrl,
-          listingTitle: prefill?.title,
-          listingPhotos: prefill?.photos,
-          // Include property details from Airbnb prefill
-          listingBeds: prefill?.beds || prefill?.bedrooms,
-          listingBaths: prefill?.baths,
-          listingGuests: prefill?.guests,
-          listingPropertyType: prefill?.propertyType,
+          // Property details will be entered manually in onboarding
         }),
       })
 
