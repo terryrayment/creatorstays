@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, useCallback } from "react"
 import Image from "next/image"
 
 // Process steps with expanded host-focused copy
@@ -52,59 +52,41 @@ const steps = [
   },
 ]
 
-// Triple the array for seamless infinite scroll
-const infiniteSteps = [...steps, ...steps, ...steps]
-
 export function FeatureScroller() {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [isPaused, setIsPaused] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
-  const animationRef = useRef<number>()
-  const scrollPositionRef = useRef(0)
+  const [isPaused, setIsPaused] = useState(false)
   
   const CARD_WIDTH = 368 // card width + gap
-  const TOTAL_WIDTH = CARD_WIDTH * steps.length
-  const SCROLL_SPEED = 0.5 // pixels per frame
 
-  useEffect(() => {
+  const scrollToIndex = useCallback((index: number) => {
     const container = scrollRef.current
     if (!container) return
+    
+    const wrappedIndex = ((index % steps.length) + steps.length) % steps.length
+    const scrollTarget = wrappedIndex * CARD_WIDTH
+    
+    container.scrollTo({
+      left: scrollTarget,
+      behavior: "smooth"
+    })
+    setActiveIndex(wrappedIndex)
+  }, [])
 
-    // Start in the middle set
-    scrollPositionRef.current = TOTAL_WIDTH
-    container.scrollLeft = TOTAL_WIDTH
+  // Auto-advance every 3 seconds
+  useEffect(() => {
+    if (isPaused) return
 
-    const animate = () => {
-      if (!isPaused && container) {
-        scrollPositionRef.current += SCROLL_SPEED
-        
-        // Reset to middle when we've scrolled through one full set
-        if (scrollPositionRef.current >= TOTAL_WIDTH * 2) {
-          scrollPositionRef.current = TOTAL_WIDTH
-        }
-        
-        container.scrollLeft = scrollPositionRef.current
-        
-        // Calculate which card is most centered for the scale effect
-        const centerPosition = scrollPositionRef.current + container.clientWidth / 2
-        const newActiveIndex = Math.floor(centerPosition / CARD_WIDTH) % steps.length
-        setActiveIndex(newActiveIndex)
-      }
-      animationRef.current = requestAnimationFrame(animate)
-    }
+    const interval = setInterval(() => {
+      const nextIndex = (activeIndex + 1) % steps.length
+      scrollToIndex(nextIndex)
+    }, 3000)
 
-    animationRef.current = requestAnimationFrame(animate)
+    return () => clearInterval(interval)
+  }, [activeIndex, isPaused, scrollToIndex])
 
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
-    }
-  }, [isPaused])
-
-  const scrollBy = (direction: number) => {
-    scrollPositionRef.current += direction * CARD_WIDTH
-  }
+  const goLeft = () => scrollToIndex(activeIndex - 1)
+  const goRight = () => scrollToIndex(activeIndex + 1)
 
   return (
     <section 
@@ -117,7 +99,7 @@ export function FeatureScroller() {
       {/* Arrow buttons */}
       <div className="mx-auto mb-2 flex max-w-7xl items-center justify-end gap-1.5 px-2">
         <button
-          onClick={() => scrollBy(-1)}
+          onClick={goLeft}
           className="flex h-9 w-9 items-center justify-center rounded-full border-[3px] border-white bg-transparent text-white transition-all hover:bg-white hover:text-black"
           aria-label="Previous card"
         >
@@ -126,7 +108,7 @@ export function FeatureScroller() {
           </svg>
         </button>
         <button
-          onClick={() => scrollBy(1)}
+          onClick={goRight}
           className="flex h-9 w-9 items-center justify-center rounded-full border-[3px] border-white bg-white text-black transition-all hover:bg-transparent hover:text-white"
           aria-label="Next card"
         >
@@ -139,22 +121,23 @@ export function FeatureScroller() {
       {/* Scroll container */}
       <div
         ref={scrollRef}
-        className="scrollbar-hide flex gap-2 overflow-x-hidden px-2"
+        className="scrollbar-hide flex gap-2 overflow-x-auto px-2"
         style={{ 
           height: "min(440px, 78vh)",
+          scrollBehavior: "smooth",
         }}
       >
-        {infiniteSteps.map((step, index) => {
-          const isActive = index % steps.length === activeIndex
+        {steps.map((step, index) => {
+          const isActive = index === activeIndex
           return (
             <div
-              key={`${step.id}-${index}`}
-              className="feature-card relative flex-shrink-0 rounded-2xl border-[3px] border-black overflow-hidden transition-transform duration-500 ease-out"
+              key={step.id}
+              className="feature-card relative flex-shrink-0 rounded-2xl border-[3px] border-black overflow-hidden transition-all duration-300 ease-out"
               style={{
                 width: "360px",
                 height: "min(420px, 75vh)",
-                transform: isActive ? "scale(1.02)" : "scale(0.98)",
-                opacity: isActive ? 1 : 0.85,
+                transform: isActive ? "scale(1.03)" : "scale(0.95)",
+                opacity: isActive ? 1 : 0.7,
                 zIndex: isActive ? 10 : 1,
               }}
             >
