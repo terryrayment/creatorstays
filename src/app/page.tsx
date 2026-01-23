@@ -72,7 +72,7 @@ function HeroSection() {
           >
             {/* Label */}
             <p className="text-[10px] font-black uppercase tracking-wider text-black">
-              The first creator marketplace for STRs
+              The first creator marketplace for Short Term Rentals
             </p>
             
             {/* Headline - heaviest weight, pure black */}
@@ -123,15 +123,12 @@ function HeroSection() {
 
             {/* Guide links */}
             <div className="mt-3 space-y-0 border-t-2 border-black">
-              {/* How it Works - underline sweep */}
+              {/* How it Works */}
               <Link
                 href="/how-it-works"
                 className="group relative flex items-center justify-between border-b-2 border-black py-2 text-[10px] font-bold uppercase tracking-wider text-black transition-transform duration-200 motion-safe:hover:-translate-y-0.5"
               >
-                <span className="relative">
-                  How it works
-                  <span className="absolute -bottom-0.5 left-0 h-[2px] w-0 bg-black transition-all duration-300 motion-safe:group-hover:w-full" />
-                </span>
+                <span>How it works</span>
                 <span className="text-black transition-transform duration-200 motion-safe:group-hover:translate-x-1.5">→</span>
               </Link>
               
@@ -171,38 +168,39 @@ function HowItWorksSection() {
   return (
     <section className="bg-black px-3 py-2 lg:px-4">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-2 lg:grid-cols-[1fr_auto] lg:items-end">
-          {/* How It Works block */}
-          <div className="block-hover rounded-2xl border-[3px] border-black bg-white p-4">
-            <p className="text-[9px] font-black uppercase tracking-wider text-black">
-              Four steps. That's it.
-            </p>
-            <h2 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[2rem]" style={{ fontWeight: 900 }}>
-              <span className="block text-black">HOW IT</span>
-              <span className="block text-black" style={{ fontWeight: 400 }}>WORKS</span>
-            </h2>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { num: "01", title: "Add property", desc: "Paste Airbnb link" },
-                { num: "02", title: "Hire creators", desc: "Pay per post" },
-                { num: "03", title: "Track traffic", desc: "Real-time analytics" },
-                { num: "04", title: "Pay easily", desc: "We handle payouts" },
-              ].map((step) => (
-                <div key={step.num} className="border-l-[3px] border-black pl-2">
-                  <span className="font-heading text-[1rem] text-black" style={{ fontWeight: 900 }}>{step.num}</span>
-                  <h4 className="text-[12px] font-bold text-black">{step.title}</h4>
-                  <p className="text-[10px] text-black">{step.desc}</p>
+        <div className="block-hover rounded-2xl border-[3px] border-black bg-white p-4">
+          <p className="text-[9px] font-black uppercase tracking-wider text-black">
+            Five steps. That's it.
+          </p>
+          <h2 className="mt-1 font-heading text-[1.5rem] leading-[0.85] tracking-[-0.02em] sm:text-[2rem]" style={{ fontWeight: 900 }}>
+            <span className="block text-black">HOW IT</span>
+            <span className="block text-black" style={{ fontWeight: 400 }}>WORKS</span>
+          </h2>
+          <div className="mt-3 grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+            {[
+              { num: "01", title: "Add property", desc: "Paste Airbnb link", img: "/images/hp-step-1.jpg" },
+              { num: "02", title: "Find creators", desc: "Browse & connect", img: "/images/hp-step-2.jpg" },
+              { num: "03", title: "Collaborate", desc: "They post, you track", img: "/images/hp-step-3.jpg" },
+              { num: "04", title: "Track results", desc: "Real-time analytics", img: "/images/hp-step-4.jpg" },
+              { num: "05", title: "Get paid", desc: "We handle payouts", img: "/images/hp-step-5.jpg" },
+            ].map((step) => (
+              <div key={step.num} className="relative overflow-hidden rounded-xl border-[3px] border-black">
+                <div className="aspect-square">
+                  <Image 
+                    src={step.img} 
+                    alt={step.title}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-              ))}
-            </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm p-2 border-t-2 border-black">
+                  <span className="font-heading text-[0.75rem] text-black" style={{ fontWeight: 900 }}>{step.num}</span>
+                  <h4 className="text-[11px] font-bold text-black">{step.title}</h4>
+                  <p className="text-[9px] text-black/70">{step.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
-
-          {/* Visual block */}
-          <ImageBlock 
-            src={pageImages[0]} 
-            className="hidden lg:block w-[140px]" 
-            aspectRatio="aspect-square"
-          />
         </div>
       </div>
     </section>
