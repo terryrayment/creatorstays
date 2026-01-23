@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select } from "@/components/ui/select"
 import { SendOfferModal } from "@/components/hosts/send-offer-modal"
+import { DashboardFooter } from "@/components/navigation/dashboard-footer"
 
 // Toast notification
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
@@ -349,13 +350,13 @@ export default function SearchCreatorsPage() {
   }
 
   return (
-    <div className="dashboard min-h-screen bg-[#FAFAFA]">
+    <div className="dashboard min-h-screen bg-[#FAFAFA] flex flex-col">
       {/* Header */}
       <div className="border-b-2 border-black bg-white">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
-            <span className="text-sm font-bold text-black">Host Dashboard</span>
+            <span className="rounded bg-[#FFD84A] px-2 py-0.5 text-sm font-bold text-black">Host Dashboard</span>
           </div>
           <Link 
             href="/" 
@@ -407,7 +408,7 @@ export default function SearchCreatorsPage() {
         </div>
       </div>
 
-      <div className="py-6">
+      <div className="flex-1 py-6">
         <Container>
           <div className="mb-4">
             <Link href="/beta/dashboard/host" className="text-xs font-bold text-black/60 hover:text-black">
@@ -730,6 +731,9 @@ export default function SearchCreatorsPage() {
           </div>
         </div>
       )}
+      
+      {/* Footer */}
+      <DashboardFooter />
     </div>
   )
 }

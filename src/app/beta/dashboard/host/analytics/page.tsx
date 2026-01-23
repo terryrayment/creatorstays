@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
+import { DashboardFooter } from "@/components/navigation/dashboard-footer"
 
 // Demo analytics data
 const DEMO_STATS = {
@@ -45,13 +46,13 @@ export default function BetaAnalyticsPage() {
   const [timeRange, setTimeRange] = useState<"30d" | "90d" | "all">("all")
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FAFAFA] flex flex-col">
       {/* Header */}
       <div className="border-b-2 border-black bg-white">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
-            <span className="text-sm font-bold text-black">Host Dashboard</span>
+            <span className="rounded bg-[#FFD84A] px-2 py-0.5 text-sm font-bold text-black">Host Dashboard</span>
           </div>
           <Link 
             href="/" 
@@ -103,7 +104,7 @@ export default function BetaAnalyticsPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <div className="flex-1 mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <div className="mb-4"><Link href="/beta/dashboard/host" className="text-xs font-bold text-black/60 hover:text-black">← Dashboard</Link></div>
         
         {/* Header */}
@@ -267,19 +268,7 @@ export default function BetaAnalyticsPage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t-2 border-black bg-white mt-12">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A] font-black text-sm">
-                CS
-              </div>
-              <span className="font-bold text-black">CreatorStays</span>
-            </div>
-            <p className="text-xs text-black/60">© 2026 CreatorStays. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <DashboardFooter />
     </div>
   )
 }
