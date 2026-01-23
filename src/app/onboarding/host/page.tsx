@@ -583,9 +583,12 @@ export default function HostOnboardingPage() {
 
       if (!propertyRes.ok) {
         const err = await propertyRes.json()
-        throw new Error(err.error || "Failed to save property")
+        console.error("[SaveData] Property save failed:", err)
+        throw new Error(err.error || `Failed to save property (${propertyRes.status})`)
       }
-      console.log("[SaveData] Property saved successfully")
+      
+      const savedProperty = await propertyRes.json()
+      console.log("[SaveData] Property saved successfully:", savedProperty.property?.id, "isDraft:", savedProperty.property?.isDraft)
 
       return true
     } catch (e) {

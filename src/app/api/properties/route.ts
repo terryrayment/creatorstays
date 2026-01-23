@@ -144,11 +144,11 @@ export async function POST(request: NextRequest) {
       propertyType: propertyType || null,
       cityRegion: cityRegion || null,
       priceNightlyRange: priceNightlyRange || null,
-      rating: rating ? parseFloat(rating) : null,
-      reviewCount: reviewCount ? parseInt(reviewCount) : null,
-      guests: maxGuests ? parseInt(maxGuests) : (guests ? parseInt(guests) : null),
-      beds: beds ? parseInt(beds) : null,
-      baths: baths ? Math.round(parseFloat(baths)) : null, // Round to int for schema
+      rating: rating ? parseFloat(String(rating)) : null,
+      reviewCount: reviewCount ? parseInt(String(reviewCount)) : null,
+      guests: maxGuests ? parseInt(String(maxGuests)) : (guests ? parseInt(String(guests)) : null),
+      beds: beds ? parseInt(String(beds)) : null,
+      baths: baths ? Math.round(parseFloat(String(baths))) : null, // Round to int for schema
       amenities,
       vibeTags,
       houseRules: houseRules || null,
@@ -197,9 +197,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ property })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Properties API] POST error:', error)
-    return NextResponse.json({ error: 'Failed to save property' }, { status: 500 })
+    const errorMessage = error?.message || 'Failed to save property'
+    return NextResponse.json({ error: errorMessage, details: error?.code || 'UNKNOWN' }, { status: 500 })
   }
 }
 
