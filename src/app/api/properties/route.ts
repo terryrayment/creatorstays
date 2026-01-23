@@ -94,8 +94,22 @@ export async function POST(request: NextRequest) {
       lastImportedAt,
     } = body
 
-    // Check property limit for non-agency hosts (only when creating new property)
-    if (!id && !hostProfile.isAgency) {
+    // If no ID provided but host already has a property, find and update it
+    let propertyIdToUse = id
+    if (!propertyIdToUse && !hostProfile.isAgency) {
+      const existingProperty = await prisma.property.findFirst({
+        where: { hostProfileId: hostProfile.id },
+      })
+      
+      if (existingProperty) {
+        // Use existing property ID for update
+        propertyIdToUse = existingProperty.id
+        console.log(`[Properties API] Auto-updating existing property ${propertyIdToUse}`)
+      }
+    }
+
+    // Check property limit for non-agency hosts (only when creating truly new property)
+    if (!propertyIdToUse && !hostProfile.isAgency) {
       const existingPropertyCount = await prisma.property.count({
         where: { hostProfileId: hostProfile.id },
       })
@@ -138,16 +152,16 @@ export async function POST(request: NextRequest) {
     }
 
     let property
-    if (id) {
+    if (propertyIdToUse) {
       // Verify ownership before update
-      const existing = await prisma.property.findUnique({ where: { id } })
+      const existing = await prisma.property.findUnique({ where: { id: propertyIdToUse } })
       if (!existing || existing.hostProfileId !== hostProfile.id) {
         return NextResponse.json({ error: 'Property not found' }, { status: 404 })
       }
       
       // Update existing
       property = await prisma.property.update({
-        where: { id },
+        where: { id: propertyIdToUse },
         data: propertyData,
       })
     } else {
