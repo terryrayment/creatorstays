@@ -238,6 +238,9 @@ export default function HostOnboardingPage() {
     contentNeeds: [],
     budgetRange: "",
   })
+  
+  // Track existing property ID (from registration) to update instead of create
+  const [existingPropertyId, setExistingPropertyId] = useState<string | null>(null)
 
   const totalSteps = 3
   
@@ -291,6 +294,8 @@ export default function HostOnboardingPage() {
               const properties = propsData.properties || propsData || []
               if (properties.length > 0) {
                 const prop = properties[0] // Get the first property
+                // Store the existing property ID for updates
+                setExistingPropertyId(prop.id)
                 setData(prev => ({
                   ...prev,
                   airbnbUrl: prop.airbnbUrl || "",
@@ -452,6 +457,7 @@ export default function HostOnboardingPage() {
   // Save profile and property
   const saveData = async () => {
     try {
+      console.log("[SaveData] Saving profile...")
       const profileRes = await fetch("/api/host/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -472,11 +478,14 @@ export default function HostOnboardingPage() {
         const err = await profileRes.json()
         throw new Error(err.error || "Failed to save profile")
       }
+      console.log("[SaveData] Profile saved successfully")
 
+      console.log("[SaveData] Saving property...", existingPropertyId ? `(updating ${existingPropertyId})` : "(creating new)")
       const propertyRes = await fetch("/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: existingPropertyId, // Pass existing ID to update instead of create
           title: data.propertyTitle,
           propertyType: data.propertyType,
           cityRegion: data.cityRegion,
@@ -496,6 +505,7 @@ export default function HostOnboardingPage() {
         const err = await propertyRes.json()
         throw new Error(err.error || "Failed to save property")
       }
+      console.log("[SaveData] Property saved successfully")
 
       return true
     } catch (e) {
@@ -521,25 +531,31 @@ export default function HostOnboardingPage() {
 
   // Handle checkout
   const handleCheckout = async () => {
+    console.log("[Checkout] Starting checkout process...")
     setCheckingOut(true)
     setError("")
 
     try {
+      console.log("[Checkout] Saving data...")
       await saveData()
+      console.log("[Checkout] Data saved successfully")
 
       if (selectedPlan === 'agency') {
+        console.log("[Checkout] Processing agency plan...")
         const res = await fetch("/api/host/agency", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({}),
         })
         const result = await res.json()
+        console.log("[Checkout] Agency response:", result)
         if (result.checkoutUrl) {
           window.location.href = result.checkoutUrl
         } else {
           throw new Error(result.error || "Failed to start checkout")
         }
       } else {
+        console.log("[Checkout] Processing standard plan with promo:", promoResult?.valid ? promoCode : "none")
         const res = await fetch("/api/host/membership/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -548,16 +564,26 @@ export default function HostOnboardingPage() {
           }),
         })
         const result = await res.json()
+        console.log("[Checkout] Membership response:", result)
         
         if (result.freeAccess || result.free) {
+          console.log("[Checkout] Free access granted, redirecting...")
           router.push("/onboarding/host/success")
+          return // Don't reset checkingOut - we're navigating away
         } else if (result.checkoutUrl) {
+          console.log("[Checkout] Redirecting to Stripe...")
           window.location.href = result.checkoutUrl
+          return // Don't reset checkingOut - we're navigating away
         } else {
           throw new Error(result.error || "Failed to start checkout")
         }
       }
     } catch (e: any) {
+      console.error("[Checkout] Error:", e)
+      setError(e.message || "Something went wrong")
+      setCheckingOut(false)
+    }
+  }
       setError(e.message || "Something went wrong")
       setCheckingOut(false)
     }
