@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Hosts paid this month
-    const hostsPaidThisMonth = await prisma.promoCodeRedemption.count({
+    const hostsPaidThisMonth = await prisma.hostPromoRedemption.count({
       where: {
         createdAt: { gte: startOfMonth }
       }
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const membershipRevenue = totalPaidHosts * 199
 
     // Free memberships (promo codes with 100% off)
-    const freeMemberships = await prisma.promoCodeRedemption.count({
+    const freeMemberships = await prisma.hostPromoRedemption.count({
       where: {
         promoCode: { discountType: "full" }
       }
