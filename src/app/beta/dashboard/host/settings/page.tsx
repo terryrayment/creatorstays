@@ -18,6 +18,9 @@ function HostSettingsContent() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState("")
   const [isEditing, setIsEditing] = useState(false)
+  const [showContactModal, setShowContactModal] = useState(false)
+  const [contactMessage, setContactMessage] = useState("")
+  const [sendingMessage, setSendingMessage] = useState(false)
   
   // Profile form
   const [profile, setProfile] = useState({
@@ -122,6 +125,68 @@ function HostSettingsContent() {
       {toast && (
         <div className="fixed bottom-4 right-4 z-50 rounded-xl border-2 border-black bg-[#28D17C] px-4 py-2">
           <span className="text-sm font-bold text-black">{toast}</span>
+        </div>
+      )}
+
+      {/* Contact Support Modal */}
+      {showContactModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl border-2 border-black bg-white p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-black text-black">Contact Support</h2>
+              <button 
+                onClick={() => {
+                  setShowContactModal(false)
+                  setContactMessage("")
+                }}
+                className="text-black/60 hover:text-black"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-xs text-black/60 mb-4">
+              Send us a message and we'll get back to you as soon as possible.
+            </p>
+            <textarea
+              value={contactMessage}
+              onChange={e => setContactMessage(e.target.value)}
+              placeholder="How can we help you?"
+              rows={4}
+              className="w-full rounded-xl border-2 border-black bg-white px-4 py-3 text-[14px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20 mb-4"
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  if (!contactMessage.trim()) return
+                  setSendingMessage(true)
+                  // Simulate sending - in production this would call an API
+                  await new Promise(resolve => setTimeout(resolve, 1000))
+                  // Open mailto as fallback
+                  window.location.href = `mailto:hello@creatorstays.com?subject=Support Request from ${profile.email}&body=${encodeURIComponent(contactMessage)}`
+                  setSendingMessage(false)
+                  setShowContactModal(false)
+                  setContactMessage("")
+                  setToast("Message sent! We'll be in touch soon.")
+                  setTimeout(() => setToast(null), 3000)
+                }}
+                disabled={!contactMessage.trim() || sendingMessage}
+                className="flex-1 rounded-full border-2 border-black bg-black px-4 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+              >
+                {sendingMessage ? "Sending..." : "Send Message"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowContactModal(false)
+                  setContactMessage("")
+                }}
+                className="rounded-full border-2 border-black bg-white px-4 py-2.5 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -291,21 +356,43 @@ function HostSettingsContent() {
                       </div>
                       
                       {/* Fun Stats Section */}
-                      <div className="mt-6 rounded-xl border-2 border-dashed border-black/30 bg-[#28D17C]/10 p-4">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-black/50 mb-2">Your Host Journey</p>
-                        <div className="flex items-center gap-6">
-                          <div className="text-center">
-                            <p className="text-2xl font-black text-black">🏠</p>
-                            <p className="text-xs text-black/60">Properties listed</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-2xl font-black text-black">📸</p>
-                            <p className="text-xs text-black/60">Creator collabs</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-2xl font-black text-black">✨</p>
-                            <p className="text-xs text-black/60">Getting started</p>
-                          </div>
+                      <div className="mt-6 rounded-xl border-2 border-black bg-[#28D17C] p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-black/70 mb-3">Your Host Journey</p>
+                        <div className="flex items-center gap-4">
+                          <Link 
+                            href="/beta/dashboard/host/properties"
+                            className="flex-1 text-center p-3 rounded-lg bg-white/20 hover:bg-white/40 transition-colors cursor-pointer"
+                          >
+                            <div className="flex h-10 w-10 mx-auto items-center justify-center rounded-full bg-white border-2 border-black">
+                              <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                              </svg>
+                            </div>
+                            <p className="text-xs font-bold text-black mt-2">Properties</p>
+                          </Link>
+                          <Link 
+                            href="/beta/dashboard/collaborations"
+                            className="flex-1 text-center p-3 rounded-lg bg-white/20 hover:bg-white/40 transition-colors cursor-pointer"
+                          >
+                            <div className="flex h-10 w-10 mx-auto items-center justify-center rounded-full bg-white border-2 border-black">
+                              <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                            </div>
+                            <p className="text-xs font-bold text-black mt-2">Collabs</p>
+                          </Link>
+                          <Link 
+                            href="/beta/dashboard/host/search-creators"
+                            className="flex-1 text-center p-3 rounded-lg bg-white/20 hover:bg-white/40 transition-colors cursor-pointer"
+                          >
+                            <div className="flex h-10 w-10 mx-auto items-center justify-center rounded-full bg-white border-2 border-black">
+                              <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                              </svg>
+                            </div>
+                            <p className="text-xs font-bold text-black mt-2">Find Creators</p>
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -380,7 +467,7 @@ function HostSettingsContent() {
                         <textarea
                           value={profile.bio}
                           onChange={e => setProfile({ ...profile, bio: e.target.value })}
-                          placeholder="Tell creators a bit about your properties and what makes them special..."
+                          placeholder="Tell us a bit about yourself and why you love being a host..."
                           rows={3}
                           className="w-full rounded-xl border-2 border-black bg-white px-4 py-3 text-[14px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
                         />
@@ -484,12 +571,12 @@ function HostSettingsContent() {
                     <p className="mb-3 text-xs text-black/60">
                       To change your email address, please contact our support team. This helps us verify your identity and keep your account secure.
                     </p>
-                    <a 
-                      href="mailto:hello@creatorstays.com?subject=Email%20Change%20Request"
+                    <button 
+                      onClick={() => setShowContactModal(true)}
                       className="inline-block rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
                     >
                       Contact Support
-                    </a>
+                    </button>
                   </div>
 
                   {/* Danger Zone */}
