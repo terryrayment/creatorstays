@@ -35,19 +35,19 @@ function PrepItem({
   return (
     <Link
       href={href}
-      className={`block rounded-xl border-2 p-4 transition-all hover:-translate-y-0.5 ${
+      className={`block rounded-xl border-2 border-black p-4 transition-all hover:-translate-y-0.5 ${
         done 
-          ? 'border-[#28D17C] bg-[#28D17C]/10' 
+          ? 'bg-[#28D17C]' 
           : priority 
-            ? 'border-[#FFD84A] bg-[#FFD84A]/10' 
-            : 'border-black bg-white'
+            ? 'bg-[#FFD84A]' 
+            : 'bg-white'
       }`}
     >
       <div className="flex items-start gap-3">
-        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
+        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-black ${
           done 
-            ? 'border-[#28D17C] bg-[#28D17C] text-white' 
-            : 'border-black bg-white'
+            ? 'bg-[#28D17C] text-black' 
+            : 'bg-white'
         }`}>
           {done ? (
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -58,10 +58,10 @@ function PrepItem({
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-bold ${done ? 'text-black/50' : 'text-black'}`}>
+          <p className={`text-sm font-bold ${done ? 'text-black/70' : 'text-black'}`}>
             {title}
             {priority && !done && (
-              <span className="ml-2 rounded-full bg-[#FFD84A] px-2 py-0.5 text-[9px] font-bold uppercase">
+              <span className="ml-2 rounded-full border border-black bg-white px-2 py-0.5 text-[9px] font-bold uppercase">
                 Next Step
               </span>
             )}

@@ -72,7 +72,7 @@ function HeroSection() {
           >
             {/* Label */}
             <p className="text-[10px] font-black uppercase tracking-wider text-black">
-              Finally.
+              The first creator marketplace for STRs
             </p>
             
             {/* Headline - heaviest weight, pure black */}
@@ -113,11 +113,11 @@ function HeroSection() {
           >
             <div>
               <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] sm:text-[2.5rem]" style={{ fontWeight: 900 }}>
-                <span className="block text-black">THIS DIDN'T</span>
-                <span className="block text-black" style={{ fontWeight: 400 }}>EXIST UNTIL NOW</span>
+                <span className="block text-black">EVERY NIGHT</span>
+                <span className="block text-black" style={{ fontWeight: 400 }}>SHOULD WORK FOR YOU</span>
               </h2>
               <p className="mt-2 text-[12px] font-medium text-black">
-                Hosts needed creators. Creators needed deals. We built the thing.
+                When your stay isn't booked, it should be marketing. When it is booked, it should justify a premium.
               </p>
             </div>
 
@@ -171,7 +171,7 @@ function HowItWorksSection() {
   return (
     <section className="bg-black px-3 py-2 lg:px-4">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-2 lg:grid-cols-[1fr_auto]">
+        <div className="grid gap-2 lg:grid-cols-[1fr_auto] lg:items-end">
           {/* How It Works block */}
           <div className="block-hover rounded-2xl border-[3px] border-black bg-white p-4">
             <p className="text-[9px] font-black uppercase tracking-wider text-black">

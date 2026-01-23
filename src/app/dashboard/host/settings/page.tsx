@@ -207,8 +207,8 @@ function HostSettingsContent() {
               </div>
             )}
 
-            {/* Profile Form */}
-            <div className="rounded-xl border-2 border-black bg-white p-5">
+            {/* Profile Form - min-height to keep footer stable */}
+            <div className="rounded-xl border-2 border-black bg-white p-5 min-h-[450px]">
               {(activeTab === "profile" || isSetup) && (
                 <div className="space-y-5">
                   <div>
@@ -318,7 +318,7 @@ function HostSettingsContent() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Links */}
-            <div className="rounded-xl border-2 border-black bg-white p-5">
+            <div className="rounded-xl border-2 border-black bg-white p-5 min-h-[450px]">
               <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-black">Quick Links</h3>
               <div className="space-y-1.5">
                 <Link href="/dashboard/host/properties" className="flex items-center justify-between rounded-lg border-2 border-black bg-white px-3 py-2 text-xs font-bold text-black transition-all hover:-translate-y-0.5">

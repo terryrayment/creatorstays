@@ -21,10 +21,10 @@ function Option({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full rounded-xl border-2 p-4 text-left transition-all hover:-translate-y-0.5 ${
+      className={`w-full rounded-xl border-2 border-black p-4 text-left transition-all hover:-translate-y-0.5 ${
         selected 
-          ? 'border-[#28D17C] bg-[#28D17C]/10' 
-          : 'border-black bg-white hover:bg-[#FAFAFA]'
+          ? 'bg-[#28D17C]' 
+          : 'bg-white hover:bg-[#FAFAFA]'
       }`}
     >
       <div className="flex items-center justify-between">
@@ -32,11 +32,11 @@ function Option({
           <p className="font-bold text-black">{children}</p>
           {description && <p className="mt-1 text-xs text-black/60">{description}</p>}
         </div>
-        <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${
-          selected ? 'border-[#28D17C] bg-[#28D17C]' : 'border-black/30'
+        <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 border-black ${
+          selected ? 'bg-[#28D17C]' : 'bg-white'
         }`}>
           {selected && (
-            <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <svg className="h-3 w-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           )}
@@ -60,16 +60,16 @@ function MultiOption({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border-2 px-4 py-3 text-left transition-all hover:-translate-y-0.5 ${
+      className={`rounded-xl border-2 border-black px-4 py-3 text-left transition-all hover:-translate-y-0.5 ${
         selected 
-          ? 'border-[#28D17C] bg-[#28D17C]/10' 
-          : 'border-black bg-white hover:bg-[#FAFAFA]'
+          ? 'bg-[#28D17C]' 
+          : 'bg-white hover:bg-[#FAFAFA]'
       }`}
     >
       <div className="flex items-center gap-2">
         <span className="text-sm font-bold text-black">{children}</span>
         {selected && (
-          <svg className="h-4 w-4 text-[#28D17C] ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <svg className="h-4 w-4 text-black ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         )}
@@ -94,10 +94,10 @@ function MultiOptionWithDesc({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border-2 px-4 py-4 text-left transition-all hover:-translate-y-0.5 ${
+      className={`rounded-xl border-2 border-black px-4 py-4 text-left transition-all hover:-translate-y-0.5 ${
         selected 
-          ? 'border-[#28D17C] bg-[#28D17C]/10' 
-          : 'border-black bg-white hover:bg-[#FAFAFA]'
+          ? 'bg-[#28D17C]' 
+          : 'bg-white hover:bg-[#FAFAFA]'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -105,11 +105,11 @@ function MultiOptionWithDesc({
           <span className="text-sm font-bold text-black">{children}</span>
           {description && <p className="mt-1 text-xs text-black/60">{description}</p>}
         </div>
-        <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 mt-0.5 ${
-          selected ? 'border-[#28D17C] bg-[#28D17C]' : 'border-black/30 bg-white'
+        <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-black mt-0.5 ${
+          selected ? 'bg-[#28D17C]' : 'bg-white'
         }`}>
           {selected && (
-            <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <svg className="h-3 w-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           )}

@@ -207,8 +207,8 @@ function HostSettingsContent() {
               </div>
             )}
 
-            {/* Profile Form */}
-            <div className="rounded-xl border-2 border-black bg-white p-5">
+            {/* Profile Form - min-height to keep footer stable */}
+            <div className="rounded-xl border-2 border-black bg-white p-5 min-h-[450px]">
               {(activeTab === "profile" || isSetup) && (
                 <div className="space-y-5">
                   <div>
