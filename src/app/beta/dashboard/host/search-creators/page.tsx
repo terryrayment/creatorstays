@@ -28,6 +28,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 
 // City coordinates for distance calculation (lat, lng)
 const CITY_COORDS: Record<string, [number, number]> = {
+  // Major metros
   "Los Angeles, CA": [34.0522, -118.2437],
   "Austin, TX": [30.2672, -97.7431],
   "Miami, FL": [25.7617, -80.1918],
@@ -38,13 +39,75 @@ const CITY_COORDS: Record<string, [number, number]> = {
   "San Diego, CA": [32.7157, -117.1611],
   "Phoenix, AZ": [33.4484, -112.0740],
   "Las Vegas, NV": [36.1699, -115.1398],
+  "Nashville, TN": [36.1627, -86.7816],
+  "New York, NY": [40.7128, -74.0060],
+  "Chicago, IL": [41.8781, -87.6298],
+  "Atlanta, GA": [33.7490, -84.3880],
+  "Houston, TX": [29.7604, -95.3698],
+  "Dallas, TX": [32.7767, -96.7970],
+  "Boston, MA": [42.3601, -71.0589],
+  "Philadelphia, PA": [39.9526, -75.1652],
+  "Washington, DC": [38.9072, -77.0369],
+  "Detroit, MI": [42.3314, -83.0458],
+  "Minneapolis, MN": [44.9778, -93.2650],
+  "Tampa, FL": [27.9506, -82.4572],
+  "Orlando, FL": [28.5383, -81.3792],
+  "Charlotte, NC": [35.2271, -80.8431],
+  "Raleigh, NC": [35.7796, -78.6382],
+  "Salt Lake City, UT": [40.7608, -111.8910],
+  "San Jose, CA": [37.3382, -121.8863],
+  "Sacramento, CA": [38.5816, -121.4944],
+  "Kansas City, MO": [39.0997, -94.5786],
+  "St. Louis, MO": [38.6270, -90.1994],
+  "Indianapolis, IN": [39.7684, -86.1581],
+  "Columbus, OH": [39.9612, -82.9988],
+  "Cleveland, OH": [41.4993, -81.6944],
+  "Cincinnati, OH": [39.1031, -84.5120],
+  "Pittsburgh, PA": [40.4406, -79.9959],
+  "Baltimore, MD": [39.2904, -76.6122],
+  "Milwaukee, WI": [43.0389, -87.9065],
+  "New Orleans, LA": [29.9511, -90.0715],
+  "Oklahoma City, OK": [35.4676, -97.5164],
+  "Louisville, KY": [38.2527, -85.7585],
+  "Memphis, TN": [35.1495, -90.0490],
+  "Albuquerque, NM": [35.0844, -106.6504],
+  "Tucson, AZ": [32.2226, -110.9747],
+  "Fresno, CA": [36.7378, -119.7871],
+  "Mesa, AZ": [33.4152, -111.8315],
+  "Scottsdale, AZ": [33.4942, -111.9261],
+  "Boise, ID": [43.6150, -116.2023],
+  "Spokane, WA": [47.6588, -117.4260],
+  "Anchorage, AK": [61.2181, -149.9003],
+  "Honolulu, HI": [21.3069, -157.8583],
+  // Vacation destinations
   "Lake Arrowhead, CA": [34.2483, -117.1897],
   "Big Bear Lake, CA": [34.2439, -116.9114],
   "Palm Springs, CA": [33.8303, -116.5453],
   "Joshua Tree, CA": [34.1347, -116.3131],
-  "Nashville, TN": [36.1627, -86.7816],
-  "New York, NY": [40.7128, -74.0060],
-  "Chicago, IL": [41.8781, -87.6298],
+  "Lake Tahoe, CA": [39.0968, -120.0324],
+  "Napa Valley, CA": [38.2975, -122.2869],
+  "Malibu, CA": [34.0259, -118.7798],
+  "Sedona, AZ": [34.8697, -111.7610],
+  "Park City, UT": [40.6461, -111.4980],
+  "Aspen, CO": [39.1911, -106.8175],
+  "Vail, CO": [39.6403, -106.3742],
+  "Telluride, CO": [37.9375, -107.8123],
+  "Jackson Hole, WY": [43.4799, -110.7624],
+  "Savannah, GA": [32.0809, -81.0912],
+  "Charleston, SC": [32.7765, -79.9311],
+  "Asheville, NC": [35.5951, -82.5515],
+  "Key West, FL": [24.5551, -81.7800],
+  "Fort Lauderdale, FL": [26.1224, -80.1373],
+  "Naples, FL": [26.1420, -81.7948],
+  "Sarasota, FL": [27.3364, -82.5307],
+  "Clearwater, FL": [27.9659, -82.8001],
+  "Destin, FL": [30.3935, -86.4958],
+  "Hilton Head, SC": [32.2163, -80.7526],
+  "Myrtle Beach, SC": [33.6891, -78.8867],
+  "Outer Banks, NC": [35.5585, -75.4665],
+  "Maui, HI": [20.7984, -156.3319],
+  "Big Island, HI": [19.5429, -155.6659],
+  "Kauai, HI": [22.0964, -159.5261],
 }
 
 // Calculate distance between two coordinates in miles
@@ -87,7 +150,7 @@ const SORT_OPTIONS = [
 
 const ALL_LOCATIONS = Object.keys(CITY_COORDS)
 
-// Location search component
+// Location search component - uses Google Places API
 function LocationSearch({ 
   value, 
   onChange,
@@ -98,15 +161,69 @@ function LocationSearch({
   onClear: () => void
 }) {
   const [open, setOpen] = useState(false)
-  const [showSearch, setShowSearch] = useState(false)
   const [inputValue, setInputValue] = useState("")
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [isGoogleLoaded, setIsGoogleLoaded] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const autocompleteRef = useRef<any>(null)
 
+  // Expanded fallback cities
+  const POPULAR_CITIES = [
+    "Los Angeles, CA", "New York, NY", "Chicago, IL", "Houston, TX", "Phoenix, AZ",
+    "San Antonio, TX", "San Diego, CA", "Dallas, TX", "Austin, TX", "San Francisco, CA",
+    "Seattle, WA", "Denver, CO", "Boston, MA", "Nashville, TN", "Portland, OR",
+    "Las Vegas, NV", "Atlanta, GA", "Miami, FL", "Tampa, FL", "Orlando, FL",
+    "Charlotte, NC", "Raleigh, NC", "Minneapolis, MN", "Detroit, MI", "Cleveland, OH",
+    "Pittsburgh, PA", "Philadelphia, PA", "Baltimore, MD", "Washington, DC", "Richmond, VA",
+    "Salt Lake City, UT", "Boise, ID", "Albuquerque, NM", "Tucson, AZ", "Oklahoma City, OK",
+    "Kansas City, MO", "St. Louis, MO", "Indianapolis, IN", "Columbus, OH", "Cincinnati, OH",
+    "Milwaukee, WI", "New Orleans, LA", "Memphis, TN", "Louisville, KY", "San Jose, CA",
+    "Sacramento, CA", "Oakland, CA", "Long Beach, CA", "Fresno, CA", "Bakersfield, CA",
+    "Lake Tahoe, CA", "Big Bear, CA", "Palm Springs, CA", "Sedona, AZ", "Scottsdale, AZ",
+    "Park City, UT", "Aspen, CO", "Vail, CO", "Jackson Hole, WY", "Savannah, GA",
+    "Charleston, SC", "Asheville, NC", "Key West, FL", "Fort Lauderdale, FL", "Naples, FL",
+    "Honolulu, HI", "Maui, HI", "Anchorage, AK"
+  ]
+
+  // Load Google Maps
+  useEffect(() => {
+    let mounted = true
+    const loadGoogleMaps = async () => {
+      try {
+        if (typeof window !== 'undefined' && (window as any).google?.maps?.places) {
+          autocompleteRef.current = new (window as any).google.maps.places.AutocompleteService()
+          setIsGoogleLoaded(true)
+          return
+        }
+
+        const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]')
+        if (!existingScript) {
+          const script = document.createElement('script')
+          script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyClauePA6V5yio6N1Ucr9m1ULmzPZ6zcoo&libraries=places'
+          script.async = true
+          script.defer = true
+          document.head.appendChild(script)
+          
+          script.onload = () => {
+            if (mounted && (window as any).google?.maps?.places?.AutocompleteService) {
+              autocompleteRef.current = new (window as any).google.maps.places.AutocompleteService()
+              setIsGoogleLoaded(true)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load Google Maps:', error)
+      }
+    }
+    loadGoogleMaps()
+    return () => { mounted = false }
+  }, [])
+
+  // Close on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setOpen(false)
-        setShowSearch(false)
         setInputValue("")
       }
     }
@@ -114,11 +231,34 @@ function LocationSearch({
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const filteredLocations = inputValue
-    ? ALL_LOCATIONS.filter(loc => loc.toLowerCase().includes(inputValue.toLowerCase()))
-    : ALL_LOCATIONS
+  // Fetch suggestions when input changes
+  useEffect(() => {
+    if (!inputValue || inputValue.length < 2) {
+      setSuggestions([])
+      return
+    }
 
-  const presetLocations = ["Los Angeles", "Austin", "Miami", "Denver", "Portland"]
+    if (isGoogleLoaded && autocompleteRef.current) {
+      autocompleteRef.current.getPlacePredictions(
+        { input: inputValue, types: ["(cities)"] },
+        (predictions: any[] | null, status: string) => {
+          if (status === "OK" && predictions) {
+            setSuggestions(predictions.map((p: any) => p.description).slice(0, 6))
+          } else {
+            setSuggestions([])
+          }
+        }
+      )
+    } else {
+      // Fallback to local filtering
+      const filtered = POPULAR_CITIES.filter(city =>
+        city.toLowerCase().includes(inputValue.toLowerCase())
+      ).slice(0, 6)
+      setSuggestions(filtered)
+    }
+  }, [inputValue, isGoogleLoaded])
+
+  const presetLocations = ["Los Angeles, CA", "Austin, TX", "Miami, FL", "Denver, CO", "Atlanta, GA"]
 
   return (
     <div ref={wrapperRef} className="relative">
@@ -133,104 +273,85 @@ function LocationSearch({
         </svg>
       </button>
       
-      {open && !showSearch && (
-        <div className="absolute z-20 mt-1 w-48 rounded-xl border-2 border-black bg-white py-1 shadow-lg">
-          {/* All Locations option */}
-          <button
-            type="button"
-            className={`flex w-full items-center gap-2 px-4 py-3 text-left text-[13px] font-bold text-black transition-colors ${!value ? 'bg-[#FFD84A]' : 'hover:bg-black/5'}`}
-            onClick={() => {
-              onClear()
-              setOpen(false)
-            }}
-          >
-            {!value && <span>✓</span>}
-            <span>All Locations</span>
-          </button>
-          
-          {/* Preset locations */}
-          {presetLocations.map((loc) => {
-            const fullLoc = ALL_LOCATIONS.find(l => l.startsWith(loc)) || loc
-            const isSelected = value === fullLoc
-            return (
-              <button
-                key={loc}
-                type="button"
-                className={`flex w-full items-center gap-2 px-4 py-3 text-left text-[13px] font-medium text-black transition-colors ${isSelected ? 'bg-[#FFD84A] font-bold' : 'hover:bg-black/5'}`}
-                onClick={() => {
-                  onChange(fullLoc)
-                  setOpen(false)
-                }}
-              >
-                {isSelected && <span>✓</span>}
-                <span>{loc}</span>
-              </button>
-            )
-          })}
-          
-          {/* Search option */}
-          <div className="border-t border-black/10 mt-1 pt-1">
-            <button
-              type="button"
-              className="flex w-full items-center gap-2 px-4 py-3 text-left text-[13px] font-medium text-black transition-colors hover:bg-black/5"
-              onClick={() => setShowSearch(true)}
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-              </svg>
-              <span>Search...</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Search view */}
-      {open && showSearch && (
-        <div className="absolute z-20 mt-1 w-56 rounded-xl border-2 border-black bg-white p-2 shadow-lg">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setShowSearch(false)
-                setInputValue("")
-              }}
-              className="text-black/50 hover:text-black"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-            </button>
+      {open && (
+        <div className="absolute z-20 mt-1 w-64 rounded-xl border-2 border-black bg-white py-2 shadow-lg">
+          {/* Search input */}
+          <div className="px-2 pb-2">
             <input
               autoFocus
-              placeholder="Search location..."
+              placeholder="Search any city..."
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
-              className="flex-1 rounded-lg border-2 border-black px-3 py-2 text-[12px] font-medium text-black placeholder:text-black/40 focus:outline-none"
+              className="w-full rounded-lg border-2 border-black px-3 py-2 text-[12px] font-medium text-black placeholder:text-black/40 focus:outline-none"
             />
           </div>
-          <p className="mt-2 px-2 text-[9px] font-bold uppercase tracking-wider text-black/50">
-            Shows creators within 150 miles
-          </p>
-          <div className="mt-1 max-h-48 overflow-y-auto">
-            {filteredLocations.map((loc) => (
+
+          {/* Show suggestions if searching, otherwise show presets */}
+          {inputValue.length >= 2 ? (
+            <div className="max-h-48 overflow-y-auto border-t border-black/10 pt-1">
+              {suggestions.length > 0 ? (
+                suggestions.map((loc) => (
+                  <button
+                    key={loc}
+                    type="button"
+                    className="w-full px-4 py-2 text-left text-[12px] font-medium text-black transition-colors hover:bg-[#FFD84A]"
+                    onClick={() => {
+                      onChange(loc)
+                      setOpen(false)
+                      setInputValue("")
+                    }}
+                  >
+                    {loc}
+                  </button>
+                ))
+              ) : (
+                <p className="px-4 py-2 text-[11px] text-black/50">
+                  No results found. Try another search.
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* All Locations option */}
               <button
-                key={loc}
                 type="button"
-                className="w-full rounded-lg px-3 py-2 text-left text-[12px] font-medium text-black transition-colors hover:bg-[#FFD84A]"
+                className={`flex w-full items-center gap-2 px-4 py-2 text-left text-[12px] font-bold text-black transition-colors ${!value ? 'bg-[#FFD84A]' : 'hover:bg-black/5'}`}
                 onClick={() => {
-                  onChange(loc)
+                  onClear()
                   setOpen(false)
-                  setShowSearch(false)
-                  setInputValue("")
                 }}
               >
-                {loc}
+                {!value && <span>✓</span>}
+                <span>All Locations</span>
               </button>
-            ))}
-            {filteredLocations.length === 0 && (
-              <p className="px-3 py-2 text-[11px] text-black/50">No locations found</p>
-            )}
-          </div>
+              
+              {/* Preset locations */}
+              <div className="border-t border-black/10 mt-1 pt-1">
+                <p className="px-4 py-1 text-[9px] font-bold uppercase tracking-wider text-black/50">Popular</p>
+                {presetLocations.map((loc) => {
+                  const isSelected = value === loc
+                  return (
+                    <button
+                      key={loc}
+                      type="button"
+                      className={`flex w-full items-center gap-2 px-4 py-2 text-left text-[12px] font-medium text-black transition-colors ${isSelected ? 'bg-[#FFD84A] font-bold' : 'hover:bg-black/5'}`}
+                      onClick={() => {
+                        onChange(loc)
+                        setOpen(false)
+                      }}
+                    >
+                      {isSelected && <span>✓</span>}
+                      <span>{loc}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              
+              <p className="mt-2 px-4 text-[9px] text-black/40">
+                Shows creators within 150 miles of location
+              </p>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -352,7 +473,7 @@ export default function SearchCreatorsPage() {
   return (
     <div className="dashboard min-h-screen bg-[#FAFAFA] flex flex-col">
       {/* Header */}
-      <div className="border-b-2 border-black bg-white">
+      <div className="bg-white">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
@@ -529,13 +650,13 @@ export default function SearchCreatorsPage() {
             </div>
           )}
 
-          {/* Creator Grid - no hover animation on cards */}
+          {/* Creator Grid - with subtle hover animation */}
           {!loading && (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {allCreators.map(creator => (
               <div
                 key={creator.id}
-                className={`relative rounded-xl border-2 bg-white p-4 ${
+                className={`relative rounded-xl border-2 bg-white p-4 transition-transform duration-200 hover:-translate-y-1 ${
                   creator.isMock ? 'border-dashed border-black/40' : 'border-black'
                 }`}
               >

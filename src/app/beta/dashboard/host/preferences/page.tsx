@@ -230,7 +230,7 @@ export default function CreatorPreferencesPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Header */}
-      <div className="border-b-2 border-black bg-white">
+      <div className="bg-white">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
           <div>
             <Link href="/beta/dashboard/host" className="text-xs text-black/50 hover:text-black">

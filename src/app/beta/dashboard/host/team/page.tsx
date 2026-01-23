@@ -195,7 +195,7 @@ export default function TeamManagementPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Header */}
-      <div className="border-b-2 border-black bg-white">
+      <div className="bg-white">
         <div className="mx-auto flex h-12 max-w-4xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <span className="rounded-full border-2 border-black bg-[#28D17C] px-2.5 py-0.5 text-[10px] font-bold text-black">AGENCY</span>

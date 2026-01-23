@@ -267,7 +267,7 @@ export default function HostSentOffersPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Top bar */}
-      <div className="border-b-2 border-black bg-white">
+      <div className="bg-white">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
             <span className="rounded-full border-2 border-black bg-[#FFD84A] px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-black">

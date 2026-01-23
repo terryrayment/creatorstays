@@ -95,7 +95,7 @@ function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
 
 function BetaHeader({ isAgency }: { isAgency?: boolean }) {
   return (
-    <div className="border-b-2 border-black bg-white">
+    <div className="bg-white">
       <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-3">
           <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
@@ -289,7 +289,7 @@ function ReferralSection() {
                     type="text"
                     value={referralLink}
                     readOnly
-                    className="flex-1 h-10 rounded-lg border-2 border-black bg-white px-3 text-xs font-medium text-black"
+                    className="flex-1 h-10 rounded-lg border-2 border-black bg-white px-3 text-xs font-bold text-black selection:bg-[#FFD84A]"
                   />
                   <button
                     onClick={copyLink}

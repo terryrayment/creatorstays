@@ -58,9 +58,9 @@ export default function BetaAnalyticsPage() {
   const [timeRange, setTimeRange] = useState<"30d" | "90d" | "all">("all")
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-[#FAFAFA] flex flex-col">
       {/* Header */}
-      <div className="border-b-2 border-black bg-white">
+      <div className="bg-white">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
