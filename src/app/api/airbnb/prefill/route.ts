@@ -186,33 +186,58 @@ export async function GET(request: NextRequest) {
       if (typeMatch) result.propertyType = typeMatch[1]
     }
 
-    // Collect photos
+    // Collect photos - be VERY strict, only get actual property photos
     const photos: string[] = []
-    if (ogImage && !isAirbnbLogo(ogImage)) {
+    
+    // Method 1: Look for photos in JSON data (most reliable)
+    // Airbnb stores listing photos in various JSON structures
+    const photoPatterns = [
+      // Look for picture arrays in JSON
+      /"pictureUrl"\s*:\s*"(https:\/\/a0\.muscache\.com\/im\/pictures\/[^"]+)"/gi,
+      /"baseUrl"\s*:\s*"(https:\/\/a0\.muscache\.com\/im\/pictures\/[^"]+)"/gi,
+      /"url"\s*:\s*"(https:\/\/a0\.muscache\.com\/im\/pictures\/hosting\/[^"]+)"/gi,
+      /"url"\s*:\s*"(https:\/\/a0\.muscache\.com\/im\/pictures\/prohost-api\/[^"]+)"/gi,
+      /"xl_picture_url"\s*:\s*"(https:\/\/a0\.muscache\.com\/[^"]+)"/gi,
+      /"picture_url"\s*:\s*"(https:\/\/a0\.muscache\.com\/[^"]+)"/gi,
+    ]
+    
+    for (const pattern of photoPatterns) {
+      let match: RegExpExecArray | null
+      while ((match = pattern.exec(html)) !== null && photos.length < 15) {
+        const imgUrl = match[1]
+        // Only include if it's a property photo path
+        if (isPropertyPhoto(imgUrl) && !photos.includes(imgUrl)) {
+          photos.push(imgUrl)
+        }
+      }
+    }
+    
+    // Method 2: Use OG image as fallback (usually the main listing photo)
+    if (photos.length === 0 && ogImage && isPropertyPhoto(ogImage)) {
       photos.push(ogImage)
     }
     
-    // Find additional images from muscache CDN
-    // Filter out logos, icons, avatars, and small images
-    const imageRegex = /["'](https:\/\/a0\.muscache\.com\/[^"']+\.(?:jpg|jpeg|webp|png)[^"']*)/gi
-    let imageMatch: RegExpExecArray | null
-    while ((imageMatch = imageRegex.exec(html)) !== null && photos.length < 10) {
-      const imgUrl = imageMatch[1]
-      
-      // Skip if it's a logo, icon, avatar, or known non-property image
-      if (isAirbnbLogo(imgUrl)) {
-        continue
-      }
-      
-      // Deduplicate by checking the filename
-      const filename = imgUrl.split('/').pop()?.split('?')[0] || ''
-      if (!photos.some(p => p.includes(filename))) {
-        photos.push(imgUrl)
+    // Method 3: Look for srcset patterns which usually contain listing photos
+    if (photos.length < 5) {
+      const srcsetPattern = /srcset="([^"]+)"/gi
+      let srcsetMatch: RegExpExecArray | null
+      while ((srcsetMatch = srcsetPattern.exec(html)) !== null && photos.length < 15) {
+        const srcset = srcsetMatch[1]
+        // Extract URLs from srcset
+        const urls = srcset.split(',').map(s => s.trim().split(' ')[0])
+        for (const url of urls) {
+          if (url.includes('muscache.com') && isPropertyPhoto(url) && !photos.includes(url)) {
+            photos.push(url)
+            if (photos.length >= 15) break
+          }
+        }
       }
     }
     
     if (photos.length > 0) {
-      result.photos = photos.slice(0, 10)
+      // Deduplicate and limit to 10
+      const uniquePhotos = [...new Set(photos)]
+      result.photos = uniquePhotos.slice(0, 10)
     }
 
     // Try to extract JSON-LD data (structured data)
@@ -370,72 +395,96 @@ function decodeHtmlEntities(str: string): string {
 }
 
 /**
- * Detect if a URL is an Airbnb logo, icon, host photo, or non-property image
- * Be conservative - only filter things we're CERTAIN are not property photos
+ * Check if a URL is likely a property photo (not a logo, icon, avatar, or illustration)
+ * Be STRICT - only return true for URLs that are clearly property photos
  */
-function isAirbnbLogo(url: string): boolean {
+function isPropertyPhoto(url: string): boolean {
   const lowerUrl = url.toLowerCase()
   
-  // Only filter out things we're absolutely sure aren't property photos
-  const definiteExclusions = [
+  // MUST contain muscache.com (Airbnb's image CDN)
+  if (!lowerUrl.includes('muscache.com')) {
+    return false
+  }
+  
+  // MUST be in a known property photo path
+  const validPaths = [
+    '/im/pictures/hosting/',      // Main hosting photos
+    '/im/pictures/prohost-api/',  // Professional host photos  
+    '/im/pictures/miso/Hosting/', // MISO hosting photos
+    '/pictures/hosting/',         // Alternate hosting path
+    '/pictures/prohost-api/',     // Alternate prohost path
+  ]
+  
+  const hasValidPath = validPaths.some(path => lowerUrl.includes(path))
+  
+  // Also allow if it's specifically marked as a listing photo in certain patterns
+  const isListingPhoto = lowerUrl.includes('_original') || 
+                         lowerUrl.includes('im_w=') ||
+                         (lowerUrl.includes('/im/pictures/') && 
+                          !lowerUrl.includes('/users/') &&
+                          !lowerUrl.includes('/c/') &&
+                          !lowerUrl.includes('/5/') &&
+                          !lowerUrl.includes('/7/'))
+  
+  if (!hasValidPath && !isListingPhoto) {
+    return false
+  }
+  
+  // Exclude known non-photo patterns
+  const exclusions = [
+    '/users/',        // User profile photos
+    'im/users',       // User profile images
+    '/miso/',         // Except MISO/Hosting
     'airbnb-static',
     'airbnb_logo',
     'airbnb-logo',
     '/logo',
     '/favicon',
-    '/apple-touch',
-    'android-chrome',
-    'belo',
-    'brandmark',
-    'symbol',
-    '/em/',           // Emoji folder
-    '/social/',       // Social icons
-    '/airbnb-platform-assets/',
-    '/platform-assets/',
-    '/original_application/',
-    '/airbnb-brand/',
-    '/category_icon/',
-    '/users/',        // User profile photos
-    'im/users',       // User profile images
-    '/miso/',         // Airbnb illustration system (MISO)
-    '/lottie/',       // Animated graphics
-    'mediacdn',       // Media CDN (profile pics)
-    '/icon/',         // Icon folders
-    '/icons/',        // Icon folders
-    '_icon',          // Icon suffix
-    '-icon',          // Icon suffix
-    'amenity',        // Amenity icons
-    'amenities',      // Amenity icons
-    'category',       // Category icons
-    '/pictures/c/',   // Category pictures folder
-    '/im/pictures/5/', // Known illustration/icon folder
-    '/im/pictures/7/', // Known illustration/icon folder
+    '/icon',
+    '/emoji',
+    '/em/',
+    '/social/',
+    '/category',
+    'amenity',
+    'amenities',
+    'mediacdn',
+    '/c/',            // Category folder
+    '/5/',            // Known icon folder
+    '/7/',            // Known icon folder
   ]
   
-  for (const pattern of definiteExclusions) {
+  // Check exclusions (but allow MISO/Hosting)
+  for (const pattern of exclusions) {
+    if (pattern === '/miso/' && lowerUrl.includes('/miso/hosting/')) {
+      continue // Allow MISO hosting photos
+    }
     if (lowerUrl.includes(pattern)) {
-      return true
+      return false
     }
   }
   
-  // Check for very small image dimensions in URL
+  // Check for reasonable image dimensions if present in URL
   const dimensionMatch = url.match(/\/(\d+)x(\d+)/)
   if (dimensionMatch) {
     const width = parseInt(dimensionMatch[1])
     const height = parseInt(dimensionMatch[2])
-    // Only skip very small images (icons)
-    if (width < 100 || height < 100) {
-      return true
+    // Property photos should be reasonably large
+    if (width < 200 || height < 200) {
+      return false
     }
   }
   
-  // Filter PNG images that are likely icons/illustrations (property photos are usually jpg/webp)
-  // Only filter PNGs from certain paths that are likely to be icons
-  if (lowerUrl.includes('.png') && 
-      (lowerUrl.includes('/pictures/') && !lowerUrl.includes('hosting') && !lowerUrl.includes('prohost'))) {
-    // PNG in a generic pictures folder (not hosting) is likely an icon
-    return true
+  // Prefer jpg/webp over png (property photos are rarely PNG)
+  if (lowerUrl.includes('.png')) {
+    return false
   }
   
-  return false
+  return true
+}
+
+/**
+ * Legacy function - kept for backward compatibility
+ */
+function isAirbnbLogo(url: string): boolean {
+  return !isPropertyPhoto(url)
 }
