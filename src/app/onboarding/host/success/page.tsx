@@ -105,11 +105,23 @@ function SuccessContent() {
         </div>
 
         <Link
-          href="/beta/dashboard/host?welcome=true"
+          href="/beta/dashboard/host/welcome"
           className="mt-6 block rounded-full border-2 border-black bg-[#28D17C] px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
         >
-          Go to Dashboard →
+          Get Started →
         </Link>
+        
+        <button
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('hostOnboardingComplete', 'true')
+            }
+            window.location.href = '/beta/dashboard/host'
+          }}
+          className="mt-3 text-sm text-black/50 underline hover:text-black"
+        >
+          Skip intro, go to dashboard
+        </button>
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Container } from "@/components/layout/container"
 import { HostOnboardingGuide } from "@/components/hosts/host-onboarding-guide"
 
@@ -9,6 +10,14 @@ export default function HostWelcomePage() {
 
   const handleComplete = () => {
     // Mark as complete in localStorage so we don't show again
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hostOnboardingComplete', 'true')
+    }
+    router.push('/beta/dashboard/host')
+  }
+
+  const handleSkip = () => {
+    // Mark as complete even if skipped
     if (typeof window !== 'undefined') {
       localStorage.setItem('hostOnboardingComplete', 'true')
     }
@@ -31,6 +40,16 @@ export default function HostWelcomePage() {
 
       <Container className="py-8 sm:py-12">
         <HostOnboardingGuide onComplete={handleComplete} />
+        
+        {/* Skip link */}
+        <div className="mt-6 text-center">
+          <button
+            onClick={handleSkip}
+            className="text-sm text-black/50 underline hover:text-black"
+          >
+            Skip intro and go to dashboard
+          </button>
+        </div>
       </Container>
     </div>
   )
