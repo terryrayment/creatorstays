@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     // If promo code covers full amount, mark as paid immediately
     if (finalAmount === 0 && promoCodeRecord) {
-      // Update host profile
+      // Update host profile - mark both paid AND onboarding complete
       await prisma.hostProfile.update({
         where: { userId: session.user.id },
         data: {
@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
           membershipPaidAt: new Date(),
           membershipAmount: 0,
           promoCodeUsed: promoCodeRecord.code,
+          onboardingComplete: true, // Mark onboarding as complete
         },
       })
 

@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
           const originalAmount = parseInt(checkoutSession.metadata.originalAmount || '0')
           const discountAmount = parseInt(checkoutSession.metadata.discountAmount || '0')
           
-          // Update host profile to mark as paid
+          // Update host profile to mark as paid AND onboarding complete
           await prisma.hostProfile.update({
             where: { userId },
             data: {
@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
               membershipAmount: checkoutSession.amount_total,
               stripePaymentId: checkoutSession.payment_intent as string,
               promoCodeUsed: promoCode,
+              onboardingComplete: true, // Mark onboarding as complete
             },
           })
           
