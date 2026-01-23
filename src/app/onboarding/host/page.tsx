@@ -272,7 +272,7 @@ export default function HostOnboardingPage() {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = (e) => {
-        const img = new Image()
+        const img = document.createElement('img')
         img.onload = () => {
           const canvas = document.createElement('canvas')
           let width = img.width
