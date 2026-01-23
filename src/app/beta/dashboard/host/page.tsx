@@ -498,7 +498,12 @@ export default function HostDashboardPage() {
 
             {/* What's coming */}
             <div className="rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-4 mb-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#4AA3FF] mb-2">🚀 Coming soon</p>
+              <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#4AA3FF] mb-2">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                </svg>
+                Coming soon
+              </p>
               <ul className="space-y-1.5 text-sm text-black">
                 <li className="flex items-start gap-2">
                   <span className="text-[#4AA3FF] mt-0.5">•</span>
@@ -517,7 +522,12 @@ export default function HostDashboardPage() {
 
             {/* What we need */}
             <div className="rounded-xl border-2 border-black bg-[#FAFAFA] p-4 mb-6">
-              <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">🤝 How you can help</p>
+              <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-black/50 mb-2">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+                How you can help
+              </p>
               <p className="text-sm text-black/70">
                 Get your property ready now. When creators join, hosts with complete profiles get matched first. Your early feedback shapes what we build.
               </p>

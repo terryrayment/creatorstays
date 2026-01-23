@@ -496,9 +496,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                     <button
                       type="button"
                       onClick={() => removePhoto(idx)}
-                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-black bg-white text-[10px] font-bold text-black hover:bg-red-100"
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-black bg-white text-black hover:bg-red-100"
                     >
-                      ✕
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
                     {idx === 0 && (
                       <span className="absolute bottom-1 left-1 rounded-full border border-black bg-[#FFD84A] px-1.5 py-0.5 text-[8px] font-bold text-black">
@@ -542,10 +544,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
             <Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => setStep(1)}>← Back</Button>
             <div className="flex gap-2">
               <Button 
-                className="border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 text-[#4AA3FF] hover:bg-[#4AA3FF]/20" 
+                className="flex items-center gap-1.5 border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 text-[#4AA3FF] hover:bg-[#4AA3FF]/20" 
                 onClick={() => setShowPreviewModal(true)}
               >
-                👁 Preview
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.01 9.964 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.01-9.964-7.178z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Preview
               </Button>
               <Button 
                 className="bg-black text-white hover:bg-black/90 disabled:opacity-50 disabled:cursor-not-allowed" 
@@ -574,10 +580,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               </div>
               <div className="flex gap-2">
                 <Button 
-                  className="border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 text-[#4AA3FF] hover:bg-[#4AA3FF]/20" 
+                  className="flex items-center gap-1.5 border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 text-[#4AA3FF] hover:bg-[#4AA3FF]/20" 
                   onClick={() => setShowPreviewModal(true)}
                 >
-                  👁 Preview
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.01 9.964 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.01-9.964-7.178z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Preview
                 </Button>
                 <Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => handleSave(true)} disabled={isSaving}>Save Draft</Button>
                 <Button className={`border-2 border-black bg-black text-white hover:bg-black/90 transition-all duration-300 ${saveSuccess ? 'animate-pulse !bg-emerald-500' : ''}`} onClick={() => handleSave(false)} disabled={isSaving || !canPublish}>{isSaving ? 'Saving...' : saveSuccess ? '✓ Published!' : 'Publish Property'}</Button>
@@ -626,14 +636,22 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 {/* Header */}
                 <div className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-black bg-[#4AA3FF] p-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">👁</span>
-                    <span className="font-bold text-white">Creator Preview</span>
+                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.01 9.964 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.01-9.964-7.178z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <div>
+                      <span className="font-bold text-white">Creator Preview</span>
+                      <p className="text-xs text-white/80">This is what creators will see when viewing your listing</p>
+                    </div>
                   </div>
                   <button
                     onClick={() => setShowPreviewModal(false)}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30"
                   >
-                    ✕
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
                 
@@ -737,8 +755,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                     <button className="flex-1 rounded-full border-2 border-black bg-black py-3 text-sm font-bold text-white">
                       Send Offer
                     </button>
-                    <button className="rounded-full border-2 border-black bg-white px-6 py-3 text-sm font-bold text-black">
-                      ♡ Save
+                    <button className="flex items-center gap-2 rounded-full border-2 border-black bg-white px-6 py-3 text-sm font-bold text-black">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                      </svg>
+                      Save
                     </button>
                   </div>
                 </div>

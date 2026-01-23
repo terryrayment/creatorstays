@@ -15,7 +15,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { displayName, contactEmail, location, bio, styleTags, idealGuests, vibes, houseRules } = body
+    const { 
+      displayName, contactEmail, location, bio, styleTags, idealGuests, vibes, houseRules,
+      idealCreators, contentNeeds, budget, responseTime, onboardingComplete
+    } = body
+
+    // Build creatorPrefs JSON if new fields provided
+    const creatorPrefsData = (idealCreators || contentNeeds || budget) ? {
+      idealCreators: idealCreators || [],
+      contentNeeds: contentNeeds || [],
+      budgetRange: budget || null,
+    } : undefined
 
     // Upsert host profile
     const hostProfile = await prisma.hostProfile.upsert({
@@ -29,6 +39,9 @@ export async function POST(request: NextRequest) {
         idealGuests: idealGuests || [],
         vibes: vibes || [],
         houseRules: houseRules || [],
+        ...(responseTime !== undefined && { responseTime }),
+        ...(onboardingComplete !== undefined && { onboardingComplete }),
+        ...(creatorPrefsData && { creatorPrefs: creatorPrefsData }),
       },
       create: {
         userId: session.user.id,
@@ -40,6 +53,9 @@ export async function POST(request: NextRequest) {
         idealGuests: idealGuests || [],
         vibes: vibes || [],
         houseRules: houseRules || [],
+        responseTime: responseTime || null,
+        onboardingComplete: onboardingComplete || false,
+        ...(creatorPrefsData && { creatorPrefs: creatorPrefsData }),
       },
     })
 
@@ -66,7 +82,7 @@ export async function PUT(request: NextRequest) {
     const { 
       displayName, contactEmail, location, bio, avatarUrl,
       styleTags, idealGuests, vibes, houseRules, 
-      onboardingComplete, creatorPrefs, contentGoals
+      onboardingComplete, creatorPrefs, contentGoals, responseTime
     } = body
 
     // Upsert host profile
@@ -85,6 +101,7 @@ export async function PUT(request: NextRequest) {
         ...(onboardingComplete !== undefined && { onboardingComplete }),
         ...(creatorPrefs !== undefined && { creatorPrefs }),
         ...(contentGoals !== undefined && { contentGoals }),
+        ...(responseTime !== undefined && { responseTime }),
       },
       create: {
         userId: session.user.id,

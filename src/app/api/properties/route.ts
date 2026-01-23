@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
       isActive,
       isDraft,
       lastImportedAt,
+      icalUrl,
     } = body
     
     // Explicitly check for boolean values (don't use defaults that override passed values)
@@ -144,6 +145,7 @@ export async function POST(request: NextRequest) {
     const propertyData = {
       hostProfileId: hostProfile.id,
       airbnbUrl: airbnbUrl || null,
+      icalUrl: icalUrl || null,
       title: title || null,
       venueType: finalVenueType,
       cityRegion: cityRegion || null,

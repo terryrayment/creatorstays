@@ -21,7 +21,11 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
     <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-xl border-2 border-black bg-[#28D17C] px-4 py-3 shadow-lg">
       <span className="text-sm font-bold text-black">{message}</span>
-      <button onClick={onClose} className="text-black/60 hover:text-black">✕</button>
+      <button onClick={onClose} className="text-black/60 hover:text-black">
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   )
 }
@@ -288,13 +292,13 @@ function LocationSearch({
 
           {/* Show suggestions if searching, otherwise show presets */}
           {inputValue.length >= 2 ? (
-            <div className="max-h-48 overflow-y-auto border-t border-black/10 pt-1">
+            <div className="max-h-48 overflow-y-auto border-t border-black pt-1">
               {suggestions.length > 0 ? (
                 suggestions.map((loc) => (
                   <button
                     key={loc}
                     type="button"
-                    className="w-full px-4 py-2 text-left text-[12px] font-medium text-black transition-colors hover:bg-[#FFD84A]"
+                    className="w-full px-4 py-2 text-left text-[12px] font-bold text-black transition-colors hover:bg-[#FFD84A]"
                     onClick={() => {
                       onChange(loc)
                       setOpen(false)
@@ -305,7 +309,7 @@ function LocationSearch({
                   </button>
                 ))
               ) : (
-                <p className="px-4 py-2 text-[11px] text-black/50">
+                <p className="px-4 py-2 text-[11px] text-black">
                   No results found. Try another search.
                 </p>
               )}
@@ -326,15 +330,15 @@ function LocationSearch({
               </button>
               
               {/* Preset locations */}
-              <div className="border-t border-black/10 mt-1 pt-1">
-                <p className="px-4 py-1 text-[9px] font-bold uppercase tracking-wider text-black/50">Popular</p>
+              <div className="border-t border-black mt-1 pt-1">
+                <p className="px-4 py-1 text-[9px] font-bold uppercase tracking-wider text-black">Popular</p>
                 {presetLocations.map((loc) => {
                   const isSelected = value === loc
                   return (
                     <button
                       key={loc}
                       type="button"
-                      className={`flex w-full items-center gap-2 px-4 py-2 text-left text-[12px] font-medium text-black transition-colors ${isSelected ? 'bg-[#FFD84A] font-bold' : 'hover:bg-black/5'}`}
+                      className={`flex w-full items-center gap-2 px-4 py-2 text-left text-[12px] font-bold text-black transition-colors ${isSelected ? 'bg-[#FFD84A]' : 'hover:bg-black/5'}`}
                       onClick={() => {
                         onChange(loc)
                         setOpen(false)
@@ -347,7 +351,7 @@ function LocationSearch({
                 })}
               </div>
               
-              <p className="mt-2 px-4 text-[9px] text-black/40">
+              <p className="mt-2 px-4 text-[9px] text-black">
                 Shows creators within 150 miles of location
               </p>
             </>
