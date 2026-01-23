@@ -542,31 +542,43 @@ export default function HostOnboardingPage() {
       console.log("[SaveData] Profile saved successfully")
 
       console.log("[SaveData] Saving property...", existingPropertyId ? `(updating ${existingPropertyId})` : "(creating new)")
+      console.log("[SaveData] Property data being sent:", {
+        id: existingPropertyId,
+        title: data.propertyTitle,
+        propertyType: data.propertyType,
+        cityRegion: data.cityRegion,
+        priceNightlyRange: data.priceRange,
+        beds: parseInt(data.bedrooms) || 1,
+        isDraft: false,
+        isActive: true,
+      })
       
       // Only save first photo as hero to speed up checkout
       // Full photo gallery can be managed in dashboard
       const heroPhoto = data.photos[0] || ""
       
+      const propertyPayload = {
+        id: existingPropertyId, // Pass existing ID to update instead of create
+        title: data.propertyTitle,
+        propertyType: data.propertyType,
+        cityRegion: data.cityRegion,
+        priceNightlyRange: data.priceRange,
+        beds: parseInt(data.bedrooms) || 1,
+        baths: parseFloat(data.bathrooms) || 1,
+        maxGuests: parseInt(data.maxGuests) || 2,
+        amenities: data.amenities,
+        vibeTags: [],
+        photos: heroPhoto ? [heroPhoto] : [], // Only save hero photo for speed
+        heroImageUrl: heroPhoto,
+        airbnbUrl: data.airbnbUrl,
+        isDraft: false, // Publish the property - THIS IS CRITICAL
+        isActive: true,
+      }
+      
       const propertyRes = await fetch("/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: existingPropertyId, // Pass existing ID to update instead of create
-          title: data.propertyTitle,
-          propertyType: data.propertyType,
-          cityRegion: data.cityRegion,
-          priceNightlyRange: data.priceRange,
-          beds: parseInt(data.bedrooms) || 1,
-          baths: parseFloat(data.bathrooms) || 1,
-          maxGuests: parseInt(data.maxGuests) || 2,
-          amenities: data.amenities,
-          vibeTags: [],
-          photos: heroPhoto ? [heroPhoto] : [], // Only save hero photo for speed
-          heroImageUrl: heroPhoto,
-          airbnbUrl: data.airbnbUrl,
-          isDraft: false, // Publish the property
-          isActive: true,
-        }),
+        body: JSON.stringify(propertyPayload),
       })
 
       if (!propertyRes.ok) {
@@ -604,14 +616,22 @@ export default function HostOnboardingPage() {
     setError("")
 
     try {
+      // CRITICAL: Save property data BEFORE checkout
+      // This must succeed or we show an error
       console.log("[Checkout] Saving data...")
-      try {
-        await saveData()
-        console.log("[Checkout] Data saved successfully")
-      } catch (saveError: any) {
-        console.error("[Checkout] Save error (continuing anyway):", saveError)
-        // Continue with checkout even if save partially failed
+      console.log("[Checkout] Property data to save:", {
+        title: data.propertyTitle,
+        cityRegion: data.cityRegion,
+        priceRange: data.priceRange,
+        photos: data.photos.length,
+        existingPropertyId
+      })
+      
+      const saveSuccess = await saveData()
+      if (!saveSuccess) {
+        throw new Error("Failed to save property data")
       }
+      console.log("[Checkout] Data saved successfully")
 
       if (selectedPlan === 'agency') {
         console.log("[Checkout] Processing agency plan...")

@@ -176,16 +176,24 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Property not found' }, { status: 404 })
       }
       
+      console.log('[Properties API] Updating property:', propertyIdToUse)
+      console.log('[Properties API] Before update - isDraft:', existing.isDraft, 'title:', existing.title)
+      console.log('[Properties API] Will set - isDraft:', propertyData.isDraft, 'title:', propertyData.title)
+      
       // Update existing
       property = await prisma.property.update({
         where: { id: propertyIdToUse },
         data: propertyData,
       })
+      
+      console.log('[Properties API] After update - isDraft:', property.isDraft, 'title:', property.title)
     } else {
       // Create new
+      console.log('[Properties API] Creating new property')
       property = await prisma.property.create({
         data: propertyData,
       })
+      console.log('[Properties API] Created property:', property.id, 'isDraft:', property.isDraft)
     }
 
     return NextResponse.json({ property })

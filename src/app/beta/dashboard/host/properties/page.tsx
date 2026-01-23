@@ -1084,6 +1084,21 @@ export default function HostPropertiesPage() {
           </div>
         </div>
       )}
+      
+      {/* Footer */}
+      <footer className="border-t-2 border-black bg-white mt-12">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A] font-black text-sm">
+                CS
+              </div>
+              <span className="font-bold text-black">CreatorStays</span>
+            </div>
+            <p className="text-xs text-black/60">© 2026 CreatorStays. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

@@ -40,16 +40,6 @@ export default function HostWelcomePage() {
 
       <Container className="py-8 sm:py-12">
         <HostOnboardingGuide onComplete={handleComplete} />
-        
-        {/* Skip link */}
-        <div className="mt-6 text-center">
-          <button
-            onClick={handleSkip}
-            className="text-sm text-black/50 underline hover:text-black"
-          >
-            Skip intro and go to dashboard
-          </button>
-        </div>
       </Container>
     </div>
   )

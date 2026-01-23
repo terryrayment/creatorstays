@@ -487,25 +487,26 @@ export default function SearchCreatorsPage() {
             </div>
 
             {/* Sort row */}
-            <div className="mt-3 flex items-center justify-between border-t border-black/10 pt-3">
+            <div className="mt-3 flex items-center justify-between border-t-2 border-black pt-3">
               <p className="text-sm font-bold text-black">
                 {loading ? 'Searching...' : `${pagination.total || allCreators.length} creator${(pagination.total || allCreators.length) !== 1 ? 's' : ''} found`}
                 {location && ` near ${location}`}
               </p>
               <div className="flex items-center gap-3">
-                <label className="flex items-center gap-1.5 text-[11px] font-bold text-black">
+                <label className="flex items-center gap-2 text-[12px] font-bold text-black cursor-pointer">
                   <input
                     type="checkbox"
                     checked={openToGiftedStays}
                     onChange={e => setOpenToGiftedStays(e.target.checked)}
-                    className="h-4 w-4 rounded border-2 border-black"
+                    className="h-4 w-4 rounded border-2 border-black accent-black"
                   />
                   Gifted stays only
                 </label>
                 <select
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value)}
-                  className="h-10 rounded-full border-2 border-black bg-white px-4 text-[12px] font-bold text-black focus:outline-none"
+                  className="h-10 rounded-full border-2 border-black bg-white px-4 pr-8 text-[12px] font-bold text-black focus:outline-none cursor-pointer appearance-none"
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
                 >
                   {SORT_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
