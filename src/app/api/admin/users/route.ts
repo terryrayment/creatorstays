@@ -41,17 +41,26 @@ export async function DELETE(request: NextRequest) {
       const authUserId = hostProfile.userId
 
       // Delete in order of dependencies:
-      // 1. Delete all messages for this host
-      await prisma.message.deleteMany({
-        where: { hostProfileId: hostProfile.id }
+      
+      // 1. Get all conversations for this host (messages cascade delete)
+      const conversations = await prisma.conversation.findMany({
+        where: { hostProfileId: hostProfile.id },
+        select: { id: true }
       })
+      
+      // 2. Delete messages in these conversations first
+      for (const conv of conversations) {
+        await prisma.message.deleteMany({
+          where: { conversationId: conv.id }
+        })
+      }
 
-      // 2. Delete all conversations for this host
+      // 3. Delete all conversations for this host
       await prisma.conversation.deleteMany({
         where: { hostProfileId: hostProfile.id }
       })
 
-      // 3. Delete content submissions for collaborations with this host
+      // 4. Delete content submissions for collaborations with this host
       const collabs = await prisma.collaboration.findMany({
         where: { hostProfileId: hostProfile.id },
         select: { id: true }
@@ -63,17 +72,17 @@ export async function DELETE(request: NextRequest) {
         })
       }
 
-      // 4. Delete all collaborations for this host
+      // 5. Delete all collaborations for this host
       await prisma.collaboration.deleteMany({
         where: { hostProfileId: hostProfile.id }
       })
 
-      // 5. Delete all offers from this host
+      // 6. Delete all offers from this host
       await prisma.offer.deleteMany({
         where: { hostProfileId: hostProfile.id }
       })
 
-      // 6. Delete tracking links for properties
+      // 7. Delete tracking links for properties
       const properties = await prisma.property.findMany({
         where: { hostProfileId: hostProfile.id },
         select: { id: true }
@@ -85,37 +94,37 @@ export async function DELETE(request: NextRequest) {
         })
       }
 
-      // 7. Delete all properties
+      // 8. Delete all properties
       await prisma.property.deleteMany({
         where: { hostProfileId: hostProfile.id }
       })
 
-      // 8. Delete team members if agency
+      // 9. Delete team members if agency
       await prisma.teamMember.deleteMany({
         where: { hostProfileId: hostProfile.id }
       })
 
-      // 9. Delete pending invites
+      // 10. Delete pending invites
       await prisma.teamInvite.deleteMany({
         where: { hostProfileId: hostProfile.id }
       })
 
-      // 10. Delete the host profile
+      // 11. Delete the host profile
       await prisma.hostProfile.delete({
         where: { id: hostProfile.id }
       })
 
-      // 11. Delete sessions for this user
+      // 12. Delete sessions for this user
       await prisma.session.deleteMany({
         where: { userId: authUserId }
       })
 
-      // 12. Delete accounts (OAuth) for this user
+      // 13. Delete accounts (OAuth) for this user
       await prisma.account.deleteMany({
         where: { userId: authUserId }
       })
 
-      // 13. Delete the user
+      // 14. Delete the user
       await prisma.user.delete({
         where: { id: authUserId }
       })
@@ -142,17 +151,26 @@ export async function DELETE(request: NextRequest) {
       const authUserId = creatorProfile.userId
 
       // Delete in order of dependencies:
-      // 1. Delete all messages for this creator
-      await prisma.message.deleteMany({
-        where: { creatorProfileId: creatorProfile.id }
+      
+      // 1. Get all conversations for this creator
+      const conversations = await prisma.conversation.findMany({
+        where: { creatorProfileId: creatorProfile.id },
+        select: { id: true }
       })
+      
+      // 2. Delete messages in these conversations first
+      for (const conv of conversations) {
+        await prisma.message.deleteMany({
+          where: { conversationId: conv.id }
+        })
+      }
 
-      // 2. Delete all conversations for this creator
+      // 3. Delete all conversations for this creator
       await prisma.conversation.deleteMany({
         where: { creatorProfileId: creatorProfile.id }
       })
 
-      // 3. Delete content submissions
+      // 4. Delete content submissions
       const collabs = await prisma.collaboration.findMany({
         where: { creatorProfileId: creatorProfile.id },
         select: { id: true }
@@ -164,52 +182,52 @@ export async function DELETE(request: NextRequest) {
         })
       }
 
-      // 4. Delete all collaborations
+      // 5. Delete all collaborations
       await prisma.collaboration.deleteMany({
         where: { creatorProfileId: creatorProfile.id }
       })
 
-      // 5. Delete all offers to this creator
+      // 6. Delete all offers to this creator
       await prisma.offer.deleteMany({
         where: { creatorProfileId: creatorProfile.id }
       })
 
-      // 6. Delete tracking links
+      // 7. Delete tracking links
       await prisma.trackingLink.deleteMany({
         where: { creatorProfileId: creatorProfile.id }
       })
 
-      // 7. Delete reviews
+      // 8. Delete reviews
       await prisma.review.deleteMany({
         where: { creatorProfileId: creatorProfile.id }
       })
 
-      // 8. Delete referrals where this creator referred someone
+      // 9. Delete referrals where this creator referred someone
       await prisma.referral.deleteMany({
         where: { referrerId: creatorProfile.id }
       })
 
-      // 9. Delete referrals where this creator was referred
+      // 10. Delete referrals where this creator was referred
       await prisma.referral.deleteMany({
         where: { referredId: creatorProfile.id }
       })
 
-      // 10. Delete the creator profile
+      // 11. Delete the creator profile
       await prisma.creatorProfile.delete({
         where: { id: creatorProfile.id }
       })
 
-      // 11. Delete sessions
+      // 12. Delete sessions
       await prisma.session.deleteMany({
         where: { userId: authUserId }
       })
 
-      // 12. Delete accounts (OAuth)
+      // 13. Delete accounts (OAuth)
       await prisma.account.deleteMany({
         where: { userId: authUserId }
       })
 
-      // 13. Delete the user
+      // 14. Delete the user
       await prisma.user.delete({
         where: { id: authUserId }
       })
