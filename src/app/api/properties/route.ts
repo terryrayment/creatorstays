@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       reviewCount: reviewCount ? parseInt(reviewCount) : null,
       guests: maxGuests ? parseInt(maxGuests) : (guests ? parseInt(guests) : null),
       beds: beds ? parseInt(beds) : null,
-      baths: baths ? parseFloat(baths) : null,
+      baths: baths ? Math.round(parseFloat(baths)) : null, // Round to int for schema
       amenities,
       vibeTags,
       houseRules: houseRules || null,
@@ -159,6 +159,14 @@ export async function POST(request: NextRequest) {
       isDraft: finalIsDraft,
       lastImportedAt: lastImportedAt ? new Date(lastImportedAt) : null,
     }
+    
+    console.log('[Properties API] Property data to save:', { 
+      title: propertyData.title, 
+      propertyType: propertyData.propertyType,
+      isDraft: propertyData.isDraft, 
+      isActive: propertyData.isActive,
+      propertyIdToUse 
+    })
 
     let property
     if (propertyIdToUse) {

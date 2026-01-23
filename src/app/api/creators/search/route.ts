@@ -187,44 +187,6 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    // If no real creators found, return mock data
-    if (creators.length === 0 && !query) {
-      // Apply filters to mock data
-      let filteredMocks = [...MOCK_CREATORS]
-      
-      if (niche && niche !== 'All Niches') {
-        filteredMocks = filteredMocks.filter(c => c.niches.includes(niche))
-      }
-      if (location && location !== 'All Locations') {
-        filteredMocks = filteredMocks.filter(c => 
-          c.location.toLowerCase().includes(location.toLowerCase())
-        )
-      }
-      if (platform && platform !== 'All Platforms') {
-        filteredMocks = filteredMocks.filter(c => c.platforms.includes(platform))
-      }
-      if (openToGiftedStays) {
-        filteredMocks = filteredMocks.filter(c => c.openToGiftedStays)
-      }
-      if (minFollowers > 0) {
-        filteredMocks = filteredMocks.filter(c => c.totalFollowers >= minFollowers)
-      }
-      if (maxFollowers > 0) {
-        filteredMocks = filteredMocks.filter(c => c.totalFollowers <= maxFollowers)
-      }
-
-      return NextResponse.json({
-        creators: filteredMocks,
-        pagination: {
-          page: 1,
-          limit,
-          total: filteredMocks.length,
-          pages: 1,
-        },
-        isMockData: true,
-      })
-    }
-
     // Format response
     const formattedCreators = creators.map(c => ({
       id: c.id,
@@ -247,16 +209,51 @@ export async function GET(request: NextRequest) {
       isVerified: c.isVerified,
       isMock: false,
     }))
+    
+    // Always include mock data for beta - filter mock creators
+    let filteredMocks = [...MOCK_CREATORS]
+    
+    if (query) {
+      const q = query.toLowerCase()
+      filteredMocks = filteredMocks.filter(c => 
+        c.displayName.toLowerCase().includes(q) ||
+        c.handle.toLowerCase().includes(q) ||
+        c.location.toLowerCase().includes(q)
+      )
+    }
+    if (niche && niche !== 'All Niches') {
+      filteredMocks = filteredMocks.filter(c => c.niches.includes(niche))
+    }
+    if (location && location !== 'All Locations') {
+      filteredMocks = filteredMocks.filter(c => 
+        c.location.toLowerCase().includes(location.toLowerCase())
+      )
+    }
+    if (platform && platform !== 'All Platforms') {
+      filteredMocks = filteredMocks.filter(c => c.platforms.includes(platform))
+    }
+    if (openToGiftedStays) {
+      filteredMocks = filteredMocks.filter(c => c.openToGiftedStays)
+    }
+    if (minFollowers > 0) {
+      filteredMocks = filteredMocks.filter(c => c.totalFollowers >= minFollowers)
+    }
+    if (maxFollowers > 0) {
+      filteredMocks = filteredMocks.filter(c => c.totalFollowers <= maxFollowers)
+    }
+    
+    // Combine real creators first, then mock creators
+    const allCreators = [...formattedCreators, ...filteredMocks]
 
     return NextResponse.json({
-      creators: formattedCreators,
+      creators: allCreators,
       pagination: {
         page,
         limit,
-        total,
-        pages: Math.ceil(total / limit),
+        total: allCreators.length,
+        pages: Math.ceil(allCreators.length / limit),
       },
-      isMockData: false,
+      isMockData: filteredMocks.length > 0,
     })
   } catch (error) {
     console.error('[Creators Search API] Error:', error)

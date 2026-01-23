@@ -350,11 +350,61 @@ export default function SearchCreatorsPage() {
 
   return (
     <div className="dashboard min-h-screen bg-[#FAFAFA]">
+      {/* Header */}
+      <div className="border-b-2 border-black bg-white">
+        <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
+            <span className="text-sm font-bold text-black">Host Dashboard</span>
+          </div>
+          <Link 
+            href="/" 
+            className="rounded-full border-2 border-black bg-[#FFD84A] px-4 py-1.5 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
+          >
+            ← Back to site
+          </Link>
+        </div>
+      </div>
+      
+      {/* Navigation Strip */}
+      <div className="border-b-2 border-black bg-[#FFD84A]">
+        <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:px-6">
+          <div className="flex flex-wrap gap-2">
+            <Link 
+              href="/beta/dashboard/host/properties"
+              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+            >
+              My Properties
+            </Link>
+            <Link 
+              href="/beta/dashboard/collaborations"
+              className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
+            >
+              Collaborations
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Demo)</span>
+            </Link>
+            <Link 
+              href="/beta/dashboard/host/settings"
+              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+            >
+              Settings
+            </Link>
+            <Link 
+              href="/beta/dashboard/host/search-creators"
+              className="rounded-full border-2 border-black bg-black px-3 py-1 text-[10px] font-bold text-white"
+            >
+              Find Creators
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
       <div className="py-6">
         <Container>
           <div className="mb-4">
-            <Link href="/beta/dashboard/host" className="text-xs font-bold text-black hover:underline">
-              ← Back to Dashboard
+            <Link href="/beta/dashboard/host" className="text-xs font-bold text-black/60 hover:text-black">
+              ← Dashboard
             </Link>
           </div>
 
