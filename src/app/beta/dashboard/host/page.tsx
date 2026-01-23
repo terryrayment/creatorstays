@@ -80,8 +80,6 @@ function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
           >
             Settings
           </Link>
-            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
-          </Link>
           {isAgency && (
             <Link 
               href="/beta/dashboard/host/team"
