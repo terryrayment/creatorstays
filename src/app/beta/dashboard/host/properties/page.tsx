@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 import { Container } from "@/components/layout/container"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import LocationAutocomplete from "@/components/ui/location-autocomplete"
+import { DashboardFooter } from "@/components/navigation/dashboard-footer"
 
 interface Property {
   id: string
@@ -149,14 +151,40 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const [isUploading, setIsUploading] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [lastSavedPhotos, setLastSavedPhotos] = useState<string[]>([])
 
-  useEffect(() => { setForm(property); setStep(1) }, [property])
+  useEffect(() => { setForm(property); setStep(1); setLastSavedPhotos(property.photos || []) }, [property])
   useEffect(() => { 
     onStepChange?.(step)
     // Scroll to top when step changes
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [step, onStepChange])
-
+  
+  // Auto-save photos when they change (to prevent loss when switching tabs)
+  useEffect(() => {
+    const currentPhotos = form.photos || []
+    // Only auto-save if photos have changed and there are photos to save
+    if (currentPhotos.length > 0 && JSON.stringify(currentPhotos) !== JSON.stringify(lastSavedPhotos)) {
+      const autoSaveTimer = setTimeout(async () => {
+        try {
+          await fetch('/api/properties', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ 
+              id: form.id, 
+              photos: currentPhotos,
+              heroImageUrl: form.heroImageUrl || currentPhotos[0]
+            }) 
+          })
+          setLastSavedPhotos(currentPhotos)
+          console.log('[Properties] Auto-saved photos')
+        } catch (e) { 
+          console.error('[Properties] Auto-save failed:', e) 
+        }
+      }, 1000) // Debounce by 1 second
+      return () => clearTimeout(autoSaveTimer)
+    }
+  }, [form.photos, form.id, form.heroImageUrl, lastSavedPhotos])
   // Handle photo upload - uploads to Cloudinary
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -981,11 +1009,78 @@ export default function HostPropertiesPage() {
   }
 
   return (
-    <div className="dashboard min-h-screen bg-[#FAFAFA]">
-      <div className="py-6">
+    <div className="dashboard min-h-screen bg-[#FAFAFA] flex flex-col">
+      {/* Header */}
+      <div className="border-b-2 border-black bg-white">
+        <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
+            <Link href="/beta/dashboard/host" className="text-sm font-bold text-black hover:opacity-70">Host Dashboard</Link>
+            {isAgency && (
+              <span className="rounded-full border-2 border-black bg-[#28D17C] px-2.5 py-0.5 text-[10px] font-bold text-black">AGENCY</span>
+            )}
+          </div>
+          <Link 
+            href="/" 
+            className="text-xs font-bold text-black hover:opacity-70"
+          >
+            ← Back to site
+          </Link>
+        </div>
+      </div>
+      
+      {/* Navigation Strip */}
+      <div className="border-b-2 border-black bg-[#FFD84A]">
+        <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:px-6">
+          <div className="flex flex-wrap gap-2">
+            <Link 
+              href="/beta/dashboard/host/properties"
+              className="rounded-full border-2 border-black bg-black px-3 py-1 text-[10px] font-bold text-white"
+            >
+              My Properties
+            </Link>
+            <Link 
+              href="/beta/dashboard/collaborations"
+              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+            >
+              Collaborations
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+            </Link>
+            <Link 
+              href="/beta/dashboard/host/analytics"
+              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+            >
+              Analytics
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+            </Link>
+            <Link 
+              href="/beta/dashboard/host/search-creators"
+              className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
+            >
+              Find Creators
+              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+            </Link>
+            <Link 
+              href="/beta/dashboard/host/settings"
+              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+            >
+              Settings
+            </Link>
+            {isAgency && (
+              <Link 
+                href="/beta/dashboard/host/team"
+                className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+              >
+                Manage Team
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Content */}
+      <div className="flex-1 py-6">
         <Container>
-          <div className="mb-4"><Link href="/beta/dashboard/host" className="text-xs font-bold text-black/60 hover:text-black">← Dashboard</Link></div>
-          
           {/* Success Toast */}
           {saveSuccess && (
             <div className="mb-4 rounded-lg border-2 border-black bg-[#28D17C] px-4 py-2 text-sm font-bold text-black">
@@ -1083,7 +1178,9 @@ export default function HostPropertiesPage() {
                 <div className="mt-6 rounded-xl border-2 border-black bg-white p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl">🔑</span>
+                      <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                      </svg>
                       <h3 className="font-bold text-black">Owner Access</h3>
                     </div>
                     <button
@@ -1123,6 +1220,9 @@ export default function HostPropertiesPage() {
           </div>
         </Container>
       </div>
+      
+      {/* Footer */}
+      <DashboardFooter />
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (

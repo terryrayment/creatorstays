@@ -240,16 +240,18 @@ function ReferralSection() {
           className="w-full flex items-center justify-between p-4 text-left"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFD84A] border-2 border-black text-sm">
-              🎁
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFD84A] border-2 border-black">
+              <svg className="h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
             </div>
             <div>
               <p className="text-sm font-bold text-black">Know another host? Share the love!</p>
-              <p className="text-xs text-black/60">Get 1 month free when they sign up</p>
+              <p className="text-xs text-black">Both get priority creator matching when they join</p>
             </div>
           </div>
           <svg 
-            className={`h-5 w-5 text-black/60 transition-transform ${expanded ? 'rotate-180' : ''}`} 
+            className={`h-5 w-5 text-black transition-transform ${expanded ? 'rotate-180' : ''}`} 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor" 
@@ -265,7 +267,7 @@ function ReferralSection() {
             <div className="grid gap-4 sm:grid-cols-2 mt-4">
               {/* Share Link */}
               <div>
-                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-black/60">
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-black">
                   Your referral link
                 </label>
                 <div className="flex gap-2">
@@ -290,7 +292,7 @@ function ReferralSection() {
 
               {/* Invite by Email */}
               <div>
-                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-black/60">
+                <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-black">
                   Or invite by email
                 </label>
                 <div className="flex gap-2">
@@ -318,9 +320,11 @@ function ReferralSection() {
 
             {/* Incentive info */}
             <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/50 p-2">
-              <span className="text-xs">💡</span>
-              <p className="text-[11px] text-black/70">
-                <span className="font-bold">Both you and your friend get 1 month free</span> when they add their first property.
+              <svg className="h-4 w-4 text-black shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+              </svg>
+              <p className="text-[11px] text-black">
+                <span className="font-bold">You both get priority creator matching</span> when they add their first property.
               </p>
             </div>
           </div>
