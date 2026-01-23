@@ -76,11 +76,13 @@ export async function POST(request: NextRequest) {
       id,
       airbnbUrl,
       title,
+      propertyType,
       cityRegion,
       priceNightlyRange,
       rating,
       reviewCount,
       guests,
+      maxGuests,
       beds,
       baths,
       amenities = [],
@@ -89,10 +91,16 @@ export async function POST(request: NextRequest) {
       photos = [],
       heroImageUrl,
       creatorBrief,
-      isActive = true,
-      isDraft = true,
+      isActive,
+      isDraft,
       lastImportedAt,
     } = body
+    
+    // Explicitly check for boolean values (don't use defaults that override passed values)
+    const finalIsActive = isActive !== undefined ? isActive : true
+    const finalIsDraft = isDraft !== undefined ? isDraft : true
+    
+    console.log('[Properties API] Received:', { title, propertyType, isDraft, isActive, finalIsDraft, finalIsActive })
 
     // If no ID provided but host already has a property, find and update it
     let propertyIdToUse = id
@@ -133,21 +141,22 @@ export async function POST(request: NextRequest) {
       hostProfileId: hostProfile.id,
       airbnbUrl: airbnbUrl || null,
       title: title || null,
+      propertyType: propertyType || null,
       cityRegion: cityRegion || null,
       priceNightlyRange: priceNightlyRange || null,
       rating: rating ? parseFloat(rating) : null,
       reviewCount: reviewCount ? parseInt(reviewCount) : null,
-      guests: guests ? parseInt(guests) : null,
+      guests: maxGuests ? parseInt(maxGuests) : (guests ? parseInt(guests) : null),
       beds: beds ? parseInt(beds) : null,
-      baths: baths ? parseInt(baths) : null,
+      baths: baths ? parseFloat(baths) : null,
       amenities,
       vibeTags,
       houseRules: houseRules || null,
       photos,
       heroImageUrl: heroImageUrl || null,
       creatorBrief: creatorBrief || null,
-      isActive,
-      isDraft,
+      isActive: finalIsActive,
+      isDraft: finalIsDraft,
       lastImportedAt: lastImportedAt ? new Date(lastImportedAt) : null,
     }
 
