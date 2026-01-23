@@ -1,5 +1,6 @@
 "use client"
 
+import { useRef, useEffect, useState } from "react"
 import Image from "next/image"
 
 // Process steps with expanded host-focused copy
@@ -10,7 +11,7 @@ const steps = [
     line1: "ADD YOUR",
     line2: "PROPERTY",
     copy: "Paste your Airbnb link. We pull in your photos, description, and details automatically.",
-    benefit: "Live in 60 seconds.",
+    benefit: "LIVE IN 60 SECONDS.",
     image: "/images/hp-step-1.jpg",
   },
   {
@@ -19,7 +20,7 @@ const steps = [
     line1: "INVITE A",
     line2: "CREATOR",
     copy: "Browse creators by niche and audience. Send collaboration offers with your terms and budget.",
-    benefit: "No cold DMs. No guesswork.",
+    benefit: "NO COLD DMS. NO GUESSWORK.",
     image: "/images/hp-step-2.jpg",
   },
   {
@@ -28,7 +29,7 @@ const steps = [
     line1: "THEY POST",
     line2: "YOUR LINK",
     copy: "Creators share your tracked link in their content. Every click is attributed to you.",
-    benefit: "Real reach. Real attribution.",
+    benefit: "REAL REACH. REAL ATTRIBUTION.",
     image: "/images/hp-step-3.jpg",
   },
   {
@@ -37,7 +38,7 @@ const steps = [
     line1: "WATCH",
     line2: "TRAFFIC GROW",
     copy: "See clicks, unique visitors, and traffic sources in real time. Know exactly what's working.",
-    benefit: "More bookings, without learning ads.",
+    benefit: "MORE BOOKINGS, WITHOUT LEARNING ADS.",
     image: "/images/hp-step-4.jpg",
   },
   {
@@ -46,28 +47,75 @@ const steps = [
     line1: "PAY THROUGH",
     line2: "PLATFORM",
     copy: "Pay creators via Stripe. We handle contracts, payouts, and 1099s at year-end.",
-    benefit: "Clean paperwork. Repeatable outreach.",
+    benefit: "CLEAN PAPERWORK. REPEATABLE OUTREACH.",
     image: "/images/hp-step-5.jpg",
   },
 ]
 
 export function FeatureScroller() {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [isPaused, setIsPaused] = useState(false)
+  const animationRef = useRef<number>()
+  const scrollPosition = useRef(0)
+  
+  // Triple the cards for seamless infinite scroll
+  const tripleSteps = [...steps, ...steps, ...steps]
+  const CARD_WIDTH = 368 // 360px card + 8px gap
+  const TOTAL_WIDTH = CARD_WIDTH * steps.length
+
+  useEffect(() => {
+    const container = scrollRef.current
+    if (!container) return
+
+    // Start in the middle set
+    scrollPosition.current = TOTAL_WIDTH
+    container.scrollLeft = scrollPosition.current
+
+    const animate = () => {
+      if (!isPaused && container) {
+        scrollPosition.current += 0.5 // Speed: pixels per frame
+        
+        // Reset to middle set when reaching end
+        if (scrollPosition.current >= TOTAL_WIDTH * 2) {
+          scrollPosition.current = TOTAL_WIDTH
+        }
+        
+        container.scrollLeft = scrollPosition.current
+      }
+      animationRef.current = requestAnimationFrame(animate)
+    }
+
+    animationRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [isPaused])
+
   return (
-    <section className="bg-black py-4 overflow-hidden">
-      {/* Scroll container */}
+    <section 
+      className="bg-black py-6 overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Scroll container with extra padding for hover scale */}
       <div
-        className="scrollbar-hide flex gap-2 overflow-x-auto px-2"
+        ref={scrollRef}
+        className="scrollbar-hide flex gap-2 overflow-x-hidden px-4"
         style={{ 
-          height: "min(440px, 78vh)",
+          paddingTop: "20px",
+          paddingBottom: "20px",
         }}
       >
-        {steps.map((step) => (
+        {tripleSteps.map((step, index) => (
           <div
-            key={step.id}
+            key={`${step.id}-${index}`}
             className="feature-card relative flex-shrink-0 rounded-2xl border-[3px] border-black overflow-hidden transition-transform duration-300 ease-out hover:scale-105 cursor-pointer"
             style={{
               width: "360px",
-              height: "min(420px, 75vh)",
+              height: "420px",
             }}
           >
             {/* Full-bleed background image */}

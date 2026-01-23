@@ -148,6 +148,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
 
   useEffect(() => { setForm(property); setStep(1) }, [property])
   useEffect(() => { 
@@ -156,7 +157,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [step, onStepChange])
 
-  // Handle photo upload
+  // Handle photo upload - uploads to Cloudinary
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
@@ -166,17 +167,38 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      // Convert to base64 data URL for demo (in production, upload to cloud storage)
-      const reader = new FileReader()
-      await new Promise<void>((resolve) => {
-        reader.onload = () => {
-          if (typeof reader.result === 'string') {
-            newPhotos.push(reader.result)
-          }
-          resolve()
-        }
+      
+      // Convert to base64 first
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
         reader.readAsDataURL(file)
       })
+      
+      try {
+        // Upload to Cloudinary via API
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            file: base64,
+            collaborationId: form.id || 'property-photos'
+          }),
+        })
+        
+        if (res.ok) {
+          const data = await res.json()
+          newPhotos.push(data.file.url)
+        } else {
+          // Fallback to base64 if upload fails (for demo/local dev)
+          console.warn('Cloudinary upload failed, using base64 fallback')
+          newPhotos.push(base64)
+        }
+      } catch (err) {
+        // Fallback to base64 if upload fails
+        console.warn('Cloudinary upload error, using base64 fallback:', err)
+        newPhotos.push(base64)
+      }
     }
     
     setForm(prev => ({
@@ -490,13 +512,21 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           </div>
           <div className="flex justify-between pt-2">
             <Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => setStep(1)}>← Back</Button>
-            <Button 
-              className="bg-black text-white hover:bg-black/90 disabled:opacity-50 disabled:cursor-not-allowed" 
-              onClick={() => setStep(3)}
-              disabled={!form.priceNightlyRange || !form.guests || !form.beds || !form.baths}
-            >
-              Next: Creator Brief →
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                className="border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 text-[#4AA3FF] hover:bg-[#4AA3FF]/20" 
+                onClick={() => setShowPreviewModal(true)}
+              >
+                👁 Preview
+              </Button>
+              <Button 
+                className="bg-black text-white hover:bg-black/90 disabled:opacity-50 disabled:cursor-not-allowed" 
+                onClick={() => setStep(3)}
+                disabled={!form.priceNightlyRange || !form.guests || !form.beds || !form.baths}
+              >
+                Next: Creator Brief →
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -515,12 +545,179 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 {onDelete && <Button className="border-2 border-red-200 bg-red-50 text-red-600 hover:bg-red-100" onClick={onDelete}>Delete</Button>}
               </div>
               <div className="flex gap-2">
+                <Button 
+                  className="border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 text-[#4AA3FF] hover:bg-[#4AA3FF]/20" 
+                  onClick={() => setShowPreviewModal(true)}
+                >
+                  👁 Preview
+                </Button>
                 <Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => handleSave(true)} disabled={isSaving}>Save Draft</Button>
                 <Button className={`border-2 border-black bg-black text-white hover:bg-black/90 transition-all duration-300 ${saveSuccess ? 'animate-pulse !bg-emerald-500' : ''}`} onClick={() => handleSave(false)} disabled={isSaving || !canPublish}>{isSaving ? 'Saving...' : saveSuccess ? '✓ Published!' : 'Publish Property'}</Button>
               </div>
             </div>
             {!canPublish && <p className="mt-3 text-right text-[11px] text-amber-600">Complete at least 7 checklist items to publish</p>}
           </div>
+          
+          {/* Creator Preview Modal */}
+          {showPreviewModal && typeof document !== 'undefined' && createPortal(
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 99999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1rem',
+            }}>
+              {/* Backdrop */}
+              <div 
+                onClick={() => setShowPreviewModal(false)}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0,0,0,0.7)',
+                }}
+              />
+              {/* Modal */}
+              <div style={{
+                position: 'relative',
+                width: '100%',
+                maxWidth: '48rem',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                backgroundColor: '#ffffff',
+                borderRadius: '1rem',
+                border: '3px solid #000',
+              }}>
+                {/* Header */}
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-black bg-[#4AA3FF] p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">👁</span>
+                    <span className="font-bold text-white">Creator Preview</span>
+                  </div>
+                  <button
+                    onClick={() => setShowPreviewModal(false)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                {/* Preview Content */}
+                <div className="p-6">
+                  {/* Hero Image */}
+                  {(form.heroImageUrl || (form.photos && form.photos[0])) && (
+                    <div className="mb-4 aspect-video overflow-hidden rounded-xl border-2 border-black">
+                      <img 
+                        src={form.heroImageUrl || form.photos?.[0]} 
+                        alt={form.title || 'Property'} 
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Photo Grid (additional photos) */}
+                  {form.photos && form.photos.length > 1 && (
+                    <div className="mb-4 grid grid-cols-4 gap-2">
+                      {form.photos.slice(1, 5).map((photo, idx) => (
+                        <div key={idx} className="aspect-square overflow-hidden rounded-lg border-2 border-black">
+                          <img src={photo} alt="" className="h-full w-full object-cover" />
+                        </div>
+                      ))}
+                      {form.photos.length > 5 && (
+                        <div className="aspect-square flex items-center justify-center rounded-lg border-2 border-black bg-black/10 text-sm font-bold text-black">
+                          +{form.photos.length - 5} more
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Title and Location */}
+                  <div className="mb-4">
+                    <h2 className="font-heading text-2xl font-black text-black">{form.title || 'Untitled Property'}</h2>
+                    <p className="text-sm text-black/60">{form.cityRegion || 'Location not set'}</p>
+                  </div>
+                  
+                  {/* Key Stats */}
+                  <div className="mb-4 flex flex-wrap gap-3">
+                    {form.priceNightlyRange && (
+                      <span className="rounded-full border-2 border-black bg-[#FFD84A] px-3 py-1 text-sm font-bold text-black">
+                        {form.priceNightlyRange}/night
+                      </span>
+                    )}
+                    {form.guests && (
+                      <span className="rounded-full border-2 border-black bg-white px-3 py-1 text-sm font-medium text-black">
+                        {form.guests} guests
+                      </span>
+                    )}
+                    {form.beds && (
+                      <span className="rounded-full border-2 border-black bg-white px-3 py-1 text-sm font-medium text-black">
+                        {form.beds} beds
+                      </span>
+                    )}
+                    {form.baths && (
+                      <span className="rounded-full border-2 border-black bg-white px-3 py-1 text-sm font-medium text-black">
+                        {form.baths} baths
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Vibe Tags */}
+                  {form.vibeTags && form.vibeTags.length > 0 && (
+                    <div className="mb-4">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black/50">Vibe</p>
+                      <div className="flex flex-wrap gap-2">
+                        {form.vibeTags.map(tag => (
+                          <span key={tag} className="rounded-full border-2 border-[#28D17C] bg-[#28D17C]/20 px-3 py-1 text-xs font-bold text-black">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Amenities */}
+                  {form.amenities && form.amenities.length > 0 && (
+                    <div className="mb-4">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black/50">Amenities</p>
+                      <div className="flex flex-wrap gap-2">
+                        {form.amenities.map(a => (
+                          <span key={a} className="rounded-full border border-black/20 bg-black/5 px-3 py-1 text-xs font-medium text-black">
+                            {a}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Creator Brief */}
+                  {form.creatorBrief && (
+                    <div className="rounded-xl border-2 border-black bg-[#FAFAFA] p-4">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black/50">Creator Brief</p>
+                      <p className="text-sm text-black">{form.creatorBrief}</p>
+                    </div>
+                  )}
+                  
+                  {/* CTA (mock) */}
+                  <div className="mt-6 flex gap-3">
+                    <button className="flex-1 rounded-full border-2 border-black bg-black py-3 text-sm font-bold text-white">
+                      Send Offer
+                    </button>
+                    <button className="rounded-full border-2 border-black bg-white px-6 py-3 text-sm font-bold text-black">
+                      ♡ Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
         </div>
       )}
 
