@@ -187,10 +187,10 @@ export function FeatureScroller() {
             />
             {/* Content overlay */}
             <div className="relative z-10 flex h-full flex-col justify-between p-4">
-              <div className="rounded-xl bg-white/90 backdrop-blur-sm p-3 self-start">
+              <div>
                 {/* Big number */}
                 <span 
-                  className="font-heading text-[3.5rem] leading-none tracking-[-0.04em] text-black"
+                  className="font-heading text-[3.5rem] leading-none tracking-[-0.04em] text-black drop-shadow-sm"
                   style={{ fontWeight: 900 }}
                 >
                   {step.number}
@@ -198,24 +198,24 @@ export function FeatureScroller() {
                 {/* Split title */}
                 <h3 className="mt-1 font-heading leading-[0.82] tracking-[-0.04em]">
                   <span 
-                    className="block text-[1.75rem] text-black sm:text-[2rem] md:text-[2.25rem]" 
+                    className="block text-[1.75rem] text-black drop-shadow-sm sm:text-[2rem] md:text-[2.25rem]" 
                     style={{ fontWeight: 900 }}
                   >
                     {step.line1}
                   </span>
                   <span 
-                    className="block text-[1.75rem] text-black sm:text-[2rem] md:text-[2.25rem]" 
+                    className="block text-[1.75rem] text-black drop-shadow-sm sm:text-[2rem] md:text-[2.25rem]" 
                     style={{ fontWeight: 400 }}
                   >
                     {step.line2}
                   </span>
                 </h3>
                 {/* Explanatory copy */}
-                <p className="mt-3 text-[13px] font-medium leading-snug text-black">
+                <p className="mt-3 text-[13px] font-medium leading-snug text-black drop-shadow-sm">
                   {step.copy}
                 </p>
                 {/* Micro-benefit */}
-                <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-black">
+                <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-black drop-shadow-sm">
                   {step.benefit}
                 </p>
               </div>
