@@ -267,6 +267,46 @@ export default function HostOnboardingPage() {
   }
   
   // Handle photo upload
+  // Compress image to reduce size
+  const compressImage = (file: File, maxWidth: number = 1200, quality: number = 0.7): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          let width = img.width
+          let height = img.height
+          
+          // Scale down if too large
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width
+            width = maxWidth
+          }
+          
+          canvas.width = width
+          canvas.height = height
+          
+          const ctx = canvas.getContext('2d')
+          if (!ctx) {
+            reject(new Error('Could not get canvas context'))
+            return
+          }
+          
+          ctx.drawImage(img, 0, 0, width, height)
+          
+          // Convert to JPEG with compression
+          const compressed = canvas.toDataURL('image/jpeg', quality)
+          resolve(compressed)
+        }
+        img.onerror = () => reject(new Error('Failed to load image'))
+        img.src = e.target?.result as string
+      }
+      reader.onerror = () => reject(new Error('Failed to read file'))
+      reader.readAsDataURL(file)
+    })
+  }
+
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
@@ -276,16 +316,24 @@ export default function HostOnboardingPage() {
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      const reader = new FileReader()
-      await new Promise<void>((resolve) => {
-        reader.onload = () => {
-          if (typeof reader.result === 'string') {
-            newPhotos.push(reader.result)
+      try {
+        // Compress image before adding
+        const compressed = await compressImage(file, 1200, 0.7)
+        newPhotos.push(compressed)
+      } catch (err) {
+        console.error('Failed to compress image:', err)
+        // Fallback to original if compression fails
+        const reader = new FileReader()
+        await new Promise<void>((resolve) => {
+          reader.onload = () => {
+            if (typeof reader.result === 'string') {
+              newPhotos.push(reader.result)
+            }
+            resolve()
           }
-          resolve()
-        }
-        reader.readAsDataURL(file)
-      })
+          reader.readAsDataURL(file)
+        })
+      }
     }
     
     setData(prev => ({
@@ -494,6 +542,11 @@ export default function HostOnboardingPage() {
       console.log("[SaveData] Profile saved successfully")
 
       console.log("[SaveData] Saving property...", existingPropertyId ? `(updating ${existingPropertyId})` : "(creating new)")
+      
+      // Only save first photo as hero to speed up checkout
+      // Full photo gallery can be managed in dashboard
+      const heroPhoto = data.photos[0] || ""
+      
       const propertyRes = await fetch("/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -508,8 +561,8 @@ export default function HostOnboardingPage() {
           maxGuests: parseInt(data.maxGuests) || 2,
           amenities: data.amenities,
           vibeTags: [],
-          photos: data.photos,
-          heroImageUrl: data.photos[0] || "",
+          photos: heroPhoto ? [heroPhoto] : [], // Only save hero photo for speed
+          heroImageUrl: heroPhoto,
           airbnbUrl: data.airbnbUrl,
           isDraft: false, // Publish the property
           isActive: true,

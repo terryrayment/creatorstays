@@ -442,23 +442,25 @@ export default function SearchCreatorsPage() {
                 {loading ? 'Searching...' : `${pagination.total || allCreators.length} creator${(pagination.total || allCreators.length) !== 1 ? 's' : ''} found`}
                 {location && ` near ${location}`}
               </p>
-              <div className="flex items-center gap-2">
-                <label className="flex items-center gap-1.5 text-[10px] font-bold text-black/60">
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-1.5 text-[11px] font-bold text-black">
                   <input
                     type="checkbox"
                     checked={openToGiftedStays}
                     onChange={e => setOpenToGiftedStays(e.target.checked)}
-                    className="h-3.5 w-3.5 rounded border-black"
+                    className="h-4 w-4 rounded border-2 border-black"
                   />
                   Gifted stays only
                 </label>
-                <span className="text-black/30">|</span>
-                <Select
-                  className="w-48"
+                <select
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value)}
-                  options={SORT_OPTIONS}
-                />
+                  className="h-10 rounded-full border-2 border-black bg-white px-4 text-[12px] font-bold text-black focus:outline-none"
+                >
+                  {SORT_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -478,7 +480,7 @@ export default function SearchCreatorsPage() {
             {allCreators.map(creator => (
               <div
                 key={creator.id}
-                className={`relative rounded-xl border-2 bg-white p-4 transition-transform hover:-translate-y-1 ${
+                className={`relative rounded-xl border-2 bg-white p-4 transition-transform duration-200 hover:-translate-y-1 ${
                   creator.isMock ? 'border-dashed border-black/40' : 'border-black'
                 }`}
               >
@@ -498,28 +500,25 @@ export default function SearchCreatorsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-black">{creator.name}</p>
-                    <p className="text-sm text-black">@{creator.handle}</p>
+                    <p className="text-sm text-black/70">@{creator.handle}</p>
                   </div>
                 </div>
 
-                {/* Stats */}
+                {/* Stats - removed transition classes */}
                 <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                   <div className="rounded-lg border border-black/20 bg-black/5 p-2">
                     <p className="text-lg font-bold text-black">{creator.audienceSize}</p>
-                    <p className="text-[9px] text-black">Followers</p>
+                    <p className="text-[9px] text-black/70">Followers</p>
                   </div>
                   <div className="rounded-lg border border-black/20 bg-black/5 p-2">
                     <p className="text-lg font-bold text-black">{creator.engagementRate}</p>
-                    <p className="text-[9px] text-black">Engagement</p>
+                    <p className="text-[9px] text-black/70">Engagement</p>
                   </div>
                   <div className="rounded-lg border border-black/20 bg-black/5 p-2">
                     <p className="text-sm font-bold text-black">{creator.rate}</p>
-                    <p className="text-[9px] text-black">Rate</p>
+                    <p className="text-[9px] text-black/70">Rate</p>
                   </div>
                 </div>
-
-                {/* Bio */}
-                <p className="mt-3 text-xs text-black line-clamp-2">{creator.bio}</p>
 
                 {/* Tags */}
                 <div className="mt-3 flex flex-wrap gap-1">
@@ -536,14 +535,14 @@ export default function SearchCreatorsPage() {
                 </div>
 
                 {/* Location with distance */}
-                <p className="mt-2 text-[10px] text-black">
+                <p className="mt-2 text-[10px] text-black/70">
                    {creator.location}
                   {creator.distance !== null && (
-                    <span className="ml-1 text-black/50">({Math.round(creator.distance)} mi away)</span>
+                    <span className="ml-1">({Math.round(creator.distance)} mi away)</span>
                   )}
                 </p>
 
-                {/* Action */}
+                {/* Action - no transition on button */}
                 {creator.isMock ? (
                   <button 
                     className="mt-4 w-full rounded-full border-2 border-dashed border-black/40 bg-black/5 py-2 text-xs font-bold text-black/50 cursor-not-allowed"
@@ -552,13 +551,12 @@ export default function SearchCreatorsPage() {
                     Sample Profile
                   </button>
                 ) : (
-                  <Button 
-                    className="mt-4 w-full" 
-                    size="sm"
+                  <button 
+                    className="mt-4 w-full rounded-full border-2 border-black bg-black py-2 text-xs font-bold text-white hover:bg-black/80"
                     onClick={() => setSelectedCreator(creator)}
                   >
                     Send Offer
-                  </Button>
+                  </button>
                 )}
               </div>
             ))}
