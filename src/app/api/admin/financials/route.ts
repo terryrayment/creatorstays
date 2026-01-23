@@ -75,14 +75,13 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         status: true,
-        paymentCents: true,
-        platformFeeCents: true,
+        paymentAmount: true,
         createdAt: true,
         completedAt: true,
-        hostProfile: {
+        host: {
           select: { displayName: true }
         },
-        creatorProfile: {
+        creator: {
           select: { displayName: true, handle: true }
         },
         property: {
@@ -94,8 +93,9 @@ export async function GET(request: NextRequest) {
     })
 
     // Total deal volume
-    const totalDealVolume = collaborations.reduce((sum, c) => sum + (c.paymentCents || 0), 0)
-    const totalPlatformFees = collaborations.reduce((sum, c) => sum + (c.platformFeeCents || 0), 0)
+    const totalDealVolume = collaborations.reduce((sum, c) => sum + (c.paymentAmount || 0), 0)
+    // Platform fee is 15% of deal volume
+    const totalPlatformFees = Math.round(totalDealVolume * 0.15)
 
     // Completed deals
     const completedDeals = collaborations.filter(c => c.status === "completed" || c.status === "paid").length
