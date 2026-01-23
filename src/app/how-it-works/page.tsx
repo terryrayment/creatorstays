@@ -150,9 +150,17 @@ export default function HowItWorksPage() {
           </div>
         </div>
 
-        {/* Image Block */}
-        <div className="mt-8">
-          <ImageBlock src="/images/creator-laptop-support.jpg" aspectRatio="aspect-[21/9]" />
+        {/* Video Block */}
+        <div className="mt-8 overflow-hidden rounded-2xl border-[3px] border-black bg-[#8B5CF6]">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="aspect-[21/9] w-full object-cover"
+          >
+            <source src="/videos/document-animation.mp4" type="video/mp4" />
+          </video>
         </div>
 
         {/* Bottom CTA */}

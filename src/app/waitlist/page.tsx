@@ -152,8 +152,18 @@ export default function WaitlistPage() {
             </div>
           </div>
 
-          {/* Right: Image Block */}
-          <ImageBlock src={pageImage} aspectRatio="aspect-[4/3]" />
+          {/* Right: Video Block */}
+          <div className="block-hover overflow-hidden rounded-2xl border-[3px] border-black bg-[#8B5CF6]">
+            <video 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
+              className="h-full w-full object-cover"
+            >
+              <source src="/videos/creator-phone.mp4" type="video/mp4" />
+            </video>
+          </div>
         </div>
 
         {/* Form Section */}

@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
             beds: listingBeds ? parseInt(listingBeds) : null,
             baths: listingBaths ? parseFloat(listingBaths) : null,
             guests: listingGuests ? parseInt(listingGuests) : null,
-            propertyType: listingPropertyType || null,
+            venueType: listingPropertyType || null,
             isDraft: true,
             isActive: true,
           },
