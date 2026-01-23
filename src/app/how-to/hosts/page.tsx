@@ -11,7 +11,7 @@ const steps = [
     num: "02",
     title: "ADD YOUR",
     subtitle: "LISTING",
-    content: "Paste your Airbnb URL. We pull your photos, description, location, and pricing automatically. Review and adjust if needed.",
+    content: "Upload photos, fill in your property details, and connect your availability calendar. Your listing is ready in minutes.",
   },
   {
     num: "03",

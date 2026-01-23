@@ -159,6 +159,8 @@ export default function AdminDashboardPage() {
   const [newMessage, setNewMessage] = useState({ hostId: "", creatorId: "", message: "", senderType: "host" })
   const [sendingMessage, setSendingMessage] = useState(false)
   const [messageSuccess, setMessageSuccess] = useState("")
+  const [deletingUser, setDeletingUser] = useState<string | null>(null)
+  const [deleteResult, setDeleteResult] = useState<{ success: boolean; message: string } | null>(null)
 
   // Financials state
   const [financials, setFinancials] = useState<FinancialData | null>(null)
@@ -265,6 +267,42 @@ export default function AdminDashboardPage() {
   const handleLogout = async () => {
     await fetch("/api/admin/logout", { method: "POST" })
     router.push("/admin/login")
+  }
+
+  const deleteUser = async (userId: string, type: 'host' | 'creator', displayName: string) => {
+    if (!confirm(`DELETE ${type.toUpperCase()}: ${displayName}\n\nThis will permanently delete:\n- User account\n- All properties\n- All offers & collaborations\n- All messages\n\nThis cannot be undone. Continue?`)) {
+      return
+    }
+    
+    setDeletingUser(userId)
+    setDeleteResult(null)
+    
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, type })
+      })
+      
+      const data = await res.json()
+      
+      if (res.ok) {
+        setDeleteResult({ success: true, message: data.message })
+        // Refresh stats to remove deleted user from list
+        const statsRes = await fetch("/api/admin/stats")
+        if (statsRes.ok) {
+          const newStats = await statsRes.json()
+          setStats(newStats)
+        }
+      } else {
+        setDeleteResult({ success: false, message: data.error || 'Delete failed' })
+      }
+    } catch (e) {
+      setDeleteResult({ success: false, message: 'Network error' })
+    }
+    
+    setDeletingUser(null)
+    setTimeout(() => setDeleteResult(null), 5000)
   }
 
   const handleSendAnnouncement = async (type: string) => {
@@ -415,6 +453,11 @@ export default function AdminDashboardPage() {
               <h3 className="text-sm font-bold text-black">Recent Creators</h3>
               <span className="text-xs text-black/60">{stats.recentCreators.length} creators</span>
             </div>
+            {deleteResult && (
+              <div className={`mb-4 rounded-lg px-3 py-2 text-sm font-medium ${deleteResult.success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+                {deleteResult.message}
+              </div>
+            )}
             <div className="space-y-3">
               {stats.recentCreators.map(creator => (
                 <div key={creator.id} className="flex items-center justify-between border-b border-black/10 pb-3 last:border-0">
@@ -422,11 +465,20 @@ export default function AdminDashboardPage() {
                     <p className="font-bold text-black">{creator.displayName}</p>
                     <p className="text-xs text-black/60">@{creator.handle} · {creator.email}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-black/60">{formatDate(creator.createdAt)}</p>
-                    <Link href={`/creators/${creator.handle}`} className="text-xs font-bold text-[#4AA3FF] hover:underline">
-                      View Profile →
-                    </Link>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-xs text-black/60">{formatDate(creator.createdAt)}</p>
+                      <Link href={`/creators/${creator.handle}`} className="text-xs font-bold text-[#4AA3FF] hover:underline">
+                        View Profile →
+                      </Link>
+                    </div>
+                    <button
+                      onClick={() => deleteUser(creator.id, 'creator', creator.displayName)}
+                      disabled={deletingUser === creator.id}
+                      className="rounded-lg border-2 border-red-300 bg-red-50 px-2 py-1 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-50"
+                    >
+                      {deletingUser === creator.id ? '...' : 'Delete'}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -441,6 +493,11 @@ export default function AdminDashboardPage() {
               <h3 className="text-sm font-bold text-black">Recent Hosts</h3>
               <span className="text-xs text-black/60">{stats.recentHosts.length} hosts</span>
             </div>
+            {deleteResult && (
+              <div className={`mb-4 rounded-lg px-3 py-2 text-sm font-medium ${deleteResult.success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+                {deleteResult.message}
+              </div>
+            )}
             <div className="space-y-4">
               {stats.recentHosts.map(host => (
                 <div key={host.id} className="border-b border-black/10 pb-4 last:border-0">
@@ -458,10 +515,19 @@ export default function AdminDashboardPage() {
                       <p className="text-xs text-black/60">{host.email}</p>
                       {host.location && <p className="text-xs text-black/40">📍 {host.location}</p>}
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-black">{host.propertyCount} property</p>
-                      <p className="text-xs text-black/60">Joined: {formatDate(host.createdAt)}</p>
-                      {host.lastLoginAt && <p className="text-xs text-black/40">Last login: {formatDate(host.lastLoginAt)}</p>}
+                    <div className="flex items-start gap-3">
+                      <div className="text-right">
+                        <p className="font-bold text-black">{host.propertyCount} property</p>
+                        <p className="text-xs text-black/60">Joined: {formatDate(host.createdAt)}</p>
+                        {host.lastLoginAt && <p className="text-xs text-black/40">Last login: {formatDate(host.lastLoginAt)}</p>}
+                      </div>
+                      <button
+                        onClick={() => deleteUser(host.id, 'host', host.displayName)}
+                        disabled={deletingUser === host.id}
+                        className="rounded-lg border-2 border-red-300 bg-red-50 px-2 py-1 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-50"
+                      >
+                        {deletingUser === host.id ? '...' : 'Delete'}
+                      </button>
                     </div>
                   </div>
                   {host.propertyTitle && (

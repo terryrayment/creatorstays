@@ -593,11 +593,7 @@ export default function HostOnboardingPage() {
   // Validation
   const validateStep = (): boolean => {
     if (step === 1) {
-      // Must have either imported from Airbnb or clicked manual entry
-      if (!importSuccess && !manualEntry) {
-        setError("Please import your property from Airbnb or click 'enter details manually' to continue")
-        return false
-      }
+      // Must have property details filled in
       if (!data.propertyTitle.trim()) {
         setError("Please enter your property title")
         return false

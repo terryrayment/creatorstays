@@ -529,6 +529,19 @@ export default function HostOnboardingPage() {
         return
       }
 
+      // If iCal URL provided, trigger calendar sync in background (don't wait)
+      if (data.icalUrl) {
+        const propertyResult = await propertyRes.json()
+        if (propertyResult.property?.id) {
+          fetch(`/api/properties/${propertyResult.property.id}/calendar`, {
+            method: "POST",
+          }).catch(() => {
+            // Ignore errors - cron will retry
+            console.log("Calendar sync will be picked up by cron job")
+          })
+        }
+      }
+
       // Success - redirect to dashboard
       router.push("/dashboard/host?onboarded=true")
     } catch (e) {

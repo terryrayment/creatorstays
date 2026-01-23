@@ -401,6 +401,7 @@ model Property {
   airbnbUrl       String?   // Link to Airbnb/VRBO listing for creators to verify
   icalUrl         String?   // iCal URL for calendar sync (availability)
   lastCalendarSync DateTime? // Last time we synced the calendar
+  blockedDates    Json?     // Array of {start: ISO date, end: ISO date} for blocked periods
   lastImportedAt  DateTime?
   
   // Listing info

@@ -87,7 +87,7 @@ function ProcessSection() {
     {
       num: "01",
       title: "ADD YOUR PROPERTY",
-      desc: "Paste your Airbnb link. We pull the details automatically. Manage multiple listings from one dashboard.",
+      desc: "Upload photos, add details, connect your calendar. We sync availability so creators see when you're open.",
       color: "#4AA3FF",
     },
     {
@@ -265,9 +265,9 @@ function SignupSection() {
             
             <div className="mt-4 space-y-2">
               {[
-                "Paste your Airbnb link",
-                "Set your creator budget",
-                "Start receiving applications",
+                "Add your property & photos",
+                "Connect your availability calendar",
+                "Start receiving creator applications",
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-black bg-white text-[10px] font-black">

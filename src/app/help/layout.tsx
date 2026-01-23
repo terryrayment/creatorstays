@@ -32,7 +32,7 @@ const faqSchema = {
       name: "How do I add my vacation rental property?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Paste your Airbnb listing URL into the signup form. We automatically import your photos, title, description, and details. Your property goes live in under 60 seconds."
+        text: "Upload your photos, add your property details, and connect your availability calendar. We sync with your Airbnb or VRBO calendar so creators can see when you're available. Setup takes about 5 minutes."
       }
     },
     {

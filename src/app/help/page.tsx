@@ -20,13 +20,13 @@ const helpTopics = [
   { 
     id: "01", 
     title: "Adding your property", 
-    content: `To add your property, paste your full Airbnb listing URL into the signup form. We automatically pull your photos, title, description, location, amenities, and nightly rate. Your listing goes live in under 60 seconds—no manual data entry required.
+    content: `Adding your property takes just a few minutes. During signup, you'll enter your property details manually—title, location, beds, baths, amenities, and price range. Then upload at least 3 photos to showcase your space.
 
-Make sure you're using the public URL (the one guests see), not the host dashboard URL. The format should look like: airbnb.com/rooms/123456789. If you see an error, double-check for extra characters or tracking parameters at the end of the URL.
+The key step is connecting your availability calendar. Export your iCal URL from Airbnb, VRBO, or your booking platform and paste it in. We sync your calendar every few days so creators only see dates when you're actually available.
 
-After import, review your listing details in your dashboard. You can update the description or swap photos anytime. The listing stays synced with Airbnb pricing, but other changes are managed within CreatorStays.
+Optionally, add your Airbnb or VRBO listing URL as a reference link. Creators can click through to see your full listing, reviews, and verify your property. This builds trust without us needing to scrape anything.
 
-Common mistake: Using a private host URL or a link with ?guests=2 parameters. Strip those before pasting. If import fails, try copying the URL fresh from an incognito browser window.`,
+After setup, review your listing in the dashboard. You can update photos, adjust details, or refine your creator brief anytime. Your calendar stays synced automatically.`,
     href: "/how-to/hosts"
   },
   { 

@@ -17,7 +17,7 @@ const steps = [
     num: "01",
     title: "ADD YOUR",
     subtitle: "PROPERTY",
-    content: "Paste your Airbnb listing URL. We automatically import your photos, description, amenities, and pricing. Your listing goes live in under 60 seconds.",
+    content: "Upload your photos, add your details, and connect your calendar. We sync with your Airbnb/VRBO availability so creators only see dates you're actually open.",
     color: "#FFD84A",
   },
   {
@@ -31,7 +31,7 @@ const steps = [
     num: "03",
     title: "SEND",
     subtitle: "OFFERS",
-    content: "Set your base pay per deliverable. Optionally add traffic bonuses when tracked links perform. Creators can accept, counter, or decline.",
+    content: "Set your base pay per deliverable. Optionally add traffic bonuses when tracked links perform. We suggest open dates from your calendar.",
     color: "#D7B6FF",
   },
   {

@@ -13,6 +13,9 @@ import { DashboardFooter } from "@/components/navigation/dashboard-footer"
 interface Property {
   id: string
   airbnbUrl?: string
+  icalUrl?: string
+  lastCalendarSync?: string
+  blockedDates?: { start: string; end: string; summary?: string }[]
   title?: string
   cityRegion?: string
   priceNightlyRange?: string
@@ -102,6 +105,12 @@ function getChecklist(p: EditingProperty): { label: string; done: boolean }[] {
 }
 
 function PropertyListItem({ property, isSelected, onSelect }: { property: Property; isSelected: boolean; onSelect: () => void }) {
+  const hasCalendar = !!property.icalUrl
+  const lastSync = property.lastCalendarSync ? new Date(property.lastCalendarSync) : null
+  const syncStatus = hasCalendar 
+    ? (lastSync ? `Synced ${formatDate(property.lastCalendarSync!)}` : 'Pending sync')
+    : null
+  
   return (
     <button onClick={onSelect} className={`w-full rounded-lg border-2 border-black p-3 text-left transition-all ${isSelected ? 'bg-[#FFD84A]' : 'bg-white hover:bg-gray-50'}`}>
       <div className="flex items-start gap-3">
@@ -114,11 +123,19 @@ function PropertyListItem({ property, isSelected, onSelect }: { property: Proper
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-bold text-black">{property.title || 'Untitled'}</p>
           <p className="text-[11px] text-black/60">{property.cityRegion || 'No location'}</p>
-          <div className="mt-1 flex items-center gap-2">
+          <div className="mt-1 flex flex-wrap items-center gap-2">
             {property.isBoosted && (
               <span className="rounded-full border border-[#28D17C] bg-[#28D17C]/20 px-1.5 py-0.5 text-[9px] font-bold text-black">Boosted</span>
             )}
             <span className={`rounded-full border border-black px-1.5 py-0.5 text-[9px] font-bold ${property.isDraft ? 'bg-amber-100 text-black' : 'bg-emerald-100 text-black'}`}>{property.isDraft ? 'Draft' : 'Published'}</span>
+            {hasCalendar && (
+              <span className="flex items-center gap-1 rounded-full border border-[#4AA3FF] bg-[#4AA3FF]/10 px-1.5 py-0.5 text-[9px] font-medium text-black">
+                <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+                {syncStatus}
+              </span>
+            )}
             <span className="text-[9px] text-black/50">{formatDate(property.updatedAt)}</span>
           </div>
         </div>
@@ -152,6 +169,8 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [lastSavedPhotos, setLastSavedPhotos] = useState<string[]>([])
+  const [isSyncingCalendar, setIsSyncingCalendar] = useState(false)
+  const [calendarSyncResult, setCalendarSyncResult] = useState<{ success?: boolean; message?: string } | null>(null)
 
   useEffect(() => { setForm(property); setStep(1); setLastSavedPhotos(property.photos || []) }, [property])
   useEffect(() => { 
@@ -377,6 +396,26 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     setForm(prev => ({ ...prev, creatorBrief: `This ${tags} property in ${location} is perfect for creators looking for authentic, visually stunning content opportunities. Ideal for travel, lifestyle, and photography content. The space offers unique angles and natural lighting throughout the day.` }))
   }
 
+  const syncCalendar = async () => {
+    if (!form.id || !form.icalUrl) return
+    setIsSyncingCalendar(true)
+    setCalendarSyncResult(null)
+    try {
+      const res = await fetch(`/api/properties/${form.id}/calendar`, { method: 'POST' })
+      const data = await res.json()
+      if (data.success) {
+        setCalendarSyncResult({ success: true, message: `Synced! Found ${data.eventCount || 0} blocked periods.` })
+        // Update local state with new blocked dates
+        setForm(prev => ({ ...prev, blockedDates: data.blockedDates, lastCalendarSync: data.lastSync }))
+      } else {
+        setCalendarSyncResult({ success: false, message: data.error || 'Sync failed' })
+      }
+    } catch {
+      setCalendarSyncResult({ success: false, message: 'Network error' })
+    }
+    setIsSyncingCalendar(false)
+  }
+
   const handleSave = (asDraft: boolean) => {
     // Check if trying to publish when already have a published property (non-agency)
     if (!asDraft && publishedCount && publishedCount >= 1 && property.isNew) {
@@ -572,6 +611,69 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
             <textarea value={form.creatorBrief || ''} onChange={e => setForm({ ...form, creatorBrief: e.target.value })} placeholder="Describe what makes your property special for content creators..." rows={6} className="w-full resize-none rounded-lg border border-black/10 bg-white px-3 py-2 text-sm focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20" />
             <p className="mt-1 text-[10px] text-black/60">This helps creators understand your property.</p>
           </div>
+          
+          {/* Calendar Availability Section */}
+          <div className="rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/5 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <svg className="h-5 w-5 text-[#4AA3FF]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+              </svg>
+              <span className="text-sm font-bold text-black">Calendar Availability</span>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1.5 block text-[11px] font-bold text-black">iCal URL</label>
+                <div className="flex gap-2">
+                  <Input 
+                    value={form.icalUrl || ''} 
+                    onChange={e => setForm({ ...form, icalUrl: e.target.value })} 
+                    placeholder="https://www.airbnb.com/calendar/ical/..."
+                    className="flex-1"
+                  />
+                  {form.id && form.icalUrl && (
+                    <Button 
+                      onClick={syncCalendar}
+                      disabled={isSyncingCalendar}
+                      className="border-2 border-[#4AA3FF] bg-[#4AA3FF] text-white hover:bg-[#4AA3FF]/90"
+                    >
+                      {isSyncingCalendar ? 'Syncing...' : 'Sync Now'}
+                    </Button>
+                  )}
+                </div>
+                <p className="mt-1 text-[10px] text-black/60">Export your iCal from Airbnb, VRBO, or your booking platform. We sync every few hours.</p>
+              </div>
+              
+              {calendarSyncResult && (
+                <div className={`rounded-lg px-3 py-2 text-xs font-medium ${calendarSyncResult.success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+                  {calendarSyncResult.message}
+                </div>
+              )}
+              
+              {form.lastCalendarSync && (
+                <p className="text-[10px] text-black/50">
+                  Last synced: {new Date(form.lastCalendarSync).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                </p>
+              )}
+              
+              {form.blockedDates && (form.blockedDates as any[]).length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold text-black/70 mb-1">Blocked periods ({(form.blockedDates as any[]).length}):</p>
+                  <div className="flex flex-wrap gap-1">
+                    {(form.blockedDates as any[]).slice(0, 5).map((period: any, i: number) => (
+                      <span key={i} className="rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[9px] font-medium text-red-600">
+                        {new Date(period.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(period.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                    ))}
+                    {(form.blockedDates as any[]).length > 5 && (
+                      <span className="text-[9px] text-black/50">+{(form.blockedDates as any[]).length - 5} more</span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          
           <div className="mt-6 rounded-xl border-2 border-black bg-white p-4">
             <div className="flex items-center justify-between">
               <div className="flex gap-2">
