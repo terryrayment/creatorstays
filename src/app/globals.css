@@ -1080,9 +1080,11 @@
   opacity: 0.6;
 }
 
-/* Dashboard card hover - subtle lift, no glow */
-.dashboard .rounded-xl:hover,
-.dashboard .rounded-lg:hover {
+/* Dashboard card hover - only apply to interactive link/button cards */
+.dashboard a.rounded-xl:hover,
+.dashboard a.rounded-lg:hover,
+.dashboard button.rounded-xl:hover,
+.dashboard button.rounded-lg:hover {
   transform: translateY(-2px);
 }
 
