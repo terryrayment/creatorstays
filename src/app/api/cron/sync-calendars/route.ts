@@ -5,18 +5,10 @@ import { fetchAndParseICal } from '@/lib/ical'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300 // 5 minutes max for this job
 
-/**
- * Cron job to sync all property calendars
- * Should run every 6-12 hours
- * 
- * Add to vercel.json:
- * {
- *   "crons": [{
- *     "path": "/api/cron/sync-calendars",
- *     "schedule": "0 */6 * * *"
- *   }]
- * }
- */
+// Cron job to sync all property calendars
+// Should run every 6-12 hours
+// Schedule configured in vercel.json: "0 0/6 * * *" (every 6 hours)
+
 export async function GET(request: NextRequest) {
   try {
     // Verify cron secret (Vercel adds this header for cron jobs)
