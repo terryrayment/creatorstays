@@ -53,17 +53,31 @@ function NextStepStrip({ isAgency }: { isAgency?: boolean }) {
             My Properties
           </Link>
           <Link 
+            href="/beta/dashboard/collaborations"
+            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+          >
+            Collaborations
+            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+          </Link>
+          <Link 
+            href="/beta/dashboard/host/analytics"
+            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+          >
+            Analytics
+            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+          </Link>
+          <Link 
+            href="/beta/dashboard/host/search-creators"
+            className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
+          >
+            Find Creators
+            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
+          </Link>
+          <Link 
             href="/beta/dashboard/host/settings"
             className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
           >
             Settings
-          </Link>
-          <Link 
-            href="/beta/dashboard/host/search-creators"
-            className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
-          >
-            Find Creators
-            <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
           </Link>
           {isAgency && (
             <Link 
@@ -233,7 +247,7 @@ function ReferralSection() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-2 sm:px-6">
-      <div className="rounded-xl border-2 border-dashed border-black/30 bg-gradient-to-r from-[#FFD84A]/20 to-[#28D17C]/20 overflow-hidden">
+      <div className="rounded-xl border-2 border-black bg-white overflow-hidden">
         {/* Collapsed view */}
         <button
           onClick={() => setExpanded(!expanded)}
@@ -263,7 +277,7 @@ function ReferralSection() {
 
         {/* Expanded content */}
         {expanded && (
-          <div className="px-4 pb-4 pt-0 border-t border-black/10">
+          <div className="px-4 pb-4 pt-0 border-t border-black">
             <div className="grid gap-4 sm:grid-cols-2 mt-4">
               {/* Share Link */}
               <div>
@@ -319,7 +333,7 @@ function ReferralSection() {
             </div>
 
             {/* Incentive info */}
-            <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/50 p-2">
+            <div className="mt-3 flex items-center gap-2 rounded-lg border-2 border-black bg-white p-2">
               <svg className="h-4 w-4 text-black shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
               </svg>

@@ -183,11 +183,11 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
           </p>
           
           <div className="space-y-4 mt-4">
-            <div className="rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4">
+            <div className="rounded-xl border-2 border-black bg-[#28D17C] p-4">
               <p className="font-bold text-black flex items-center gap-2">
-                <span className="text-[#28D17C]">✓</span> Do this
+                <span className="text-black">✓</span> Do this
               </p>
-              <ul className="mt-2 space-y-2 text-sm text-black/80">
+              <ul className="mt-2 space-y-2 text-sm text-black">
                 <li>• <strong>Be specific</strong> about what you're offering (dates, value, expectations)</li>
                 <li>• <strong>Explain why them</strong> — mention something specific about their content you liked</li>
                 <li>• <strong>Be clear on deliverables</strong> — "2 Instagram Reels" is better than "some posts"</li>
@@ -195,11 +195,11 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
               </ul>
             </div>
             
-            <div className="rounded-xl border-2 border-red-300 bg-red-50 p-4">
+            <div className="rounded-xl border-2 border-black bg-red-200 p-4">
               <p className="font-bold text-black flex items-center gap-2">
-                <span className="text-red-500">✗</span> Avoid this
+                <span className="text-red-600">✗</span> Avoid this
               </p>
-              <ul className="mt-2 space-y-2 text-sm text-black/80">
+              <ul className="mt-2 space-y-2 text-sm text-black">
                 <li>• Generic "collab?" messages with no details</li>
                 <li>• Asking for content without offering fair value</li>
                 <li>• Demanding specific scripts or heavy editing control</li>
@@ -210,7 +210,7 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
           
           <div className="rounded-xl border-2 border-black bg-[#4AA3FF] p-4 mt-4">
             <p className="font-bold text-black">Example of a good first message:</p>
-            <p className="mt-2 text-sm text-black/80 italic">
+            <p className="mt-2 text-sm text-black italic">
               "Hi [Name]! I loved your recent video about [specific thing]. I have a cabin in 
               Big Bear that I think would be perfect for your travel content — it has a 
               private hot tub with mountain views. Would you be interested in a 3-night stay 

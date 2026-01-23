@@ -78,8 +78,8 @@ function SuccessContent() {
           Welcome to CreatorStays. Your lifetime membership is now active.
         </p>
 
-        <div className="mt-6 rounded-xl border-2 border-black bg-[#FFD84A]/20 p-4 text-left">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-black/60">What's included</h3>
+        <div className="mt-6 rounded-xl border-2 border-black bg-[#FFD84A] p-4 text-left">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-black">What's included</h3>
           <ul className="mt-2 space-y-2 text-sm text-black">
             <li className="flex items-center gap-2">
               <span className="text-[#28D17C]">✓</span>

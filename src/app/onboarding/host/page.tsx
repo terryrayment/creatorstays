@@ -286,6 +286,86 @@ export default function HostOnboardingPage() {
     setError("")
   }
   
+  // Auto-save property data when it changes (prevents data loss when navigating away)
+  useEffect(() => {
+    // Only save if we have meaningful data and not just loading
+    if (loading || !importSuccess && !manualEntry) return
+    if (!data.propertyTitle && !data.photos.length && !data.cityRegion) return
+    
+    const saveTimer = setTimeout(async () => {
+      try {
+        // Save to localStorage as backup
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('onboarding_draft', JSON.stringify(data))
+        }
+        
+        // Save to API
+        const propertyData = {
+          id: existingPropertyId || undefined,
+          title: data.propertyTitle || null,
+          propertyType: data.propertyType || null,
+          cityRegion: data.cityRegion || null,
+          airbnbUrl: data.airbnbUrl || null,
+          beds: data.bedrooms ? parseInt(data.bedrooms) : null,
+          baths: data.bathrooms ? parseInt(data.bathrooms) : null,
+          maxGuests: data.maxGuests ? parseInt(data.maxGuests) : null,
+          amenities: data.amenities,
+          photos: data.photos,
+          heroImageUrl: data.photos[0] || null,
+          priceNightlyRange: data.priceRange || null,
+          isDraft: true,
+        }
+        
+        const res = await fetch('/api/properties', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(propertyData),
+        })
+        
+        if (res.ok) {
+          const result = await res.json()
+          if (result.property?.id && !existingPropertyId) {
+            setExistingPropertyId(result.property.id)
+          }
+          console.log('[Onboarding] Auto-saved property data')
+        }
+      } catch (e) {
+        console.error('[Onboarding] Auto-save failed:', e)
+      }
+    }, 2000) // Debounce by 2 seconds
+    
+    return () => clearTimeout(saveTimer)
+  }, [data.propertyTitle, data.photos, data.cityRegion, data.bedrooms, data.bathrooms, data.maxGuests, data.propertyType, data.amenities, data.priceRange, existingPropertyId, loading, importSuccess, manualEntry])
+  
+  // Load from localStorage on mount (backup recovery)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('onboarding_draft')
+      if (saved) {
+        try {
+          const savedData = JSON.parse(saved)
+          // Only restore if current data is empty
+          if (!data.propertyTitle && !data.photos.length && savedData.propertyTitle) {
+            setData(prev => ({
+              ...prev,
+              ...savedData,
+              // Keep session-based fields
+              displayName: prev.displayName || savedData.displayName,
+              contactEmail: prev.contactEmail || savedData.contactEmail,
+              avatarUrl: prev.avatarUrl || savedData.avatarUrl,
+            }))
+            if (savedData.airbnbUrl || savedData.propertyTitle) {
+              setImportSuccess(true)
+            }
+            console.log('[Onboarding] Restored from localStorage')
+          }
+        } catch (e) {
+          console.error('[Onboarding] Failed to restore from localStorage')
+        }
+      }
+    }
+  }, [])
+  
   // Handle photo upload
   // Compress image to reduce size
   const compressImage = (file: File, maxWidth: number = 1200, quality: number = 0.7): Promise<string> => {
@@ -819,27 +899,13 @@ export default function HostOnboardingPage() {
               {(importSuccess || manualEntry) && (
                 <>
                   {data.airbnbUrl && (
-                    <div className="rounded-lg border-2 border-[#28D17C] bg-[#28D17C]/10 p-3 text-sm font-medium text-black">
+                    <div className="rounded-lg border-2 border-black bg-[#28D17C] p-3 text-sm font-medium text-black">
                       ✓ Airbnb link saved! Now enter your property details below.
                     </div>
                   )}
                   {!data.airbnbUrl && manualEntry && (
-                    <div className="rounded-lg border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-3 text-sm font-medium text-black">
+                    <div className="rounded-lg border-2 border-black bg-[#4AA3FF] p-3 text-sm font-medium text-black">
                       Enter your property details below.
-                    </div>
-                  )}
-
-                  {data.photos.length > 0 && (
-                    <div>
-                      <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-black">Photos</label>
-                      <PhotoGrid 
-                        photos={data.photos} 
-                        onRemove={(i) => {
-                          const newPhotos = [...data.photos]
-                          newPhotos.splice(i, 1)
-                          updateField("photos", newPhotos)
-                        }} 
-                      />
                     </div>
                   )}
 
@@ -1081,47 +1147,47 @@ export default function HostOnboardingPage() {
                   
                   {/* Completion Checklist */}
                   {!step1Complete && (
-                    <div className="rounded-xl border-2 border-[#FFD84A] bg-[#FFD84A]/10 p-4">
-                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black/60">Required to continue:</p>
+                    <div className="rounded-xl border-2 border-black bg-[#FFD84A] p-4">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black">Required to continue:</p>
                       <div className="space-y-1.5">
                         {!data.propertyTitle.trim() && (
-                          <p className="flex items-center gap-2 text-sm text-black/70">
-                            <span className="text-[#FFD84A]">○</span> Property title
+                          <p className="flex items-center gap-2 text-sm text-black">
+                            <span className="text-black">○</span> Property title
                           </p>
                         )}
                         {!data.cityRegion.trim() && (
-                          <p className="flex items-center gap-2 text-sm text-black/70">
-                            <span className="text-[#FFD84A]">○</span> Location (select from dropdown)
+                          <p className="flex items-center gap-2 text-sm text-black">
+                            <span className="text-black">○</span> Location (select from dropdown)
                           </p>
                         )}
                         {(!data.bedrooms || parseInt(data.bedrooms) < 1) && (
-                          <p className="flex items-center gap-2 text-sm text-black/70">
-                            <span className="text-[#FFD84A]">○</span> Number of bedrooms
+                          <p className="flex items-center gap-2 text-sm text-black">
+                            <span className="text-black">○</span> Number of bedrooms
                           </p>
                         )}
                         {(!data.bathrooms || parseInt(data.bathrooms) < 1) && (
-                          <p className="flex items-center gap-2 text-sm text-black/70">
-                            <span className="text-[#FFD84A]">○</span> Number of bathrooms
+                          <p className="flex items-center gap-2 text-sm text-black">
+                            <span className="text-black">○</span> Number of bathrooms
                           </p>
                         )}
                         {(!data.maxGuests || parseInt(data.maxGuests) < 1) && (
-                          <p className="flex items-center gap-2 text-sm text-black/70">
-                            <span className="text-[#FFD84A]">○</span> Maximum guests
+                          <p className="flex items-center gap-2 text-sm text-black">
+                            <span className="text-black">○</span> Maximum guests
                           </p>
                         )}
                         {!data.propertyType && (
-                          <p className="flex items-center gap-2 text-sm text-black/70">
-                            <span className="text-[#FFD84A]">○</span> Property type
+                          <p className="flex items-center gap-2 text-sm text-black">
+                            <span className="text-black">○</span> Property type
                           </p>
                         )}
                         {!data.priceRange && (
-                          <p className="flex items-center gap-2 text-sm text-black/70">
-                            <span className="text-[#FFD84A]">○</span> Nightly price range
+                          <p className="flex items-center gap-2 text-sm text-black">
+                            <span className="text-black">○</span> Nightly price range
                           </p>
                         )}
                         {data.photos.length < 6 && (
-                          <p className="flex items-center gap-2 text-sm text-black/70">
-                            <span className="text-[#FFD84A]">○</span> At least 6 photos ({data.photos.length}/6)
+                          <p className="flex items-center gap-2 text-sm text-black">
+                            <span className="text-black">○</span> At least 6 photos ({data.photos.length}/6)
                           </p>
                         )}
                       </div>
