@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import Image from "next/image"
 
 // Process steps with expanded host-focused copy
@@ -10,8 +10,8 @@ const steps = [
     number: "01",
     line1: "ADD YOUR",
     line2: "PROPERTY",
-    copy: "Paste your Airbnb link. We pull in your photos, description, and details automatically.",
-    benefit: "LIVE IN 60 SECONDS.",
+    copy: "Upload photos, add details, and connect your availability calendar. Your listing is ready in minutes.",
+    benefit: "LIVE IN 5 MINUTES.",
     image: "/images/hp-step-1.jpg",
   },
   {
@@ -56,6 +56,7 @@ export function FeatureScroller() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number>()
   const scrollPosition = useRef(0)
+  const [isPaused, setIsPaused] = useState(false)
   
   // Triple the cards for seamless infinite scroll
   const tripleSteps = [...steps, ...steps, ...steps]
@@ -71,8 +72,8 @@ export function FeatureScroller() {
     container.scrollLeft = scrollPosition.current
 
     const animate = () => {
-      if (container) {
-        scrollPosition.current += 0.5 // Speed: pixels per frame
+      if (container && !isPaused) {
+        scrollPosition.current += 0.25 // Speed: 50% slower (was 0.5)
         
         // Reset to middle set when reaching end
         if (scrollPosition.current >= TOTAL_WIDTH * 2) {
@@ -91,23 +92,25 @@ export function FeatureScroller() {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [])
+  }, [isPaused])
 
   return (
     <section className="bg-black py-6 overflow-hidden">
       {/* Scroll container with extra padding for hover scale */}
       <div
         ref={scrollRef}
-        className="scrollbar-hide flex gap-2 overflow-x-hidden px-4 pointer-events-none"
+        className="scrollbar-hide flex gap-2 overflow-x-hidden px-4"
         style={{ 
           paddingTop: "20px",
           paddingBottom: "20px",
         }}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
       >
         {tripleSteps.map((step, index) => (
           <div
             key={`${step.id}-${index}`}
-            className="feature-card relative flex-shrink-0 rounded-2xl border-[3px] border-black overflow-hidden"
+            className="feature-card relative flex-shrink-0 rounded-2xl border-[3px] border-black overflow-hidden transition-transform duration-300 ease-out hover:scale-105 hover:z-10"
             style={{
               width: "360px",
               height: "420px",
