@@ -60,19 +60,7 @@ export async function DELETE(request: NextRequest) {
         where: { hostProfileId: hostProfile.id }
       })
 
-      // 4. Delete content submissions for collaborations with this host
-      const collabs = await prisma.collaboration.findMany({
-        where: { hostId: hostProfile.id },
-        select: { id: true }
-      })
-      
-      for (const collab of collabs) {
-        await prisma.contentSubmission.deleteMany({
-          where: { collaborationId: collab.id }
-        })
-      }
-
-      // 5. Delete all collaborations for this host
+      // 4. Delete all collaborations for this host
       await prisma.collaboration.deleteMany({
         where: { hostId: hostProfile.id }
       })
@@ -170,19 +158,7 @@ export async function DELETE(request: NextRequest) {
         where: { creatorProfileId: creatorProfile.id }
       })
 
-      // 4. Delete content submissions
-      const collabs = await prisma.collaboration.findMany({
-        where: { creatorId: creatorProfile.id },
-        select: { id: true }
-      })
-      
-      for (const collab of collabs) {
-        await prisma.contentSubmission.deleteMany({
-          where: { collaborationId: collab.id }
-        })
-      }
-
-      // 5. Delete all collaborations
+      // 4. Delete all collaborations
       await prisma.collaboration.deleteMany({
         where: { creatorId: creatorProfile.id }
       })
