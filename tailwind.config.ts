@@ -16,6 +16,10 @@ const config: Config = {
     'bg-black/5',
     'text-white',
     'text-black/30',
+    // Calendar hover classes
+    'hover:bg-emerald-300',
+    'hover:bg-emerald-500',
+    'hover:text-black',
   ],
   theme: {
     extend: {

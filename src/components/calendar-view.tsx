@@ -388,12 +388,14 @@ function MonthCalendar({
           const ringClass = isToday && !isToggling ? 'ring-2 ring-black ring-offset-1' : ''
           
           // Hover/cursor for clickable days
+          // IMPORTANT: Available days use emerald hover, NOT amber, to avoid
+          // globals.css [class*="bg-amber"] selector forcing yellow background
           let interactionClass = ''
           if (canClick) {
             if (isManualOnlyBlocked) {
               interactionClass = 'cursor-pointer hover:bg-emerald-300 hover:text-black transition-colors'
             } else if (isAvailable) {
-              interactionClass = 'cursor-pointer hover:bg-amber-300 transition-colors'
+              interactionClass = 'cursor-pointer hover:bg-emerald-500 transition-colors'
             }
           }
           
