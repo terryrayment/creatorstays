@@ -171,7 +171,9 @@ export async function POST(request: NextRequest) {
       venueType: propertyData.venueType,
       isDraft: propertyData.isDraft, 
       isActive: propertyData.isActive,
-      propertyIdToUse 
+      propertyIdToUse,
+      photosCount: photos.length,
+      heroImageUrl: propertyData.heroImageUrl,
     })
 
     let property

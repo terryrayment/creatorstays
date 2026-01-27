@@ -201,9 +201,10 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('[Host Register] Error:', error)
+    console.error('[Host Register] Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)))
     
     // Check for specific Prisma errors
-    const prismaError = error as { code?: string; meta?: { target?: string[] } }
+    const prismaError = error as { code?: string; meta?: { target?: string[] }; message?: string }
     
     if (prismaError.code === 'P2002') {
       // Unique constraint violation
@@ -222,13 +223,11 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Return more specific error in development
-    const errorMessage = process.env.NODE_ENV === 'development' 
-      ? `Failed to create account: ${error instanceof Error ? error.message : 'Unknown error'}`
-      : 'Failed to create account. Please try again.'
+    // Always return the actual error message for debugging
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     
     return NextResponse.json(
-      { error: errorMessage },
+      { error: `Failed to create account: ${errorMessage}` },
       { status: 500 }
     )
   }

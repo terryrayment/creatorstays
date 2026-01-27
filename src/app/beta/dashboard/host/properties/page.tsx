@@ -171,7 +171,9 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const [lastSavedPhotos, setLastSavedPhotos] = useState<string[]>([])
   const [isSyncingCalendar, setIsSyncingCalendar] = useState(false)
   const [calendarSyncResult, setCalendarSyncResult] = useState<{ success?: boolean; message?: string } | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
 
+  useEffect(() => { setIsMounted(true) }, [])
   useEffect(() => { setForm(property); setStep(1); setLastSavedPhotos(property.photos || []) }, [property])
   useEffect(() => { 
     onStepChange?.(step)
@@ -699,7 +701,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           </div>
           
           {/* Creator Preview Modal */}
-          {showPreviewModal && typeof document !== 'undefined' && createPortal(
+          {showPreviewModal && isMounted && createPortal(
             <div style={{
               position: 'fixed',
               top: 0,
