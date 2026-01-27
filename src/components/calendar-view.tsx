@@ -6,18 +6,21 @@ import { iterateDaysExclusive, dateToYMD, ymdToLocalDate } from '@/lib/calendar-
 
 interface CalendarViewProps {
   blockedDates: BlockedPeriod[]
+  /** Manual blocks - these can be toggled off */
+  manualBlockDates?: string[]  // Array of YYYY-MM-DD dates that are manually blocked
   monthsToShow?: number
   onDayClick?: (ymd: string, periods: BlockedPeriod[]) => void
   /** Interactive mode: allows clicking any day to toggle block status */
   interactive?: boolean
   /** Called when user clicks a day in interactive mode. Return value indicates if toggle succeeded. */
-  onToggleDay?: (ymd: string, currentlyBlocked: boolean) => Promise<boolean>
+  onToggleDay?: (ymd: string, currentlyBlocked: boolean, isManualBlock: boolean) => Promise<boolean>
   /** Days currently being toggled (show loading state) */
   togglingDays?: Set<string>
 }
 
 export function CalendarView({ 
   blockedDates, 
+  manualBlockDates = [],
   monthsToShow = 3, 
   onDayClick,
   interactive = false,
@@ -29,21 +32,38 @@ export function CalendarView({
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
 
+  // Create a set of manually blocked dates for quick lookup
+  const manualBlockSet = useMemo(() => new Set(manualBlockDates), [manualBlockDates])
+
   // Build a map of all blocked days with their source periods
+  // Also track which days are from iCal vs manual
   const blockedDaysMap = useMemo(() => {
-    const map = new Map<string, BlockedPeriod[]>()
+    const map = new Map<string, { periods: BlockedPeriod[], isManual: boolean, isIcal: boolean }>()
     
     for (const period of blockedDates) {
       const days = iterateDaysExclusive(period.start, period.end)
       days.forEach(d => {
-        const existing = map.get(d) || []
-        existing.push(period)
+        const existing = map.get(d) || { periods: [], isManual: false, isIcal: false }
+        existing.periods.push(period)
+        // Check source - if missing, assume ical
+        if (period.source === 'manual') {
+          existing.isManual = true
+        } else {
+          existing.isIcal = true
+        }
         map.set(d, existing)
       })
     }
     
+    // Also add from manualBlockDates set (in case source info was lost in merging)
+    for (const ymd of manualBlockDates) {
+      const existing = map.get(ymd) || { periods: [], isManual: false, isIcal: false }
+      existing.isManual = true
+      map.set(ymd, existing)
+    }
+    
     return map
-  }, [blockedDates])
+  }, [blockedDates, manualBlockDates])
 
   const months = useMemo(() => {
     const result = []
@@ -156,11 +176,11 @@ function MonthCalendar({
   togglingDays,
 }: { 
   month: Date
-  blockedDaysMap: Map<string, BlockedPeriod[]>
+  blockedDaysMap: Map<string, { periods: BlockedPeriod[], isManual: boolean, isIcal: boolean }>
   todayStr: string
   onDayClick?: (ymd: string, periods: BlockedPeriod[]) => void
   interactive?: boolean
-  onToggleDay?: (ymd: string, currentlyBlocked: boolean) => Promise<boolean>
+  onToggleDay?: (ymd: string, currentlyBlocked: boolean, isManualBlock: boolean) => Promise<boolean>
   togglingDays?: Set<string>
 }) {
   const monthName = month.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
@@ -191,21 +211,17 @@ function MonthCalendar({
   // Add all days of the month
   for (let d = 1; d <= daysInMonth; d++) {
     const ymd = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-    const blockingPeriods = blockedDaysMap.get(ymd) || []
-    
-    // Check if any blocking period is from manual source
-    const hasManualBlock = blockingPeriods.some(p => p.source === 'manual')
-    const hasIcalBlock = blockingPeriods.some(p => p.source === 'ical' || !p.source)
+    const blockInfo = blockedDaysMap.get(ymd)
     
     days.push({
       day: d,
       ymd,
-      isBlocked: blockingPeriods.length > 0,
-      blockingPeriods,
+      isBlocked: !!blockInfo,
+      blockingPeriods: blockInfo?.periods || [],
       isToday: ymd === todayStr,
       isPast: ymd < todayStr,
-      hasManualBlock,
-      hasIcalBlock,
+      hasManualBlock: blockInfo?.isManual || false,
+      hasIcalBlock: blockInfo?.isIcal || false,
       isToggling: togglingDays?.has(ymd) || false,
     })
   }
@@ -217,15 +233,15 @@ function MonthCalendar({
     if (interactive && onToggleDay) {
       // Can only toggle if:
       // - Day is available (not blocked) -> add block
-      // - Day has manual block (and no iCal block) -> remove block
+      // - Day has manual block ONLY (no iCal block) -> remove block
       if (!day.isBlocked) {
         // Available -> block it
-        onToggleDay(day.ymd, false)
+        onToggleDay(day.ymd, false, false)
       } else if (day.hasManualBlock && !day.hasIcalBlock) {
         // Manual block only -> unblock it
-        onToggleDay(day.ymd, true)
+        onToggleDay(day.ymd, true, true)
       }
-      // If it's an iCal block, do nothing (can't unblock)
+      // If it's an iCal block (even with manual), can't toggle
     } else if (day.isBlocked && onDayClick) {
       // Non-interactive: show info about why it's blocked
       onDayClick(day.ymd, day.blockingPeriods)

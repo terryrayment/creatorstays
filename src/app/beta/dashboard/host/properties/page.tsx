@@ -533,15 +533,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   }
 
   // Toggle a single day blocked/unblocked
-  const toggleDayBlock = async (ymd: string, currentlyBlocked: boolean): Promise<boolean> => {
+  const toggleDayBlock = async (ymd: string, currentlyBlocked: boolean, isManualBlock: boolean): Promise<boolean> => {
     if (!form.id) return false
     
     setTogglingDays(prev => new Set(prev).add(ymd))
     
     try {
-      if (currentlyBlocked) {
+      if (currentlyBlocked && isManualBlock) {
         // Find manual block that contains this day and remove it
-        // Or create an "unblock" - for now, we can only unblock manual blocks
         const blockToRemove = manualBlocks.find(b => {
           return ymd >= b.startDate && ymd < b.endDate
         })
@@ -554,13 +553,8 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
             await refreshCalendarData()
             return true
           }
-        } else {
-          // It's an iCal block - can't unblock those
-          setToast("Can't unblock iCal dates - only Airbnb can do that")
-          setTimeout(() => setToast(null), 3000)
-          return false
         }
-      } else {
+      } else if (!currentlyBlocked) {
         // Block this single day - create a manual block for just this day
         // End date is exclusive, so for a single day we need endDate = day + 1
         const startDate = ymd
@@ -912,6 +906,17 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               <div className="mt-4">
                 <CalendarView 
                   blockedDates={form.blockedDates as any[] || []} 
+                  manualBlockDates={manualBlocks.flatMap(b => {
+                    // Generate all dates in this block range
+                    const dates: string[] = []
+                    const start = new Date(b.startDate)
+                    const end = new Date(b.endDate)
+                    while (start < end) {
+                      dates.push(start.toISOString().split('T')[0])
+                      start.setDate(start.getDate() + 1)
+                    }
+                    return dates
+                  })}
                   monthsToShow={3}
                   interactive={!!form.id}
                   onToggleDay={toggleDayBlock}
