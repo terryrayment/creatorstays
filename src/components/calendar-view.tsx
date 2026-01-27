@@ -181,7 +181,8 @@ export function CalendarView({
   // Stats
   const icalDayCount = useMemo(() => {
     let count = 0
-    for (const state of dayStateMap.values()) {
+    const values = Array.from(dayStateMap.values())
+    for (const state of values) {
       if (state.isBlockedByIcal) count++
     }
     return count
@@ -189,7 +190,8 @@ export function CalendarView({
   
   const manualDayCount = useMemo(() => {
     let count = 0
-    for (const state of dayStateMap.values()) {
+    const values = Array.from(dayStateMap.values())
+    for (const state of values) {
       if (state.isBlockedByManual && !state.isBlockedByIcal) count++
     }
     return count
