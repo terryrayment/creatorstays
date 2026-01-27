@@ -99,9 +99,9 @@ export function CalendarView({
       </div>
 
       {/* Legend */}
-      <div className="mb-4 flex flex-wrap items-center justify-center gap-3 text-[10px]">
+      <div className="mb-4 flex flex-wrap items-center justify-center gap-4 text-[10px]">
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded bg-emerald-50 border border-black/20" />
+          <div className="h-3 w-3 rounded bg-emerald-400" />
           <span>Available</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -112,16 +112,12 @@ export function CalendarView({
           <div className="h-3 w-3 rounded bg-amber-500" />
           <span>Blocked (manual)</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded border-2 border-black bg-[#FFD84A]" />
-          <span>Today</span>
-        </div>
       </div>
 
       {/* Interactive mode hint */}
       {interactive && (
         <div className="mb-4 text-center text-[11px] text-black/60 bg-amber-50 rounded-lg px-3 py-2">
-          <strong>Click any date</strong> to block or unblock it
+          <strong>Click any green date</strong> to block it • <strong>Click amber</strong> to unblock
         </div>
       )}
 
@@ -215,11 +211,21 @@ function MonthCalendar({
   }
 
   const handleDayClick = (day: typeof days[0]) => {
-    if (!day) return
+    if (!day || day.isPast) return
     
-    // In interactive mode, allow toggling future days
-    if (interactive && onToggleDay && !day.isPast) {
-      onToggleDay(day.ymd, day.isBlocked)
+    // In interactive mode
+    if (interactive && onToggleDay) {
+      // Can only toggle if:
+      // - Day is available (not blocked) -> add block
+      // - Day has manual block (and no iCal block) -> remove block
+      if (!day.isBlocked) {
+        // Available -> block it
+        onToggleDay(day.ymd, false)
+      } else if (day.hasManualBlock && !day.hasIcalBlock) {
+        // Manual block only -> unblock it
+        onToggleDay(day.ymd, true)
+      }
+      // If it's an iCal block, do nothing (can't unblock)
     } else if (day.isBlocked && onDayClick) {
       // Non-interactive: show info about why it's blocked
       onDayClick(day.ymd, day.blockingPeriods)
@@ -240,44 +246,47 @@ function MonthCalendar({
       {/* Days */}
       <div className="grid grid-cols-7 gap-0.5">
         {days.map((day, idx) => {
-          // Determine if this day is clickable
-          const isClickable = day && (
-            (interactive && !day.isPast) || 
-            (day.isBlocked && onDayClick)
+          // Determine if this day is clickable in interactive mode
+          const canToggle = interactive && day && !day.isPast && !day.isToggling && (
+            !day.isBlocked || // Can block available days
+            (day.hasManualBlock && !day.hasIcalBlock) // Can unblock manual-only blocks
           )
           
-          // Determine background color
+          // Determine background color - today gets a ring instead of full bg change
           let bgClass = ''
+          let ringClass = ''
+          
           if (!day) {
             bgClass = ''
           } else if (day.isToggling) {
             bgClass = 'bg-black/20 animate-pulse'
-          } else if (day.isToday) {
-            bgClass = 'border-2 border-black bg-[#FFD84A] font-bold'
           } else if (day.isBlocked) {
             // Different shades for ical vs manual
-            if (day.hasIcalBlock && day.hasManualBlock) {
-              bgClass = 'bg-red-500 text-white' // Both
-            } else if (day.hasManualBlock) {
-              bgClass = 'bg-amber-500 text-white' // Manual only
+            if (day.hasManualBlock && !day.hasIcalBlock) {
+              bgClass = 'bg-amber-500 text-white' // Manual only - can unblock
             } else {
-              bgClass = 'bg-red-400 text-white' // iCal only
+              bgClass = 'bg-red-400 text-white' // iCal (can't unblock)
             }
           } else if (day.isPast) {
             bgClass = 'bg-black/5 text-black/30'
           } else {
-            bgClass = 'bg-emerald-50 text-black'
+            bgClass = 'bg-emerald-400 text-white' // Available
           }
           
-          // Add hover/cursor styles
+          // Today gets a ring
+          if (day?.isToday && !day.isToggling) {
+            ringClass = 'ring-2 ring-black ring-offset-1'
+          }
+          
+          // Add hover/cursor styles only for actionable days
           let interactionClass = ''
-          if (isClickable && !day?.isToggling) {
-            if (interactive && day && !day.isPast) {
-              interactionClass = day.isBlocked 
-                ? 'cursor-pointer hover:bg-emerald-200 hover:text-black transition-colors' 
-                : 'cursor-pointer hover:bg-red-300 hover:text-white transition-colors'
-            } else if (day?.isBlocked) {
-              interactionClass = 'cursor-pointer hover:opacity-80'
+          if (canToggle) {
+            if (day.isBlocked) {
+              // Manual block - show it can be unblocked
+              interactionClass = 'cursor-pointer hover:bg-emerald-300 hover:text-black transition-colors'
+            } else {
+              // Available - show it can be blocked
+              interactionClass = 'cursor-pointer hover:bg-red-300 transition-colors'
             }
           }
           
@@ -285,15 +294,17 @@ function MonthCalendar({
             <div 
               key={idx}
               onClick={() => handleDayClick(day)}
-              className={`aspect-square flex items-center justify-center rounded text-[10px] ${bgClass} ${interactionClass}`}
+              className={`aspect-square flex items-center justify-center rounded text-[10px] ${bgClass} ${ringClass} ${interactionClass}`}
               title={
                 day?.isToggling 
                   ? 'Updating...'
-                  : day?.isBlocked 
-                    ? `Blocked: ${day.blockingPeriods.map(p => p.summary || (p.source === 'manual' ? 'Manual block' : 'Unknown')).join(', ')}${interactive ? ' (click to unblock)' : ''}`
-                    : interactive && day && !day.isPast
-                      ? 'Click to block'
-                      : undefined
+                  : day?.hasIcalBlock
+                    ? 'Blocked by Airbnb (cannot change here)'
+                    : day?.hasManualBlock
+                      ? 'Manual block (click to unblock)'
+                      : interactive && day && !day.isPast
+                        ? 'Click to block'
+                        : undefined
               }
             >
               {day?.day}

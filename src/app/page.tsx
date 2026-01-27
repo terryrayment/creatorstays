@@ -246,7 +246,7 @@ function CTASection() {
               playsInline
               className="h-full w-full object-cover"
             >
-              <source src="/images/creator-laptop.mp4" type="video/mp4" />
+              <source src="/videos/creator-laptop.mp4" type="video/mp4" />
             </video>
           </div>
 
