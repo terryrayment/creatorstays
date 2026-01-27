@@ -562,6 +562,30 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     setIsDeletingBlock(null)
   }
 
+  // ADMIN: Clear all manual blocks for this property (for testing)
+  const [isClearingAllBlocks, setIsClearingAllBlocks] = useState(false)
+  const clearAllManualBlocks = async () => {
+    if (!form.id || manualBlocks.length === 0) return
+    if (!confirm(`Delete all ${manualBlocks.length} manual blocks for this property?`)) return
+    
+    setIsClearingAllBlocks(true)
+    try {
+      // Delete all blocks in parallel
+      const deletePromises = manualBlocks.map(block => 
+        fetch(`/api/properties/${form.id}/manual-blocks/${block.id}`, { method: 'DELETE' })
+      )
+      await Promise.all(deletePromises)
+      setManualBlocks([])
+      setToast(`Cleared ${manualBlocks.length} manual blocks`)
+      setTimeout(() => setToast(null), 2000)
+    } catch (e) {
+      console.error('[ManualBlocks] Clear all error:', e)
+      setToast('Failed to clear blocks')
+      setTimeout(() => setToast(null), 2000)
+    }
+    setIsClearingAllBlocks(false)
+  }
+
   // ==========================================================================
   // Calendar click handlers - based on user INTENT
   // ==========================================================================
@@ -962,7 +986,16 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               {/* Manual Blocks Section */}
               {form.id && manualBlocks.length > 0 && (
                 <div className="border-t border-black/10 pt-3">
-                  <p className="text-[11px] font-bold text-black mb-2">Your Manual Blocks ({manualBlocks.length})</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[11px] font-bold text-black">Your Manual Blocks ({manualBlocks.length})</p>
+                    <button
+                      onClick={clearAllManualBlocks}
+                      disabled={isClearingAllBlocks}
+                      className="text-[9px] text-red-500 hover:text-red-700 disabled:opacity-50"
+                    >
+                      {isClearingAllBlocks ? 'Clearing...' : 'Clear All (Admin)'}
+                    </button>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {manualBlocks.map(block => (
                       <div key={block.id} className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5">
