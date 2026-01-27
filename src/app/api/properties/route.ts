@@ -148,29 +148,36 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const propertyData = {
+    // Build propertyData with ONLY the fields that were explicitly provided
+    // This prevents partial updates (like photo saves) from wiping other fields
+    const propertyData: Record<string, any> = {
       hostProfileId: hostProfile.id,
-      airbnbUrl: airbnbUrl || null,
-      icalUrl: icalUrl || null,
-      title: title || null,
-      venueType: finalVenueType,
-      cityRegion: cityRegion || null,
-      priceNightlyRange: priceNightlyRange || null,
-      rating: rating ? parseFloat(String(rating)) : null,
-      reviewCount: reviewCount ? parseInt(String(reviewCount)) : null,
-      guests: maxGuests ? parseInt(String(maxGuests)) : (guests ? parseInt(String(guests)) : null),
-      beds: finalBeds ? parseInt(String(finalBeds)) : null,
-      baths: finalBaths ? Math.round(parseFloat(String(finalBaths))) : null, // Round to int for schema
-      amenities,
-      vibeTags,
-      houseRules: houseRules || null,
-      photos,
-      heroImageUrl: heroImageUrl || null,
-      creatorBrief: creatorBrief || null,
-      isActive: finalIsActive,
-      isDraft: finalIsDraft,
-      lastImportedAt: lastImportedAt ? new Date(lastImportedAt) : null,
     }
+    
+    // Only include fields that were explicitly sent in the request
+    if (airbnbUrl !== undefined) propertyData.airbnbUrl = airbnbUrl || null
+    if (icalUrl !== undefined) propertyData.icalUrl = icalUrl || null
+    if (title !== undefined) propertyData.title = title || null
+    if (finalVenueType !== undefined && finalVenueType !== null) propertyData.venueType = finalVenueType
+    if (cityRegion !== undefined) propertyData.cityRegion = cityRegion || null
+    if (priceNightlyRange !== undefined) propertyData.priceNightlyRange = priceNightlyRange || null
+    if (rating !== undefined) propertyData.rating = rating ? parseFloat(String(rating)) : null
+    if (reviewCount !== undefined) propertyData.reviewCount = reviewCount ? parseInt(String(reviewCount)) : null
+    if (maxGuests !== undefined || guests !== undefined) {
+      propertyData.guests = maxGuests ? parseInt(String(maxGuests)) : (guests ? parseInt(String(guests)) : null)
+    }
+    if (finalBeds !== undefined) propertyData.beds = finalBeds ? parseInt(String(finalBeds)) : null
+    if (finalBaths !== undefined) propertyData.baths = finalBaths ? Math.round(parseFloat(String(finalBaths))) : null
+    if (body.amenities !== undefined) propertyData.amenities = amenities
+    if (body.vibeTags !== undefined) propertyData.vibeTags = vibeTags
+    if (houseRules !== undefined) propertyData.houseRules = houseRules || null
+    if (body.photos !== undefined) propertyData.photos = photos
+    if (heroImageUrl !== undefined) propertyData.heroImageUrl = heroImageUrl || null
+    if (creatorBrief !== undefined) propertyData.creatorBrief = creatorBrief || null
+    if (isActive !== undefined) propertyData.isActive = finalIsActive
+    if (isDraft !== undefined) propertyData.isDraft = finalIsDraft
+    if (lastImportedAt !== undefined) propertyData.lastImportedAt = lastImportedAt ? new Date(lastImportedAt) : null
+    
     
     console.log('[Properties API] Property data to save:', { 
       title: propertyData.title, 
@@ -178,8 +185,9 @@ export async function POST(request: NextRequest) {
       isDraft: propertyData.isDraft, 
       isActive: propertyData.isActive,
       propertyIdToUse,
-      photosCount: photos.length,
+      photosCount: propertyData.photos?.length || 'not updating',
       heroImageUrl: propertyData.heroImageUrl,
+      fieldsBeingUpdated: Object.keys(propertyData).filter(k => k !== 'hostProfileId'),
     })
 
     let property
