@@ -460,24 +460,27 @@ export default function AdminDashboardPage() {
             )}
             <div className="space-y-3">
               {stats.recentCreators.map(creator => (
-                <div key={creator.id} className="flex items-center justify-between border-b border-black/10 pb-3 last:border-0">
-                  <div>
-                    <p className="font-bold text-black">{creator.displayName}</p>
-                    <p className="text-xs text-black/60">@{creator.handle} · {creator.email}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
+                <div key={creator.id} className="border-b border-black/10 pb-3 last:border-0">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-bold text-black">{creator.displayName}</p>
+                      <p className="text-xs text-black/60">@{creator.handle} · {creator.email}</p>
+                    </div>
                     <div className="text-right">
                       <p className="text-xs text-black/60">{formatDate(creator.createdAt)}</p>
                       <Link href={`/creators/${creator.handle}`} className="text-xs font-bold text-[#4AA3FF] hover:underline">
                         View Profile →
                       </Link>
                     </div>
+                  </div>
+                  {/* Delete button on its own row */}
+                  <div className="mt-2 flex justify-end">
                     <button
                       onClick={() => deleteUser(creator.id, 'creator', creator.displayName)}
                       disabled={deletingUser === creator.id}
-                      className="rounded-lg border-2 border-red-300 bg-red-50 px-2 py-1 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-50"
+                      className="rounded-lg border-2 border-red-300 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-50"
                     >
-                      {deletingUser === creator.id ? '...' : 'Delete'}
+                      {deletingUser === creator.id ? 'Deleting...' : '🗑 Delete Creator'}
                     </button>
                   </div>
                 </div>
@@ -515,19 +518,10 @@ export default function AdminDashboardPage() {
                       <p className="text-xs text-black/60">{host.email}</p>
                       {host.location && <p className="text-xs text-black/40">📍 {host.location}</p>}
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="text-right">
-                        <p className="font-bold text-black">{host.propertyCount} property</p>
-                        <p className="text-xs text-black/60">Joined: {formatDate(host.createdAt)}</p>
-                        {host.lastLoginAt && <p className="text-xs text-black/40">Last login: {formatDate(host.lastLoginAt)}</p>}
-                      </div>
-                      <button
-                        onClick={() => deleteUser(host.id, 'host', host.displayName)}
-                        disabled={deletingUser === host.id}
-                        className="rounded-lg border-2 border-red-300 bg-red-50 px-2 py-1 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-50"
-                      >
-                        {deletingUser === host.id ? '...' : 'Delete'}
-                      </button>
+                    <div className="text-right">
+                      <p className="font-bold text-black">{host.propertyCount} property</p>
+                      <p className="text-xs text-black/60">Joined: {formatDate(host.createdAt)}</p>
+                      {host.lastLoginAt && <p className="text-xs text-black/40">Last login: {formatDate(host.lastLoginAt)}</p>}
                     </div>
                   </div>
                   {host.propertyTitle && (
@@ -540,6 +534,16 @@ export default function AdminDashboardPage() {
                       )}
                     </div>
                   )}
+                  {/* Delete button on its own row */}
+                  <div className="mt-2 flex justify-end">
+                    <button
+                      onClick={() => deleteUser(host.id, 'host', host.displayName)}
+                      disabled={deletingUser === host.id}
+                      className="rounded-lg border-2 border-red-300 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-50"
+                    >
+                      {deletingUser === host.id ? 'Deleting...' : '🗑 Delete Host'}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
