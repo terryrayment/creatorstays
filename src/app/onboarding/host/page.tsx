@@ -699,13 +699,10 @@ export default function HostOnboardingPage() {
         cityRegion: data.cityRegion,
         priceNightlyRange: data.priceRange,
         beds: parseInt(data.bedrooms) || 1,
+        photosCount: data.photos.length,
         isDraft: false,
         isActive: true,
       })
-      
-      // Only save first photo as hero to speed up checkout
-      // Full photo gallery can be managed in dashboard
-      const heroPhoto = data.photos[0] || ""
       
       const propertyPayload = {
         id: existingPropertyId, // Pass existing ID to update instead of create
@@ -718,8 +715,8 @@ export default function HostOnboardingPage() {
         maxGuests: parseInt(data.maxGuests) || 2,
         amenities: data.amenities,
         vibeTags: [],
-        photos: heroPhoto ? [heroPhoto] : [], // Only save hero photo for speed
-        heroImageUrl: heroPhoto,
+        photos: data.photos, // Save ALL photos
+        heroImageUrl: data.photos[0] || "",
         airbnbUrl: data.airbnbUrl,
         isDraft: false, // Publish the property - THIS IS CRITICAL
         isActive: true,
