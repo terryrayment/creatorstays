@@ -186,15 +186,29 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   // Manual save via Save Draft / Publish buttons handles everything else
   // Handle photo upload - uploads to Cloudinary
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('[Photos] handlePhotoUpload triggered')
     const files = e.target.files
-    if (!files || files.length === 0) return
+    console.log('[Photos] Files selected:', files?.length || 0)
+    if (!files || files.length === 0) {
+      console.log('[Photos] No files, returning early')
+      return
+    }
+    
+    console.log('[Photos] Starting upload of', files.length, 'files')
+    console.log('[Photos] Current form.id:', form.id)
+    console.log('[Photos] Current form.photos:', form.photos?.length || 0)
     
     setIsUploading(true)
     const newPhotos: string[] = []
     const failedCount = { value: 0 }
     
+    // Capture form.id NOW before any async operations
+    const propertyId = form.id
+    console.log('[Photos] Captured propertyId:', propertyId)
+    
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
+      console.log('[Photos] Processing file', i + 1, ':', file.name)
       
       // Convert to base64 first
       const base64 = await new Promise<string>((resolve) => {
@@ -205,6 +219,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       
       try {
         // Upload to Cloudinary via API
+        console.log('[Photos] Uploading to Cloudinary...')
         const res = await fetch('/api/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -216,17 +231,20 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         
         if (res.ok) {
           const data = await res.json()
+          console.log('[Photos] Upload success:', data.file.url.substring(0, 50) + '...')
           newPhotos.push(data.file.url)
         } else {
           // Log error but don't use base64 fallback
-          console.error('Cloudinary upload failed:', await res.text())
+          console.error('[Photos] Cloudinary upload failed:', await res.text())
           failedCount.value++
         }
       } catch (err) {
-        console.error('Cloudinary upload error:', err)
+        console.error('[Photos] Cloudinary upload error:', err)
         failedCount.value++
       }
     }
+    
+    console.log('[Photos] All uploads complete. Success:', newPhotos.length, 'Failed:', failedCount.value)
     
     if (failedCount.value > 0) {
       setToast(`${failedCount.value} photo(s) failed to upload. Please try again.`)
@@ -234,6 +252,8 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     }
     
     if (newPhotos.length > 0) {
+      console.log('[Photos] Preparing to save', newPhotos.length, 'new photos')
+      
       // Use a ref to track what we're saving
       let allPhotos: string[] = []
       let heroImage: string = ''
@@ -242,6 +262,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       setForm(prev => {
         allPhotos = [...(prev.photos || []), ...newPhotos]
         heroImage = prev.heroImageUrl || newPhotos[0]
+        console.log('[Photos] State updated - total photos:', allPhotos.length)
         return {
           ...prev,
           photos: allPhotos,
@@ -249,33 +270,37 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         }
       })
       
-      // IMMEDIATELY save to database (don't wait for auto-save)
-      // We need to wait a tick for the state to update
-      setTimeout(async () => {
-        if (form.id) {
-          try {
-            const saveRes = await fetch('/api/properties', { 
-              method: 'POST', 
-              headers: { 'Content-Type': 'application/json' }, 
-              body: JSON.stringify({ 
-                id: form.id, 
-                photos: allPhotos,
-                heroImageUrl: heroImage
-              }) 
-            })
-            if (saveRes.ok) {
-              setLastSavedPhotos(allPhotos)
-              console.log('[Properties] Saved', allPhotos.length, 'photos to database')
-            } else {
-              console.error('[Properties] Save failed:', await saveRes.text())
-            }
-          } catch (err) {
-            console.error('[Properties] Failed to save photos:', err)
-            setToast('Photos uploaded but failed to save. Please click Save.')
+      // IMMEDIATELY save to database
+      // Use propertyId captured at start of function
+      console.log('[Photos] About to save. propertyId:', propertyId)
+      if (propertyId) {
+        try {
+          console.log('[Photos] Saving', allPhotos.length, 'photos for property', propertyId)
+          const saveRes = await fetch('/api/properties', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ 
+              id: propertyId, 
+              photos: allPhotos,
+              heroImageUrl: heroImage
+            }) 
+          })
+          if (saveRes.ok) {
+            setLastSavedPhotos(allPhotos)
+            console.log('[Photos] SUCCESS - Saved', allPhotos.length, 'photos to database')
+          } else {
+            console.error('[Photos] Save failed:', await saveRes.text())
+            setToast('Failed to save photos. Please try again.')
             setTimeout(() => setToast(null), 5000)
           }
+        } catch (err) {
+          console.error('[Properties] Failed to save photos:', err)
+          setToast('Photos uploaded but failed to save. Please click Save.')
+          setTimeout(() => setToast(null), 5000)
         }
-      }, 100)
+      } else {
+        console.log('[Properties] No property ID - photos will be saved when property is created')
+      }
     }
     setIsUploading(false)
     e.target.value = '' // Reset input
