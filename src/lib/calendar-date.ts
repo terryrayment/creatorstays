@@ -154,7 +154,6 @@ export function iterateDaysExclusive(startYMD: string, endYMD: string): Set<stri
   const days = new Set<string>()
   
   if (!isValidYMD(startYMD) || !isValidYMD(endYMD)) {
-    console.warn('[CalendarDate] Invalid YMD in iterateDaysExclusive:', startYMD, endYMD)
     return days
   }
   

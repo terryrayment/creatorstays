@@ -349,10 +349,19 @@ function MonthCalendar({
           // DISPLAY LOGIC: Computed from state, never stored
           // =================================================================
           
-          // Determine what action is possible
-          const isAvailable = !state || (!state.isBlockedByIcal && !state.isBlockedByManual)
-          const isIcalBlocked = state?.isBlockedByIcal || false
-          const isManualOnlyBlocked = state?.isBlockedByManual && !state?.isBlockedByIcal
+          // Determine blocked status with EXPLICIT boolean checks
+          let isIcalBlocked = false
+          let isManualOnlyBlocked = false
+          
+          if (state !== null && state !== undefined) {
+            if (state.isBlockedByIcal === true) {
+              isIcalBlocked = true
+            } else if (state.isBlockedByManual === true) {
+              isManualOnlyBlocked = true
+            }
+          }
+          
+          const isAvailable = !isIcalBlocked && !isManualOnlyBlocked
           
           // Can user click this day?
           const canClick = interactive && !isPast && !isToggling && (
@@ -360,8 +369,10 @@ function MonthCalendar({
             isManualOnlyBlocked   // Can unblock manual-only blocks
           )
           
-          // Background color
-          let bgClass = ''
+          // Background color - order matters!
+          // Default to green, then override based on state
+          let bgClass = 'bg-emerald-400 text-white' // GREEN: available - CAN block
+          
           if (isToggling) {
             bgClass = 'bg-black/20 animate-pulse'
           } else if (isPast) {
@@ -370,9 +381,8 @@ function MonthCalendar({
             bgClass = 'bg-red-400 text-white'  // Red: iCal block - NOT clickable
           } else if (isManualOnlyBlocked) {
             bgClass = 'bg-amber-500 text-white' // Amber: manual only - CAN unblock
-          } else {
-            bgClass = 'bg-emerald-400 text-white' // Green: available - CAN block
           }
+          // else: stays green (default)
           
           // Ring for today
           const ringClass = isToday && !isToggling ? 'ring-2 ring-black ring-offset-1' : ''

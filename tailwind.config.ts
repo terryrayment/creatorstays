@@ -7,6 +7,16 @@ const config: Config = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  safelist: [
+    // Calendar day cell colors - must be present in production build
+    'bg-emerald-400',
+    'bg-amber-500',
+    'bg-red-400',
+    'bg-black/20',
+    'bg-black/5',
+    'text-white',
+    'text-black/30',
+  ],
   theme: {
     extend: {
       colors: {
