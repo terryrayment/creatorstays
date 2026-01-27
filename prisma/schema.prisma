@@ -451,10 +451,28 @@ model Property {
   collaborations  Collaboration[]
   offers          Offer[]
   propertyOwners  PropertyOwner[]
+  manualBlocks    PropertyManualBlock[]
 
   @@unique([hostProfileId, airbnbUrl])
   @@index([hostProfileId])
   @@map("properties")
+}
+
+// Manual availability blocks (for dates not in iCal)
+model PropertyManualBlock {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  startDate   String   // YYYY-MM-DD format
+  endDate     String   // YYYY-MM-DD format (exclusive, same as iCal convention)
+  note        String?  // Optional note for this block
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([propertyId])
+  @@map("property_manual_blocks")
 }
 
 // ============================================================================

@@ -1,43 +1,35 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { BlockedPeriod } from '@/lib/ical'
+import { BlockedPeriod, findBlockingPeriods } from '@/lib/ical'
+import { iterateDaysExclusive, dateToYMD, ymdToLocalDate } from '@/lib/calendar-date'
 
 interface CalendarViewProps {
   blockedDates: BlockedPeriod[]
   monthsToShow?: number
+  onDayClick?: (ymd: string, periods: BlockedPeriod[]) => void
 }
 
-export function CalendarView({ blockedDates, monthsToShow = 3 }: CalendarViewProps) {
+export function CalendarView({ blockedDates, monthsToShow = 3, onDayClick }: CalendarViewProps) {
   const [startMonth, setStartMonth] = useState(() => {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
 
-  // Build a set of all blocked days for O(1) lookup
-  const blockedDays = useMemo(() => {
-    const blocked = new Set<string>()
+  // Build a map of all blocked days with their source periods
+  const blockedDaysMap = useMemo(() => {
+    const map = new Map<string, BlockedPeriod[]>()
     
     for (const period of blockedDates) {
-      // Parse dates without timezone conversion
-      // period.start and period.end are in format YYYY-MM-DD
-      const [startYear, startMonth, startDay] = period.start.split('-').map(Number)
-      const [endYear, endMonth, endDay] = period.end.split('-').map(Number)
-      
-      // Create dates using local timezone
-      const start = new Date(startYear, startMonth - 1, startDay)
-      const end = new Date(endYear, endMonth - 1, endDay)
-      
-      // Add each day in the range (end date is exclusive in iCal)
-      const current = new Date(start)
-      while (current < end) {
-        const dateStr = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`
-        blocked.add(dateStr)
-        current.setDate(current.getDate() + 1)
-      }
+      const days = iterateDaysExclusive(period.start, period.end)
+      days.forEach(d => {
+        const existing = map.get(d) || []
+        existing.push(period)
+        map.set(d, existing)
+      })
     }
     
-    return blocked
+    return map
   }, [blockedDates])
 
   const months = useMemo(() => {
@@ -68,9 +60,7 @@ export function CalendarView({ blockedDates, monthsToShow = 3 }: CalendarViewPro
     })
   }
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  const todayStr = dateToYMD(new Date())
 
   return (
     <div className="rounded-xl border-2 border-black bg-white p-4">
@@ -117,8 +107,9 @@ export function CalendarView({ blockedDates, monthsToShow = 3 }: CalendarViewPro
           <MonthCalendar 
             key={idx}
             month={month}
-            blockedDays={blockedDays}
+            blockedDaysMap={blockedDaysMap}
             todayStr={todayStr}
+            onDayClick={onDayClick}
           />
         ))}
       </div>
@@ -126,7 +117,7 @@ export function CalendarView({ blockedDates, monthsToShow = 3 }: CalendarViewPro
       {/* Stats */}
       <div className="mt-4 flex items-center justify-center gap-6 border-t border-black/10 pt-3 text-[10px] text-black/60">
         <span>{blockedDates.length} blocked periods</span>
-        <span>{blockedDays.size} days unavailable</span>
+        <span>{blockedDaysMap.size} days unavailable</span>
       </div>
     </div>
   )
@@ -134,12 +125,14 @@ export function CalendarView({ blockedDates, monthsToShow = 3 }: CalendarViewPro
 
 function MonthCalendar({ 
   month, 
-  blockedDays,
-  todayStr 
+  blockedDaysMap,
+  todayStr,
+  onDayClick,
 }: { 
   month: Date
-  blockedDays: Set<string>
+  blockedDaysMap: Map<string, BlockedPeriod[]>
   todayStr: string
+  onDayClick?: (ymd: string, periods: BlockedPeriod[]) => void
 }) {
   const monthName = month.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   
@@ -156,13 +149,16 @@ function MonthCalendar({
   
   // Add all days of the month
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    const ymd = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    const blockingPeriods = blockedDaysMap.get(ymd) || []
+    
     days.push({
       day: d,
-      dateStr,
-      isBlocked: blockedDays.has(dateStr),
-      isToday: dateStr === todayStr,
-      isPast: dateStr < todayStr,
+      ymd,
+      isBlocked: blockingPeriods.length > 0,
+      blockingPeriods,
+      isToday: ymd === todayStr,
+      isPast: ymd < todayStr,
     })
   }
 
@@ -182,17 +178,19 @@ function MonthCalendar({
         {days.map((day, idx) => (
           <div 
             key={idx}
+            onClick={() => day && day.isBlocked && onDayClick?.(day.ymd, day.blockingPeriods)}
             className={`aspect-square flex items-center justify-center rounded text-[10px] ${
               !day 
                 ? '' 
                 : day.isToday
                   ? 'border-2 border-black bg-[#FFD84A] font-bold'
                   : day.isBlocked
-                    ? 'bg-red-400 text-white'
+                    ? `bg-red-400 text-white ${onDayClick ? 'cursor-pointer hover:bg-red-500' : ''}`
                     : day.isPast
                       ? 'bg-black/5 text-black/30'
                       : 'bg-emerald-50 text-black'
             }`}
+            title={day?.isBlocked ? `Blocked: ${day.blockingPeriods.map(p => p.summary || 'Unknown').join(', ')}` : undefined}
           >
             {day?.day}
           </div>

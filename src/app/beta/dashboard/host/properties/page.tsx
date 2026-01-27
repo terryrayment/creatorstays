@@ -173,6 +173,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const [isSyncingCalendar, setIsSyncingCalendar] = useState(false)
   const [calendarSyncResult, setCalendarSyncResult] = useState<{ success?: boolean; message?: string } | null>(null)
   const [isMounted, setIsMounted] = useState(false)
+  
+  // Manual blocks state
+  const [manualBlocks, setManualBlocks] = useState<{ id: string; startDate: string; endDate: string; note?: string }[]>([])
+  const [newBlockStart, setNewBlockStart] = useState('')
+  const [newBlockEnd, setNewBlockEnd] = useState('')
+  const [newBlockNote, setNewBlockNote] = useState('')
+  const [isAddingBlock, setIsAddingBlock] = useState(false)
+  const [isDeletingBlock, setIsDeletingBlock] = useState<string | null>(null)
 
   useEffect(() => { setIsMounted(true) }, [])
   useEffect(() => { setForm(property); setStep(1); setLastSavedPhotos(property.photos || []) }, [property])
@@ -446,6 +454,96 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     setForm(prev => ({ ...prev, creatorBrief: `This ${tags} property in ${location} is perfect for creators looking for authentic, visually stunning content opportunities. Ideal for travel, lifestyle, and photography content. The space offers unique angles and natural lighting throughout the day.` }))
   }
 
+  // Fetch manual blocks when property changes
+  const fetchManualBlocks = async () => {
+    if (!form.id) return
+    try {
+      const res = await fetch(`/api/properties/${form.id}/manual-blocks`)
+      if (res.ok) {
+        const data = await res.json()
+        setManualBlocks(data.blocks || [])
+      }
+    } catch (e) {
+      console.error('[ManualBlocks] Fetch error:', e)
+    }
+  }
+
+  // Fetch manual blocks on mount and when property changes
+  useEffect(() => {
+    if (form.id) {
+      fetchManualBlocks()
+    }
+  }, [form.id])
+
+  const addManualBlock = async () => {
+    if (!form.id || !newBlockStart || !newBlockEnd) return
+    if (newBlockEnd <= newBlockStart) {
+      setToast('End date must be after start date')
+      setTimeout(() => setToast(null), 3000)
+      return
+    }
+    
+    setIsAddingBlock(true)
+    try {
+      const res = await fetch(`/api/properties/${form.id}/manual-blocks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startDate: newBlockStart, endDate: newBlockEnd, note: newBlockNote || undefined })
+      })
+      
+      if (res.ok) {
+        const data = await res.json()
+        setManualBlocks(prev => [...prev, data.block].sort((a, b) => a.startDate.localeCompare(b.startDate)))
+        setNewBlockStart('')
+        setNewBlockEnd('')
+        setNewBlockNote('')
+        // Refresh calendar to get merged data
+        await refreshCalendarData()
+        setToast('Block added!')
+        setTimeout(() => setToast(null), 2000)
+      } else {
+        const err = await res.json()
+        setToast(err.error || 'Failed to add block')
+        setTimeout(() => setToast(null), 3000)
+      }
+    } catch (e) {
+      setToast('Network error')
+      setTimeout(() => setToast(null), 3000)
+    }
+    setIsAddingBlock(false)
+  }
+
+  const deleteManualBlock = async (blockId: string) => {
+    if (!form.id) return
+    setIsDeletingBlock(blockId)
+    try {
+      const res = await fetch(`/api/properties/${form.id}/manual-blocks/${blockId}`, { method: 'DELETE' })
+      if (res.ok) {
+        setManualBlocks(prev => prev.filter(b => b.id !== blockId))
+        // Refresh calendar to get merged data
+        await refreshCalendarData()
+        setToast('Block removed')
+        setTimeout(() => setToast(null), 2000)
+      }
+    } catch (e) {
+      console.error('[ManualBlocks] Delete error:', e)
+    }
+    setIsDeletingBlock(null)
+  }
+
+  const refreshCalendarData = async () => {
+    if (!form.id) return
+    try {
+      const res = await fetch(`/api/properties/${form.id}/calendar`)
+      if (res.ok) {
+        const data = await res.json()
+        setForm(prev => ({ ...prev, blockedDates: data.blockedDatesMerged || data.blockedDates, lastCalendarSync: data.lastSync }))
+      }
+    } catch (e) {
+      console.error('[Calendar] Refresh error:', e)
+    }
+  }
+
   const syncCalendar = async () => {
     if (!form.id || !form.icalUrl) return
     setIsSyncingCalendar(true)
@@ -462,9 +560,9 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       const res = await fetch(`/api/properties/${form.id}/calendar`, { method: 'POST' })
       const data = await res.json()
       if (data.success) {
-        setCalendarSyncResult({ success: true, message: `Synced! Found ${data.eventCount || 0} blocked periods.` })
-        // Update local state with new blocked dates
-        setForm(prev => ({ ...prev, blockedDates: data.blockedDates, lastCalendarSync: data.lastSync }))
+        setCalendarSyncResult({ success: true, message: `Synced! Found ${data.eventCount || 0} blocked periods from iCal.` })
+        // Update local state with merged blocked dates
+        setForm(prev => ({ ...prev, blockedDates: data.blockedDatesMerged || data.blockedDates, lastCalendarSync: data.lastSync }))
       } else {
         setCalendarSyncResult({ success: false, message: data.error || 'Sync failed' })
       }
@@ -679,6 +777,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               <span className="text-sm font-bold text-black">Calendar Availability</span>
             </div>
             
+            {/* Info Banner */}
+            <div className="rounded-lg border border-black/10 bg-black/5 px-3 py-2 text-[11px] text-black">
+              <strong>Note:</strong> Airbnb iCal only includes reservations and some blocked events. Airbnb can show additional unavailable days that do not appear in iCal. Use Manual Blocks below to match your exact availability.
+            </div>
+            
             <div className="space-y-3">
               <div>
                 <label className="mb-1.5 block text-[11px] font-bold text-black">iCal URL</label>
@@ -714,9 +817,81 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 </p>
               )}
               
+              {/* Manual Blocks Section */}
+              {form.id && (
+                <div className="border-t border-black/10 pt-3">
+                  <p className="text-[11px] font-bold text-black mb-2">Manual Blocks</p>
+                  
+                  {/* Add Block Form */}
+                  <div className="flex flex-wrap gap-2 items-end mb-3">
+                    <div className="flex-1 min-w-[120px]">
+                      <label className="block text-[10px] text-black/60 mb-1">Start Date</label>
+                      <input 
+                        type="date" 
+                        value={newBlockStart} 
+                        onChange={e => setNewBlockStart(e.target.value)}
+                        className="w-full rounded-lg border-2 border-black/20 px-2 py-1.5 text-xs focus:border-black focus:outline-none"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-[120px]">
+                      <label className="block text-[10px] text-black/60 mb-1">End Date (exclusive)</label>
+                      <input 
+                        type="date" 
+                        value={newBlockEnd} 
+                        onChange={e => setNewBlockEnd(e.target.value)}
+                        className="w-full rounded-lg border-2 border-black/20 px-2 py-1.5 text-xs focus:border-black focus:outline-none"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-[150px]">
+                      <label className="block text-[10px] text-black/60 mb-1">Note (optional)</label>
+                      <input 
+                        type="text" 
+                        value={newBlockNote} 
+                        onChange={e => setNewBlockNote(e.target.value)}
+                        placeholder="e.g., Personal use"
+                        className="w-full rounded-lg border-2 border-black/20 px-2 py-1.5 text-xs focus:border-black focus:outline-none"
+                      />
+                    </div>
+                    <Button 
+                      onClick={addManualBlock}
+                      disabled={isAddingBlock || !newBlockStart || !newBlockEnd}
+                      className="border-2 border-black bg-black text-white hover:bg-black/90 text-xs px-3 py-1.5"
+                    >
+                      {isAddingBlock ? 'Adding...' : 'Add Block'}
+                    </Button>
+                  </div>
+                  
+                  {/* Existing Manual Blocks */}
+                  {manualBlocks.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {manualBlocks.map(block => (
+                        <div key={block.id} className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5">
+                          <span className="text-[9px] font-medium text-amber-700">
+                            {block.startDate} → {block.endDate}
+                            {block.note && ` (${block.note})`}
+                          </span>
+                          <button 
+                            onClick={() => deleteManualBlock(block.id)}
+                            disabled={isDeletingBlock === block.id}
+                            className="ml-1 text-amber-500 hover:text-red-500 disabled:opacity-50"
+                          >
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {manualBlocks.length === 0 && (
+                    <p className="text-[10px] text-black/40">No manual blocks added yet.</p>
+                  )}
+                </div>
+              )}
+              
               {form.blockedDates && (form.blockedDates as any[]).length > 0 && (
                 <div>
-                  <p className="text-[10px] font-bold text-black/70 mb-1">Blocked periods ({(form.blockedDates as any[]).length}):</p>
+                  <p className="text-[10px] font-bold text-black/70 mb-1">All blocked periods ({(form.blockedDates as any[]).length}):</p>
                   <div className="flex flex-wrap gap-1">
                     {(form.blockedDates as any[]).map((period: any, i: number) => (
                       <span key={i} className="rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[9px] font-medium text-red-600">

@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { fetchAndParseICal, getAvailablePeriods, BlockedPeriod } from '@/lib/ical'
+import { fetchAndParseICal, getAvailablePeriods, BlockedPeriod, mergeAllBlocks } from '@/lib/ical'
 
 export const dynamic = 'force-dynamic'
 
 /**
  * GET /api/properties/[id]/calendar
- * Get calendar availability for a property
+ * Get calendar availability for a property (includes merged iCal + manual blocks)
  */
 export async function GET(
   request: NextRequest,
@@ -23,6 +23,9 @@ export async function GET(
         icalUrl: true,
         blockedDates: true,
         lastCalendarSync: true,
+        manualBlocks: {
+          orderBy: { startDate: 'asc' },
+        },
       },
     })
 
@@ -30,15 +33,26 @@ export async function GET(
       return NextResponse.json({ error: 'Property not found' }, { status: 404 })
     }
 
-    const blockedDates = (property.blockedDates as unknown as BlockedPeriod[]) || []
-    const availablePeriods = getAvailablePeriods(blockedDates, 3)
+    const icalBlocks = (property.blockedDates as unknown as BlockedPeriod[]) || []
+    
+    // Merge iCal blocks with manual blocks
+    const { blockedDatesFromIcal, blockedDatesManual, blockedDatesMerged } = mergeAllBlocks(
+      icalBlocks,
+      property.manualBlocks
+    )
+    
+    const availablePeriods = getAvailablePeriods(blockedDatesMerged, 3)
 
     return NextResponse.json({
       propertyId: property.id,
       title: property.title,
       hasCalendar: !!property.icalUrl,
       lastSync: property.lastCalendarSync,
-      blockedDates,
+      blockedDatesFromIcal,
+      blockedDatesManual,
+      blockedDatesMerged,
+      // Keep legacy field for backwards compatibility
+      blockedDates: blockedDatesMerged,
       availablePeriods,
     })
   } catch (error) {
@@ -62,12 +76,15 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get property and verify ownership
+    // Get property and verify ownership (include manual blocks)
     const property = await prisma.property.findUnique({
       where: { id: params.id },
       include: {
         hostProfile: {
           select: { userId: true },
+        },
+        manualBlocks: {
+          orderBy: { startDate: 'asc' },
         },
       },
     })
@@ -113,12 +130,22 @@ export async function POST(
 
     console.log(`[Calendar Sync] Success for property ${property.id}: ${result.eventCount} events`)
 
-    const availablePeriods = getAvailablePeriods(result.blockedDates, 3)
+    // Merge with manual blocks
+    const { blockedDatesFromIcal, blockedDatesManual, blockedDatesMerged } = mergeAllBlocks(
+      result.blockedDates,
+      property.manualBlocks
+    )
+    
+    const availablePeriods = getAvailablePeriods(blockedDatesMerged, 3)
 
     return NextResponse.json({
       success: true,
       eventCount: result.eventCount,
-      blockedDates: result.blockedDates,
+      blockedDatesFromIcal,
+      blockedDatesManual,
+      blockedDatesMerged,
+      // Keep legacy field for backwards compatibility
+      blockedDates: blockedDatesMerged,
       availablePeriods,
       lastSync: new Date().toISOString(),
     })

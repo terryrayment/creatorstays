@@ -2,12 +2,32 @@
  * iCal Parser for CreatorStays
  * Parses iCal feeds from Airbnb, VRBO, Booking.com, etc.
  * Extracts blocked/booked dates for availability display
+ * 
+ * IMPORTANT: This uses calendar-date.ts helpers for all date operations
+ * to avoid timezone drift issues.
  */
 
+import {
+  parseICalDateToLocalYMD,
+  ymdToLocalDate,
+  dateToYMD,
+  getTodayYMD,
+  iterateDaysExclusive,
+  compareYMD,
+  isValidYMD,
+  formatYMDShort,
+} from './calendar-date'
+
+// =============================================================================
+// Types
+// =============================================================================
+
 export interface BlockedPeriod {
-  start: string  // ISO date string (YYYY-MM-DD)
-  end: string    // ISO date string (YYYY-MM-DD)
-  summary?: string
+  start: string       // YYYY-MM-DD (inclusive)
+  end: string         // YYYY-MM-DD (exclusive, per iCal semantics)
+  summary?: string    // Event summary (e.g., "Reserved", "Airbnb (Not available)")
+  uid?: string        // VEVENT UID for traceability
+  source: 'ical' | 'manual'  // Where this block came from
 }
 
 export interface CalendarSyncResult {
@@ -16,26 +36,46 @@ export interface CalendarSyncResult {
   error?: string
   eventCount?: number
   rawEventCount?: number
+  debug?: {
+    fetchedAt: string
+    icalBytes: number
+    eventsFound: number
+    eventsParsed: number
+    eventsFiltered: number
+    filterReason?: Record<string, number>
+  }
 }
+
+// =============================================================================
+// Main Entry Points
+// =============================================================================
 
 /**
  * Fetch and parse an iCal feed
  */
 export async function fetchAndParseICal(icalUrl: string): Promise<CalendarSyncResult> {
+  const debug: CalendarSyncResult['debug'] = {
+    fetchedAt: new Date().toISOString(),
+    icalBytes: 0,
+    eventsFound: 0,
+    eventsParsed: 0,
+    eventsFiltered: 0,
+    filterReason: {},
+  }
+  
   try {
     // Validate URL
     if (!icalUrl || !icalUrl.startsWith('http')) {
-      return { success: false, blockedDates: [], error: 'Invalid iCal URL' }
+      return { success: false, blockedDates: [], error: 'Invalid iCal URL', debug }
     }
 
     // Fetch the iCal data
-    console.log('[iCal] Fetching:', icalUrl.substring(0, 50) + '...')
+    console.log('[iCal] Fetching:', icalUrl.substring(0, 60) + '...')
     const response = await fetch(icalUrl, {
       headers: {
         'User-Agent': 'CreatorStays Calendar Sync/1.0',
         'Accept': 'text/calendar, application/calendar+json, */*',
       },
-      // 30 second timeout
       signal: AbortSignal.timeout(30000),
     })
 
@@ -43,23 +83,31 @@ export async function fetchAndParseICal(icalUrl: string): Promise<CalendarSyncRe
       return { 
         success: false, 
         blockedDates: [], 
-        error: `Failed to fetch calendar: ${response.status} ${response.statusText}` 
+        error: `Failed to fetch calendar: ${response.status} ${response.statusText}`,
+        debug,
       }
     }
 
     const icalText = await response.text()
+    debug.icalBytes = icalText.length
     console.log('[iCal] Received', icalText.length, 'bytes')
     
     // Parse the iCal data
-    const { blockedDates, rawEventCount } = parseICalText(icalText)
+    const parseResult = parseICalText(icalText)
     
-    console.log('[iCal] Parsed', rawEventCount, 'events,', blockedDates.length, 'blocked periods')
+    debug.eventsFound = parseResult.rawEventCount
+    debug.eventsParsed = parseResult.blockedDates.length
+    debug.eventsFiltered = parseResult.filteredCount
+    debug.filterReason = parseResult.filterReasons
+    
+    console.log('[iCal] Parsed', parseResult.rawEventCount, 'events,', parseResult.blockedDates.length, 'blocked periods')
     
     return {
       success: true,
-      blockedDates,
-      eventCount: blockedDates.length,
-      rawEventCount,
+      blockedDates: parseResult.blockedDates,
+      eventCount: parseResult.blockedDates.length,
+      rawEventCount: parseResult.rawEventCount,
+      debug,
     }
   } catch (error) {
     console.error('[iCal] Fetch error:', error)
@@ -67,16 +115,23 @@ export async function fetchAndParseICal(icalUrl: string): Promise<CalendarSyncRe
       success: false,
       blockedDates: [],
       error: error instanceof Error ? error.message : 'Unknown error fetching calendar',
+      debug,
     }
   }
 }
 
 /**
- * Parse iCal text into blocked periods
- * iCal format reference: https://icalendar.org/iCalendar-RFC-5545/
+ * Parse iCal text into blocked periods (exported for testing)
  */
-function parseICalText(icalText: string): { blockedDates: BlockedPeriod[], rawEventCount: number } {
+export function parseICalText(icalText: string): { 
+  blockedDates: BlockedPeriod[]
+  rawEventCount: number
+  filteredCount: number
+  filterReasons: Record<string, number>
+} {
   const blockedDates: BlockedPeriod[] = []
+  const filterReasons: Record<string, number> = {}
+  let filteredCount = 0
   
   // Split into events
   const events = icalText.split('BEGIN:VEVENT')
@@ -84,53 +139,77 @@ function parseICalText(icalText: string): { blockedDates: BlockedPeriod[], rawEv
   
   console.log('[iCal] Found', rawEventCount, 'VEVENT blocks')
   
+  const todayYMD = getTodayYMD()
+  
   for (let i = 1; i < events.length; i++) {
     const eventText = events[i]
     const endIdx = eventText.indexOf('END:VEVENT')
     const eventContent = endIdx > -1 ? eventText.substring(0, endIdx) : eventText
     
-    // Extract DTSTART
+    // Extract fields
     const dtstart = extractICalField(eventContent, 'DTSTART')
-    // Extract DTEND
     const dtend = extractICalField(eventContent, 'DTEND')
-    // Extract SUMMARY (optional)
     const summary = extractICalField(eventContent, 'SUMMARY')
+    const uid = extractICalField(eventContent, 'UID')
     
-    if (dtstart) {
-      const startDate = parseICalDate(dtstart)
-      // If no DTEND, assume single day event
-      const endDate = dtend ? parseICalDate(dtend) : startDate
-      
-      if (startDate && endDate) {
-        // Include all dates from today onwards
-        // Parse dates without timezone issues
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-        
-        // Compare as strings to avoid timezone issues
-        // Include if end date is today or in the future
-        if (endDate >= todayStr) {
-          blockedDates.push({
-            start: startDate,
-            end: endDate,
-            summary: summary || undefined,
-          })
-          console.log('[iCal] Event:', startDate, 'to', endDate, summary ? `(${summary})` : '')
-        } else {
-          console.log('[iCal] Skipped past event:', startDate, 'to', endDate)
-        }
-      }
+    // Parse dates using our robust helpers
+    const startParsed = parseICalDateToLocalYMD(dtstart)
+    const endParsed = dtend ? parseICalDateToLocalYMD(dtend) : null
+    
+    if (!startParsed) {
+      filteredCount++
+      filterReasons['invalid_start'] = (filterReasons['invalid_start'] || 0) + 1
+      console.log('[iCal] Skipped: invalid DTSTART:', dtstart)
+      continue
     }
+    
+    const startYMD = startParsed.ymd
+    // If no DTEND, assume single day event (end = start + 1 day)
+    const endYMD = endParsed?.ymd || addOneDayYMD(startYMD)
+    
+    if (!endYMD) {
+      filteredCount++
+      filterReasons['invalid_end'] = (filterReasons['invalid_end'] || 0) + 1
+      continue
+    }
+    
+    // Validate: end must be after start
+    if (compareYMD(endYMD, startYMD) <= 0) {
+      filteredCount++
+      filterReasons['end_before_start'] = (filterReasons['end_before_start'] || 0) + 1
+      console.log('[iCal] Skipped: end before start:', startYMD, '->', endYMD)
+      continue
+    }
+    
+    // Filter: only include if end date is today or in the future
+    // (event is still relevant if it ends today or later)
+    if (compareYMD(endYMD, todayYMD) < 0) {
+      filteredCount++
+      filterReasons['past_event'] = (filterReasons['past_event'] || 0) + 1
+      console.log('[iCal] Skipped past event:', startYMD, '->', endYMD)
+      continue
+    }
+    
+    blockedDates.push({
+      start: startYMD,
+      end: endYMD,
+      summary: summary || undefined,
+      uid: uid || undefined,
+      source: 'ical',
+    })
+    
+    console.log('[iCal] Event:', startYMD, 'to', endYMD, summary ? `(${summary})` : '', uid ? `[${uid.substring(0, 20)}...]` : '')
   }
   
   // Sort by start date
-  blockedDates.sort((a, b) => a.start.localeCompare(b.start))
+  blockedDates.sort((a, b) => compareYMD(a.start, b.start))
   
-  // DON'T merge - keep individual events separate for accurate display
-  // Merging was causing issues with adjacent bookings
-  return { blockedDates, rawEventCount }
+  return { blockedDates, rawEventCount, filteredCount, filterReasons }
 }
+
+// =============================================================================
+// Field Extraction
+// =============================================================================
 
 /**
  * Extract a field from iCal event text
@@ -155,70 +234,45 @@ function extractICalField(eventText: string, fieldName: string): string | null {
 }
 
 /**
- * Parse iCal date format into ISO date string
- * Handles:
- * - 20240115 (DATE format)
- * - 20240115T120000 (local datetime)
- * - 20240115T120000Z (UTC datetime)
+ * Add one day to a YMD string (for single-day events without DTEND)
  */
-function parseICalDate(dateStr: string): string | null {
-  if (!dateStr) return null
-  
-  // Remove any line continuations
-  dateStr = dateStr.replace(/\r?\n\s/g, '')
-  
-  // Basic date format: YYYYMMDD
-  if (/^\d{8}$/.test(dateStr)) {
-    const year = dateStr.substring(0, 4)
-    const month = dateStr.substring(4, 6)
-    const day = dateStr.substring(6, 8)
-    return `${year}-${month}-${day}`
-  }
-  
-  // DateTime format: YYYYMMDDTHHmmss or YYYYMMDDTHHmmssZ
-  if (/^\d{8}T\d{6}Z?$/.test(dateStr)) {
-    const year = dateStr.substring(0, 4)
-    const month = dateStr.substring(4, 6)
-    const day = dateStr.substring(6, 8)
-    return `${year}-${month}-${day}`
-  }
-  
-  // Try standard Date parsing as fallback
-  try {
-    const date = new Date(dateStr)
-    if (!isNaN(date.getTime())) {
-      return date.toISOString().split('T')[0]
-    }
-  } catch {
-    // Ignore parsing errors
-  }
-  
-  return null
+function addOneDayYMD(ymd: string): string | null {
+  const date = ymdToLocalDate(ymd)
+  if (!date) return null
+  date.setDate(date.getDate() + 1)
+  return dateToYMD(date)
 }
 
+// =============================================================================
+// Merging and Combining
+// =============================================================================
+
 /**
- * Merge overlapping or adjacent blocked periods (optional, not used by default)
+ * Merge overlapping or contiguous blocked periods
+ * Only merges when periods are strictly adjacent (next.start === current.end)
+ * Preserves "Reserved" label over "Not available" when merging
  */
 export function mergeOverlappingPeriods(periods: BlockedPeriod[]): BlockedPeriod[] {
   if (periods.length <= 1) return periods
   
-  const merged: BlockedPeriod[] = []
-  let current = { ...periods[0] }
+  // Sort by start date
+  const sorted = [...periods].sort((a, b) => compareYMD(a.start, b.start))
   
-  for (let i = 1; i < periods.length; i++) {
-    const next = periods[i]
+  const merged: BlockedPeriod[] = []
+  let current = { ...sorted[0] }
+  
+  for (let i = 1; i < sorted.length; i++) {
+    const next = sorted[i]
     
-    // Check if next period overlaps or is adjacent to current
-    const currentEnd = new Date(current.end)
-    const nextStart = new Date(next.start)
-    
-    // Add 1 day buffer for adjacency
-    currentEnd.setDate(currentEnd.getDate() + 1)
-    
-    if (nextStart <= currentEnd) {
-      // Merge: extend current end if next ends later
-      if (next.end > current.end) {
+    // Merge if contiguous or overlapping: next.start <= current.end
+    if (compareYMD(next.start, current.end) <= 0) {
+      // Extend end if next ends later
+      if (compareYMD(next.end, current.end) > 0) {
         current.end = next.end
+      }
+      // Preserve "Reserved" label over "Not available"
+      if (next.summary?.includes('Reserved')) {
+        current.summary = next.summary
       }
     } else {
       // No overlap, save current and start new
@@ -227,47 +281,101 @@ export function mergeOverlappingPeriods(periods: BlockedPeriod[]): BlockedPeriod
     }
   }
   
-  // Don't forget the last one
   merged.push(current)
-  
   return merged
 }
 
 /**
- * Check if a specific date is blocked
+ * Merge iCal blocks with manual blocks
+ * Returns both individual sources and merged result
  */
-export function isDateBlocked(date: Date | string, blockedDates: BlockedPeriod[]): boolean {
-  const checkDate = typeof date === 'string' ? date : date.toISOString().split('T')[0]
+export function mergeAllBlocks(
+  icalBlocks: BlockedPeriod[],
+  manualBlocks: { startDate: string; endDate: string; note?: string | null }[]
+): {
+  blockedDatesFromIcal: BlockedPeriod[]
+  blockedDatesManual: BlockedPeriod[]
+  blockedDatesMerged: BlockedPeriod[]
+} {
+  // Convert manual blocks to BlockedPeriod format
+  const manualAsPeriods: BlockedPeriod[] = manualBlocks.map(b => ({
+    start: b.startDate,
+    end: b.endDate,
+    summary: b.note || 'Manual block',
+    source: 'manual' as const,
+  }))
   
+  // Combine and merge
+  const allBlocks = [...icalBlocks, ...manualAsPeriods]
+  const merged = mergeOverlappingPeriods(allBlocks)
+  
+  return {
+    blockedDatesFromIcal: icalBlocks,
+    blockedDatesManual: manualAsPeriods,
+    blockedDatesMerged: merged,
+  }
+}
+
+// =============================================================================
+// Query Helpers
+// =============================================================================
+
+/**
+ * Check if a specific date (YMD) is blocked
+ */
+export function isDateBlocked(ymd: string, blockedDates: BlockedPeriod[]): boolean {
   for (const period of blockedDates) {
-    if (checkDate >= period.start && checkDate < period.end) {
+    if (ymd >= period.start && ymd < period.end) {
       return true
     }
   }
-  
   return false
 }
 
 /**
- * Get all blocked dates as individual days (for calendar display)
+ * Find why a date is blocked
+ * Returns the blocking period(s) or empty array
+ */
+export function findBlockingPeriods(ymd: string, blockedDates: BlockedPeriod[]): BlockedPeriod[] {
+  return blockedDates.filter(period => ymd >= period.start && ymd < period.end)
+}
+
+/**
+ * Get all blocked days as individual YMDs (for calendar display)
+ * Uses iterateDaysExclusive to avoid timezone issues
  */
 export function getBlockedDays(blockedDates: BlockedPeriod[]): Set<string> {
-  const blocked = new Set<string>()
+  const allDays = new Set<string>()
   
   for (const period of blockedDates) {
-    const start = new Date(period.start)
-    const end = new Date(period.end)
-    
-    // Add each day in the range
-    const current = new Date(start)
-    while (current < end) {
-      blocked.add(current.toISOString().split('T')[0])
-      current.setDate(current.getDate() + 1)
-    }
+    const days = iterateDaysExclusive(period.start, period.end)
+    days.forEach(d => allDays.add(d))
   }
   
-  return blocked
+  return allDays
 }
+
+/**
+ * Get blocked days with their source info (for "why blocked?" feature)
+ */
+export function getBlockedDaysWithInfo(blockedDates: BlockedPeriod[]): Map<string, BlockedPeriod[]> {
+  const dayInfo = new Map<string, BlockedPeriod[]>()
+  
+  for (const period of blockedDates) {
+    const days = iterateDaysExclusive(period.start, period.end)
+    days.forEach(d => {
+      const existing = dayInfo.get(d) || []
+      existing.push(period)
+      dayInfo.set(d, existing)
+    })
+  }
+  
+  return dayInfo
+}
+
+// =============================================================================
+// Available Periods
+// =============================================================================
 
 /**
  * Get available date ranges within the next N months
@@ -278,19 +386,21 @@ export function getAvailablePeriods(
 ): { start: string; end: string }[] {
   const available: { start: string; end: string }[] = []
   
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const endDate = new Date(today)
-  endDate.setMonth(endDate.getMonth() + monthsAhead)
+  const todayYMD = getTodayYMD()
+  const todayDate = ymdToLocalDate(todayYMD)
+  if (!todayDate) return available
   
-  let currentStart = today.toISOString().split('T')[0]
+  todayDate.setMonth(todayDate.getMonth() + monthsAhead)
+  const endYMD = dateToYMD(todayDate)
+  
+  let currentStart = todayYMD
   
   // Sort blocked dates by start
-  const sortedBlocked = [...blockedDates].sort((a, b) => a.start.localeCompare(b.start))
+  const sortedBlocked = [...blockedDates].sort((a, b) => compareYMD(a.start, b.start))
   
   for (const blocked of sortedBlocked) {
     // If there's a gap before this blocked period
-    if (blocked.start > currentStart) {
+    if (compareYMD(blocked.start, currentStart) > 0) {
       available.push({
         start: currentStart,
         end: blocked.start,
@@ -298,17 +408,16 @@ export function getAvailablePeriods(
     }
     
     // Move current start to after this blocked period
-    if (blocked.end > currentStart) {
+    if (compareYMD(blocked.end, currentStart) > 0) {
       currentStart = blocked.end
     }
   }
   
   // Add any remaining time after last blocked period
-  const endDateStr = endDate.toISOString().split('T')[0]
-  if (currentStart < endDateStr) {
+  if (compareYMD(currentStart, endYMD) < 0) {
     available.push({
       start: currentStart,
-      end: endDateStr,
+      end: endYMD,
     })
   }
   
@@ -320,16 +429,17 @@ export function getAvailablePeriods(
  */
 export function formatAvailablePeriods(periods: { start: string; end: string }[]): string[] {
   return periods.map(period => {
-    const start = new Date(period.start)
-    const end = new Date(period.end)
+    const startDate = ymdToLocalDate(period.start)
+    const endDate = ymdToLocalDate(period.end)
+    
+    if (!startDate || !endDate) return `${period.start} - ${period.end}`
     
     const formatOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
     
-    // If same month, combine nicely
-    if (start.getMonth() === end.getMonth()) {
-      return `${start.toLocaleDateString('en-US', formatOptions)} - ${end.getDate()}`
+    if (startDate.getMonth() === endDate.getMonth()) {
+      return `${startDate.toLocaleDateString('en-US', formatOptions)} - ${endDate.getDate()}`
     }
     
-    return `${start.toLocaleDateString('en-US', formatOptions)} - ${end.toLocaleDateString('en-US', formatOptions)}`
+    return `${startDate.toLocaleDateString('en-US', formatOptions)} - ${endDate.toLocaleDateString('en-US', formatOptions)}`
   })
 }
