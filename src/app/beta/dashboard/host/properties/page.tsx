@@ -181,33 +181,9 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [step, onStepChange])
   
-  // Auto-save is now handled in handlePhotoUpload - this effect is kept for safety
-  // but with a longer debounce to avoid conflicts
-  useEffect(() => {
-    const currentPhotos = form.photos || []
-    // Only auto-save if photos have changed, there are photos to save, and we have an id
-    if (form.id && currentPhotos.length > 0 && JSON.stringify(currentPhotos) !== JSON.stringify(lastSavedPhotos)) {
-      const autoSaveTimer = setTimeout(async () => {
-        try {
-          console.log('[Properties] Auto-save backup running...')
-          await fetch('/api/properties', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ 
-              id: form.id, 
-              photos: currentPhotos,
-              heroImageUrl: form.heroImageUrl || currentPhotos[0]
-            }) 
-          })
-          setLastSavedPhotos(currentPhotos)
-          console.log('[Properties] Auto-save backup completed -', currentPhotos.length, 'photos')
-        } catch (e) { 
-          console.error('[Properties] Auto-save failed:', e) 
-        }
-      }, 3000) // Longer debounce to avoid conflicts with immediate save
-      return () => clearTimeout(autoSaveTimer)
-    }
-  }, [form.photos, form.id, form.heroImageUrl, lastSavedPhotos])
+  // DISABLED: Auto-save was causing race conditions and overwriting photos
+  // Photos are now saved immediately after upload in handlePhotoUpload
+  // Manual save via Save Draft / Publish buttons handles everything else
   // Handle photo upload - uploads to Cloudinary
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files

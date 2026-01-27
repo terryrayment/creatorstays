@@ -89,16 +89,14 @@ export function DashboardFooter() {
               © {new Date().getFullYear()} Wolfpup, Inc. All rights reserved.
             </p>
             <p className="mt-2 text-[10px] font-bold text-black/60">
-              A{" "}
               <a 
                 href="https://wolfpup.xyz" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="underline hover:text-black transition-colors"
               >
-                WOLFPUP
+                A WOLFPUP PROJECT
               </a>
-              {" "}PROJECT
             </p>
           </div>
 
