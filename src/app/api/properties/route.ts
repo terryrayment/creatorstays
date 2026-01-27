@@ -200,20 +200,45 @@ export async function POST(request: NextRequest) {
       
       console.log('[Properties API] Updating property:', propertyIdToUse)
       console.log('[Properties API] Before update - isDraft:', existing.isDraft, 'title:', existing.title)
-      console.log('[Properties API] Will set - isDraft:', propertyData.isDraft, 'title:', propertyData.title)
+      console.log('[Properties API] Will update fields:', Object.keys(propertyData).filter(k => k !== 'hostProfileId'))
       
-      // Update existing
+      // Update existing - use partial data (only fields that were sent)
+      // Remove hostProfileId from update data as it shouldn't change
+      const { hostProfileId: _, ...updateData } = propertyData
       property = await prisma.property.update({
         where: { id: propertyIdToUse },
-        data: propertyData,
+        data: updateData,
       })
       
       console.log('[Properties API] After update - isDraft:', property.isDraft, 'title:', property.title)
     } else {
-      // Create new
+      // Create new - need full data with defaults
       console.log('[Properties API] Creating new property')
+      const createData = {
+        hostProfileId: hostProfile.id,
+        airbnbUrl: airbnbUrl || null,
+        icalUrl: icalUrl || null,
+        title: title || null,
+        venueType: finalVenueType || null,
+        cityRegion: cityRegion || null,
+        priceNightlyRange: priceNightlyRange || null,
+        rating: rating ? parseFloat(String(rating)) : null,
+        reviewCount: reviewCount ? parseInt(String(reviewCount)) : null,
+        guests: maxGuests ? parseInt(String(maxGuests)) : (guests ? parseInt(String(guests)) : null),
+        beds: finalBeds ? parseInt(String(finalBeds)) : null,
+        baths: finalBaths ? Math.round(parseFloat(String(finalBaths))) : null,
+        amenities: amenities || [],
+        vibeTags: vibeTags || [],
+        houseRules: houseRules || null,
+        photos: photos || [],
+        heroImageUrl: heroImageUrl || null,
+        creatorBrief: creatorBrief || null,
+        isActive: finalIsActive,
+        isDraft: finalIsDraft,
+        lastImportedAt: lastImportedAt ? new Date(lastImportedAt) : null,
+      }
       property = await prisma.property.create({
-        data: propertyData,
+        data: createData,
       })
       console.log('[Properties API] Created property:', property.id, 'isDraft:', property.isDraft)
     }
