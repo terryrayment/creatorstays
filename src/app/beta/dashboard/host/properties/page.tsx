@@ -256,11 +256,36 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     }
     
     if (newPhotos.length > 0) {
+      const allPhotos = [...(form.photos || []), ...newPhotos]
+      const heroImage = form.heroImageUrl || newPhotos[0]
+      
+      // Update local state
       setForm(prev => ({
         ...prev,
-        photos: [...(prev.photos || []), ...newPhotos],
-        heroImageUrl: prev.heroImageUrl || newPhotos[0]
+        photos: allPhotos,
+        heroImageUrl: heroImage
       }))
+      
+      // IMMEDIATELY save to database (don't wait for auto-save)
+      if (form.id) {
+        try {
+          await fetch('/api/properties', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ 
+              id: form.id, 
+              photos: allPhotos,
+              heroImageUrl: heroImage
+            }) 
+          })
+          setLastSavedPhotos(allPhotos)
+          console.log('[Properties] Saved', allPhotos.length, 'photos to database')
+        } catch (err) {
+          console.error('[Properties] Failed to save photos:', err)
+          setToast('Photos uploaded but failed to save. Please click Save.')
+          setTimeout(() => setToast(null), 5000)
+        }
+      }
     }
     setIsUploading(false)
     e.target.value = '' // Reset input
