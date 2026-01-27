@@ -85,7 +85,9 @@ export async function POST(request: NextRequest) {
       guests,
       maxGuests,
       beds,
+      bedrooms,     // Alias for beds (from onboarding)
       baths,
+      bathrooms,    // Alias for baths (from onboarding)
       amenities = [],
       vibeTags = [],
       houseRules,
@@ -101,6 +103,10 @@ export async function POST(request: NextRequest) {
     // Explicitly check for boolean values (don't use defaults that override passed values)
     const finalIsActive = isActive !== undefined ? isActive : true
     const finalIsDraft = isDraft !== undefined ? isDraft : true
+    
+    // Handle field aliases (bedrooms -> beds, bathrooms -> baths)
+    const finalBeds = beds ?? bedrooms
+    const finalBaths = baths ?? bathrooms
     
     // Use venueType if provided, otherwise fall back to propertyType
     const finalVenueType = venueType || propertyType || null
@@ -153,8 +159,8 @@ export async function POST(request: NextRequest) {
       rating: rating ? parseFloat(String(rating)) : null,
       reviewCount: reviewCount ? parseInt(String(reviewCount)) : null,
       guests: maxGuests ? parseInt(String(maxGuests)) : (guests ? parseInt(String(guests)) : null),
-      beds: beds ? parseInt(String(beds)) : null,
-      baths: baths ? Math.round(parseFloat(String(baths))) : null, // Round to int for schema
+      beds: finalBeds ? parseInt(String(finalBeds)) : null,
+      baths: finalBaths ? Math.round(parseFloat(String(finalBaths))) : null, // Round to int for schema
       amenities,
       vibeTags,
       houseRules: houseRules || null,

@@ -874,6 +874,129 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         </div>
       )}
 
+      {/* Creator Preview Modal - MOVED OUTSIDE step conditions so it works on any step */}
+      {showPreviewModal && isMounted && createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+        }}>
+          {/* Backdrop */}
+          <div 
+            onClick={() => setShowPreviewModal(false)}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.7)',
+            }}
+          />
+          {/* Modal */}
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '48rem',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            backgroundColor: '#ffffff',
+            borderRadius: '1rem',
+            border: '3px solid #000',
+          }}>
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-black bg-[#4AA3FF] p-4">
+              <div className="flex items-center gap-2">
+                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.01 9.964 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.01-9.964-7.178z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <div>
+                  <span className="font-bold text-white">Creator Preview</span>
+                  <p className="text-xs text-white/80">This is what creators will see when viewing your listing</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPreviewModal(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Preview Content */}
+            <div className="p-6">
+              {/* Hero Image */}
+              {(form.heroImageUrl || (form.photos && form.photos[0])) && (
+                <div className="mb-4 aspect-video overflow-hidden rounded-xl border-2 border-black">
+                  <img 
+                    src={form.heroImageUrl || form.photos?.[0]} 
+                    alt={form.title || 'Property'} 
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
+              
+              {/* Basic Info */}
+              <div className="mb-6">
+                <h2 className="text-2xl font-black text-black">{form.title || 'Untitled Property'}</h2>
+                <p className="text-black/60">{form.cityRegion || 'No location'}</p>
+                <div className="mt-2 flex items-center gap-4 text-sm text-black/80">
+                  {form.guests && <span>{form.guests} guests</span>}
+                  {form.beds && <span>{form.beds} beds</span>}
+                  {form.baths && <span>{form.baths} baths</span>}
+                </div>
+                {form.priceNightlyRange && (
+                  <p className="mt-2 text-lg font-bold text-black">{form.priceNightlyRange}/night</p>
+                )}
+              </div>
+
+              {/* Creator Brief */}
+              {form.creatorBrief && (
+                <div className="mb-6 rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/5 p-4">
+                  <h3 className="mb-2 font-bold text-black">For Creators</h3>
+                  <p className="text-sm text-black/80 whitespace-pre-wrap">{form.creatorBrief}</p>
+                </div>
+              )}
+
+              {/* Amenities */}
+              {form.amenities && form.amenities.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="mb-2 font-bold text-black">Amenities</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {form.amenities.map((a: string) => (
+                      <span key={a} className="rounded-full border border-black/20 px-3 py-1 text-sm">{a}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Vibe Tags */}
+              {form.vibeTags && form.vibeTags.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="mb-2 font-bold text-black">Vibe</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {form.vibeTags.map((t: string) => (
+                      <span key={t} className="rounded-full bg-[#FFD84A] px-3 py-1 text-sm font-medium">{t}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* Upgrade to Agency Modal - using Portal */}
       {showUpgradeModal && typeof document !== 'undefined' && createPortal(
         <div style={{
