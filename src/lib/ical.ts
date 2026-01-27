@@ -36,6 +36,9 @@ export interface CalendarSyncResult {
   error?: string
   eventCount?: number
   rawEventCount?: number
+  notModified?: boolean      // True if 304 response (no changes)
+  etag?: string              // ETag from response for caching
+  lastModified?: string      // Last-Modified from response
   debug?: {
     fetchedAt: string
     icalBytes: number
@@ -43,7 +46,13 @@ export interface CalendarSyncResult {
     eventsParsed: number
     eventsFiltered: number
     filterReason?: Record<string, number>
+    httpStatus?: number
   }
+}
+
+export interface FetchOptions {
+  etag?: string | null       // Send If-None-Match
+  lastModified?: string | null  // Send If-Modified-Since
 }
 
 // =============================================================================
@@ -51,9 +60,12 @@ export interface CalendarSyncResult {
 // =============================================================================
 
 /**
- * Fetch and parse an iCal feed
+ * Fetch and parse an iCal feed with conditional request support
  */
-export async function fetchAndParseICal(icalUrl: string): Promise<CalendarSyncResult> {
+export async function fetchAndParseICal(
+  icalUrl: string,
+  options?: FetchOptions
+): Promise<CalendarSyncResult> {
   const debug: CalendarSyncResult['debug'] = {
     fetchedAt: new Date().toISOString(),
     icalBytes: 0,
@@ -69,15 +81,44 @@ export async function fetchAndParseICal(icalUrl: string): Promise<CalendarSyncRe
       return { success: false, blockedDates: [], error: 'Invalid iCal URL', debug }
     }
 
+    // Build headers with conditional request support
+    const headers: Record<string, string> = {
+      'User-Agent': 'CreatorStays Calendar Sync/1.0',
+      'Accept': 'text/calendar, application/calendar+json, */*',
+    }
+    
+    if (options?.etag) {
+      headers['If-None-Match'] = options.etag
+    }
+    if (options?.lastModified) {
+      headers['If-Modified-Since'] = options.lastModified
+    }
+
     // Fetch the iCal data
     console.log('[iCal] Fetching:', icalUrl.substring(0, 60) + '...')
+    if (options?.etag || options?.lastModified) {
+      console.log('[iCal] Conditional request - ETag:', options.etag?.substring(0, 20), 'LastMod:', options.lastModified)
+    }
+    
     const response = await fetch(icalUrl, {
-      headers: {
-        'User-Agent': 'CreatorStays Calendar Sync/1.0',
-        'Accept': 'text/calendar, application/calendar+json, */*',
-      },
+      headers,
       signal: AbortSignal.timeout(30000),
     })
+
+    debug.httpStatus = response.status
+    
+    // Handle 304 Not Modified
+    if (response.status === 304) {
+      console.log('[iCal] 304 Not Modified - calendar unchanged')
+      return {
+        success: true,
+        blockedDates: [],  // Caller should keep existing data
+        notModified: true,
+        etag: response.headers.get('ETag') || options?.etag || undefined,
+        lastModified: response.headers.get('Last-Modified') || options?.lastModified || undefined,
+        debug,
+      }
+    }
 
     if (!response.ok) {
       return { 
@@ -87,6 +128,10 @@ export async function fetchAndParseICal(icalUrl: string): Promise<CalendarSyncRe
         debug,
       }
     }
+
+    // Extract caching headers
+    const etag = response.headers.get('ETag') || undefined
+    const lastModified = response.headers.get('Last-Modified') || undefined
 
     const icalText = await response.text()
     debug.icalBytes = icalText.length
@@ -107,6 +152,8 @@ export async function fetchAndParseICal(icalUrl: string): Promise<CalendarSyncRe
       blockedDates: parseResult.blockedDates,
       eventCount: parseResult.blockedDates.length,
       rawEventCount: parseResult.rawEventCount,
+      etag,
+      lastModified,
       debug,
     }
   } catch (error) {

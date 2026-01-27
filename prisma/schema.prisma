@@ -400,8 +400,17 @@ model Property {
   // External links
   airbnbUrl       String?   // Link to Airbnb/VRBO listing for creators to verify
   icalUrl         String?   // iCal URL for calendar sync (availability)
-  lastCalendarSync DateTime? // Last time we synced the calendar
-  blockedDates    Json?     // Array of {start: ISO date, end: ISO date} for blocked periods
+  
+  // Calendar sync state (enhanced for reliability)
+  lastCalendarSync     DateTime? // Last time we attempted a sync (renamed from lastCalendarSync)
+  lastCalendarSyncAt   DateTime? // Alias for UI compatibility
+  lastCalendarSyncStatus String?  // 'ok' | 'failed' | 'not_modified'
+  lastCalendarSyncError  String?  // Short error message if failed
+  lastCalendarSyncDebug  Json?    // Debug info blob
+  icalEtag             String?   // For conditional requests (If-None-Match)
+  icalLastModified     String?   // For conditional requests (If-Modified-Since)
+  
+  blockedDates    Json?     // Array of {start, end, summary, uid, source} for blocked periods
   lastImportedAt  DateTime?
   
   // Listing info
