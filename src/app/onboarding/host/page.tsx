@@ -411,16 +411,19 @@ export default function HostOnboardingPage() {
     const files = e.target.files
     if (!files || files.length === 0) return
     
+    console.log('[Onboarding Photos] Starting upload of', files.length, 'files')
     setIsUploading(true)
     const newPhotos: string[] = []
+    let failedCount = 0
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
+      console.log('[Onboarding Photos] Processing file', i + 1, ':', file.name)
       try {
         // Compress image before adding
         const compressed = await compressImage(file, 1200, 0.7)
         
-        // Try to upload to Cloudinary
+        // Upload to Cloudinary
         try {
           const res = await fetch('/api/upload', {
             method: 'POST',
@@ -433,27 +436,26 @@ export default function HostOnboardingPage() {
           
           if (res.ok) {
             const data = await res.json()
+            console.log('[Onboarding Photos] Upload success:', data.file.url.substring(0, 50) + '...')
             newPhotos.push(data.file.url) // Use Cloudinary URL
           } else {
-            newPhotos.push(compressed) // Fallback to base64
+            console.error('[Onboarding Photos] Upload failed:', await res.text())
+            failedCount++
           }
-        } catch {
-          newPhotos.push(compressed) // Fallback to base64
+        } catch (err) {
+          console.error('[Onboarding Photos] Upload error:', err)
+          failedCount++
         }
       } catch (err) {
-        console.error('Failed to compress image:', err)
-        // Fallback to original if compression fails
-        const reader = new FileReader()
-        await new Promise<void>((resolve) => {
-          reader.onload = () => {
-            if (typeof reader.result === 'string') {
-              newPhotos.push(reader.result)
-            }
-            resolve()
-          }
-          reader.readAsDataURL(file)
-        })
+        console.error('[Onboarding Photos] Failed to compress image:', err)
+        failedCount++
       }
+    }
+    
+    console.log('[Onboarding Photos] Complete. Success:', newPhotos.length, 'Failed:', failedCount)
+    
+    if (failedCount > 0) {
+      alert(`${failedCount} photo(s) failed to upload. Please try again.`)
     }
     
     const updatedPhotos = [...data.photos, ...newPhotos]
@@ -464,9 +466,10 @@ export default function HostOnboardingPage() {
     }))
     
     // Auto-save photos to API so they persist
-    if (existingPropertyId) {
+    if (existingPropertyId && newPhotos.length > 0) {
+      console.log('[Onboarding Photos] Saving', updatedPhotos.length, 'photos to property', existingPropertyId)
       try {
-        await fetch('/api/properties', {
+        const saveRes = await fetch('/api/properties', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -475,9 +478,16 @@ export default function HostOnboardingPage() {
             heroImageUrl: data.heroImageUrl || newPhotos[0],
           }),
         })
+        if (saveRes.ok) {
+          console.log('[Onboarding Photos] SUCCESS - Saved', updatedPhotos.length, 'photos')
+        } else {
+          console.error('[Onboarding Photos] Save failed:', await saveRes.text())
+        }
       } catch (e) {
-        console.error('Failed to auto-save photos:', e)
+        console.error('[Onboarding Photos] Failed to save:', e)
       }
+    } else if (!existingPropertyId) {
+      console.log('[Onboarding Photos] No property ID yet - photos will be saved with property creation')
     }
     
     setIsUploading(false)
