@@ -718,14 +718,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 <div>
                   <p className="text-[10px] font-bold text-black/70 mb-1">Blocked periods ({(form.blockedDates as any[]).length}):</p>
                   <div className="flex flex-wrap gap-1">
-                    {(form.blockedDates as any[]).slice(0, 5).map((period: any, i: number) => (
+                    {(form.blockedDates as any[]).map((period: any, i: number) => (
                       <span key={i} className="rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[9px] font-medium text-red-600">
                         {new Date(period.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(period.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                     ))}
-                    {(form.blockedDates as any[]).length > 5 && (
-                      <span className="text-[9px] text-black/50">+{(form.blockedDates as any[]).length - 5} more</span>
-                    )}
                   </div>
                 </div>
               )}

@@ -96,6 +96,12 @@ export async function POST(
       }, { status: 400 })
     }
 
+    // Log all blocked periods for debugging
+    console.log(`[Calendar Sync] Raw events: ${result.rawEventCount}, Blocked periods: ${result.eventCount}`)
+    result.blockedDates.forEach((period, i) => {
+      console.log(`[Calendar Sync] Period ${i + 1}: ${period.start} to ${period.end} ${period.summary ? `(${period.summary})` : ''}`)
+    })
+
     // Update property with new blocked dates
     await prisma.property.update({
       where: { id: property.id },
