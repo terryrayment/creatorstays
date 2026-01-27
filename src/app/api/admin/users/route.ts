@@ -87,27 +87,22 @@ export async function DELETE(request: NextRequest) {
         where: { hostProfileId: hostProfile.id }
       })
 
-      // 9. Delete team members if agency
-      await prisma.teamMember.deleteMany({
+      // 9. Delete agency team members if any
+      await prisma.agencyTeamMember.deleteMany({
         where: { hostProfileId: hostProfile.id }
       })
 
-      // 10. Delete pending invites
-      await prisma.teamInvite.deleteMany({
-        where: { hostProfileId: hostProfile.id }
-      })
-
-      // 11. Delete the host profile
+      // 10. Delete the host profile
       await prisma.hostProfile.delete({
         where: { id: hostProfile.id }
       })
 
-      // 12. Delete sessions for this user
+      // 11. Delete sessions for this user
       await prisma.session.deleteMany({
         where: { userId: authUserId }
       })
 
-      // 13. Delete accounts (OAuth) for this user
+      // 12. Delete accounts (OAuth) for this user
       await prisma.account.deleteMany({
         where: { userId: authUserId }
       })
