@@ -438,10 +438,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           .replace(/\s+(estate|retreat|house|home|cabin|villa|lodge|resort|property).*$/i, '')
           .trim()
         
+        // Prefill text fields only - photos must be uploaded manually
         setForm(prev => ({
           ...prev,
           title: cleanTitle || prev.title,
-          heroImageUrl: data.imageUrl || prev.heroImageUrl,
+          // Do NOT prefill heroImageUrl or photos - user must upload their own
           cityRegion: cleanCity || prev.cityRegion,
           rating: data.rating || prev.rating,
           reviewCount: data.reviewCount || prev.reviewCount,
@@ -449,7 +450,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           guests: data.guests || prev.guests,
           beds: data.beds || prev.beds,
           baths: data.baths || prev.baths,
-          photos: data.photos || prev.photos,
+          // photos: intentionally not prefilled - user uploads manually
           lastImportedAt: new Date().toISOString(),
         }))
         setStep(2)
@@ -814,8 +815,9 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           
           {/* Photo Upload Section */}
           <div>
-            <div className="mb-1.5 flex items-center justify-between">
+            <div className="mb-1.5">
               <label className="text-[11px] font-bold text-black">Photos (3+ recommended)</label>
+              <p className="text-[10px] text-black/60">Upload your own photos. We don&apos;t import listing photos.</p>
             </div>
             
             {/* Photo Grid */}
@@ -858,7 +860,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 ) : (
                   <>
                     <p className="text-sm font-bold text-black">Click to upload photos</p>
-                    <p className="mt-1 text-[10px] text-black">PNG, JPG up to 10MB each</p>
+                    <p className="mt-1 text-[10px] text-black/60">PNG, JPG up to 10MB each</p>
                   </>
                 )}
               </div>
@@ -1487,7 +1489,16 @@ export default function HostPropertiesPage() {
   const fetchProperties = async () => {
     try {
       const res = await fetch('/api/properties')
-      if (res.ok) { const data = await res.json(); setProperties(data.properties || []) }
+      if (res.ok) { 
+        const data = await res.json()
+        const props = data.properties || []
+        setProperties(props)
+        // Auto-select first property if none selected and properties exist
+        if (!selectedId && props.length > 0) {
+          setSelectedId(props[0].id)
+          setEditing(props[0])
+        }
+      }
     } catch (e) { /* error handled silently */ }
     finally { setIsLoading(false) }
   }
@@ -1676,14 +1687,7 @@ export default function HostPropertiesPage() {
                 onCancelBoost={() => selectedId && handleCancelBoost(selectedId)}
                 publishedCount={properties.filter(p => !p.isDraft).length}
                 onUpgrade={handleUpgradeToAgency}
-              /> : (
-                <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed border-black/30 bg-white">
-                  <div className="text-center">
-                    <p className="text-sm text-black/60">Select a property or add a new one</p>
-                    <button onClick={handleAddNew} className="mt-3 rounded-full border-2 border-black bg-black px-5 py-2 text-[10px] font-bold text-white">+ Add Property</button>
-                  </div>
-                </div>
-              )}
+              /> : null}
               
               {/* Boost Card - Only show on step 3 */}
               {editing && !editing.isNew && selectedId && editorStep === 3 && (
