@@ -213,6 +213,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     
     setIsUploading(true)
     const newPhotos: string[] = []
+    const failedCount = { value: 0 }
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
@@ -239,22 +240,28 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           const data = await res.json()
           newPhotos.push(data.file.url)
         } else {
-          // Fallback to base64 if upload fails (for demo/local dev)
-          console.warn('Cloudinary upload failed, using base64 fallback')
-          newPhotos.push(base64)
+          // Log error but don't use base64 fallback
+          console.error('Cloudinary upload failed:', await res.text())
+          failedCount.value++
         }
       } catch (err) {
-        // Fallback to base64 if upload fails
-        console.warn('Cloudinary upload error, using base64 fallback:', err)
-        newPhotos.push(base64)
+        console.error('Cloudinary upload error:', err)
+        failedCount.value++
       }
     }
     
-    setForm(prev => ({
-      ...prev,
-      photos: [...(prev.photos || []), ...newPhotos],
-      heroImageUrl: prev.heroImageUrl || newPhotos[0]
-    }))
+    if (failedCount.value > 0) {
+      setToast(`${failedCount.value} photo(s) failed to upload. Please try again.`)
+      setTimeout(() => setToast(null), 5000)
+    }
+    
+    if (newPhotos.length > 0) {
+      setForm(prev => ({
+        ...prev,
+        photos: [...(prev.photos || []), ...newPhotos],
+        heroImageUrl: prev.heroImageUrl || newPhotos[0]
+      }))
+    }
     setIsUploading(false)
     e.target.value = '' // Reset input
   }
@@ -403,6 +410,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     setIsSyncingCalendar(true)
     setCalendarSyncResult(null)
     try {
+      // First, save the icalUrl to the property (in case it was just entered)
+      await fetch('/api/properties', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: form.id, icalUrl: form.icalUrl })
+      })
+      
+      // Then sync the calendar
       const res = await fetch(`/api/properties/${form.id}/calendar`, { method: 'POST' })
       const data = await res.json()
       if (data.success) {
