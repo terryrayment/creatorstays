@@ -316,6 +316,8 @@ export default function HostOnboardingPage() {
           isDraft: true,
         }
         
+        console.log('[Onboarding AutoSave] Saving with', data.photos.length, 'photos')
+        
         const res = await fetch('/api/properties', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -326,11 +328,14 @@ export default function HostOnboardingPage() {
           const result = await res.json()
           if (result.property?.id && !existingPropertyId) {
             setExistingPropertyId(result.property.id)
+            console.log('[Onboarding AutoSave] Created property:', result.property.id)
           }
-          console.log('[Onboarding] Auto-saved property data')
+          console.log('[Onboarding AutoSave] Success - saved', data.photos.length, 'photos')
+        } else {
+          console.error('[Onboarding AutoSave] Failed:', await res.text())
         }
       } catch (e) {
-        console.error('[Onboarding] Auto-save failed:', e)
+        console.error('[Onboarding AutoSave] Error:', e)
       }
     }, 2000) // Debounce by 2 seconds
     
