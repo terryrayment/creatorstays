@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { fetchAndParseICal, getAvailablePeriods, BlockedPeriod, mergeAllBlocks } from '@/lib/ical'
+import { fetchAndParseICal, BlockedPeriod } from '@/lib/ical'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,15 +91,8 @@ export async function GET(
     }
 
     const icalBlocks = (property.blockedDates as unknown as BlockedPeriod[]) || []
-    
-    // Merge iCal blocks with manual blocks
-    const { blockedDatesFromIcal, blockedDatesManual, blockedDatesMerged } = mergeAllBlocks(
-      icalBlocks,
-      property.manualBlocks
-    )
-    
-    const availablePeriods = getAvailablePeriods(blockedDatesMerged, 3)
 
+    // Return raw sources - NO MERGING
     return NextResponse.json({
       propertyId: property.id,
       title: property.title,
@@ -107,11 +100,14 @@ export async function GET(
       lastSync: property.lastCalendarSyncAt || property.lastCalendarSync,
       lastSyncStatus: property.lastCalendarSyncStatus,
       lastSyncError: property.lastCalendarSyncError,
-      blockedDatesFromIcal,
-      blockedDatesManual,
-      blockedDatesMerged,
-      blockedDates: blockedDatesMerged,
-      availablePeriods,
+      icalBlocks: icalBlocks.map(b => ({ ...b, source: 'ical' as const })),
+      manualBlocks: property.manualBlocks.map(b => ({
+        id: b.id,
+        start: b.startDate,
+        end: b.endDate,
+        note: b.note,
+        source: 'manual' as const,
+      })),
     })
   } catch (error) {
     console.error('[Calendar GET] Error:', error)
@@ -207,24 +203,23 @@ export async function POST(
         },
       })
 
-      // Return existing data
+      // Return existing data - NO MERGING
       const existingBlocks = (property.blockedDates as unknown as BlockedPeriod[]) || []
-      const { blockedDatesFromIcal, blockedDatesManual, blockedDatesMerged } = mergeAllBlocks(
-        existingBlocks,
-        property.manualBlocks
-      )
 
       return NextResponse.json({
         success: true,
         notModified: true,
         message: 'Calendar unchanged since last sync',
         eventCount: existingBlocks.length,
-        blockedDatesFromIcal,
-        blockedDatesManual,
-        blockedDatesMerged,
-        blockedDates: blockedDatesMerged,
-        availablePeriods: getAvailablePeriods(blockedDatesMerged, 3),
         lastSync: now.toISOString(),
+        icalBlocks: existingBlocks.map(b => ({ ...b, source: 'ical' as const })),
+        manualBlocks: property.manualBlocks.map(b => ({
+          id: b.id,
+          start: b.startDate,
+          end: b.endDate,
+          note: b.note,
+          source: 'manual' as const,
+        })),
       })
     }
 
@@ -273,25 +268,21 @@ export async function POST(
 
     console.log(`[Calendar Sync] Success for property ${property.id}: ${result.eventCount} events`)
 
-    // Merge with manual blocks
-    const { blockedDatesFromIcal, blockedDatesManual, blockedDatesMerged } = mergeAllBlocks(
-      result.blockedDates,
-      property.manualBlocks
-    )
-    
-    const availablePeriods = getAvailablePeriods(blockedDatesMerged, 3)
-
+    // Return raw sources - NO MERGING
     return NextResponse.json({
       success: true,
       eventCount: result.eventCount,
       rawEventCount: result.rawEventCount,
-      blockedDatesFromIcal,
-      blockedDatesManual,
-      blockedDatesMerged,
-      blockedDates: blockedDatesMerged,
-      availablePeriods,
       lastSync: now.toISOString(),
       lastSyncStatus: 'ok',
+      icalBlocks: result.blockedDates.map(b => ({ ...b, source: 'ical' as const })),
+      manualBlocks: property.manualBlocks.map(b => ({
+        id: b.id,
+        start: b.startDate,
+        end: b.endDate,
+        note: b.note,
+        source: 'manual' as const,
+      })),
     })
   } catch (error) {
     console.error('[Calendar POST] Error:', error)

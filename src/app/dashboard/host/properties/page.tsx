@@ -405,8 +405,8 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       const data = await res.json()
       if (data.success) {
         setCalendarSyncResult({ success: true, message: `Synced! Found ${data.eventCount || 0} blocked periods.` })
-        // Update local state with new blocked dates
-        setForm(prev => ({ ...prev, blockedDates: data.blockedDates, lastCalendarSync: data.lastSync }))
+        // Update local state with icalBlocks (API no longer returns blockedDates)
+        setForm(prev => ({ ...prev, blockedDates: data.icalBlocks || [], lastCalendarSync: data.lastSync }))
       } else {
         setCalendarSyncResult({ success: false, message: data.error || 'Sync failed' })
       }

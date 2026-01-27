@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
@@ -16,7 +16,9 @@ interface Property {
   airbnbUrl?: string
   icalUrl?: string
   lastCalendarSync?: string
-  blockedDates?: { start: string; end: string; summary?: string }[]
+  // Raw calendar sources - NOT merged
+  icalBlocks?: { start: string; end: string; summary?: string; uid?: string; source: 'ical' }[]
+  // Note: manualBlocks are stored separately in state, not here
   title?: string
   cityRegion?: string
   priceNightlyRange?: string
@@ -182,6 +184,15 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const [isAddingBlock, setIsAddingBlock] = useState(false)
   const [isDeletingBlock, setIsDeletingBlock] = useState<string | null>(null)
   const [togglingDays, setTogglingDays] = useState<Set<string>>(new Set())
+  
+  // DEBUG: Track last clicked day info
+  const [debugClickedDay, setDebugClickedDay] = useState<{ 
+    ymd: string
+    isBlockedByIcal: boolean
+    isBlockedByManual: boolean
+    manualBlockId: string | null
+    actionTaken: 'POST' | 'DELETE' | 'NOOP' | null
+  } | null>(null)
 
   useEffect(() => { setIsMounted(true) }, [])
   useEffect(() => { setForm(property); setStep(1); setLastSavedPhotos(property.photos || []) }, [property])
@@ -455,26 +466,47 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     setForm(prev => ({ ...prev, creatorBrief: `This ${tags} property in ${location} is perfect for creators looking for authentic, visually stunning content opportunities. Ideal for travel, lifestyle, and photography content. The space offers unique angles and natural lighting throughout the day.` }))
   }
 
-  // Fetch manual blocks when property changes
-  const fetchManualBlocks = async () => {
-    if (!form.id) return
+  // Fetch calendar data (icalBlocks + manualBlocks) when property changes
+  // Wrapped in useCallback to prevent recreation on every render
+  const fetchCalendarData = useCallback(async (propertyId: string) => {
+    if (!propertyId) return
+    console.log('[DEBUG] fetchCalendarData called for propertyId:', propertyId)
     try {
-      const res = await fetch(`/api/properties/${form.id}/manual-blocks`)
+      const res = await fetch(`/api/properties/${propertyId}/calendar`)
       if (res.ok) {
         const data = await res.json()
-        setManualBlocks(data.blocks || [])
+        // Update icalBlocks in form state
+        setForm(prev => ({ 
+          ...prev, 
+          icalBlocks: data.icalBlocks || [],
+          lastCalendarSync: data.lastSync 
+        }))
+        // Update manualBlocks in separate state
+        if (data.manualBlocks) {
+          setManualBlocks(data.manualBlocks.map((b: any) => ({
+            id: b.id,
+            startDate: b.start,
+            endDate: b.end,
+            note: b.note,
+          })))
+        }
       }
     } catch (e) {
-      console.error('[ManualBlocks] Fetch error:', e)
+      console.error('[Calendar] Fetch error:', e)
     }
-  }
+  }, []) // No dependencies - setForm and setManualBlocks are stable
 
-  // Fetch manual blocks on mount and when property changes
+  // Fetch calendar data ONCE on mount when property id is available
+  // Using a ref to track if we've already fetched for this property
+  const [calendarFetchedForId, setCalendarFetchedForId] = useState<string | null>(null)
+  
   useEffect(() => {
-    if (form.id) {
-      fetchManualBlocks()
+    if (form.id && form.id !== calendarFetchedForId) {
+      console.log('[DEBUG] useEffect triggering fetchCalendarData for:', form.id)
+      setCalendarFetchedForId(form.id)
+      fetchCalendarData(form.id)
     }
-  }, [form.id])
+  }, [form.id, calendarFetchedForId, fetchCalendarData])
 
   const addManualBlock = async () => {
     if (!form.id || !newBlockStart || !newBlockEnd) return
@@ -498,8 +530,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         setNewBlockStart('')
         setNewBlockEnd('')
         setNewBlockNote('')
-        // Refresh calendar to get merged data
-        await refreshCalendarData()
+        // Local state already updated - no need to refetch
         setToast('Block added!')
         setTimeout(() => setToast(null), 2000)
       } else {
@@ -521,8 +552,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       const res = await fetch(`/api/properties/${form.id}/manual-blocks/${blockId}`, { method: 'DELETE' })
       if (res.ok) {
         setManualBlocks(prev => prev.filter(b => b.id !== blockId))
-        // Refresh calendar to get merged data
-        await refreshCalendarData()
+        // Local state already updated - no need to refetch
         setToast('Block removed')
         setTimeout(() => setToast(null), 2000)
       }
@@ -532,52 +562,46 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     setIsDeletingBlock(null)
   }
 
-  // Toggle a single day blocked/unblocked
-  const toggleDayBlock = async (ymd: string, currentlyBlocked: boolean, isManualBlock: boolean): Promise<boolean> => {
-    if (!form.id) return false
+  // ==========================================================================
+  // Calendar click handlers - based on user INTENT
+  // ==========================================================================
+  
+  // User clicked a GREEN day -> wants to BLOCK it
+  const handleBlockDay = async (ymd: string): Promise<void> => {
+    if (!form.id) return
+    
+    // DEBUG: Set clicked day info and log
+    const debugInfo = { ymd, isBlockedByIcal: false, isBlockedByManual: false, manualBlockId: null, actionTaken: 'POST' as const }
+    setDebugClickedDay(debugInfo)
+    console.log('[DEBUG] handleBlockDay called:', debugInfo)
     
     setTogglingDays(prev => new Set(prev).add(ymd))
     
     try {
-      if (currentlyBlocked && isManualBlock) {
-        // Find manual block that contains this day and remove it
-        const blockToRemove = manualBlocks.find(b => {
-          return ymd >= b.startDate && ymd < b.endDate
-        })
-        
-        if (blockToRemove) {
-          // Delete this manual block
-          const res = await fetch(`/api/properties/${form.id}/manual-blocks/${blockToRemove.id}`, { method: 'DELETE' })
-          if (res.ok) {
-            setManualBlocks(prev => prev.filter(b => b.id !== blockToRemove.id))
-            await refreshCalendarData()
-            return true
-          }
-        }
-      } else if (!currentlyBlocked) {
-        // Block this single day - create a manual block for just this day
-        // End date is exclusive, so for a single day we need endDate = day + 1
-        const startDate = ymd
-        const [year, month, day] = ymd.split('-').map(Number)
-        const nextDay = new Date(year, month - 1, day + 1)
-        const endDate = `${nextDay.getFullYear()}-${String(nextDay.getMonth() + 1).padStart(2, '0')}-${String(nextDay.getDate()).padStart(2, '0')}`
-        
-        const res = await fetch(`/api/properties/${form.id}/manual-blocks`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ startDate, endDate })
-        })
-        
-        if (res.ok) {
-          const data = await res.json()
-          setManualBlocks(prev => [...prev, data.block].sort((a, b) => a.startDate.localeCompare(b.startDate)))
-          await refreshCalendarData()
-          return true
-        }
+      // Create a single-day manual block
+      // End date is exclusive, so for a single day we need endDate = day + 1
+      const startDate = ymd
+      const [year, month, day] = ymd.split('-').map(Number)
+      const nextDay = new Date(year, month - 1, day + 1)
+      const endDate = `${nextDay.getFullYear()}-${String(nextDay.getMonth() + 1).padStart(2, '0')}-${String(nextDay.getDate()).padStart(2, '0')}`
+      
+      const res = await fetch(`/api/properties/${form.id}/manual-blocks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startDate, endDate })
+      })
+      
+      if (res.ok) {
+        const data = await res.json()
+        setManualBlocks(prev => [...prev, data.block].sort((a, b) => a.startDate.localeCompare(b.startDate)))
+        // No need to refresh full calendar - we just update local state
+      } else {
+        setToast('Failed to block date')
+        setTimeout(() => setToast(null), 2000)
       }
     } catch (e) {
-      console.error('[ToggleDay] Error:', e)
-      setToast('Failed to update')
+      console.error('[BlockDay] Error:', e)
+      setToast('Failed to block date')
       setTimeout(() => setToast(null), 2000)
     } finally {
       setTogglingDays(prev => {
@@ -586,20 +610,66 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         return next
       })
     }
-    
-    return false
   }
-
-  const refreshCalendarData = async () => {
+  
+  // User clicked an AMBER day -> wants to UNBLOCK it (delete manual block)
+  const handleUnblockDay = async (manualBlockId: string): Promise<void> => {
     if (!form.id) return
+    
+    // Find which days this block covers for the loading state
+    const block = manualBlocks.find(b => b.id === manualBlockId)
+    
+    // DEBUG: Set clicked day info and log
+    const debugInfo = { 
+      ymd: block?.startDate || 'unknown', 
+      isBlockedByIcal: false, 
+      isBlockedByManual: true,
+      manualBlockId, 
+      actionTaken: 'DELETE' as const 
+    }
+    setDebugClickedDay(debugInfo)
+    console.log('[DEBUG] handleUnblockDay called:', debugInfo, 'block:', block)
+    
+    const affectedDays: string[] = []
+    if (block) {
+      const start = new Date(block.startDate)
+      const end = new Date(block.endDate)
+      while (start < end) {
+        affectedDays.push(start.toISOString().split('T')[0])
+        start.setDate(start.getDate() + 1)
+      }
+    }
+    
+    console.log('[DEBUG handleUnblockDay] affectedDays:', affectedDays)
+    
+    setTogglingDays(prev => {
+      const next = new Set(prev)
+      affectedDays.forEach(d => next.add(d))
+      return next
+    })
+    
     try {
-      const res = await fetch(`/api/properties/${form.id}/calendar`)
+      const res = await fetch(`/api/properties/${form.id}/manual-blocks/${manualBlockId}`, { 
+        method: 'DELETE' 
+      })
+      
       if (res.ok) {
-        const data = await res.json()
-        setForm(prev => ({ ...prev, blockedDates: data.blockedDatesMerged || data.blockedDates, lastCalendarSync: data.lastSync }))
+        setManualBlocks(prev => prev.filter(b => b.id !== manualBlockId))
+        // No need to refresh full calendar - we just update local state
+      } else {
+        setToast('Failed to unblock date')
+        setTimeout(() => setToast(null), 2000)
       }
     } catch (e) {
-      console.error('[Calendar] Refresh error:', e)
+      console.error('[UnblockDay] Error:', e)
+      setToast('Failed to unblock date')
+      setTimeout(() => setToast(null), 2000)
+    } finally {
+      setTogglingDays(prev => {
+        const next = new Set(prev)
+        affectedDays.forEach(d => next.delete(d))
+        return next
+      })
     }
   }
 
@@ -620,8 +690,21 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       const data = await res.json()
       if (data.success) {
         setCalendarSyncResult({ success: true, message: `Synced! Found ${data.eventCount || 0} blocked periods from iCal.` })
-        // Update local state with merged blocked dates
-        setForm(prev => ({ ...prev, blockedDates: data.blockedDatesMerged || data.blockedDates, lastCalendarSync: data.lastSync }))
+        // Store raw icalBlocks
+        setForm(prev => ({ 
+          ...prev, 
+          icalBlocks: data.icalBlocks || [],
+          lastCalendarSync: data.lastSync 
+        }))
+        // Update manualBlocks state from API response
+        if (data.manualBlocks) {
+          setManualBlocks(data.manualBlocks.map((b: any) => ({
+            id: b.id,
+            startDate: b.start,
+            endDate: b.end,
+            note: b.note,
+          })))
+        }
       } else {
         setCalendarSyncResult({ success: false, message: data.error || 'Sync failed' })
       }
@@ -905,23 +988,67 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               {/* Calendar View */}
               <div className="mt-4">
                 <CalendarView 
-                  blockedDates={form.blockedDates as any[] || []} 
-                  manualBlockDates={manualBlocks.flatMap(b => {
-                    // Generate all dates in this block range
-                    const dates: string[] = []
-                    const start = new Date(b.startDate)
-                    const end = new Date(b.endDate)
-                    while (start < end) {
-                      dates.push(start.toISOString().split('T')[0])
-                      start.setDate(start.getDate() + 1)
-                    }
-                    return dates
-                  })}
+                  icalBlocks={(form.icalBlocks || []).map(b => ({
+                    start: b.start,
+                    end: b.end,
+                    summary: b.summary,
+                    uid: b.uid,
+                    source: 'ical' as const,
+                  }))}
+                  manualBlocks={manualBlocks.map(b => ({
+                    id: b.id,
+                    start: b.startDate,
+                    end: b.endDate,
+                    note: b.note,
+                    source: 'manual' as const,
+                  }))}
                   monthsToShow={3}
                   interactive={!!form.id}
-                  onToggleDay={toggleDayBlock}
+                  onBlockDay={handleBlockDay}
+                  onUnblockDay={handleUnblockDay}
                   togglingDays={togglingDays}
                 />
+              </div>
+              
+              {/* DEBUG PANEL - REMOVE BEFORE PRODUCTION */}
+              <div className="mt-4 rounded-lg border-2 border-dashed border-red-300 bg-red-50 p-3 font-mono text-[10px]">
+                <div className="font-bold text-red-600 mb-2">🔧 DEBUG PANEL (remove before production)</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="font-bold">Data Sources:</div>
+                    <div>iCal blocks: {(form.icalBlocks || []).length}</div>
+                    <div>Manual blocks: {manualBlocks.length}</div>
+                    <div className="mt-2 font-bold">First 5 iCal blocks:</div>
+                    {(form.icalBlocks || []).slice(0, 5).map((b, i) => (
+                      <div key={i} className="text-[9px]">
+                        {b.start} → {b.end} {b.summary && <span className="text-black/50">({b.summary})</span>}
+                      </div>
+                    ))}
+                    {(form.icalBlocks || []).length === 0 && <div className="text-black/50">No iCal blocks</div>}
+                    <div className="mt-2 font-bold">First 5 Manual blocks:</div>
+                    {manualBlocks.slice(0, 5).map((b, i) => (
+                      <div key={i} className="text-[9px]">
+                        [{b.id.slice(0,8)}...] {b.startDate} → {b.endDate}
+                      </div>
+                    ))}
+                    {manualBlocks.length === 0 && <div className="text-black/50">No manual blocks</div>}
+                  </div>
+                  <div>
+                    <div className="font-bold">Last Clicked Day:</div>
+                    {debugClickedDay ? (
+                      <>
+                        <div>ymd: {debugClickedDay.ymd}</div>
+                        <div>isBlockedByIcal: {String(debugClickedDay.isBlockedByIcal)}</div>
+                        <div>isBlockedByManual: {String(debugClickedDay.isBlockedByManual)}</div>
+                        <div>manualBlockId: {debugClickedDay.manualBlockId || 'null'}</div>
+                        <div className="font-bold text-blue-600">actionTaken: {debugClickedDay.actionTaken || 'none'}</div>
+                      </>
+                    ) : (
+                      <div className="text-black/50">Click a day to see info</div>
+                    )}
+                    <div className="mt-2 font-bold">Check console for detailed logs</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

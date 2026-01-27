@@ -1,30 +1,64 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { BlockedPeriod, findBlockingPeriods } from '@/lib/ical'
-import { iterateDaysExclusive, dateToYMD, ymdToLocalDate } from '@/lib/calendar-date'
+import { iterateDaysExclusive, dateToYMD } from '@/lib/calendar-date'
+
+// =============================================================================
+// Types
+// =============================================================================
+
+interface ICalBlock {
+  start: string  // YYYY-MM-DD
+  end: string    // YYYY-MM-DD (exclusive)
+  summary?: string
+  uid?: string
+  source: 'ical'
+}
+
+interface ManualBlock {
+  id: string     // Database ID - needed for deletion
+  start: string  // YYYY-MM-DD (was startDate)
+  end: string    // YYYY-MM-DD (was endDate, exclusive)
+  note?: string | null
+  source: 'manual'
+}
 
 interface CalendarViewProps {
-  blockedDates: BlockedPeriod[]
-  /** Manual blocks - these can be toggled off */
-  manualBlockDates?: string[]  // Array of YYYY-MM-DD dates that are manually blocked
+  /** iCal blocks from Airbnb - immutable, cannot be toggled */
+  icalBlocks: ICalBlock[]
+  /** Manual blocks from database - can be created/deleted */
+  manualBlocks: ManualBlock[]
   monthsToShow?: number
-  onDayClick?: (ymd: string, periods: BlockedPeriod[]) => void
-  /** Interactive mode: allows clicking any day to toggle block status */
+  /** Interactive mode: allows clicking days to create/delete manual blocks */
   interactive?: boolean
-  /** Called when user clicks a day in interactive mode. Return value indicates if toggle succeeded. */
-  onToggleDay?: (ymd: string, currentlyBlocked: boolean, isManualBlock: boolean) => Promise<boolean>
+  /** Called when user wants to CREATE a manual block for a day */
+  onBlockDay?: (ymd: string) => Promise<void>
+  /** Called when user wants to DELETE a manual block */
+  onUnblockDay?: (manualBlockId: string) => Promise<void>
   /** Days currently being toggled (show loading state) */
   togglingDays?: Set<string>
 }
 
+// Per-day computed state
+interface DayState {
+  ymd: string
+  isBlockedByIcal: boolean
+  isBlockedByManual: boolean
+  manualBlockId: string | null  // ID for deletion, null if not manually blocked
+  icalSummary?: string          // Why iCal blocked it
+}
+
+// =============================================================================
+// Main Component
+// =============================================================================
+
 export function CalendarView({ 
-  blockedDates, 
-  manualBlockDates = [],
+  icalBlocks = [],
+  manualBlocks = [],
   monthsToShow = 3, 
-  onDayClick,
   interactive = false,
-  onToggleDay,
+  onBlockDay,
+  onUnblockDay,
   togglingDays = new Set(),
 }: CalendarViewProps) {
   const [startMonth, setStartMonth] = useState(() => {
@@ -32,48 +66,95 @@ export function CalendarView({
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
 
-  // Create a set of manually blocked dates for quick lookup
-  const manualBlockSet = useMemo(() => new Set(manualBlockDates), [manualBlockDates])
-
-  // Build a map of all blocked days with their source periods
-  // Also track which days are from iCal vs manual
-  const blockedDaysMap = useMemo(() => {
-    const map = new Map<string, { periods: BlockedPeriod[], isManual: boolean, isIcal: boolean }>()
+  // ==========================================================================
+  // CORE COMPUTATION: Build per-day lookup from raw sources
+  // This is computed fresh on every render - NO stored derived state
+  // ==========================================================================
+  const dayStateMap = useMemo(() => {
+    const map = new Map<string, DayState>()
     
-    for (const period of blockedDates) {
-      const days = iterateDaysExclusive(period.start, period.end)
-      days.forEach(d => {
-        const existing = map.get(d) || { periods: [], isManual: false, isIcal: false }
-        existing.periods.push(period)
-        // Check source - if missing, assume ical
-        if (period.source === 'manual') {
-          existing.isManual = true
+    // Diagnostic stats
+    let icalDaysProduced = 0
+    let icalMinYmd: string | null = null
+    let icalMaxYmd: string | null = null
+    let manualDaysProduced = 0
+    let manualMinYmd: string | null = null
+    let manualMaxYmd: string | null = null
+    
+    console.log('[DEBUG CalendarView] Building dayStateMap from:', {
+      icalBlocksCount: icalBlocks.length,
+      manualBlocksCount: manualBlocks.length,
+    })
+    console.log('[DEBUG CalendarView] icalBlocks (first 5):', icalBlocks.slice(0, 5))
+    console.log('[DEBUG CalendarView] manualBlocks (first 5):', manualBlocks.slice(0, 5))
+    
+    // Process iCal blocks first
+    for (const block of icalBlocks) {
+      const days = iterateDaysExclusive(block.start, block.end)
+      console.log('[DEBUG CalendarView] iCal block:', block.start, '->', block.end, '| days produced:', days.size)
+      for (const ymd of days) {
+        icalDaysProduced++
+        if (!icalMinYmd || ymd < icalMinYmd) icalMinYmd = ymd
+        if (!icalMaxYmd || ymd > icalMaxYmd) icalMaxYmd = ymd
+        
+        const existing = map.get(ymd)
+        if (existing) {
+          existing.isBlockedByIcal = true
+          existing.icalSummary = block.summary
         } else {
-          existing.isIcal = true
+          map.set(ymd, {
+            ymd,
+            isBlockedByIcal: true,
+            isBlockedByManual: false,
+            manualBlockId: null,
+            icalSummary: block.summary,
+          })
         }
-        map.set(d, existing)
-      })
+      }
     }
     
-    // Also add from manualBlockDates set (in case source info was lost in merging)
-    for (const ymd of manualBlockDates) {
-      const existing = map.get(ymd) || { periods: [], isManual: false, isIcal: false }
-      existing.isManual = true
-      map.set(ymd, existing)
+    // Process manual blocks second
+    for (const block of manualBlocks) {
+      const days = iterateDaysExclusive(block.start, block.end)
+      console.log('[DEBUG CalendarView] Manual block:', block.id.slice(0,8), block.start, '->', block.end, '| days produced:', days.size)
+      for (const ymd of days) {
+        manualDaysProduced++
+        if (!manualMinYmd || ymd < manualMinYmd) manualMinYmd = ymd
+        if (!manualMaxYmd || ymd > manualMaxYmd) manualMaxYmd = ymd
+        
+        const existing = map.get(ymd)
+        if (existing) {
+          existing.isBlockedByManual = true
+          existing.manualBlockId = block.id
+        } else {
+          map.set(ymd, {
+            ymd,
+            isBlockedByIcal: false,
+            isBlockedByManual: true,
+            manualBlockId: block.id,
+          })
+        }
+      }
     }
+    
+    console.log('[DEBUG CalendarView] DIAGNOSTIC STATS:')
+    console.log('  totalDaysMarkedByIcal:', icalDaysProduced, '| range:', icalMinYmd, '->', icalMaxYmd)
+    console.log('  totalDaysMarkedByManual:', manualDaysProduced, '| range:', manualMinYmd, '->', manualMaxYmd)
+    console.log('  totalUniqueBlockedDays:', map.size)
     
     return map
-  }, [blockedDates, manualBlockDates])
+  }, [icalBlocks, manualBlocks])
 
+  // ==========================================================================
+  // Navigation
+  // ==========================================================================
   const months = useMemo(() => {
     const result = []
     const current = new Date(startMonth)
-    
     for (let i = 0; i < monthsToShow; i++) {
       result.push(new Date(current))
       current.setMonth(current.getMonth() + 1)
     }
-    
     return result
   }, [startMonth, monthsToShow])
 
@@ -94,6 +175,23 @@ export function CalendarView({
   }
 
   const todayStr = dateToYMD(new Date())
+  
+  // Stats
+  const icalDayCount = useMemo(() => {
+    let count = 0
+    for (const state of dayStateMap.values()) {
+      if (state.isBlockedByIcal) count++
+    }
+    return count
+  }, [dayStateMap])
+  
+  const manualDayCount = useMemo(() => {
+    let count = 0
+    for (const state of dayStateMap.values()) {
+      if (state.isBlockedByManual && !state.isBlockedByIcal) count++
+    }
+    return count
+  }, [dayStateMap])
 
   return (
     <div className="rounded-xl border-2 border-black bg-white p-4">
@@ -126,7 +224,7 @@ export function CalendarView({
         </div>
         <div className="flex items-center gap-1.5">
           <div className="h-3 w-3 rounded bg-red-400" />
-          <span>Blocked (iCal)</span>
+          <span>Blocked (Airbnb)</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="h-3 w-3 rounded bg-amber-500" />
@@ -137,7 +235,7 @@ export function CalendarView({
       {/* Interactive mode hint */}
       {interactive && (
         <div className="mb-4 text-center text-[11px] text-black/60 bg-amber-50 rounded-lg px-3 py-2">
-          <strong>Click any green date</strong> to block it • <strong>Click amber</strong> to unblock
+          <strong>Click green</strong> to block • <strong>Click amber</strong> to unblock • Red dates are from Airbnb
         </div>
       )}
 
@@ -147,11 +245,11 @@ export function CalendarView({
           <MonthCalendar 
             key={idx}
             month={month}
-            blockedDaysMap={blockedDaysMap}
+            dayStateMap={dayStateMap}
             todayStr={todayStr}
-            onDayClick={onDayClick}
             interactive={interactive}
-            onToggleDay={onToggleDay}
+            onBlockDay={onBlockDay}
+            onUnblockDay={onUnblockDay}
             togglingDays={togglingDays}
           />
         ))}
@@ -159,93 +257,112 @@ export function CalendarView({
 
       {/* Stats */}
       <div className="mt-4 flex items-center justify-center gap-6 border-t border-black/10 pt-3 text-[10px] text-black/60">
-        <span>{blockedDates.length} blocked periods</span>
-        <span>{blockedDaysMap.size} days unavailable</span>
+        <span>{icalBlocks.length} iCal periods</span>
+        <span>{manualBlocks.length} manual blocks</span>
+        <span>{icalDayCount + manualDayCount} days unavailable</span>
       </div>
     </div>
   )
 }
 
+// =============================================================================
+// Month Component
+// =============================================================================
+
 function MonthCalendar({ 
   month, 
-  blockedDaysMap,
+  dayStateMap,
   todayStr,
-  onDayClick,
   interactive,
-  onToggleDay,
+  onBlockDay,
+  onUnblockDay,
   togglingDays,
 }: { 
   month: Date
-  blockedDaysMap: Map<string, { periods: BlockedPeriod[], isManual: boolean, isIcal: boolean }>
+  dayStateMap: Map<string, DayState>
   todayStr: string
-  onDayClick?: (ymd: string, periods: BlockedPeriod[]) => void
   interactive?: boolean
-  onToggleDay?: (ymd: string, currentlyBlocked: boolean, isManualBlock: boolean) => Promise<boolean>
+  onBlockDay?: (ymd: string) => Promise<void>
+  onUnblockDay?: (manualBlockId: string) => Promise<void>
   togglingDays?: Set<string>
 }) {
   const monthName = month.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   
-  // Get days in this month
   const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate()
   const firstDayOfWeek = new Date(month.getFullYear(), month.getMonth(), 1).getDay()
   
-  type DayInfo = {
+  // Build day cells
+  type DayCell = {
     day: number
     ymd: string
-    isBlocked: boolean
-    blockingPeriods: BlockedPeriod[]
+    state: DayState | null
     isToday: boolean
     isPast: boolean
-    hasManualBlock: boolean
-    hasIcalBlock: boolean
     isToggling: boolean
   } | null
   
-  const days: DayInfo[] = []
+  const days: DayCell[] = []
   
-  // Add empty cells for days before the 1st
+  // Empty cells before 1st
   for (let i = 0; i < firstDayOfWeek; i++) {
     days.push(null)
   }
   
-  // Add all days of the month
+  // Day cells
   for (let d = 1; d <= daysInMonth; d++) {
     const ymd = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-    const blockInfo = blockedDaysMap.get(ymd)
-    
     days.push({
       day: d,
       ymd,
-      isBlocked: !!blockInfo,
-      blockingPeriods: blockInfo?.periods || [],
+      state: dayStateMap.get(ymd) || null,
       isToday: ymd === todayStr,
       isPast: ymd < todayStr,
-      hasManualBlock: blockInfo?.isManual || false,
-      hasIcalBlock: blockInfo?.isIcal || false,
       isToggling: togglingDays?.has(ymd) || false,
     })
   }
 
-  const handleDayClick = (day: typeof days[0]) => {
-    if (!day || day.isPast) return
-    
-    // In interactive mode
-    if (interactive && onToggleDay) {
-      // Can only toggle if:
-      // - Day is available (not blocked) -> add block
-      // - Day has manual block ONLY (no iCal block) -> remove block
-      if (!day.isBlocked) {
-        // Available -> block it
-        onToggleDay(day.ymd, false, false)
-      } else if (day.hasManualBlock && !day.hasIcalBlock) {
-        // Manual block only -> unblock it
-        onToggleDay(day.ymd, true, true)
-      }
-      // If it's an iCal block (even with manual), can't toggle
-    } else if (day.isBlocked && onDayClick) {
-      // Non-interactive: show info about why it's blocked
-      onDayClick(day.ymd, day.blockingPeriods)
+  // ==========================================================================
+  // CLICK HANDLER: Based on user intent, not raw date mutation
+  // ==========================================================================
+  const handleDayClick = async (dayCell: DayCell) => {
+    if (!dayCell || dayCell.isPast || dayCell.isToggling || !interactive) {
+      console.log('[DEBUG CalendarView] Click IGNORED:', { 
+        reason: !dayCell ? 'no dayCell' : dayCell.isPast ? 'isPast' : dayCell.isToggling ? 'isToggling' : 'not interactive',
+        ymd: dayCell?.ymd,
+      })
+      return
     }
+    
+    const { state, ymd } = dayCell
+    
+    console.log('[DEBUG CalendarView] ========== DAY CLICKED ==========')
+    console.log('[DEBUG CalendarView] ymd:', ymd)
+    console.log('[DEBUG CalendarView] state:', state)
+    console.log('[DEBUG CalendarView] isBlockedByIcal:', state?.isBlockedByIcal ?? false)
+    console.log('[DEBUG CalendarView] isBlockedByManual:', state?.isBlockedByManual ?? false)
+    console.log('[DEBUG CalendarView] manualBlockId:', state?.manualBlockId ?? null)
+    
+    // Case 1: Day is available (green) -> User wants to BLOCK it
+    if (!state || (!state.isBlockedByIcal && !state.isBlockedByManual)) {
+      console.log('[DEBUG CalendarView] BRANCH: GREEN -> BLOCK (calling onBlockDay)')
+      if (onBlockDay) {
+        await onBlockDay(ymd)
+      }
+      return
+    }
+    
+    // Case 2: Day has manual block ONLY (amber) -> User wants to UNBLOCK it
+    if (state.isBlockedByManual && !state.isBlockedByIcal && state.manualBlockId) {
+      console.log('[DEBUG CalendarView] BRANCH: AMBER -> UNBLOCK (calling onUnblockDay with id:', state.manualBlockId, ')')
+      if (onUnblockDay) {
+        await onUnblockDay(state.manualBlockId)
+      }
+      return
+    }
+    
+    // Case 3: Day has iCal block (red) -> NO-OP, cannot change Airbnb data
+    console.log('[DEBUG CalendarView] BRANCH: RED -> NOOP (iCal blocked, cannot change)')
+    // Do nothing - the UI already shows this isn't clickable
   }
 
   return (
@@ -261,69 +378,75 @@ function MonthCalendar({
       
       {/* Days */}
       <div className="grid grid-cols-7 gap-0.5">
-        {days.map((day, idx) => {
-          // Determine if this day is clickable in interactive mode
-          const canToggle = interactive && day && !day.isPast && !day.isToggling && (
-            !day.isBlocked || // Can block available days
-            (day.hasManualBlock && !day.hasIcalBlock) // Can unblock manual-only blocks
+        {days.map((dayCell, idx) => {
+          if (!dayCell) {
+            return <div key={idx} className="aspect-square" />
+          }
+          
+          const { day, state, isToday, isPast, isToggling } = dayCell
+          
+          // =================================================================
+          // DISPLAY LOGIC: Computed from state, never stored
+          // =================================================================
+          
+          // Determine what action is possible
+          const isAvailable = !state || (!state.isBlockedByIcal && !state.isBlockedByManual)
+          const isIcalBlocked = state?.isBlockedByIcal || false
+          const isManualOnlyBlocked = state?.isBlockedByManual && !state?.isBlockedByIcal
+          
+          // Can user click this day?
+          const canClick = interactive && !isPast && !isToggling && (
+            isAvailable ||        // Can block available days
+            isManualOnlyBlocked   // Can unblock manual-only blocks
           )
           
-          // Determine background color - today gets a ring instead of full bg change
+          // Background color
           let bgClass = ''
-          let ringClass = ''
-          
-          if (!day) {
-            bgClass = ''
-          } else if (day.isToggling) {
+          if (isToggling) {
             bgClass = 'bg-black/20 animate-pulse'
-          } else if (day.isBlocked) {
-            // Different shades for ical vs manual
-            if (day.hasManualBlock && !day.hasIcalBlock) {
-              bgClass = 'bg-amber-500 text-white' // Manual only - can unblock
-            } else {
-              bgClass = 'bg-red-400 text-white' // iCal (can't unblock)
-            }
-          } else if (day.isPast) {
+          } else if (isPast) {
             bgClass = 'bg-black/5 text-black/30'
+          } else if (isIcalBlocked) {
+            bgClass = 'bg-red-400 text-white'  // Red: iCal block - NOT clickable
+          } else if (isManualOnlyBlocked) {
+            bgClass = 'bg-amber-500 text-white' // Amber: manual only - CAN unblock
           } else {
-            bgClass = 'bg-emerald-400 text-white' // Available
+            bgClass = 'bg-emerald-400 text-white' // Green: available - CAN block
           }
           
-          // Today gets a ring
-          if (day?.isToday && !day.isToggling) {
-            ringClass = 'ring-2 ring-black ring-offset-1'
-          }
+          // Ring for today
+          const ringClass = isToday && !isToggling ? 'ring-2 ring-black ring-offset-1' : ''
           
-          // Add hover/cursor styles only for actionable days
+          // Hover/cursor for clickable days
           let interactionClass = ''
-          if (canToggle) {
-            if (day.isBlocked) {
-              // Manual block - show it can be unblocked
+          if (canClick) {
+            if (isManualOnlyBlocked) {
               interactionClass = 'cursor-pointer hover:bg-emerald-300 hover:text-black transition-colors'
-            } else {
-              // Available - show it can be blocked
-              interactionClass = 'cursor-pointer hover:bg-red-300 transition-colors'
+            } else if (isAvailable) {
+              interactionClass = 'cursor-pointer hover:bg-amber-300 transition-colors'
             }
+          }
+          
+          // Tooltip
+          let title: string | undefined
+          if (isToggling) {
+            title = 'Updating...'
+          } else if (isIcalBlocked) {
+            title = `Blocked by Airbnb${state?.icalSummary ? `: ${state.icalSummary}` : ''} (cannot change here)`
+          } else if (isManualOnlyBlocked) {
+            title = 'Manual block - click to unblock'
+          } else if (interactive && !isPast) {
+            title = 'Click to block this date'
           }
           
           return (
             <div 
               key={idx}
-              onClick={() => handleDayClick(day)}
+              onClick={() => handleDayClick(dayCell)}
               className={`aspect-square flex items-center justify-center rounded text-[10px] ${bgClass} ${ringClass} ${interactionClass}`}
-              title={
-                day?.isToggling 
-                  ? 'Updating...'
-                  : day?.hasIcalBlock
-                    ? 'Blocked by Airbnb (cannot change here)'
-                    : day?.hasManualBlock
-                      ? 'Manual block (click to unblock)'
-                      : interactive && day && !day.isPast
-                        ? 'Click to block'
-                        : undefined
-              }
+              title={title}
             >
-              {day?.day}
+              {day}
             </div>
           )
         })}
