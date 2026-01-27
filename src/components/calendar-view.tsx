@@ -19,13 +19,20 @@ export function CalendarView({ blockedDates, monthsToShow = 3 }: CalendarViewPro
     const blocked = new Set<string>()
     
     for (const period of blockedDates) {
-      const start = new Date(period.start)
-      const end = new Date(period.end)
+      // Parse dates without timezone conversion
+      // period.start and period.end are in format YYYY-MM-DD
+      const [startYear, startMonth, startDay] = period.start.split('-').map(Number)
+      const [endYear, endMonth, endDay] = period.end.split('-').map(Number)
       
-      // Add each day in the range
+      // Create dates using local timezone
+      const start = new Date(startYear, startMonth - 1, startDay)
+      const end = new Date(endYear, endMonth - 1, endDay)
+      
+      // Add each day in the range (end date is exclusive in iCal)
       const current = new Date(start)
       while (current < end) {
-        blocked.add(current.toISOString().split('T')[0])
+        const dateStr = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`
+        blocked.add(dateStr)
         current.setDate(current.getDate() + 1)
       }
     }
@@ -63,7 +70,7 @@ export function CalendarView({ blockedDates, monthsToShow = 3 }: CalendarViewPro
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const todayStr = today.toISOString().split('T')[0]
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
   return (
     <div className="rounded-xl border-2 border-black bg-white p-4">
