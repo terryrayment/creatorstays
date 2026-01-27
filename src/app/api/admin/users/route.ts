@@ -89,7 +89,7 @@ export async function DELETE(request: NextRequest) {
 
       // 9. Delete agency team members if any
       await prisma.agencyTeamMember.deleteMany({
-        where: { hostProfileId: hostProfile.id }
+        where: { agencyHostId: hostProfile.id }
       })
 
       // 10. Delete the host profile
