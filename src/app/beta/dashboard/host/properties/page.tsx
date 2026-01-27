@@ -181,13 +181,15 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [step, onStepChange])
   
-  // Auto-save photos when they change (to prevent loss when switching tabs)
+  // Auto-save is now handled in handlePhotoUpload - this effect is kept for safety
+  // but with a longer debounce to avoid conflicts
   useEffect(() => {
     const currentPhotos = form.photos || []
-    // Only auto-save if photos have changed and there are photos to save
-    if (currentPhotos.length > 0 && JSON.stringify(currentPhotos) !== JSON.stringify(lastSavedPhotos)) {
+    // Only auto-save if photos have changed, there are photos to save, and we have an id
+    if (form.id && currentPhotos.length > 0 && JSON.stringify(currentPhotos) !== JSON.stringify(lastSavedPhotos)) {
       const autoSaveTimer = setTimeout(async () => {
         try {
+          console.log('[Properties] Auto-save backup running...')
           await fetch('/api/properties', { 
             method: 'POST', 
             headers: { 'Content-Type': 'application/json' }, 
@@ -198,11 +200,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
             }) 
           })
           setLastSavedPhotos(currentPhotos)
-          console.log('[Properties] Auto-saved photos')
+          console.log('[Properties] Auto-save backup completed -', currentPhotos.length, 'photos')
         } catch (e) { 
           console.error('[Properties] Auto-save failed:', e) 
         }
-      }, 1000) // Debounce by 1 second
+      }, 3000) // Longer debounce to avoid conflicts with immediate save
       return () => clearTimeout(autoSaveTimer)
     }
   }, [form.photos, form.id, form.heroImageUrl, lastSavedPhotos])
@@ -256,36 +258,48 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     }
     
     if (newPhotos.length > 0) {
-      const allPhotos = [...(form.photos || []), ...newPhotos]
-      const heroImage = form.heroImageUrl || newPhotos[0]
+      // Use a ref to track what we're saving
+      let allPhotos: string[] = []
+      let heroImage: string = ''
       
-      // Update local state
-      setForm(prev => ({
-        ...prev,
-        photos: allPhotos,
-        heroImageUrl: heroImage
-      }))
+      // Update local state and capture the final values
+      setForm(prev => {
+        allPhotos = [...(prev.photos || []), ...newPhotos]
+        heroImage = prev.heroImageUrl || newPhotos[0]
+        return {
+          ...prev,
+          photos: allPhotos,
+          heroImageUrl: heroImage
+        }
+      })
       
       // IMMEDIATELY save to database (don't wait for auto-save)
-      if (form.id) {
-        try {
-          await fetch('/api/properties', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ 
-              id: form.id, 
-              photos: allPhotos,
-              heroImageUrl: heroImage
-            }) 
-          })
-          setLastSavedPhotos(allPhotos)
-          console.log('[Properties] Saved', allPhotos.length, 'photos to database')
-        } catch (err) {
-          console.error('[Properties] Failed to save photos:', err)
-          setToast('Photos uploaded but failed to save. Please click Save.')
-          setTimeout(() => setToast(null), 5000)
+      // We need to wait a tick for the state to update
+      setTimeout(async () => {
+        if (form.id) {
+          try {
+            const saveRes = await fetch('/api/properties', { 
+              method: 'POST', 
+              headers: { 'Content-Type': 'application/json' }, 
+              body: JSON.stringify({ 
+                id: form.id, 
+                photos: allPhotos,
+                heroImageUrl: heroImage
+              }) 
+            })
+            if (saveRes.ok) {
+              setLastSavedPhotos(allPhotos)
+              console.log('[Properties] Saved', allPhotos.length, 'photos to database')
+            } else {
+              console.error('[Properties] Save failed:', await saveRes.text())
+            }
+          } catch (err) {
+            console.error('[Properties] Failed to save photos:', err)
+            setToast('Photos uploaded but failed to save. Please click Save.')
+            setTimeout(() => setToast(null), 5000)
+          }
         }
-      }
+      }, 100)
     }
     setIsUploading(false)
     e.target.value = '' // Reset input
