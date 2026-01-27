@@ -243,7 +243,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     }
     
     if (failedCount.value > 0) {
-      setToast(`${failedCount.value} photo(s) failed to upload. Please try again.`)
+      setToast(`${failedCount.value} photo(s) couldn't upload. Please retry.`)
       setTimeout(() => setToast(null), 5000)
     }
     
@@ -279,11 +279,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           if (saveRes.ok) {
             setLastSavedPhotos(allPhotos)
           } else {
-            setToast('Failed to save photos. Please try again.')
+            setToast("Photos couldn't be saved. Click Save to retry.")
             setTimeout(() => setToast(null), 5000)
           }
         } catch (err) {
-          setToast('Photos uploaded but failed to save. Please click Save.')
+          setToast("Photos uploaded but couldn't be saved. Click Save to retry.")
           setTimeout(() => setToast(null), 5000)
         }
       }
@@ -371,12 +371,41 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     setTimeout(() => setToast(null), 2000)
   }
 
+  // Sanitize Airbnb URL to extract canonical form
+  const sanitizeAirbnbUrl = (url: string): { sanitizedUrl: string | null; roomId: string | null } => {
+    if (!url) return { sanitizedUrl: null, roomId: null }
+    
+    // Check if it looks like an Airbnb URL
+    if (!url.includes('airbnb.') || !url.includes('/rooms/')) {
+      return { sanitizedUrl: null, roomId: null }
+    }
+    
+    // Extract room ID - numeric segment after /rooms/ up to next / or ?
+    const match = url.match(/\/rooms\/(\d+)/)
+    if (!match || !match[1]) {
+      return { sanitizedUrl: null, roomId: null }
+    }
+    
+    const roomId = match[1]
+    const sanitizedUrl = `https://www.airbnb.com/rooms/${roomId}`
+    return { sanitizedUrl, roomId }
+  }
+
   const handleImport = async () => {
     if (!form.airbnbUrl) return
+    
+    // Sanitize URL before import
+    const { sanitizedUrl, roomId } = sanitizeAirbnbUrl(form.airbnbUrl)
+    
+    if (!sanitizedUrl || !roomId) {
+      setImportError('Paste a listing link like https://www.airbnb.com/rooms/12345678')
+      return
+    }
+    
     setIsImporting(true)
     setImportError(null)
     try {
-      const res = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(form.airbnbUrl)}`)
+      const res = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(sanitizedUrl)}`)
       const data = await res.json()
       
       if (data.ok) {
@@ -420,7 +449,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         setImportError(data.error || 'Could not fetch listing. Check URL and try again.')
       }
     } catch { 
-      setImportError('Import failed. Enter details manually.') 
+      setImportError("We couldn't pull details from Airbnb. You can continue manually.") 
     }
     finally { setIsImporting(false) }
   }
@@ -512,11 +541,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         setTimeout(() => setToast(null), 2000)
       } else {
         const err = await res.json()
-        setToast(err.error || 'Failed to add block')
+        setToast(err.error || "Couldn't add block. Try again.")
         setTimeout(() => setToast(null), 3000)
       }
     } catch (e) {
-      setToast('Network error')
+      setToast('Connection issue. Please try again.')
       setTimeout(() => setToast(null), 3000)
     }
     setIsAddingBlock(false)
@@ -568,11 +597,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         setManualBlocks(prev => [...prev, data.block].sort((a, b) => a.startDate.localeCompare(b.startDate)))
         // No need to refresh full calendar - we just update local state
       } else {
-        setToast('Failed to block date')
+        setToast("Couldn't block that date. Try again.")
         setTimeout(() => setToast(null), 2000)
       }
     } catch (e) {
-      setToast('Failed to block date')
+      setToast("Couldn't block that date. Try again.")
       setTimeout(() => setToast(null), 2000)
     } finally {
       setTogglingDays(prev => {
@@ -615,11 +644,11 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         setManualBlocks(prev => prev.filter(b => b.id !== manualBlockId))
         // No need to refresh full calendar - we just update local state
       } else {
-        setToast('Failed to unblock date')
+        setToast("Couldn't unblock that date. Try again.")
         setTimeout(() => setToast(null), 2000)
       }
     } catch (e) {
-      setToast('Failed to unblock date')
+      setToast("Couldn't unblock that date. Try again.")
       setTimeout(() => setToast(null), 2000)
     } finally {
       setTogglingDays(prev => {
@@ -663,10 +692,10 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           })))
         }
       } else {
-        setCalendarSyncResult({ success: false, message: data.error || 'Sync failed' })
+        setCalendarSyncResult({ success: false, message: data.error || "Sync didn't complete. Try again or check your iCal URL." })
       }
     } catch {
-      setCalendarSyncResult({ success: false, message: 'Network error' })
+      setCalendarSyncResult({ success: false, message: 'Connection issue. Please try again.' })
     }
     setIsSyncingCalendar(false)
   }
@@ -905,7 +934,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               </div>
               
               {calendarSyncResult && (
-                <div className={`rounded-lg px-3 py-2 text-xs font-medium ${calendarSyncResult.success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+                <div className={`rounded-lg px-3 py-2 text-xs font-medium ${calendarSyncResult.success ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
                   {calendarSyncResult.message}
                 </div>
               )}
@@ -1428,7 +1457,7 @@ export default function HostPropertiesPage() {
         }, 2000)
       } else {
         const data = await res.json()
-        alert(data.error || 'Failed to invite owner')
+        alert(data.error || "Couldn't send invite. Please try again.")
       }
     } catch (e) { /* error handled silently */ }
     finally { setInvitingOwner(false) }
