@@ -406,6 +406,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     setImportError(null)
     try {
       const res = await fetch(`/api/airbnb/prefill?url=${encodeURIComponent(sanitizedUrl)}`)
+      
+      // Guard against non-JSON responses (404 pages, etc.)
+      const contentType = res.headers.get('content-type')
+      if (!contentType?.includes('application/json')) {
+        setImportError("Import isn't available right now. You can continue manually.")
+        return
+      }
+      
       const data = await res.json()
       
       if (data.ok) {
@@ -446,7 +454,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         }))
         setStep(2)
       } else {
-        setImportError(data.error || 'Could not fetch listing. Check URL and try again.')
+        setImportError(data.error || "We couldn't pull details from Airbnb. You can continue manually.")
       }
     } catch { 
       setImportError("We couldn't pull details from Airbnb. You can continue manually.") 
