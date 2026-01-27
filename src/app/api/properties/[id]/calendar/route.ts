@@ -30,7 +30,7 @@ export async function GET(
       return NextResponse.json({ error: 'Property not found' }, { status: 404 })
     }
 
-    const blockedDates = (property.blockedDates as BlockedPeriod[]) || []
+    const blockedDates = (property.blockedDates as unknown as BlockedPeriod[]) || []
     const availablePeriods = getAvailablePeriods(blockedDates, 3)
 
     return NextResponse.json({
