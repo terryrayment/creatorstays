@@ -133,10 +133,23 @@ function extractListingData(html: string, roomId: string) {
   if (bathsMatch) data.baths = parseFloat(bathsMatch[1])
   
   // Try to extract photos from the page
-  const photoMatches = html.matchAll(/https:\/\/a0\.muscache\.com\/[^"'\s]+/g)
-  const photos = [...new Set([...photoMatches].map(m => m[0]))]
-    .filter(url => url.includes('/pictures/') && !url.includes('avatar'))
+  const photoMatches = Array.from(
+    html.matchAll(/https:\/\/a0\.muscache\.com\/[^"'\s]+/g),
+    (m) => m[0]
+  )
+  
+  // Dedupe without Set spread (avoids downlevelIteration build error)
+  const seen = new Set<string>()
+  const photos = photoMatches
+    .filter((url) => {
+      if (!url.includes('/pictures/')) return false
+      if (url.includes('avatar')) return false
+      if (seen.has(url)) return false
+      seen.add(url)
+      return true
+    })
     .slice(0, 10)
+  
   if (photos.length > 0) data.photos = photos
   
   return data
