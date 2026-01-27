@@ -92,7 +92,8 @@ export function CalendarView({
     for (const block of icalBlocks) {
       const days = iterateDaysExclusive(block.start, block.end)
       console.log('[DEBUG CalendarView] iCal block:', block.start, '->', block.end, '| days produced:', days.size)
-      for (const ymd of days) {
+      const daysArray = Array.from(days)
+      for (const ymd of daysArray) {
         icalDaysProduced++
         if (!icalMinYmd || ymd < icalMinYmd) icalMinYmd = ymd
         if (!icalMaxYmd || ymd > icalMaxYmd) icalMaxYmd = ymd
@@ -117,7 +118,8 @@ export function CalendarView({
     for (const block of manualBlocks) {
       const days = iterateDaysExclusive(block.start, block.end)
       console.log('[DEBUG CalendarView] Manual block:', block.id.slice(0,8), block.start, '->', block.end, '| days produced:', days.size)
-      for (const ymd of days) {
+      const daysArray = Array.from(days)
+      for (const ymd of daysArray) {
         manualDaysProduced++
         if (!manualMinYmd || ymd < manualMinYmd) manualMinYmd = ymd
         if (!manualMaxYmd || ymd > manualMaxYmd) manualMaxYmd = ymd
