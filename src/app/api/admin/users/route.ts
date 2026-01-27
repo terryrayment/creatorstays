@@ -158,42 +158,37 @@ export async function DELETE(request: NextRequest) {
         where: { creatorId: creatorProfile.id }
       })
 
-      // 6. Delete all offers to this creator
+      // 5. Delete all offers to this creator
       await prisma.offer.deleteMany({
         where: { creatorProfileId: creatorProfile.id }
       })
 
-      // 7. Delete tracking links
+      // 6. Delete tracking links (uses creatorId not creatorProfileId)
       await prisma.trackingLink.deleteMany({
-        where: { creatorProfileId: creatorProfile.id }
+        where: { creatorId: creatorProfile.id }
       })
 
-      // 8. Delete reviews
-      await prisma.review.deleteMany({
-        where: { creatorProfileId: creatorProfile.id }
-      })
-
-      // 9. Delete referrals where this creator referred someone
-      await prisma.referral.deleteMany({
+      // 7. Delete referrals where this creator referred someone
+      await prisma.creatorReferral.deleteMany({
         where: { referrerId: creatorProfile.id }
       })
 
-      // 10. Delete referrals where this creator was referred
-      await prisma.referral.deleteMany({
+      // 8. Delete referrals where this creator was referred
+      await prisma.creatorReferral.deleteMany({
         where: { referredId: creatorProfile.id }
       })
 
-      // 11. Delete the creator profile
+      // 9. Delete the creator profile (reviews cascade delete via collaboration)
       await prisma.creatorProfile.delete({
         where: { id: creatorProfile.id }
       })
 
-      // 12. Delete sessions
+      // 10. Delete sessions
       await prisma.session.deleteMany({
         where: { userId: authUserId }
       })
 
-      // 13. Delete accounts (OAuth)
+      // 11. Delete accounts (OAuth)
       await prisma.account.deleteMany({
         where: { userId: authUserId }
       })
