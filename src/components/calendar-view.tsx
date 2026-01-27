@@ -300,14 +300,10 @@ function MonthCalendar({
   // ==========================================================================
   const handleDayClick = async (dayCell: DayCell) => {
     if (!dayCell || dayCell.isPast || dayCell.isToggling || !interactive) {
-        reason: !dayCell ? 'no dayCell' : dayCell.isPast ? 'isPast' : dayCell.isToggling ? 'isToggling' : 'not interactive',
-        ymd: dayCell?.ymd,
-      })
       return
     }
     
     const { state, ymd } = dayCell
-    
     
     // Case 1: Day is available (green) -> User wants to BLOCK it
     if (!state || (!state.isBlockedByIcal && !state.isBlockedByManual)) {
