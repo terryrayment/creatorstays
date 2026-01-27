@@ -102,20 +102,23 @@ function parseICalText(icalText: string): { blockedDates: BlockedPeriod[], rawEv
       const endDate = dtend ? parseICalDate(dtend) : startDate
       
       if (startDate && endDate) {
-        // Include all dates from today onwards (don't filter out past)
-        // We filter by checking if the END date is in the future
+        // Include all dates from today onwards
+        // Parse dates without timezone issues
         const today = new Date()
         today.setHours(0, 0, 0, 0)
-        const endDateObj = new Date(endDate)
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
         
+        // Compare as strings to avoid timezone issues
         // Include if end date is today or in the future
-        if (endDateObj >= today) {
+        if (endDate >= todayStr) {
           blockedDates.push({
             start: startDate,
             end: endDate,
             summary: summary || undefined,
           })
           console.log('[iCal] Event:', startDate, 'to', endDate, summary ? `(${summary})` : '')
+        } else {
+          console.log('[iCal] Skipped past event:', startDate, 'to', endDate)
         }
       }
     }
