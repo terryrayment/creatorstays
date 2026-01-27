@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import LocationAutocomplete from "@/components/ui/location-autocomplete"
 import { DashboardFooter } from "@/components/navigation/dashboard-footer"
+import { CalendarView } from "@/components/calendar-view"
 
 interface Property {
   id: string
@@ -726,6 +727,13 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                       <span className="text-[9px] text-black/50">+{(form.blockedDates as any[]).length - 5} more</span>
                     )}
                   </div>
+                </div>
+              )}
+              
+              {/* Calendar View */}
+              {form.blockedDates && (form.blockedDates as any[]).length > 0 && (
+                <div className="mt-4">
+                  <CalendarView blockedDates={form.blockedDates as any[]} monthsToShow={3} />
                 </div>
               )}
             </div>

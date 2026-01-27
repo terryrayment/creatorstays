@@ -15,6 +15,7 @@ export interface CalendarSyncResult {
   blockedDates: BlockedPeriod[]
   error?: string
   eventCount?: number
+  rawEventCount?: number
 }
 
 /**
@@ -28,6 +29,7 @@ export async function fetchAndParseICal(icalUrl: string): Promise<CalendarSyncRe
     }
 
     // Fetch the iCal data
+    console.log('[iCal] Fetching:', icalUrl.substring(0, 50) + '...')
     const response = await fetch(icalUrl, {
       headers: {
         'User-Agent': 'CreatorStays Calendar Sync/1.0',
@@ -46,14 +48,18 @@ export async function fetchAndParseICal(icalUrl: string): Promise<CalendarSyncRe
     }
 
     const icalText = await response.text()
+    console.log('[iCal] Received', icalText.length, 'bytes')
     
     // Parse the iCal data
-    const blockedDates = parseICalText(icalText)
+    const { blockedDates, rawEventCount } = parseICalText(icalText)
+    
+    console.log('[iCal] Parsed', rawEventCount, 'events,', blockedDates.length, 'blocked periods')
     
     return {
       success: true,
       blockedDates,
       eventCount: blockedDates.length,
+      rawEventCount,
     }
   } catch (error) {
     console.error('[iCal] Fetch error:', error)
@@ -69,11 +75,14 @@ export async function fetchAndParseICal(icalUrl: string): Promise<CalendarSyncRe
  * Parse iCal text into blocked periods
  * iCal format reference: https://icalendar.org/iCalendar-RFC-5545/
  */
-function parseICalText(icalText: string): BlockedPeriod[] {
+function parseICalText(icalText: string): { blockedDates: BlockedPeriod[], rawEventCount: number } {
   const blockedDates: BlockedPeriod[] = []
   
   // Split into events
   const events = icalText.split('BEGIN:VEVENT')
+  const rawEventCount = events.length - 1
+  
+  console.log('[iCal] Found', rawEventCount, 'VEVENT blocks')
   
   for (let i = 1; i < events.length; i++) {
     const eventText = events[i]
@@ -93,17 +102,20 @@ function parseICalText(icalText: string): BlockedPeriod[] {
       const endDate = dtend ? parseICalDate(dtend) : startDate
       
       if (startDate && endDate) {
-        // Only include future or current dates (don't bother with past bookings)
+        // Include all dates from today onwards (don't filter out past)
+        // We filter by checking if the END date is in the future
         const today = new Date()
         today.setHours(0, 0, 0, 0)
         const endDateObj = new Date(endDate)
         
+        // Include if end date is today or in the future
         if (endDateObj >= today) {
           blockedDates.push({
             start: startDate,
             end: endDate,
             summary: summary || undefined,
           })
+          console.log('[iCal] Event:', startDate, 'to', endDate, summary ? `(${summary})` : '')
         }
       }
     }
@@ -112,8 +124,9 @@ function parseICalText(icalText: string): BlockedPeriod[] {
   // Sort by start date
   blockedDates.sort((a, b) => a.start.localeCompare(b.start))
   
-  // Merge overlapping periods
-  return mergeOverlappingPeriods(blockedDates)
+  // DON'T merge - keep individual events separate for accurate display
+  // Merging was causing issues with adjacent bookings
+  return { blockedDates, rawEventCount }
 }
 
 /**
@@ -181,9 +194,9 @@ function parseICalDate(dateStr: string): string | null {
 }
 
 /**
- * Merge overlapping or adjacent blocked periods
+ * Merge overlapping or adjacent blocked periods (optional, not used by default)
  */
-function mergeOverlappingPeriods(periods: BlockedPeriod[]): BlockedPeriod[] {
+export function mergeOverlappingPeriods(periods: BlockedPeriod[]): BlockedPeriod[] {
   if (periods.length <= 1) return periods
   
   const merged: BlockedPeriod[] = []
@@ -230,6 +243,27 @@ export function isDateBlocked(date: Date | string, blockedDates: BlockedPeriod[]
   }
   
   return false
+}
+
+/**
+ * Get all blocked dates as individual days (for calendar display)
+ */
+export function getBlockedDays(blockedDates: BlockedPeriod[]): Set<string> {
+  const blocked = new Set<string>()
+  
+  for (const period of blockedDates) {
+    const start = new Date(period.start)
+    const end = new Date(period.end)
+    
+    // Add each day in the range
+    const current = new Date(start)
+    while (current < end) {
+      blocked.add(current.toISOString().split('T')[0])
+      current.setDate(current.getDate() + 1)
+    }
+  }
+  
+  return blocked
 }
 
 /**
