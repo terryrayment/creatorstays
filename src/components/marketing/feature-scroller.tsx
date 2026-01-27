@@ -110,7 +110,7 @@ export function FeatureScroller() {
         {tripleSteps.map((step, index) => (
           <div
             key={`${step.id}-${index}`}
-            className="feature-card relative flex-shrink-0 rounded-2xl border-[3px] border-black overflow-hidden transition-transform duration-300 ease-out hover:scale-105 hover:z-10"
+            className="feature-card relative flex-shrink-0 rounded-2xl border-[3px] border-black overflow-hidden transition-all duration-300 ease-out hover:-translate-y-3 hover:shadow-2xl hover:z-10"
             style={{
               width: "360px",
               height: "420px",
