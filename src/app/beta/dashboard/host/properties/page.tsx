@@ -181,6 +181,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const [newBlockNote, setNewBlockNote] = useState('')
   const [isAddingBlock, setIsAddingBlock] = useState(false)
   const [isDeletingBlock, setIsDeletingBlock] = useState<string | null>(null)
+  const [togglingDays, setTogglingDays] = useState<Set<string>>(new Set())
 
   useEffect(() => { setIsMounted(true) }, [])
   useEffect(() => { setForm(property); setStep(1); setLastSavedPhotos(property.photos || []) }, [property])
@@ -531,6 +532,70 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     setIsDeletingBlock(null)
   }
 
+  // Toggle a single day blocked/unblocked
+  const toggleDayBlock = async (ymd: string, currentlyBlocked: boolean): Promise<boolean> => {
+    if (!form.id) return false
+    
+    setTogglingDays(prev => new Set(prev).add(ymd))
+    
+    try {
+      if (currentlyBlocked) {
+        // Find manual block that contains this day and remove it
+        // Or create an "unblock" - for now, we can only unblock manual blocks
+        const blockToRemove = manualBlocks.find(b => {
+          return ymd >= b.startDate && ymd < b.endDate
+        })
+        
+        if (blockToRemove) {
+          // Delete this manual block
+          const res = await fetch(`/api/properties/${form.id}/manual-blocks/${blockToRemove.id}`, { method: 'DELETE' })
+          if (res.ok) {
+            setManualBlocks(prev => prev.filter(b => b.id !== blockToRemove.id))
+            await refreshCalendarData()
+            return true
+          }
+        } else {
+          // It's an iCal block - can't unblock those
+          setToast("Can't unblock iCal dates - only Airbnb can do that")
+          setTimeout(() => setToast(null), 3000)
+          return false
+        }
+      } else {
+        // Block this single day - create a manual block for just this day
+        // End date is exclusive, so for a single day we need endDate = day + 1
+        const startDate = ymd
+        const [year, month, day] = ymd.split('-').map(Number)
+        const nextDay = new Date(year, month - 1, day + 1)
+        const endDate = `${nextDay.getFullYear()}-${String(nextDay.getMonth() + 1).padStart(2, '0')}-${String(nextDay.getDate()).padStart(2, '0')}`
+        
+        const res = await fetch(`/api/properties/${form.id}/manual-blocks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ startDate, endDate })
+        })
+        
+        if (res.ok) {
+          const data = await res.json()
+          setManualBlocks(prev => [...prev, data.block].sort((a, b) => a.startDate.localeCompare(b.startDate)))
+          await refreshCalendarData()
+          return true
+        }
+      }
+    } catch (e) {
+      console.error('[ToggleDay] Error:', e)
+      setToast('Failed to update')
+      setTimeout(() => setToast(null), 2000)
+    } finally {
+      setTogglingDays(prev => {
+        const next = new Set(prev)
+        next.delete(ymd)
+        return next
+      })
+    }
+    
+    return false
+  }
+
   const refreshCalendarData = async () => {
     if (!form.id) return
     try {
@@ -779,7 +844,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
             
             {/* Info Banner */}
             <div className="rounded-lg border border-black/10 bg-black/5 px-3 py-2 text-[11px] text-black">
-              <strong>Note:</strong> Airbnb iCal only includes reservations and some blocked events. Airbnb can show additional unavailable days that do not appear in iCal. Use Manual Blocks below to match your exact availability.
+              <strong>Tip:</strong> Airbnb iCal doesn&apos;t export all blocked dates. <strong>Click any date on the calendar</strong> to block or unblock it manually.
             </div>
             
             <div className="space-y-3">
@@ -818,96 +883,41 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               )}
               
               {/* Manual Blocks Section */}
-              {form.id && (
+              {form.id && manualBlocks.length > 0 && (
                 <div className="border-t border-black/10 pt-3">
-                  <p className="text-[11px] font-bold text-black mb-2">Manual Blocks</p>
-                  
-                  {/* Add Block Form */}
-                  <div className="flex flex-wrap gap-2 items-end mb-3">
-                    <div className="flex-1 min-w-[120px]">
-                      <label className="block text-[10px] text-black/60 mb-1">Start Date</label>
-                      <input 
-                        type="date" 
-                        value={newBlockStart} 
-                        onChange={e => setNewBlockStart(e.target.value)}
-                        className="w-full rounded-lg border-2 border-black/20 px-2 py-1.5 text-xs focus:border-black focus:outline-none"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-[120px]">
-                      <label className="block text-[10px] text-black/60 mb-1">End Date (exclusive)</label>
-                      <input 
-                        type="date" 
-                        value={newBlockEnd} 
-                        onChange={e => setNewBlockEnd(e.target.value)}
-                        className="w-full rounded-lg border-2 border-black/20 px-2 py-1.5 text-xs focus:border-black focus:outline-none"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-[150px]">
-                      <label className="block text-[10px] text-black/60 mb-1">Note (optional)</label>
-                      <input 
-                        type="text" 
-                        value={newBlockNote} 
-                        onChange={e => setNewBlockNote(e.target.value)}
-                        placeholder="e.g., Personal use"
-                        className="w-full rounded-lg border-2 border-black/20 px-2 py-1.5 text-xs focus:border-black focus:outline-none"
-                      />
-                    </div>
-                    <Button 
-                      onClick={addManualBlock}
-                      disabled={isAddingBlock || !newBlockStart || !newBlockEnd}
-                      className="border-2 border-black bg-black text-white hover:bg-black/90 text-xs px-3 py-1.5"
-                    >
-                      {isAddingBlock ? 'Adding...' : 'Add Block'}
-                    </Button>
-                  </div>
-                  
-                  {/* Existing Manual Blocks */}
-                  {manualBlocks.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {manualBlocks.map(block => (
-                        <div key={block.id} className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5">
-                          <span className="text-[9px] font-medium text-amber-700">
-                            {block.startDate} → {block.endDate}
-                            {block.note && ` (${block.note})`}
-                          </span>
-                          <button 
-                            onClick={() => deleteManualBlock(block.id)}
-                            disabled={isDeletingBlock === block.id}
-                            className="ml-1 text-amber-500 hover:text-red-500 disabled:opacity-50"
-                          >
-                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {manualBlocks.length === 0 && (
-                    <p className="text-[10px] text-black/40">No manual blocks added yet.</p>
-                  )}
-                </div>
-              )}
-              
-              {form.blockedDates && (form.blockedDates as any[]).length > 0 && (
-                <div>
-                  <p className="text-[10px] font-bold text-black/70 mb-1">All blocked periods ({(form.blockedDates as any[]).length}):</p>
-                  <div className="flex flex-wrap gap-1">
-                    {(form.blockedDates as any[]).map((period: any, i: number) => (
-                      <span key={i} className="rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[9px] font-medium text-red-600">
-                        {new Date(period.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(period.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </span>
+                  <p className="text-[11px] font-bold text-black mb-2">Your Manual Blocks ({manualBlocks.length})</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {manualBlocks.map(block => (
+                      <div key={block.id} className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5">
+                        <span className="text-[9px] font-medium text-amber-700">
+                          {block.startDate} → {block.endDate}
+                          {block.note && ` (${block.note})`}
+                        </span>
+                        <button 
+                          onClick={() => deleteManualBlock(block.id)}
+                          disabled={isDeletingBlock === block.id}
+                          className="ml-1 text-amber-500 hover:text-red-500 disabled:opacity-50"
+                        >
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
               
               {/* Calendar View */}
-              {form.blockedDates && (form.blockedDates as any[]).length > 0 && (
-                <div className="mt-4">
-                  <CalendarView blockedDates={form.blockedDates as any[]} monthsToShow={3} />
-                </div>
-              )}
+              <div className="mt-4">
+                <CalendarView 
+                  blockedDates={form.blockedDates as any[] || []} 
+                  monthsToShow={3}
+                  interactive={!!form.id}
+                  onToggleDay={toggleDayBlock}
+                  togglingDays={togglingDays}
+                />
+              </div>
             </div>
           </div>
           
