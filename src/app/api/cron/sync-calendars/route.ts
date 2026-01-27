@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
           await prisma.property.update({
             where: { id: property.id },
             data: {
-              blockedDates: result.blockedDates,
+              blockedDates: result.blockedDates as any,
               lastCalendarSync: new Date(),
             },
           })

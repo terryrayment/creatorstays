@@ -100,7 +100,7 @@ export async function POST(
     await prisma.property.update({
       where: { id: property.id },
       data: {
-        blockedDates: result.blockedDates,
+        blockedDates: result.blockedDates as any,
         lastCalendarSync: new Date(),
       },
     })
@@ -181,7 +181,7 @@ export async function PUT(
         await prisma.property.update({
           where: { id: property.id },
           data: {
-            blockedDates: result.blockedDates,
+            blockedDates: result.blockedDates as any,
             lastCalendarSync: new Date(),
           },
         })
