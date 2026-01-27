@@ -231,8 +231,8 @@ export function CalendarView({
 
       {/* Stats */}
       <div className="mt-4 flex items-center justify-center gap-6 border-t border-black/10 pt-3 text-[10px] text-black/60">
-        <span>{icalBlocks.length} iCal periods</span>
-        <span>{manualBlocks.length} manual blocks</span>
+        <span>{icalBlocks.length} synced from Airbnb</span>
+        <span>{manualBlocks.length} manual adjustments</span>
         <span>{icalDayCount + manualDayCount} days unavailable</span>
       </div>
     </div>

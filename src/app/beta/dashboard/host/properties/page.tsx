@@ -916,32 +916,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 </p>
               )}
               
-              {/* Manual Blocks Section */}
-              {form.id && manualBlocks.length > 0 && (
-                <div className="border-t border-black/10 pt-3">
-                  <p className="text-[11px] font-bold text-black mb-2">Your Manual Blocks ({manualBlocks.length})</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {manualBlocks.map(block => (
-                      <div key={block.id} className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5">
-                        <span className="text-[9px] font-medium text-amber-700">
-                          {block.startDate} → {block.endDate}
-                          {block.note && ` (${block.note})`}
-                        </span>
-                        <button 
-                          onClick={() => deleteManualBlock(block.id)}
-                          disabled={isDeletingBlock === block.id}
-                          className="ml-1 text-amber-500 hover:text-red-500 disabled:opacity-50"
-                        >
-                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
               {/* Calendar View */}
               <div className="mt-4">
                 <CalendarView 
