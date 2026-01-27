@@ -75,7 +75,6 @@ export async function GET(
       })),
     })
   } catch (error) {
-    console.error('[ManualBlocks GET] Error:', error)
     return NextResponse.json({ error: 'Failed to get manual blocks' }, { status: 500 })
   }
 }
@@ -143,8 +142,6 @@ export async function POST(
       },
     })
 
-    console.log(`[ManualBlocks] Created block for property ${params.id}: ${startDate} to ${endDate}`)
-
     return NextResponse.json({
       block: {
         id: block.id,
@@ -155,7 +152,6 @@ export async function POST(
       },
     })
   } catch (error) {
-    console.error('[ManualBlocks POST] Error:', error)
     return NextResponse.json({ error: 'Failed to create manual block' }, { status: 500 })
   }
 }

@@ -47,11 +47,8 @@ export async function DELETE(
       where: { id: params.blockId },
     })
 
-    console.log(`[ManualBlocks] Deleted block ${params.blockId} from property ${params.id}`)
-
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[ManualBlocks DELETE] Error:', error)
     return NextResponse.json({ error: 'Failed to delete manual block' }, { status: 500 })
   }
 }

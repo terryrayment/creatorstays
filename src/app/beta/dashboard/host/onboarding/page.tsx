@@ -537,7 +537,7 @@ export default function HostOnboardingPage() {
             method: "POST",
           }).catch(() => {
             // Ignore errors - cron will retry
-            console.log("Calendar sync will be picked up by cron job")
+            // Calendar sync handled by cron job
           })
         }
       }

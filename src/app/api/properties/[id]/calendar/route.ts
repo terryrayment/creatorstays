@@ -110,7 +110,6 @@ export async function GET(
       })),
     })
   } catch (error) {
-    console.error('[Calendar GET] Error:', error)
     return NextResponse.json({ error: 'Failed to get calendar' }, { status: 500 })
   }
 }
@@ -181,7 +180,6 @@ export async function POST(
     recordSync(params.id, session.user.id)
 
     // Fetch with conditional request support
-    console.log(`[Calendar Sync] Syncing calendar for property ${property.id}`)
     const result = await fetchAndParseICal(property.icalUrl, {
       etag: property.icalEtag,
       lastModified: property.icalLastModified,
@@ -191,7 +189,6 @@ export async function POST(
 
     // Handle 304 Not Modified
     if (result.notModified) {
-      console.log(`[Calendar Sync] 304 Not Modified for property ${property.id}`)
       
       await prisma.property.update({
         where: { id: property.id },
@@ -225,7 +222,6 @@ export async function POST(
 
     // Handle failure - DO NOT wipe existing data
     if (!result.success) {
-      console.error(`[Calendar Sync] Failed for property ${property.id}:`, result.error)
       
       await prisma.property.update({
         where: { id: property.id },
@@ -245,12 +241,6 @@ export async function POST(
       }, { status: 400 })
     }
 
-    // Log parsed events
-    console.log(`[Calendar Sync] Raw events: ${result.rawEventCount}, Blocked periods: ${result.eventCount}`)
-    result.blockedDates.forEach((period, i) => {
-      console.log(`[Calendar Sync] Period ${i + 1}: ${period.start} to ${period.end} ${period.summary ? `(${period.summary})` : ''}`)
-    })
-
     // Update property with new blocked dates AND caching metadata
     await prisma.property.update({
       where: { id: property.id },
@@ -265,8 +255,6 @@ export async function POST(
         icalLastModified: result.lastModified,
       },
     })
-
-    console.log(`[Calendar Sync] Success for property ${property.id}: ${result.eventCount} events`)
 
     // Return raw sources - NO MERGING
     return NextResponse.json({
@@ -285,7 +273,6 @@ export async function POST(
       })),
     })
   } catch (error) {
-    console.error('[Calendar POST] Error:', error)
     return NextResponse.json({ error: 'Failed to sync calendar' }, { status: 500 })
   }
 }
@@ -377,7 +364,6 @@ export async function PUT(
 
     return NextResponse.json({ success: true, icalUrl: icalUrl || null })
   } catch (error) {
-    console.error('[Calendar PUT] Error:', error)
     return NextResponse.json({ error: 'Failed to update calendar' }, { status: 500 })
   }
 }

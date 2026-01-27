@@ -18,12 +18,9 @@ export async function GET(request: NextRequest) {
     // In production, verify the cron secret
     if (process.env.NODE_ENV === 'production' && cronSecret) {
       if (authHeader !== `Bearer ${cronSecret}`) {
-        console.log('[Calendar Cron] Unauthorized request')
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
     }
-
-    console.log('[Calendar Cron] Starting calendar sync job')
 
     // Get all properties with iCal URLs that haven't been synced in the last 6 hours
     // or have never been synced
@@ -51,8 +48,6 @@ export async function GET(request: NextRequest) {
       ],
     })
 
-    console.log(`[Calendar Cron] Found ${properties.length} properties to sync`)
-
     const results = {
       total: properties.length,
       success: 0,
@@ -65,8 +60,6 @@ export async function GET(request: NextRequest) {
       if (!property.icalUrl) continue
 
       try {
-        console.log(`[Calendar Cron] Syncing property ${property.id}: ${property.title}`)
-        
         const result = await fetchAndParseICal(property.icalUrl)
 
         if (result.success) {
@@ -79,14 +72,12 @@ export async function GET(request: NextRequest) {
           })
           
           results.success++
-          console.log(`[Calendar Cron] Success for ${property.id}: ${result.eventCount} events`)
         } else {
           results.failed++
           results.errors.push({
             propertyId: property.id,
             error: result.error || 'Unknown error',
           })
-          console.error(`[Calendar Cron] Failed for ${property.id}: ${result.error}`)
         }
 
         // Small delay to be nice to calendar servers
@@ -99,11 +90,8 @@ export async function GET(request: NextRequest) {
           propertyId: property.id,
           error: errorMessage,
         })
-        console.error(`[Calendar Cron] Error for ${property.id}:`, error)
       }
     }
-
-    console.log(`[Calendar Cron] Completed: ${results.success} success, ${results.failed} failed`)
 
     return NextResponse.json({
       success: true,

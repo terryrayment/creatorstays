@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
@@ -184,15 +184,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const [isAddingBlock, setIsAddingBlock] = useState(false)
   const [isDeletingBlock, setIsDeletingBlock] = useState<string | null>(null)
   const [togglingDays, setTogglingDays] = useState<Set<string>>(new Set())
-  
-  // DEBUG: Track last clicked day info
-  const [debugClickedDay, setDebugClickedDay] = useState<{ 
-    ymd: string
-    isBlockedByIcal: boolean
-    isBlockedByManual: boolean
-    manualBlockId: string | null
-    actionTaken: 'POST' | 'DELETE' | 'NOOP' | null
-  } | null>(null)
 
   useEffect(() => { setIsMounted(true) }, [])
   useEffect(() => { setForm(property); setStep(1); setLastSavedPhotos(property.photos || []) }, [property])
@@ -207,17 +198,10 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   // Manual save via Save Draft / Publish buttons handles everything else
   // Handle photo upload - uploads to Cloudinary
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('[Photos] handlePhotoUpload triggered')
     const files = e.target.files
-    console.log('[Photos] Files selected:', files?.length || 0)
     if (!files || files.length === 0) {
-      console.log('[Photos] No files, returning early')
       return
     }
-    
-    console.log('[Photos] Starting upload of', files.length, 'files')
-    console.log('[Photos] Current form.id:', form.id)
-    console.log('[Photos] Current form.photos:', form.photos?.length || 0)
     
     setIsUploading(true)
     const newPhotos: string[] = []
@@ -225,11 +209,9 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     
     // Capture form.id NOW before any async operations
     const propertyId = form.id
-    console.log('[Photos] Captured propertyId:', propertyId)
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      console.log('[Photos] Processing file', i + 1, ':', file.name)
       
       // Convert to base64 first
       const base64 = await new Promise<string>((resolve) => {
@@ -240,7 +222,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       
       try {
         // Upload to Cloudinary via API
-        console.log('[Photos] Uploading to Cloudinary...')
         const res = await fetch('/api/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -252,20 +233,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         
         if (res.ok) {
           const data = await res.json()
-          console.log('[Photos] Upload success:', data.file.url.substring(0, 50) + '...')
           newPhotos.push(data.file.url)
         } else {
-          // Log error but don't use base64 fallback
-          console.error('[Photos] Cloudinary upload failed:', await res.text())
           failedCount.value++
         }
       } catch (err) {
-        console.error('[Photos] Cloudinary upload error:', err)
         failedCount.value++
       }
     }
-    
-    console.log('[Photos] All uploads complete. Success:', newPhotos.length, 'Failed:', failedCount.value)
     
     if (failedCount.value > 0) {
       setToast(`${failedCount.value} photo(s) failed to upload. Please try again.`)
@@ -273,8 +248,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     }
     
     if (newPhotos.length > 0) {
-      console.log('[Photos] Preparing to save', newPhotos.length, 'new photos')
-      
       // Use a ref to track what we're saving
       let allPhotos: string[] = []
       let heroImage: string = ''
@@ -283,7 +256,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       setForm(prev => {
         allPhotos = [...(prev.photos || []), ...newPhotos]
         heroImage = prev.heroImageUrl || newPhotos[0]
-        console.log('[Photos] State updated - total photos:', allPhotos.length)
         return {
           ...prev,
           photos: allPhotos,
@@ -293,10 +265,8 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
       
       // IMMEDIATELY save to database
       // Use propertyId captured at start of function
-      console.log('[Photos] About to save. propertyId:', propertyId)
       if (propertyId) {
         try {
-          console.log('[Photos] Saving', allPhotos.length, 'photos for property', propertyId)
           const saveRes = await fetch('/api/properties', { 
             method: 'POST', 
             headers: { 'Content-Type': 'application/json' }, 
@@ -308,19 +278,14 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
           })
           if (saveRes.ok) {
             setLastSavedPhotos(allPhotos)
-            console.log('[Photos] SUCCESS - Saved', allPhotos.length, 'photos to database')
           } else {
-            console.error('[Photos] Save failed:', await saveRes.text())
             setToast('Failed to save photos. Please try again.')
             setTimeout(() => setToast(null), 5000)
           }
         } catch (err) {
-          console.error('[Properties] Failed to save photos:', err)
           setToast('Photos uploaded but failed to save. Please click Save.')
           setTimeout(() => setToast(null), 5000)
         }
-      } else {
-        console.log('[Properties] No property ID - photos will be saved when property is created')
       }
     }
     setIsUploading(false)
@@ -466,15 +431,31 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     setForm(prev => ({ ...prev, creatorBrief: `This ${tags} property in ${location} is perfect for creators looking for authentic, visually stunning content opportunities. Ideal for travel, lifestyle, and photography content. The space offers unique angles and natural lighting throughout the day.` }))
   }
 
+  // Refs to prevent duplicate fetches - NOT state to avoid re-renders
+  const fetchedForIdRef = useRef<string | null>(null)
+  const inFlightRef = useRef(false)
+
   // Fetch calendar data (icalBlocks + manualBlocks) when property changes
-  // Wrapped in useCallback to prevent recreation on every render
   const fetchCalendarData = useCallback(async (propertyId: string) => {
     if (!propertyId) return
-    console.log('[DEBUG] fetchCalendarData called for propertyId:', propertyId)
+    
+    // Guard: already fetched for this property
+    if (fetchedForIdRef.current === propertyId) {
+      return
+    }
+    
+    // Guard: request already in flight
+    if (inFlightRef.current) {
+      return
+    }
+    
+    inFlightRef.current = true
+    
     try {
       const res = await fetch(`/api/properties/${propertyId}/calendar`)
       if (res.ok) {
         const data = await res.json()
+        fetchedForIdRef.current = propertyId // Mark as fetched AFTER success
         // Update icalBlocks in form state
         setForm(prev => ({ 
           ...prev, 
@@ -492,21 +473,17 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         }
       }
     } catch (e) {
-      console.error('[Calendar] Fetch error:', e)
+      // Error handled silently
+    } finally {
+      inFlightRef.current = false
     }
   }, []) // No dependencies - setForm and setManualBlocks are stable
 
-  // Fetch calendar data ONCE on mount when property id is available
-  // Using a ref to track if we've already fetched for this property
-  const [calendarFetchedForId, setCalendarFetchedForId] = useState<string | null>(null)
-  
+  // Fetch calendar data ONCE when property id changes
   useEffect(() => {
-    if (form.id && form.id !== calendarFetchedForId) {
-      console.log('[DEBUG] useEffect triggering fetchCalendarData for:', form.id)
-      setCalendarFetchedForId(form.id)
-      fetchCalendarData(form.id)
-    }
-  }, [form.id, calendarFetchedForId, fetchCalendarData])
+    if (!form.id) return
+    fetchCalendarData(form.id)
+  }, [form.id, fetchCalendarData])
 
   const addManualBlock = async () => {
     if (!form.id || !newBlockStart || !newBlockEnd) return
@@ -557,33 +534,9 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         setTimeout(() => setToast(null), 2000)
       }
     } catch (e) {
-      console.error('[ManualBlocks] Delete error:', e)
+      // Error handled silently
     }
     setIsDeletingBlock(null)
-  }
-
-  // ADMIN: Clear all manual blocks for this property (for testing)
-  const [isClearingAllBlocks, setIsClearingAllBlocks] = useState(false)
-  const clearAllManualBlocks = async () => {
-    if (!form.id || manualBlocks.length === 0) return
-    if (!confirm(`Delete all ${manualBlocks.length} manual blocks for this property?`)) return
-    
-    setIsClearingAllBlocks(true)
-    try {
-      // Delete all blocks in parallel
-      const deletePromises = manualBlocks.map(block => 
-        fetch(`/api/properties/${form.id}/manual-blocks/${block.id}`, { method: 'DELETE' })
-      )
-      await Promise.all(deletePromises)
-      setManualBlocks([])
-      setToast(`Cleared ${manualBlocks.length} manual blocks`)
-      setTimeout(() => setToast(null), 2000)
-    } catch (e) {
-      console.error('[ManualBlocks] Clear all error:', e)
-      setToast('Failed to clear blocks')
-      setTimeout(() => setToast(null), 2000)
-    }
-    setIsClearingAllBlocks(false)
   }
 
   // ==========================================================================
@@ -593,11 +546,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   // User clicked a GREEN day -> wants to BLOCK it
   const handleBlockDay = async (ymd: string): Promise<void> => {
     if (!form.id) return
-    
-    // DEBUG: Set clicked day info and log
-    const debugInfo = { ymd, isBlockedByIcal: false, isBlockedByManual: false, manualBlockId: null, actionTaken: 'POST' as const }
-    setDebugClickedDay(debugInfo)
-    console.log('[DEBUG] handleBlockDay called:', debugInfo)
     
     setTogglingDays(prev => new Set(prev).add(ymd))
     
@@ -624,7 +572,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         setTimeout(() => setToast(null), 2000)
       }
     } catch (e) {
-      console.error('[BlockDay] Error:', e)
       setToast('Failed to block date')
       setTimeout(() => setToast(null), 2000)
     } finally {
@@ -643,17 +590,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
     // Find which days this block covers for the loading state
     const block = manualBlocks.find(b => b.id === manualBlockId)
     
-    // DEBUG: Set clicked day info and log
-    const debugInfo = { 
-      ymd: block?.startDate || 'unknown', 
-      isBlockedByIcal: false, 
-      isBlockedByManual: true,
-      manualBlockId, 
-      actionTaken: 'DELETE' as const 
-    }
-    setDebugClickedDay(debugInfo)
-    console.log('[DEBUG] handleUnblockDay called:', debugInfo, 'block:', block)
-    
     const affectedDays: string[] = []
     if (block) {
       const start = new Date(block.startDate)
@@ -663,8 +599,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         start.setDate(start.getDate() + 1)
       }
     }
-    
-    console.log('[DEBUG handleUnblockDay] affectedDays:', affectedDays)
     
     setTogglingDays(prev => {
       const next = new Set(prev)
@@ -685,7 +619,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         setTimeout(() => setToast(null), 2000)
       }
     } catch (e) {
-      console.error('[UnblockDay] Error:', e)
       setToast('Failed to unblock date')
       setTimeout(() => setToast(null), 2000)
     } finally {
@@ -986,16 +919,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               {/* Manual Blocks Section */}
               {form.id && manualBlocks.length > 0 && (
                 <div className="border-t border-black/10 pt-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[11px] font-bold text-black">Your Manual Blocks ({manualBlocks.length})</p>
-                    <button
-                      onClick={clearAllManualBlocks}
-                      disabled={isClearingAllBlocks}
-                      className="text-[9px] text-red-500 hover:text-red-700 disabled:opacity-50"
-                    >
-                      {isClearingAllBlocks ? 'Clearing...' : 'Clear All (Admin)'}
-                    </button>
-                  </div>
+                  <p className="text-[11px] font-bold text-black mb-2">Your Manual Blocks ({manualBlocks.length})</p>
                   <div className="flex flex-wrap gap-1.5">
                     {manualBlocks.map(block => (
                       <div key={block.id} className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5">
@@ -1041,47 +965,6 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                   onUnblockDay={handleUnblockDay}
                   togglingDays={togglingDays}
                 />
-              </div>
-              
-              {/* DEBUG PANEL - REMOVE BEFORE PRODUCTION */}
-              <div className="mt-4 rounded-lg border-2 border-dashed border-red-300 bg-red-50 p-3 font-mono text-[10px]">
-                <div className="font-bold text-red-600 mb-2">🔧 DEBUG PANEL (remove before production)</div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="font-bold">Data Sources:</div>
-                    <div>iCal blocks: {(form.icalBlocks || []).length}</div>
-                    <div>Manual blocks: {manualBlocks.length}</div>
-                    <div className="mt-2 font-bold">First 5 iCal blocks:</div>
-                    {(form.icalBlocks || []).slice(0, 5).map((b, i) => (
-                      <div key={i} className="text-[9px]">
-                        {b.start} → {b.end} {b.summary && <span className="text-black/50">({b.summary})</span>}
-                      </div>
-                    ))}
-                    {(form.icalBlocks || []).length === 0 && <div className="text-black/50">No iCal blocks</div>}
-                    <div className="mt-2 font-bold">First 5 Manual blocks:</div>
-                    {manualBlocks.slice(0, 5).map((b, i) => (
-                      <div key={i} className="text-[9px]">
-                        [{b.id.slice(0,8)}...] {b.startDate} → {b.endDate}
-                      </div>
-                    ))}
-                    {manualBlocks.length === 0 && <div className="text-black/50">No manual blocks</div>}
-                  </div>
-                  <div>
-                    <div className="font-bold">Last Clicked Day:</div>
-                    {debugClickedDay ? (
-                      <>
-                        <div>ymd: {debugClickedDay.ymd}</div>
-                        <div>isBlockedByIcal: {String(debugClickedDay.isBlockedByIcal)}</div>
-                        <div>isBlockedByManual: {String(debugClickedDay.isBlockedByManual)}</div>
-                        <div>manualBlockId: {debugClickedDay.manualBlockId || 'null'}</div>
-                        <div className="font-bold text-blue-600">actionTaken: {debugClickedDay.actionTaken || 'none'}</div>
-                      </>
-                    ) : (
-                      <div className="text-black/50">Click a day to see info</div>
-                    )}
-                    <div className="mt-2 font-bold">Check console for detailed logs</div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1538,7 +1421,7 @@ export default function HostPropertiesPage() {
         const data = await res.json()
         setIsAgency(data.isAgency || false)
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* error handled silently */ }
   }
 
   const fetchPropertyOwners = async (propertyId: string) => {
@@ -1548,7 +1431,7 @@ export default function HostPropertiesPage() {
         const data = await res.json()
         setPropertyOwners(data.owners || [])
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* error handled silently */ }
   }
 
   const handleInviteOwner = async () => {
@@ -1573,7 +1456,7 @@ export default function HostPropertiesPage() {
         const data = await res.json()
         alert(data.error || 'Failed to invite owner')
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* error handled silently */ }
     finally { setInvitingOwner(false) }
   }
 
@@ -1587,14 +1470,14 @@ export default function HostPropertiesPage() {
         body: JSON.stringify({ ownerId }),
       })
       fetchPropertyOwners(selectedId)
-    } catch (e) { console.error(e) }
+    } catch (e) { /* error handled silently */ }
   }
 
   const fetchProperties = async () => {
     try {
       const res = await fetch('/api/properties')
       if (res.ok) { const data = await res.json(); setProperties(data.properties || []) }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* error handled silently */ }
     finally { setIsLoading(false) }
   }
 
@@ -1614,7 +1497,7 @@ export default function HostPropertiesPage() {
         setSaveSuccess(true)
         setTimeout(() => setSaveSuccess(false), 2000)
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* error handled silently */ }
     finally { setIsSaving(false) }
   }
 
@@ -1628,7 +1511,7 @@ export default function HostPropertiesPage() {
       setEditing(null)
       setShowDeleteModal(false)
     }
-    catch (e) { console.error(e) }
+    catch (e) { /* error handled silently */ }
     finally { setDeleting(false) }
   }
 
@@ -1640,7 +1523,7 @@ export default function HostPropertiesPage() {
         window.location.href = data.checkoutUrl
       }
     } catch (e) {
-      console.error('Failed to start boost:', e)
+      // Error handled silently
     }
   }
 
@@ -1650,7 +1533,7 @@ export default function HostPropertiesPage() {
       await fetch(`/api/properties/${propertyId}/boost`, { method: 'DELETE' })
       await fetchProperties()
     } catch (e) {
-      console.error('Failed to cancel boost:', e)
+      // Error handled silently
     }
   }
 
@@ -1662,7 +1545,7 @@ export default function HostPropertiesPage() {
         window.location.href = data.checkoutUrl
       }
     } catch (e) {
-      console.error('Failed to start upgrade:', e)
+      // Error handled silently
     }
   }
 

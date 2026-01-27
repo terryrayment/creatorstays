@@ -73,31 +73,11 @@ export function CalendarView({
   const dayStateMap = useMemo(() => {
     const map = new Map<string, DayState>()
     
-    // Diagnostic stats
-    let icalDaysProduced = 0
-    let icalMinYmd: string | null = null
-    let icalMaxYmd: string | null = null
-    let manualDaysProduced = 0
-    let manualMinYmd: string | null = null
-    let manualMaxYmd: string | null = null
-    
-    console.log('[DEBUG CalendarView] Building dayStateMap from:', {
-      icalBlocksCount: icalBlocks.length,
-      manualBlocksCount: manualBlocks.length,
-    })
-    console.log('[DEBUG CalendarView] icalBlocks (first 5):', icalBlocks.slice(0, 5))
-    console.log('[DEBUG CalendarView] manualBlocks (first 5):', manualBlocks.slice(0, 5))
-    
     // Process iCal blocks first
     for (const block of icalBlocks) {
       const days = iterateDaysExclusive(block.start, block.end)
-      console.log('[DEBUG CalendarView] iCal block:', block.start, '->', block.end, '| days produced:', days.size)
       const daysArray = Array.from(days)
       for (const ymd of daysArray) {
-        icalDaysProduced++
-        if (!icalMinYmd || ymd < icalMinYmd) icalMinYmd = ymd
-        if (!icalMaxYmd || ymd > icalMaxYmd) icalMaxYmd = ymd
-        
         const existing = map.get(ymd)
         if (existing) {
           existing.isBlockedByIcal = true
@@ -117,13 +97,8 @@ export function CalendarView({
     // Process manual blocks second
     for (const block of manualBlocks) {
       const days = iterateDaysExclusive(block.start, block.end)
-      console.log('[DEBUG CalendarView] Manual block:', block.id.slice(0,8), block.start, '->', block.end, '| days produced:', days.size)
       const daysArray = Array.from(days)
       for (const ymd of daysArray) {
-        manualDaysProduced++
-        if (!manualMinYmd || ymd < manualMinYmd) manualMinYmd = ymd
-        if (!manualMaxYmd || ymd > manualMaxYmd) manualMaxYmd = ymd
-        
         const existing = map.get(ymd)
         if (existing) {
           existing.isBlockedByManual = true
@@ -138,11 +113,6 @@ export function CalendarView({
         }
       }
     }
-    
-    console.log('[DEBUG CalendarView] DIAGNOSTIC STATS:')
-    console.log('  totalDaysMarkedByIcal:', icalDaysProduced, '| range:', icalMinYmd, '->', icalMaxYmd)
-    console.log('  totalDaysMarkedByManual:', manualDaysProduced, '| range:', manualMinYmd, '->', manualMaxYmd)
-    console.log('  totalUniqueBlockedDays:', map.size)
     
     return map
   }, [icalBlocks, manualBlocks])
@@ -330,7 +300,6 @@ function MonthCalendar({
   // ==========================================================================
   const handleDayClick = async (dayCell: DayCell) => {
     if (!dayCell || dayCell.isPast || dayCell.isToggling || !interactive) {
-      console.log('[DEBUG CalendarView] Click IGNORED:', { 
         reason: !dayCell ? 'no dayCell' : dayCell.isPast ? 'isPast' : dayCell.isToggling ? 'isToggling' : 'not interactive',
         ymd: dayCell?.ymd,
       })
@@ -339,16 +308,9 @@ function MonthCalendar({
     
     const { state, ymd } = dayCell
     
-    console.log('[DEBUG CalendarView] ========== DAY CLICKED ==========')
-    console.log('[DEBUG CalendarView] ymd:', ymd)
-    console.log('[DEBUG CalendarView] state:', state)
-    console.log('[DEBUG CalendarView] isBlockedByIcal:', state?.isBlockedByIcal ?? false)
-    console.log('[DEBUG CalendarView] isBlockedByManual:', state?.isBlockedByManual ?? false)
-    console.log('[DEBUG CalendarView] manualBlockId:', state?.manualBlockId ?? null)
     
     // Case 1: Day is available (green) -> User wants to BLOCK it
     if (!state || (!state.isBlockedByIcal && !state.isBlockedByManual)) {
-      console.log('[DEBUG CalendarView] BRANCH: GREEN -> BLOCK (calling onBlockDay)')
       if (onBlockDay) {
         await onBlockDay(ymd)
       }
@@ -357,7 +319,6 @@ function MonthCalendar({
     
     // Case 2: Day has manual block ONLY (amber) -> User wants to UNBLOCK it
     if (state.isBlockedByManual && !state.isBlockedByIcal && state.manualBlockId) {
-      console.log('[DEBUG CalendarView] BRANCH: AMBER -> UNBLOCK (calling onUnblockDay with id:', state.manualBlockId, ')')
       if (onUnblockDay) {
         await onUnblockDay(state.manualBlockId)
       }
@@ -365,7 +326,6 @@ function MonthCalendar({
     }
     
     // Case 3: Day has iCal block (red) -> NO-OP, cannot change Airbnb data
-    console.log('[DEBUG CalendarView] BRANCH: RED -> NOOP (iCal blocked, cannot change)')
     // Do nothing - the UI already shows this isn't clickable
   }
 
