@@ -173,7 +173,19 @@ function MonthCalendar({
   const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate()
   const firstDayOfWeek = new Date(month.getFullYear(), month.getMonth(), 1).getDay()
   
-  const days = []
+  type DayInfo = {
+    day: number
+    ymd: string
+    isBlocked: boolean
+    blockingPeriods: BlockedPeriod[]
+    isToday: boolean
+    isPast: boolean
+    hasManualBlock: boolean
+    hasIcalBlock: boolean
+    isToggling: boolean
+  } | null
+  
+  const days: DayInfo[] = []
   
   // Add empty cells for days before the 1st
   for (let i = 0; i < firstDayOfWeek; i++) {
