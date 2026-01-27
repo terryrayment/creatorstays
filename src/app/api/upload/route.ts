@@ -10,9 +10,11 @@ export const dynamic = 'force-dynamic'
 
 // POST /api/upload - Upload a file to Cloudinary
 export async function POST(request: NextRequest) {
+  console.log('[Upload API] Request received')
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
+      console.log('[Upload API] Unauthorized - no session')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -21,11 +23,13 @@ export async function POST(request: NextRequest) {
 
     // file should be a base64 data URL (data:video/mp4;base64,...)
     if (!file || typeof file !== 'string') {
+      console.log('[Upload API] No file data')
       return NextResponse.json({ error: 'File data required' }, { status: 400 })
     }
 
     // Validate it's a data URL
     if (!file.startsWith('data:')) {
+      console.log('[Upload API] Invalid file format')
       return NextResponse.json({ error: 'Invalid file format. Expected base64 data URL.' }, { status: 400 })
     }
 
@@ -37,16 +41,21 @@ export async function POST(request: NextRequest) {
     const isImage = mimeType.startsWith('image/')
 
     if (!isVideo && !isImage) {
+      console.log('[Upload API] Invalid mime type:', mimeType)
       return NextResponse.json({ 
         error: 'Invalid file type. Only images and videos are allowed.' 
       }, { status: 400 })
     }
+
+    console.log('[Upload API] Uploading to Cloudinary...', { mimeType, collaborationId, fileSize: file.length })
 
     // Upload to Cloudinary
     const result: UploadResult = await uploadToCloudinary(file, {
       folder: `creatorstays/content/${collaborationId || 'general'}`,
       collaborationId,
     })
+
+    console.log('[Upload API] Success! URL:', result.url)
 
     return NextResponse.json({
       success: true,
