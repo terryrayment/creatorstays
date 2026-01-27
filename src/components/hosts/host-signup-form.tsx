@@ -12,7 +12,13 @@ function normalizeUrl(url: string): string {
   if (!/^https?:\/\//i.test(normalized)) {
     normalized = 'https://' + normalized
   }
-  return normalized
+  // Strip query params for cleaner storage
+  try {
+    const urlObj = new URL(normalized)
+    return `${urlObj.origin}${urlObj.pathname}`
+  } catch {
+    return normalized
+  }
 }
 
 function isValidAirbnbUrl(url: string): boolean {
@@ -222,12 +228,11 @@ export function HostSignupForm() {
         </div>
 
         <div>
-          <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Airbnb Listing URL *</label>
+          <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-black">Airbnb Listing URL (optional)</label>
           <div className="flex gap-2">
             <input
-              required
               type="text"
-              placeholder="airbnb.com/rooms/..."
+              placeholder="airbnb.com/rooms/... (you can add this later)"
               value={form.listingUrl}
               onChange={e => setForm({ ...form, listingUrl: e.target.value })}
               onBlur={handleListingUrlBlur}
