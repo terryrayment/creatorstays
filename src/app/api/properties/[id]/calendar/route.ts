@@ -164,14 +164,18 @@ export async function PUT(
     }
 
     // Update the iCal URL
-    await prisma.property.update({
-      where: { id: property.id },
-      data: {
-        icalUrl: icalUrl || null,
-        // Clear blocked dates if URL is removed
-        ...(icalUrl ? {} : { blockedDates: null, lastCalendarSync: null }),
-      },
-    })
+    if (icalUrl) {
+      // URL provided - just update the URL, sync will happen below
+      await prisma.property.update({
+        where: { id: property.id },
+        data: {
+          icalUrl: icalUrl,
+        },
+      })
+    } else {
+      // URL removed - clear everything
+      await prisma.$executeRaw`UPDATE "properties" SET "icalUrl" = NULL, "blockedDates" = NULL, "lastCalendarSync" = NULL WHERE "id" = ${property.id}`
+    }
 
     // If new URL provided, sync immediately
     if (icalUrl) {
