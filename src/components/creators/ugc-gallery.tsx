@@ -348,7 +348,7 @@ export function UGCGalleryManager() {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-wider text-black">Portfolio</h2>
-          <p className="mt-0.5 text-[10px] text-black/60">Hosts can see this portfolio on your public profile.</p>
+          <p className="mt-0.5 text-[10px] text-black/60">Hosts will see this when reviewing your profile.</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}

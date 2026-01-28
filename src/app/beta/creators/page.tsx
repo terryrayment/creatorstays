@@ -141,7 +141,7 @@ export default function CreatorBetaPage() {
               <div className="rounded-lg border-2 border-black/10 bg-black/5 p-4">
                 <p className="font-bold text-black">Who Reaches Out?</p>
                 <p className="mt-1">
-                  Hosts initiate most outreach based on your public profile. 
+                  Hosts initiate collaborations by sending you offers directly. 
                   You can also pitch hosts selectively if you see a property you'd love to feature.
                 </p>
               </div>

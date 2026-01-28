@@ -362,7 +362,7 @@ function OldCreatorOnboardingPage() {
                     className={`${inputClass} rounded-l-none`}
                   />
                 </div>
-                <p className="mt-1 text-xs text-black/50">This will be your public profile URL</p>
+                <p className="mt-1 text-xs text-black/50">This will be your profile URL</p>
               </div>
 
               <div>

@@ -126,6 +126,7 @@ model CreatorProfile {
   // Status
   isVerified        Boolean  @default(false)
   isActive          Boolean  @default(true)
+  isPublic          Boolean  @default(false)  // Whether profile appears in public discovery (beta: always false)
   profileComplete   Int      @default(0) // Percentage 0-100
   
   // Beta access - tracks how creator was onboarded

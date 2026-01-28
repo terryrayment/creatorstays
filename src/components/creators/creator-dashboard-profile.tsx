@@ -789,9 +789,9 @@ export function CreatorDashboardProfile() {
         <div className="fixed left-0 right-0 top-14 z-40 border-b-2 border-black bg-[#FFD84A] px-4 py-3">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="text-xl"></span>
+              <span className="text-xl">📋</span>
               <div>
-                <p className="text-sm font-bold text-black">Complete your profile to get discovered by hosts!</p>
+                <p className="text-sm font-bold text-black">Complete your profile to receive collaboration offers</p>
                 <p className="text-xs text-black/70">Your profile is {profileComplete}% complete</p>
               </div>
             </div>
@@ -1199,7 +1199,7 @@ export function CreatorDashboardProfile() {
                       setEditProfileOpen(true)
                     }}>Edit Profile</Button>
                     <Button size="sm" variant="outline" className="w-full text-xs border-2 border-black text-black hover:bg-black/5" asChild>
-                      <Link href={`/creators/${profile.handle}`}>View Public</Link>
+                      <Link href={`/creators/${profile.handle}`}>View Profile</Link>
                     </Button>
                   </div>
                 </div>

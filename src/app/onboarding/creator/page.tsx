@@ -53,7 +53,7 @@ const TRAVEL_RADIUS = [
 
 function ProgressBar({ step, totalSteps }: { step: number; totalSteps: number }) {
   const progress = (step / totalSteps) * 100
-  const stepNames = ["About You", "Platforms & Niche", "What You Offer", "Launch"]
+  const stepNames = ["About You", "Platforms & Niche", "What You Offer", "Review"]
   
   return (
     <div className="mb-8">
@@ -342,7 +342,7 @@ export default function CreatorOnboardingPage() {
             <div className="mb-8 text-center">
               <StepIcon icon="user" />
               <h1 className="font-heading text-3xl tracking-tight text-black">Let's build your profile</h1>
-              <p className="mt-2 text-sm text-black/60">This is how hosts will discover you</p>
+              <p className="mt-2 text-sm text-black/60">This info helps hosts understand who you are</p>
             </div>
 
             <div className="space-y-6">
@@ -609,13 +609,13 @@ export default function CreatorOnboardingPage() {
           </div>
         )}
 
-        {/* STEP 4: Review & Launch */}
+        {/* STEP 4: Review & Complete */}
         {step === 4 && (
           <div>
             <div className="mb-8 text-center">
               <StepIcon icon="check" />
-              <h1 className="font-heading text-3xl tracking-tight text-black">You're ready to launch!</h1>
-              <p className="mt-2 text-sm text-black/60">Review your profile and go live</p>
+              <h1 className="font-heading text-3xl tracking-tight text-black">You're almost done!</h1>
+              <p className="mt-2 text-sm text-black/60">Review your profile and complete setup</p>
             </div>
 
             <div className="space-y-6">
@@ -683,9 +683,14 @@ export default function CreatorOnboardingPage() {
                 </div>
               </div>
 
-              <p className="text-center text-xs text-black/50">
-                Your profile will be visible to hosts looking for creators
-              </p>
+              <div className="rounded-xl border-2 border-dashed border-black/20 bg-black/5 p-4 text-center">
+                <p className="text-xs text-black/60">
+                  Hosts will see this info when they send you collaboration offers.
+                </p>
+                <p className="mt-1 text-[10px] text-black/40">
+                  Creator discovery is rolling out in phases during beta.
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -708,7 +713,7 @@ export default function CreatorOnboardingPage() {
               disabled={saving}
               className="rounded-full border-2 border-black bg-[#28D17C] px-8 py-2.5 text-xs font-bold uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
             >
-              {saving ? "Launching..." : "Launch Profile"}
+              {saving ? "Saving..." : "Complete Setup"}
             </button>
           )}
         </div>

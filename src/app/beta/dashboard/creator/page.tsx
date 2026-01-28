@@ -122,27 +122,28 @@ export default function CreatorDashboardPage() {
 
   return (
     <div className="dashboard">
-      {/* Welcome Modal */}
+      {/* Welcome Modal - Beta appropriate copy */}
       {showWelcome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
-            <span className="mb-4 inline-block text-6xl">🎬</span>
-            <h2 className="font-heading text-2xl tracking-tight text-black">Your profile is live!</h2>
-            <p className="mt-2 text-sm text-black/60">
-              Hosts can now discover you and send collaboration offers.
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-black bg-[#28D17C]">
+              <svg className="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <h2 className="font-heading text-2xl tracking-tight text-black">Your profile is ready</h2>
+            <p className="mt-2 text-sm text-black/70">
+              You're set up for the CreatorStays beta. When hosts invite you to collaborate, you'll see offers here.
             </p>
-            <div className="mt-6 space-y-3">
-              <Link
-                href="/creators"
-                className="block rounded-full border-2 border-black bg-[#FF7A00] px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
-              >
-                See Your Public Profile →
-              </Link>
+            <p className="mt-3 text-xs text-black/50">
+              Creator discovery is rolling out in phases during beta.
+            </p>
+            <div className="mt-6">
               <button
                 onClick={() => setShowWelcome(false)}
-                className="text-sm font-medium text-black/60 hover:text-black"
+                className="w-full rounded-full border-[3px] border-black bg-black px-6 py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
               >
-                Explore my dashboard
+                Go to Dashboard
               </button>
             </div>
           </div>
