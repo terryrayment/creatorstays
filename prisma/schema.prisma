@@ -95,16 +95,35 @@ model CreatorProfile {
   // Empty array = available on all platforms (default behavior)
   interestedVerticals  String[]  @default([]) // ["STR", "SPA", "FITNESS"]
   
-  // Social platforms
+  // Social platforms - self-reported handles
   instagramHandle   String?
   instagramUrl      String?
-  instagramFollowers Int?
   tiktokHandle      String?
   tiktokUrl         String?
-  tiktokFollowers   Int?
   youtubeHandle     String?
   youtubeUrl        String?
   youtubeSubscribers Int?
+  
+  // Instagram OAuth - verified connection
+  instagramConnected      Boolean   @default(false)
+  instagramAccountId      String?   // IG user ID from API
+  instagramAccessToken    String?   // Encrypted access token
+  instagramFollowers      Int?      // Verified follower count
+  instagramLastSyncAt     DateTime? // Last successful sync
+  instagramTokenExpiresAt DateTime? // When token expires
+  
+  // TikTok OAuth - verified connection
+  tiktokConnected         Boolean   @default(false)
+  tiktokOpenId            String?   // TikTok open_id
+  tiktokAccessToken       String?   // Encrypted access token
+  tiktokRefreshToken      String?   // For token refresh
+  tiktokFollowers         Int?      // Verified follower count
+  tiktokLastSyncAt        DateTime? // Last successful sync
+  tiktokTokenExpiresAt    DateTime? // When token expires
+  
+  // Manual refresh rate limiting
+  instagramLastManualRefresh DateTime?
+  tiktokLastManualRefresh    DateTime?
   
   // Stats (auto-synced later)
   totalFollowers    Int?
