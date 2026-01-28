@@ -72,7 +72,7 @@ function ProgressBar({ step, totalSteps }: { step: number; totalSteps: number })
         ))}
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-black/10">
-        <div className="h-full rounded-full bg-[#D7B6FF] transition-all duration-500" style={{ width: `${progress}%` }} />
+        <div className="h-full rounded-full bg-[#FF7A00] transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
     </div>
   )
@@ -87,7 +87,7 @@ function StepIcon({ icon }: { icon: 'user' | 'share' | 'package' | 'check' }) {
   }
   
   return (
-    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-black bg-[#D7B6FF]">
+    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-black bg-[#FF7A00]">
       <svg className="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
         {icons[icon]}
       </svg>
@@ -512,7 +512,7 @@ export default function CreatorOnboardingPage() {
                         }
                       }}
                       className={`rounded-full border-2 border-black px-4 py-2 text-xs font-bold transition-all ${
-                        data.niches.includes(niche.value) ? "bg-[#D7B6FF]" : "bg-white hover:bg-black/5"
+                        data.niches.includes(niche.value) ? "bg-[#FF7A00]" : "bg-white hover:bg-black/5"
                       }`}
                     >
                       {niche.label}
@@ -621,7 +621,7 @@ export default function CreatorOnboardingPage() {
             <div className="space-y-6">
               {/* Profile Preview */}
               <div className="overflow-hidden rounded-xl border-2 border-black bg-white">
-                <div className="bg-gradient-to-r from-[#D7B6FF] to-[#4AA3FF] p-6">
+                <div className="bg-gradient-to-r from-[#FF7A00] to-[#4AA3FF] p-6">
                   <div className="flex items-center gap-4">
                     <div className="h-20 w-20 overflow-hidden rounded-full border-[3px] border-black bg-white">
                       {data.avatarUrl ? (
@@ -663,7 +663,7 @@ export default function CreatorOnboardingPage() {
 
                   <div className="flex flex-wrap gap-1">
                     {data.niches.map(n => (
-                      <span key={n} className="rounded-full bg-[#D7B6FF]/30 px-2 py-0.5 text-xs font-medium text-black">
+                      <span key={n} className="rounded-full border-2 border-[#FF7A00] bg-[#FF7A00] px-2 py-0.5 text-xs font-bold text-black">
                         {NICHES.find(x => x.value === n)?.label}
                       </span>
                     ))}

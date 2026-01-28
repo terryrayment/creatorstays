@@ -59,7 +59,7 @@ export default function ReferralJoinPage() {
             A creator friend invited you to join CreatorStays — the marketplace connecting content creators with amazing stays.
           </p>
 
-          <div className="my-6 rounded-xl border-2 border-[#D7B6FF] bg-[#D7B6FF]/10 p-4">
+          <div className="my-6 rounded-xl border-2 border-black bg-[#FF7A00] p-4">
             <p className="text-xs font-bold uppercase tracking-wider text-black/60">Referral Code</p>
             <p className="mt-1 font-mono text-2xl font-bold text-black">{code?.toUpperCase()}</p>
           </div>
@@ -67,7 +67,7 @@ export default function ReferralJoinPage() {
           <div className="space-y-4">
             <button
               onClick={handleSignUp}
-              className="w-full rounded-full border-2 border-black bg-[#D7B6FF] py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+              className="w-full rounded-full border-2 border-black bg-[#FF7A00] py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
             >
               Sign Up with Google
             </button>

@@ -60,7 +60,7 @@ function StatCard({
     yellow: "bg-[#FFD84A]",
     green: "bg-[#28D17C]",
     blue: "bg-[#4AA3FF]",
-    purple: "bg-[#D7B6FF]",
+    purple: "bg-[#FF7A00]",
   }
 
   const content = (

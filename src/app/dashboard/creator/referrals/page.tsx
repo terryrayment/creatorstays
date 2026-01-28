@@ -113,7 +113,7 @@ export default function CreatorReferralPage() {
             <p className="text-3xl font-bold text-black">{stats?.pendingReferrals || 0}</p>
             <p className="text-xs text-black/60">Pending</p>
           </div>
-          <div className="rounded-xl border-2 border-black bg-[#D7B6FF]/20 p-4">
+          <div className="rounded-xl border-2 border-black bg-[#FF7A00] p-4">
             <p className="text-3xl font-bold text-black">${((stats?.totalEarnings || 0) / 100).toFixed(0)}</p>
             <p className="text-xs text-black/60">Total Earned</p>
           </div>
@@ -186,7 +186,7 @@ export default function CreatorReferralPage() {
         </div>
 
         {/* How it works */}
-        <div className="rounded-xl border-2 border-black bg-[#D7B6FF]/10 p-6 mb-8">
+        <div className="rounded-xl border-2 border-black bg-[#FF7A00] p-6 mb-8">
           <h2 className="mb-4 text-lg font-bold text-black">How it works</h2>
           <div className="grid gap-4 sm:grid-cols-3">
             {[

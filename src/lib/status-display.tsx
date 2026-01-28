@@ -205,7 +205,7 @@ export function getCollaborationStatusDisplay(
       creator: {
         label: "Awaiting Approval",
         description: "Your content is being reviewed by the host.",
-        color: "bg-[#D7B6FF]",
+        color: "bg-[#FF7A00]",
         textColor: "text-black",
         actionRequired: false,
       },

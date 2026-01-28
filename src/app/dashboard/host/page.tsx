@@ -589,7 +589,7 @@ export default function HostDashboardPage() {
         </div>
       )}
       
-      <BetaHeader isAgency={isAgency} />
+      {/* Header is now handled by layout */}
       <ActionRequiredBanner />
       {showOnboardingBanner && (
         <OnboardingBanner onDismiss={() => setShowOnboardingBanner(false)} />

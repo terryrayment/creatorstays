@@ -130,7 +130,7 @@ function StatusBadge({ status }: { status: string }) {
     completed: "bg-[#28D17C]",
     active: "bg-[#4AA3FF]",
     "pending-agreement": "bg-[#FFD84A]",
-    "content-submitted": "bg-[#D7B6FF]",
+    "content-submitted": "bg-[#FF7A00]",
     paid: "bg-[#28D17C]",
   }
   return (
@@ -437,7 +437,7 @@ export default function AdminDashboardPage() {
               <StatCard label="Creators" value={stats.overview.totalCreators} color="bg-[#4AA3FF]" />
               <StatCard label="Hosts" value={stats.overview.totalHosts} color="bg-[#FFD84A]" />
               <StatCard label="Properties" value={stats.overview.totalProperties} color="bg-[#28D17C]" />
-              <StatCard label="Payment Volume" value={formatCurrency(stats.overview.paymentVolume)} color="bg-[#D7B6FF]" />
+              <StatCard label="Payment Volume" value={formatCurrency(stats.overview.paymentVolume)} color="bg-[#FF7A00]" />
             </div>
 
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -632,7 +632,9 @@ export default function AdminDashboardPage() {
               )}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-black">Host</label>
+                  <label className="mb-1 block text-xs font-bold text-black">
+                    Host <span className="font-normal text-black/50">({hosts.length} loaded)</span>
+                  </label>
                   <input
                     type="text"
                     placeholder="Search hosts..."
@@ -648,14 +650,22 @@ export default function AdminDashboardPage() {
                   >
                     <option value="">Select host...</option>
                     {hosts
-                      .filter(h => !hostSearch || h.displayName?.toLowerCase().includes(hostSearch.toLowerCase()) || h.contactEmail?.toLowerCase().includes(hostSearch.toLowerCase()))
+                      .filter(h => {
+                        if (!hostSearch) return true
+                        const search = hostSearch.toLowerCase()
+                        const name = (h.displayName || '').toLowerCase()
+                        const email = (h.contactEmail || '').toLowerCase()
+                        return name.includes(search) || email.includes(search)
+                      })
                       .map(h => (
-                        <option key={h.id} value={h.id}>{h.displayName} ({h.contactEmail})</option>
+                        <option key={h.id} value={h.id}>{h.displayName || 'No name'} ({h.contactEmail || 'No email'})</option>
                       ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-black">Creator</label>
+                  <label className="mb-1 block text-xs font-bold text-black">
+                    Creator <span className="font-normal text-black/50">({creators.length} loaded)</span>
+                  </label>
                   <select
                     value={newMessage.creatorId}
                     onChange={e => setNewMessage({ ...newMessage, creatorId: e.target.value })}
@@ -664,7 +674,7 @@ export default function AdminDashboardPage() {
                   >
                     <option value="">Select creator...</option>
                     {creators.map(c => (
-                      <option key={c.id} value={c.id}>{c.displayName} (@{c.handle})</option>
+                      <option key={c.id} value={c.id}>{c.displayName || 'No name'} (@{c.handle || 'no-handle'})</option>
                     ))}
                   </select>
                 </div>
@@ -797,7 +807,7 @@ export default function AdminDashboardPage() {
                   <StatCard label="Total Paid Hosts" value={financials.subscriptions.totalPaidHosts} color="bg-[#28D17C]" />
                   <StatCard label="Paid Memberships" value={financials.subscriptions.paidMemberships} subValue="@ $199" color="bg-white" />
                   <StatCard label="Free (Promo)" value={financials.subscriptions.freeMemberships} color="bg-[#FFD84A]" />
-                  <StatCard label="Membership Revenue" value={`$${financials.subscriptions.membershipRevenue.toLocaleString()}`} color="bg-[#D7B6FF]" />
+                  <StatCard label="Membership Revenue" value={`$${financials.subscriptions.membershipRevenue.toLocaleString()}`} color="bg-[#FF7A00]" />
                 </div>
 
                 {/* Deal Stats */}

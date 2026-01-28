@@ -339,7 +339,7 @@ export default function WaitlistPage() {
         </div>
 
         {/* Footer Marquee */}
-        <div className="mt-2 overflow-hidden rounded-2xl border-[3px] border-black bg-[#D7B6FF] py-2">
+        <div className="mt-2 overflow-hidden rounded-2xl border-[3px] border-black bg-[#FF7A00] py-2">
           <div className="marquee-track flex whitespace-nowrap">
             {[...Array(10)].map((_, i) => (
               <span key={i} className="mx-4 font-heading text-[1.75rem] tracking-[-0.02em] text-black sm:text-[2.5rem]">

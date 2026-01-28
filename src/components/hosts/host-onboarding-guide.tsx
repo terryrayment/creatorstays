@@ -90,7 +90,7 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
             
             <div className="rounded-xl border-2 border-black bg-white p-4">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#D7B6FF]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#FF7A00]">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -102,7 +102,7 @@ export function HostOnboardingGuide({ onComplete }: { onComplete?: () => void })
                     Creator makes content about your area (things to do, hidden gems, local tips) 
                     and mentions your property as where they stayed.
                   </p>
-                  <p className="mt-2 text-xs text-[#D7B6FF] font-bold">Best for: Properties in popular destinations</p>
+                  <p className="mt-2 text-xs text-[#FF7A00] font-bold">Best for: Properties in popular destinations</p>
                 </div>
               </div>
             </div>

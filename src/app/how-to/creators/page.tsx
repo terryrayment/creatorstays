@@ -152,7 +152,7 @@ export default function HowToCreatorsPage() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-8 rounded-2xl border-[3px] border-black bg-[#D7B6FF] p-5">
+        <div className="mt-8 rounded-2xl border-[3px] border-black bg-[#FF7A00] p-5">
           <h3 className="font-heading text-[1.25rem] text-black" style={{ fontWeight: 900 }}>
             READY TO EARN?
           </h3>

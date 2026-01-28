@@ -202,7 +202,7 @@ export function CreatorPublicProfile({ creator }: { creator: CreatorProfile }) {
               <p className="text-2xl font-black text-black">{creator.pastCollabs.length}</p>
               <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Collabs</p>
             </div>
-            <div className="rounded-xl border-2 border-black bg-[#D7B6FF] p-4 text-center">
+            <div className="rounded-xl border-2 border-black bg-[#FF7A00] p-4 text-center">
               <p className="text-lg font-black text-black">{formatRate(creator.dealPreferences.baseRate)}</p>
               <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Base Rate</p>
             </div>

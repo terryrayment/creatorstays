@@ -4,7 +4,7 @@ import AdminGate from '@/components/admin-gate';
 import { DashboardHeader } from '@/components/navigation/dashboard-header';
 import { usePathname } from 'next/navigation';
 
-export default function DashboardLayout({
+export default function BetaDashboardLayout({
   children,
 }: {
   children: React.ReactNode;

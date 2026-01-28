@@ -9,8 +9,7 @@ const CARD_COLORS = {
   yellow: "#FFD84A",
   blue: "#4AA3FF", 
   green: "#28D17C",
-  purple: "#D7B6FF",
-  orange: "#FF5A1F",
+  orange: "#FF7A00",
   white: "#FFFFFF",
 } as const
 
@@ -25,20 +24,20 @@ function getCardColors(): { hero: [CardColor, CardColor]; cta: [CardColor, CardC
   // Row 2 (How It Works): white - skipped for color variety calc
   
   // Row 3 (CTA): 2 cards side by side - must differ from hero at same positions
-  // Left card was yellow in hero, so use green/purple/orange
-  // Right card was blue in hero, so use yellow/green/purple
-  const ctaLeftOptions: CardColor[] = ["green", "purple", "orange"]
-  const ctaRightOptions: CardColor[] = ["yellow", "green", "purple"]
+  // Left card was yellow in hero, so use green/orange
+  // Right card was blue in hero, so use yellow/green/orange
+  const ctaLeftOptions: CardColor[] = ["green", "orange"]
+  const ctaRightOptions: CardColor[] = ["yellow", "green", "orange"]
   
   // Pick based on a rotation - use date-based seed for variety across days
-  const seed = new Date().getDate() % 3
+  const seed = new Date().getDate() % 2
   const ctaColors: [CardColor, CardColor] = [
     ctaLeftOptions[seed],
     ctaRightOptions[(seed + 1) % ctaRightOptions.length]
   ]
   
   // Footer: avoid whatever color is most prominent in CTA row
-  const footerOptions: CardColor[] = ["green", "purple", "orange"]
+  const footerOptions: CardColor[] = ["green", "orange"]
   const footerColor: CardColor = footerOptions.find(
     c => c !== ctaColors[0] && c !== ctaColors[1]
   ) ?? "green"
@@ -168,7 +167,7 @@ function HowItWorksSection() {
   return (
     <section className="bg-black px-3 py-2 lg:px-4">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-2 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="grid gap-2 lg:grid-cols-[1fr_auto] lg:items-stretch">
           {/* How It Works block */}
           <div className="block-hover rounded-2xl border-[3px] border-black bg-white p-4">
             <p className="text-[9px] font-black uppercase tracking-wider text-black">
@@ -194,12 +193,17 @@ function HowItWorksSection() {
             </div>
           </div>
 
-          {/* Visual block */}
-          <ImageBlock 
-            src={pageImages[0]} 
-            className="hidden lg:block w-[140px]" 
-            aspectRatio="aspect-square"
-          />
+          {/* Visual block - matches height of left panel */}
+          <div className="hidden lg:block w-[140px] h-full">
+            <div className="relative h-full w-full overflow-hidden rounded-2xl border-[3px] border-black">
+              <Image 
+                src={pageImages[0]} 
+                alt="" 
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -617,7 +617,7 @@ export default function HelpPage() {
           </Link>
           <Link 
             href="/how-to/creators"
-            className="block-hover flex items-center justify-between rounded-xl border-[3px] border-black bg-[#D7B6FF] p-4 transition-transform duration-200"
+            className="block-hover flex items-center justify-between rounded-xl border-[3px] border-black bg-[#FF7A00] p-4 transition-transform duration-200"
           >
             <span className="text-[12px] font-black uppercase tracking-wider text-black">
               How To: Creators

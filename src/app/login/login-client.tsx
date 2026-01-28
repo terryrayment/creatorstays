@@ -158,7 +158,7 @@ export default function LoginClient() {
           </Link>
           <Link 
             href="/waitlist"
-            className="block-hover rounded-xl border-[3px] border-black bg-[#D7B6FF] p-4 text-center transition-transform duration-200"
+            className="block-hover rounded-xl border-[3px] border-black bg-[#FF7A00] p-4 text-center transition-transform duration-200"
           >
             <p className="text-[10px] font-black uppercase tracking-wider text-black">Creator?</p>
             <p className="mt-1 text-[12px] font-bold text-black">Join waitlist →</p>

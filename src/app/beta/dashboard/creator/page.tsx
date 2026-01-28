@@ -78,7 +78,7 @@ export default function CreatorDashboardPage() {
             <div className="mt-6 space-y-3">
               <Link
                 href="/creators"
-                className="block rounded-full border-2 border-black bg-[#D7B6FF] px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
+                className="block rounded-full border-2 border-black bg-[#FF7A00] px-6 py-3 text-sm font-bold text-black transition-transform hover:-translate-y-0.5"
               >
                 See Your Public Profile →
               </Link>

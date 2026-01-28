@@ -235,7 +235,7 @@ export default function UploadContentPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Top bar */}
-      <div className="border-b-2 border-black bg-[#D7B6FF]">
+      <div className="border-b-2 border-black bg-[#FF7A00]">
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
             <span className="rounded-full border-2 border-black bg-white px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-black">
@@ -322,15 +322,15 @@ export default function UploadContentPage() {
               onDrop={handleDrop}
               className={`mt-4 relative rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
                 dragActive 
-                  ? "border-[#4AA3FF] bg-[#4AA3FF]/10" 
+                  ? "border-[#4AA3FF] bg-[#4AA3FF]" 
                   : uploading
-                    ? "border-[#D7B6FF] bg-[#D7B6FF]/10"
+                    ? "border-[#FF7A00] bg-[#FF7A00]"
                     : "border-black/30 hover:border-black"
               }`}
             >
               {uploading ? (
                 <>
-                  <div className="h-10 w-10 mx-auto animate-spin rounded-full border-3 border-[#D7B6FF] border-t-black" />
+                  <div className="h-10 w-10 mx-auto animate-spin rounded-full border-3 border-white border-t-black" />
                   <p className="mt-3 font-bold text-black">Uploading to cloud...</p>
                   <p className="mt-1 text-xs text-black/60">{uploadProgress}</p>
                 </>

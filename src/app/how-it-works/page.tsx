@@ -32,7 +32,7 @@ const steps = [
     title: "SEND",
     subtitle: "OFFERS",
     content: "Set your base pay per deliverable. Optionally add traffic bonuses when tracked links perform. We suggest open dates from your calendar.",
-    color: "#D7B6FF",
+    color: "#FF7A00",
   },
   {
     num: "04",

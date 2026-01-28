@@ -296,7 +296,7 @@ function OnboardingContent() {
           <button
             onClick={() => handleSelectRole("creator")}
             disabled={loading !== null}
-            className="block-hover rounded-2xl border-[3px] border-black bg-[#D7B6FF] p-6 text-left transition-transform duration-200 hover:-translate-y-1 disabled:opacity-50"
+            className="block-hover rounded-2xl border-[3px] border-black bg-[#FF7A00] p-6 text-left transition-transform duration-200 hover:-translate-y-1 disabled:opacity-50"
           >
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border-[2px] border-black bg-white">
               <svg className="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
