@@ -164,6 +164,7 @@ function ChipSelector({ options, selected, onChange, label }: { options: string[
 function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onStepChange, showBoost, onBoost, isBoosted, onCancelBoost, publishedCount, onUpgrade }: { property: EditingProperty; onSave: (data: EditingProperty) => void; onDelete?: () => void; isSaving: boolean; saveSuccess: boolean; onStepChange?: (step: number) => void; showBoost?: boolean; onBoost?: () => void; isBoosted?: boolean; onCancelBoost?: () => void; publishedCount?: number; onUpgrade?: () => void }) {
   const [form, setForm] = useState<EditingProperty>(property)
   const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [editMode, setEditMode] = useState<'view' | 'details' | 'photos' | 'calendar' | 'brief'>('view')
   const [isImporting, setIsImporting] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
@@ -189,9 +190,15 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   useEffect(() => { 
     setForm(property)
     setLastSavedPhotos(property.photos || [])
-    // NEW properties start at step 1 (Import wizard)
-    // EXISTING properties start at step 2 (Management view - skip Import)
-    setStep(property.isNew ? 1 : 2)
+    // NEW properties start in wizard mode (step 1)
+    // EXISTING properties start in view mode
+    if (property.isNew) {
+      setStep(1)
+      setEditMode('details') // New properties are always in edit mode
+    } else {
+      setStep(2)
+      setEditMode('view') // Existing properties start in view mode
+    }
   }, [property])
   useEffect(() => { 
     onStepChange?.(step)
@@ -732,10 +739,243 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   
   // For existing properties, hide Import tab and relabel
   const isExistingProperty = !property.isNew && form.id
+  
+  // Cancel editing and revert to last saved values
+  const handleCancelEdit = () => {
+    setForm(property)
+    setEditMode('view')
+  }
+  
+  // Save and return to view mode
+  const handleSaveAndView = (asDraft: boolean) => {
+    onSave({ ...form, isDraft: asDraft })
+    setEditMode('view')
+  }
+
+  // VIEW MODE for existing properties
+  if (isExistingProperty && editMode === 'view') {
+    return (
+      <div className="space-y-4">
+        {toast && <div className="mb-4 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">{toast}</div>}
+        
+        {/* Hero Header Card */}
+        <div className="rounded-xl border-2 border-black bg-white p-5">
+          <div className="flex gap-5">
+            {/* Hero Image */}
+            <div className="relative h-32 w-48 shrink-0 overflow-hidden rounded-lg border-2 border-black bg-gray-100">
+              {form.heroImageUrl || (form.photos && form.photos[0]) ? (
+                <img src={form.heroImageUrl || form.photos?.[0]} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center text-2xl text-black/20">🏠</div>
+              )}
+            </div>
+            
+            {/* Property Info */}
+            <div className="flex-1">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-black">{form.title || 'Untitled Property'}</h2>
+                  <p className="text-sm text-black/60">{form.cityRegion || 'No location set'}</p>
+                </div>
+                <span className={`rounded-full border-2 border-black px-3 py-1 text-xs font-bold ${form.isDraft ? 'bg-amber-100' : 'bg-emerald-100'}`}>
+                  {form.isDraft ? 'Draft' : 'Published'}
+                </span>
+              </div>
+              
+              {/* Quick Stats */}
+              <div className="mt-3 flex flex-wrap gap-3 text-xs text-black/70">
+                {form.guests && <span>{form.guests} guests</span>}
+                {form.beds && <span>• {form.beds} beds</span>}
+                {form.baths && <span>• {form.baths} baths</span>}
+                {form.priceNightlyRange && <span>• {form.priceNightlyRange}/night</span>}
+              </div>
+              
+              {/* Last Synced */}
+              {form.lastCalendarSync && (
+                <p className="mt-2 text-[10px] text-black/50">
+                  Calendar synced {formatDate(form.lastCalendarSync)}
+                </p>
+              )}
+              
+              {/* Action Buttons */}
+              <div className="mt-4 flex gap-2">
+                <button 
+                  onClick={() => setEditMode('details')}
+                  className="rounded-full border-2 border-black bg-black px-4 py-1.5 text-xs font-bold text-white hover:bg-black/80"
+                >
+                  Edit details
+                </button>
+                <button 
+                  onClick={() => setEditMode('photos')}
+                  className="rounded-full border-2 border-black bg-white px-4 py-1.5 text-xs font-bold text-black hover:bg-gray-50"
+                >
+                  Manage photos
+                </button>
+                <button 
+                  onClick={() => setEditMode('calendar')}
+                  className="rounded-full border-2 border-black bg-white px-4 py-1.5 text-xs font-bold text-black hover:bg-gray-50"
+                >
+                  Calendar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Setup Progress Card */}
+        {checklistComplete < checklist.length && (
+          <div className="rounded-xl border-2 border-black bg-[#FFD84A]/20 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-black">Setup Progress</h3>
+                <p className="text-xs text-black/70">{checklistComplete} of {checklist.length} items complete</p>
+              </div>
+              <div className="text-right">
+                <span className="text-2xl font-bold text-black">{Math.round((checklistComplete / checklist.length) * 100)}%</span>
+              </div>
+            </div>
+            <div className="mt-3 h-2 rounded-full bg-black/10">
+              <div 
+                className="h-full rounded-full bg-[#28D17C] transition-all" 
+                style={{ width: `${(checklistComplete / checklist.length) * 100}%` }}
+              />
+            </div>
+            {!canPublish && form.isDraft && (
+              <p className="mt-3 text-xs text-black/60">Complete setup to publish your property.</p>
+            )}
+          </div>
+        )}
+        
+        {/* Details Section (Read-only) */}
+        <div className="rounded-xl border-2 border-black bg-white p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-black">Property Details</h3>
+            <button onClick={() => setEditMode('details')} className="text-xs text-black/60 hover:text-black underline">Edit</button>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div><span className="text-[10px] text-black/50">Title</span><p className="text-sm">{form.title || '—'}</p></div>
+            <div><span className="text-[10px] text-black/50">Location</span><p className="text-sm">{form.cityRegion || '—'}</p></div>
+            <div><span className="text-[10px] text-black/50">Price</span><p className="text-sm">{form.priceNightlyRange || '—'}</p></div>
+            <div><span className="text-[10px] text-black/50">Capacity</span><p className="text-sm">{form.guests ? `${form.guests} guests, ${form.beds || 0} beds, ${form.baths || 0} baths` : '—'}</p></div>
+          </div>
+          
+          {/* Amenities */}
+          {form.amenities && form.amenities.length > 0 && (
+            <div className="mt-4">
+              <span className="text-[10px] text-black/50">Amenities</span>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {form.amenities.map(a => (
+                  <span key={a} className="rounded-full border border-black/20 bg-black/5 px-2 py-0.5 text-[10px]">{a}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Vibe Tags */}
+          {form.vibeTags && form.vibeTags.length > 0 && (
+            <div className="mt-4">
+              <span className="text-[10px] text-black/50">Vibe Tags</span>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {form.vibeTags.map(t => (
+                  <span key={t} className="rounded-full border border-[#FFD84A] bg-[#FFD84A]/20 px-2 py-0.5 text-[10px] font-medium">{t}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Photos Section (Read-only) */}
+        <div className="rounded-xl border-2 border-black bg-white p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-black">Photos ({form.photos?.length || 0})</h3>
+            <button onClick={() => setEditMode('photos')} className="text-xs text-black/60 hover:text-black underline">Manage</button>
+          </div>
+          {form.photos && form.photos.length > 0 ? (
+            <div className="grid grid-cols-4 gap-2">
+              {form.photos.slice(0, 8).map((photo, idx) => (
+                <div key={idx} className="aspect-square overflow-hidden rounded-lg border border-black/10">
+                  <img src={photo} alt="" className="h-full w-full object-cover" />
+                </div>
+              ))}
+              {form.photos.length > 8 && (
+                <div className="flex aspect-square items-center justify-center rounded-lg border border-black/10 bg-black/5">
+                  <span className="text-sm font-bold text-black/50">+{form.photos.length - 8}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-lg border-2 border-dashed border-black/20 p-6 text-center">
+              <p className="text-sm text-black/50">No photos yet</p>
+              <button onClick={() => setEditMode('photos')} className="mt-2 text-xs text-black underline">Add photos</button>
+            </div>
+          )}
+        </div>
+        
+        {/* Brief Section (Read-only) */}
+        <div className="rounded-xl border-2 border-black bg-white p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-black">Creator Brief</h3>
+            <button onClick={() => { setEditMode('brief'); setStep(3) }} className="text-xs text-black/60 hover:text-black underline">Edit</button>
+          </div>
+          {form.creatorBrief ? (
+            <p className="text-sm text-black/80 whitespace-pre-wrap">{form.creatorBrief}</p>
+          ) : (
+            <p className="text-sm text-black/50 italic">No brief written yet. Add one to help creators understand your property.</p>
+          )}
+        </div>
+        
+        {/* Publish/Unpublish Actions */}
+        <div className="flex items-center justify-between rounded-xl border-2 border-black bg-white p-4">
+          <div>
+            <h3 className="font-bold text-black">{form.isDraft ? 'Ready to publish?' : 'Property is live'}</h3>
+            <p className="text-xs text-black/60">
+              {form.isDraft 
+                ? (canPublish ? 'Your property is ready to go live.' : 'Complete setup to publish.')
+                : 'Creators can find and apply to your property.'}
+            </p>
+          </div>
+          {form.isDraft ? (
+            <button 
+              onClick={() => handleSaveAndView(false)}
+              disabled={!canPublish || isSaving}
+              className={`rounded-full border-2 border-black px-5 py-2 text-sm font-bold transition-all ${canPublish ? 'bg-[#28D17C] text-black hover:bg-[#28D17C]/80' : 'bg-black/10 text-black/40 cursor-not-allowed'}`}
+            >
+              {isSaving ? 'Publishing...' : 'Publish'}
+            </button>
+          ) : (
+            <button 
+              onClick={() => handleSaveAndView(true)}
+              disabled={isSaving}
+              className="rounded-full border-2 border-black bg-white px-5 py-2 text-sm font-bold text-black hover:bg-gray-50"
+            >
+              Unpublish
+            </button>
+          )}
+        </div>
+        
+        {/* Delete Action */}
+        {onDelete && (
+          <div className="pt-2">
+            <button onClick={onDelete} className="text-xs text-red-500 hover:underline">Delete property</button>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="rounded-xl border border-black/5 bg-white/60 p-5">
       {toast && <div className="mb-4 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">{toast}</div>}
+      
+      {/* Edit mode header for existing properties */}
+      {isExistingProperty && editMode !== 'view' && (
+        <div className="mb-4 flex items-center justify-between rounded-lg bg-black/5 px-4 py-2">
+          <span className="text-sm font-medium text-black">
+            Editing {editMode === 'details' ? 'Details' : editMode === 'photos' ? 'Photos' : editMode === 'brief' ? 'Creator Brief' : 'Calendar'}
+          </span>
+          <button onClick={handleCancelEdit} className="text-xs text-black/60 hover:text-black">← Back to overview</button>
+        </div>
+      )}
 
       <div className="mb-5 flex gap-1 rounded-lg bg-black/[0.03] p-1">
         {isExistingProperty ? (
@@ -800,7 +1040,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
 
       {step === 2 && (
         <div className="space-y-4">
-          <p className="text-[11px] text-black/50">Verify details match your Airbnb listing.</p>
+          <p className="text-[11px] text-black/50">Property details · Used to match you with creators. Edit anytime.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div><label className="mb-1.5 block text-[11px] font-bold text-black">Title *</label><Input value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Cozy Mountain Cabin" /></div>
             <div>
