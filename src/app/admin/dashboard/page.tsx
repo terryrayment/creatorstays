@@ -156,11 +156,13 @@ export default function AdminDashboardPage() {
   const [hosts, setHosts] = useState<any[]>([])
   const [creators, setCreators] = useState<any[]>([])
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
-  const [newMessage, setNewMessage] = useState({ hostId: "", creatorId: "", message: "", senderType: "host" })
+  const [newMessage, setNewMessage] = useState({ hostId: "", creatorId: "", message: "", senderType: "admin" })
   const [sendingMessage, setSendingMessage] = useState(false)
   const [messageSuccess, setMessageSuccess] = useState("")
   const [deletingUser, setDeletingUser] = useState<string | null>(null)
   const [deleteResult, setDeleteResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [hostSearch, setHostSearch] = useState("")
+  const [conversationSearch, setConversationSearch] = useState("")
 
   // Financials state
   const [financials, setFinancials] = useState<FinancialData | null>(null)
@@ -358,20 +360,45 @@ export default function AdminDashboardPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-black pt-16">
-      {/* Header */}
-      <div className="border-b-2 border-white/20 bg-black px-4 py-6">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div>
-            <h1 className="font-heading text-3xl font-black text-white">ADMIN DASHBOARD</h1>
-            <p className="mt-1 text-sm text-white/60">Platform overview and management</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="rounded-full border-2 border-white/30 px-4 py-2 text-xs font-bold text-white/70 transition-colors hover:border-white hover:text-white"
+    <div className="min-h-screen bg-black">
+      {/* Top Header - matches main navbar style */}
+      <header className="fixed left-0 right-0 top-0 z-50 border-b-2 border-white/20 bg-black">
+        <nav className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 lg:px-6">
+          {/* Left - Logo icon */}
+          <Link 
+            href="/" 
+            className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-white transition-colors hover:bg-white hover:text-black"
           >
-            Logout
-          </button>
+            <span className="text-[13px] font-bold">CS</span>
+          </Link>
+
+          {/* Center - Admin Badge */}
+          <div className="flex items-center gap-2">
+            <span className="rounded-full border-2 border-[#FFD84A] bg-[#FFD84A] px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-black">
+              Admin Panel
+            </span>
+          </div>
+
+          {/* Right - Avatar + Logout */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/50 bg-[#28D17C] text-sm font-bold text-black">
+              A
+            </div>
+            <button
+              onClick={handleLogout}
+              className="rounded-full bg-white px-5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-black transition-all hover:bg-white/90"
+            >
+              Log Out
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Page Title Section */}
+      <div className="border-b-2 border-white/20 bg-black px-4 py-6 pt-20">
+        <div className="mx-auto max-w-7xl">
+          <h1 className="font-heading text-3xl font-black text-white">ADMIN DASHBOARD</h1>
+          <p className="mt-1 text-sm text-white/60">Platform overview and management</p>
         </div>
       </div>
 
@@ -599,22 +626,32 @@ export default function AdminDashboardPage() {
             <div className="rounded-xl border-2 border-black bg-white p-4">
               <h3 className="mb-4 text-sm font-bold text-black">Send Message as Admin</h3>
               {messageSuccess && (
-                <div className="mb-4 rounded-lg border-2 border-[#28D17C] bg-[#28D17C] p-2 text-sm font-bold text-black">
+                <div className="mb-4 rounded-lg border-2 border-black bg-[#28D17C] p-2 text-sm font-bold text-black">
                   {messageSuccess}
                 </div>
               )}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div>
                   <label className="mb-1 block text-xs font-bold text-black">Host</label>
+                  <input
+                    type="text"
+                    placeholder="Search hosts..."
+                    value={hostSearch}
+                    onChange={e => setHostSearch(e.target.value)}
+                    className="mb-2 w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm"
+                  />
                   <select
                     value={newMessage.hostId}
                     onChange={e => setNewMessage({ ...newMessage, hostId: e.target.value })}
                     className="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm"
+                    size={5}
                   >
                     <option value="">Select host...</option>
-                    {hosts.map(h => (
-                      <option key={h.id} value={h.id}>{h.displayName} ({h.contactEmail})</option>
-                    ))}
+                    {hosts
+                      .filter(h => !hostSearch || h.displayName?.toLowerCase().includes(hostSearch.toLowerCase()) || h.contactEmail?.toLowerCase().includes(hostSearch.toLowerCase()))
+                      .map(h => (
+                        <option key={h.id} value={h.id}>{h.displayName} ({h.contactEmail})</option>
+                      ))}
                   </select>
                 </div>
                 <div>
@@ -623,6 +660,7 @@ export default function AdminDashboardPage() {
                     value={newMessage.creatorId}
                     onChange={e => setNewMessage({ ...newMessage, creatorId: e.target.value })}
                     className="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm"
+                    size={7}
                   >
                     <option value="">Select creator...</option>
                     {creators.map(c => (
@@ -637,6 +675,7 @@ export default function AdminDashboardPage() {
                     onChange={e => setNewMessage({ ...newMessage, senderType: e.target.value })}
                     className="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm"
                   >
+                    <option value="admin">Admin</option>
                     <option value="host">Host</option>
                     <option value="creator">Creator</option>
                   </select>
@@ -667,28 +706,46 @@ export default function AdminDashboardPage() {
             {/* Conversation List */}
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="rounded-xl border-2 border-black bg-white p-4">
-                <h3 className="mb-4 text-sm font-bold text-black">All Conversations ({conversations.length})</h3>
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-black">All Conversations ({conversations.length})</h3>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search conversations..."
+                  value={conversationSearch}
+                  onChange={e => setConversationSearch(e.target.value)}
+                  className="mb-3 w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm"
+                />
                 <div className="max-h-[500px] space-y-2 overflow-y-auto">
-                  {conversations.map(conv => (
-                    <button
-                      key={conv.id}
-                      onClick={() => fetchConversation(conv.id)}
-                      className={`w-full rounded-lg border-2 p-3 text-left transition-colors ${
-                        selectedConversation?.id === conv.id ? "border-[#28D17C] bg-[#28D17C]/10" : "border-black/10 hover:border-black"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <p className="font-bold text-black">{conv.hostProfile.displayName}</p>
-                        <span className="text-[10px] text-black/40">{formatDate(conv.lastMessageAt)}</span>
-                      </div>
-                      <p className="text-xs text-black/60">↔ {conv.creatorProfile.displayName} (@{conv.creatorProfile.handle})</p>
-                      {conv.messages[0] && (
-                        <p className="mt-1 truncate text-xs text-black/40">{conv.messages[0].body}</p>
-                      )}
-                    </button>
-                  ))}
+                  {conversations
+                    .filter(conv => !conversationSearch || 
+                      conv.hostProfile.displayName?.toLowerCase().includes(conversationSearch.toLowerCase()) ||
+                      conv.creatorProfile.displayName?.toLowerCase().includes(conversationSearch.toLowerCase()) ||
+                      conv.creatorProfile.handle?.toLowerCase().includes(conversationSearch.toLowerCase())
+                    )
+                    .map(conv => (
+                      <button
+                        key={conv.id}
+                        onClick={() => fetchConversation(conv.id)}
+                        className={`w-full rounded-lg border-2 p-3 text-left transition-colors ${
+                          selectedConversation?.id === conv.id ? "border-[#28D17C] bg-[#28D17C]" : "border-black/20 hover:border-black"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="font-bold text-black">{conv.hostProfile.displayName}</p>
+                          <span className="text-[10px] text-black/60">{formatDate(conv.lastMessageAt)}</span>
+                        </div>
+                        <p className="text-xs text-black/60">↔ {conv.creatorProfile.displayName} (@{conv.creatorProfile.handle})</p>
+                        {conv.messages[0] && (
+                          <p className="mt-1 truncate text-xs text-black/50">{conv.messages[0].body}</p>
+                        )}
+                      </button>
+                    ))}
                   {conversations.length === 0 && (
-                    <p className="text-sm text-black/60">No conversations yet</p>
+                    <div className="rounded-lg border-2 border-dashed border-black/20 p-4 text-center">
+                      <p className="text-sm text-black/60">No conversations yet</p>
+                      <p className="mt-1 text-xs text-black/40">Select a host and creator above to start one</p>
+                    </div>
                   )}
                 </div>
               </div>

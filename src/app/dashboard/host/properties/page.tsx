@@ -501,7 +501,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   if (isExistingProperty && editMode === 'view') {
     return (
       <div className="space-y-4">
-        {toast && <div className="mb-4 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">{toast}</div>}
+        {toast && <div className="mb-4 rounded-lg border-2 border-[#28D17C] bg-[#28D17C] px-4 py-2 text-sm font-bold text-black">{toast}</div>}
         
         {/* Hero Header Card */}
         <div className="rounded-xl border-2 border-black bg-white p-5">
@@ -710,7 +710,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
 
   return (
     <div className="rounded-xl border border-black/5 bg-white/60 p-5">
-      {toast && <div className="mb-4 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">{toast}</div>}
+      {toast && <div className="mb-4 rounded-lg border-2 border-[#28D17C] bg-[#28D17C] px-4 py-2 text-sm font-bold text-black">{toast}</div>}
       
       {/* Edit mode header for existing properties */}
       {isExistingProperty && editMode !== 'view' && (
@@ -952,7 +952,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               </div>
               
               {calendarSyncResult && (
-                <div className={`rounded-lg px-3 py-2 text-xs font-medium ${calendarSyncResult.success ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                <div className={`rounded-lg px-3 py-2 text-xs font-medium ${calendarSyncResult.success ? 'border-2 border-[#28D17C] bg-[#28D17C] text-black' : 'border-2 border-[#FFD84A] bg-[#FFD84A] text-black'}`}>
                   {calendarSyncResult.message}
                 </div>
               )}
@@ -1043,7 +1043,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 border: '3px solid #000',
               }}>
                 {/* Header */}
-                <div className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-black bg-[#4AA3FF] p-4">
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-black bg-black p-4">
                   <div className="flex items-center gap-2">
                     <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.01 9.964 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.01-9.964-7.178z" />
