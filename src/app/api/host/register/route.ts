@@ -203,6 +203,37 @@ export async function POST(request: NextRequest) {
       // Don't fail the registration if email fails - user can still sign in via login page
     }
 
+    // 6. Send admin notification email for new signup
+    const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'hello@creatorstays.com'
+    try {
+      await sendEmail({
+        to: ADMIN_EMAIL,
+        subject: `🎉 New Host Signup: ${fullName}`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #28D17C; padding: 16px 24px; border-radius: 8px 8px 0 0;">
+              <h2 style="color: #000; margin: 0; font-size: 18px;">🎉 New Host Signup!</h2>
+            </div>
+            <div style="background: #fff; padding: 24px; border: 2px solid #000; border-top: none; border-radius: 0 0 8px 8px;">
+              <p style="margin: 0 0 16px 0;"><strong>Name:</strong> ${fullName}</p>
+              <p style="margin: 0 0 16px 0;"><strong>Email:</strong> ${normalizedEmail}</p>
+              <p style="margin: 0 0 16px 0;"><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+              <p style="margin: 0 0 16px 0;"><strong>Company:</strong> ${companyName || 'Not provided'}</p>
+              <p style="margin: 0 0 16px 0;"><strong>Location:</strong> ${cityRegion || 'Not provided'}</p>
+              ${listingUrl ? `<p style="margin: 0 0 16px 0;"><strong>Listing:</strong> <a href="${listingUrl}">${listingUrl}</a></p>` : ''}
+              <p style="margin: 16px 0 0 0; color: #666; font-size: 12px;">
+                Signed up: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
+              </p>
+            </div>
+          </div>
+        `,
+      })
+      console.log('[Host Register] Admin notification sent to', ADMIN_EMAIL)
+    } catch (notifyError) {
+      console.error('[Host Register] Failed to send admin notification:', notifyError)
+      // Don't fail - admin notification is non-critical
+    }
+
     return NextResponse.json({
       success: true,
       message: emailSent 

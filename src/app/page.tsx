@@ -242,7 +242,7 @@ function CTASection() {
           </div>
 
           {/* Video block */}
-          <div className="block-hover relative hidden overflow-hidden rounded-2xl border-[3px] border-black bg-[#FFB6C1] md:block">
+          <div className="block-hover relative hidden overflow-hidden rounded-2xl border-[3px] border-black bg-[#F5F5F0] md:block">
             <video
               autoPlay
               loop
@@ -250,7 +250,7 @@ function CTASection() {
               playsInline
               className="h-full w-full object-cover"
             >
-              <source src="/videos/creator-laptop.mp4" type="video/mp4" />
+              <source src="/videos/map-cluster.mp4" type="video/mp4" />
             </video>
           </div>
 
