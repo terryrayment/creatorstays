@@ -320,13 +320,15 @@ function ReferralSection() {
                   <button
                     onClick={sendInvite}
                     disabled={sending || !inviteEmail}
-                    className={`h-10 rounded-lg border-2 border-black px-4 text-xs font-bold transition-all disabled:opacity-60 ${
+                    className={`h-10 rounded-lg border-2 px-4 text-xs font-bold transition-all ${
                       sent 
-                        ? 'bg-[#28D17C] text-black' 
-                        : 'bg-[#FFD84A] text-black hover:bg-[#FFD84A]'
+                        ? 'border-black bg-[#28D17C] text-black' 
+                        : !inviteEmail
+                          ? 'border-black/40 bg-black/20 text-black cursor-not-allowed'
+                          : 'border-black bg-black text-white hover:bg-gray-800'
                     }`}
                   >
-                    {sending ? '...' : sent ? '✓ Sent!' : 'Invite'}
+                    {sending ? '...' : sent ? '✓ Sent!' : !inviteEmail ? 'Enter email' : 'Invite'}
                   </button>
                 </div>
               </div>
