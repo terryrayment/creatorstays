@@ -84,6 +84,14 @@ export default function WaitlistPage() {
         return
       }
 
+      // Fire GA event
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'waitlist_signup', {
+          event_category: 'conversion',
+          event_label: form.platform || 'unknown'
+        })
+      }
+
       setSubmitted(true)
     } catch (err) {
       setError('Network error. Please try again.')

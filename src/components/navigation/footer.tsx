@@ -21,22 +21,28 @@ export function Footer() {
 
     setStatus("loading")
     try {
-      const res = await fetch("/api/waitlist", {
+      const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           email, 
-          userType: "newsletter",
           source: "footer" 
         }),
       })
       
       const data = await res.json()
       
-      // Treat 409 (already exists) as success
-      if (res.ok || (res.status === 409 && data.alreadyExists)) {
+      // Treat 409 (already exists) or explicit alreadyExists as success
+      if (res.ok || data.alreadyExists) {
         setStatus("success")
         setEmail("")
+        // Fire GA event
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('event', 'newsletter_signup', {
+            event_category: 'engagement',
+            event_label: 'footer'
+          })
+        }
       } else {
         setStatus("error")
       }

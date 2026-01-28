@@ -102,6 +102,14 @@ export function HostSignupForm() {
         return
       }
 
+      // Fire GA event
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'host_signup', {
+          event_category: 'conversion',
+          event_label: 'host-form'
+        })
+      }
+
       setSubmittedEmail(form.email)
       setSubmitted(true)
     } catch (err) {

@@ -2,31 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 /**
- * POST /api/waitlist
- * Creator waitlist signup only
- * - Adds to MailerLite creator waitlist group
+ * POST /api/newsletter
+ * Subscribe to the newsletter
+ * - Adds to MailerLite newsletter group
  * - Stores in database
- * - Sends waitlist confirmation email
+ * - Sends confirmation email
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
-    const {
-      email,
-      name,
-      handle,
-      platform,
-      niche,
-      audienceSize,
-      instagramUrl,
-      tiktokUrl,
-      youtubeUrl,
-      source,
-      referredBy,
-    } = body
+    const { email, name, source = 'footer' } = body
 
-    // Validate required fields
+    // Validate email
     if (!email) {
       return NextResponse.json(
         { error: 'Email is required' },
@@ -34,7 +21,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       return NextResponse.json(
@@ -45,45 +31,40 @@ export async function POST(request: NextRequest) {
 
     const normalizedEmail = email.toLowerCase().trim()
 
-    // Check if email already exists
+    // Check if already subscribed
     const existing = await prisma.waitlistEntry.findFirst({
       where: { 
         email: normalizedEmail,
-        userType: 'creator'
+        userType: 'newsletter'
       },
     })
 
     if (existing) {
-      return NextResponse.json(
-        { error: 'Email already on waitlist', alreadyExists: true },
-        { status: 409 }
-      )
+      // Already subscribed - return success (don't reveal this to user)
+      console.log('[Newsletter] Already subscribed:', normalizedEmail)
+      return NextResponse.json({
+        success: true,
+        message: 'Thanks for subscribing!',
+        alreadyExists: true,
+      })
     }
 
-    // Create waitlist entry
+    // Create newsletter subscriber record
     const entry = await prisma.waitlistEntry.create({
       data: {
         email: normalizedEmail,
         name: name || null,
-        userType: 'creator',
-        handle: handle || null,
-        platform: platform || null,
-        niche: niche || null,
-        audienceSize: audienceSize || null,
-        instagramUrl: instagramUrl || null,
-        tiktokUrl: tiktokUrl || null,
-        youtubeUrl: youtubeUrl || null,
-        source: source || 'organic',
-        referredBy: referredBy || null,
-        status: 'pending',
+        userType: 'newsletter',
+        source,
+        status: 'active',
       },
     })
 
-    console.log('[Waitlist] Creator added:', entry.id, normalizedEmail)
+    console.log('[Newsletter] New subscriber:', entry.id, normalizedEmail)
 
-    // Sync to MailerLite creator waitlist group
+    // Sync to MailerLite newsletter group
     const mailerliteApiKey = process.env.MAILERLITE_API_KEY
-    const mailerliteGroupId = process.env.MAILERLITE_GROUP_ID_CREATORS
+    const mailerliteGroupId = process.env.MAILERLITE_GROUP_ID_NEWSLETTER
 
     if (mailerliteApiKey && mailerliteGroupId) {
       try {
@@ -97,10 +78,6 @@ export async function POST(request: NextRequest) {
             email: normalizedEmail,
             fields: {
               name: name || '',
-              handle: handle || '',
-              platform: platform || '',
-              niche: niche || '',
-              audience_size: audienceSize || '',
             },
             groups: [mailerliteGroupId],
           }),
@@ -108,16 +85,17 @@ export async function POST(request: NextRequest) {
 
         if (!mlResponse.ok) {
           const error = await mlResponse.text()
-          console.error('[Waitlist] MailerLite sync failed:', error)
+          console.error('[Newsletter] MailerLite sync failed:', error)
         } else {
-          console.log('[Waitlist] Synced to MailerLite:', normalizedEmail)
+          console.log('[Newsletter] Synced to MailerLite:', normalizedEmail)
         }
       } catch (mlError) {
-        console.error('[Waitlist] MailerLite error:', mlError)
+        console.error('[Newsletter] MailerLite error:', mlError)
+        // Don't fail the request
       }
     }
 
-    // Send waitlist confirmation email via Resend
+    // Send confirmation email via Resend
     const resendApiKey = process.env.RESEND_API_KEY
     if (resendApiKey) {
       try {
@@ -130,7 +108,7 @@ export async function POST(request: NextRequest) {
           body: JSON.stringify({
             from: 'CreatorStays <hello@creatorstays.com>',
             to: normalizedEmail,
-            subject: 'You\'re on the CreatorStays Waitlist',
+            subject: 'Welcome to the CreatorStays Newsletter',
             html: `
 <!DOCTYPE html>
 <html>
@@ -160,20 +138,17 @@ export async function POST(request: NextRequest) {
           <!-- Main Card -->
           <tr>
             <td>
-              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #4AA3FF; border-radius: 12px; border: 3px solid #000000;">
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #FFD84A; border-radius: 12px; border: 3px solid #000000;">
                 <tr>
                   <td style="padding: 32px 24px;">
                     <p style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #000000;">
-                      You're On The List
+                      You're In
                     </p>
                     <p style="margin: 0 0 20px 0; font-family: Arial, Helvetica, sans-serif; font-size: 24px; font-weight: bold; line-height: 1.2; color: #000000;">
-                      Welcome to the CreatorStays waitlist${name ? `, ${name}` : ''}
-                    </p>
-                    <p style="margin: 0 0 16px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.5; color: #000000;">
-                      We're building the best platform for creators to partner with vacation rental hosts. You'll be among the first to know when we open for creators.
+                      Thanks for subscribing to the CreatorStays newsletter
                     </p>
                     <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.5; color: #000000;">
-                      In the meantime, make sure your social profiles are up to date - hosts will be able to browse creators by niche, location, and audience size.
+                      You'll receive creator marketing tips, platform updates, and industry insights. We keep it short and useful - no spam, ever.
                     </p>
                   </td>
                 </tr>
@@ -185,7 +160,7 @@ export async function POST(request: NextRequest) {
           <tr>
             <td align="center" style="padding: 24px 16px;">
               <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #666666;">
-                CreatorStays - Get paid to post from beautiful places
+                CreatorStays - Connecting hosts with creators
               </p>
             </td>
           </tr>
@@ -201,81 +176,32 @@ export async function POST(request: NextRequest) {
         })
 
         if (emailResponse.ok) {
-          console.log('[Waitlist] Confirmation email sent:', normalizedEmail)
+          console.log('[Newsletter] Confirmation email sent:', normalizedEmail)
         } else {
           const error = await emailResponse.text()
-          console.error('[Waitlist] Email send failed:', error)
+          console.error('[Newsletter] Email send failed:', error)
         }
       } catch (emailError) {
-        console.error('[Waitlist] Email error:', emailError)
+        console.error('[Newsletter] Email error:', emailError)
+        // Don't fail the request
       }
     }
 
     // Log analytics event
-    console.log('[Analytics] waitlist_signup', {
-      entryId: entry.id,
-      platform: platform || 'unknown',
+    console.log('[Analytics] newsletter_signup', {
+      subscriberId: entry.id,
+      source,
       timestamp: new Date().toISOString()
     })
 
     return NextResponse.json({
       success: true,
-      message: 'Successfully joined the waitlist!',
-      entry: {
-        id: entry.id,
-        email: entry.email,
-        userType: entry.userType,
-        createdAt: entry.createdAt,
-      },
+      message: 'Thanks for subscribing!',
     })
   } catch (error) {
-    console.error('[Waitlist] Error:', error)
+    console.error('[Newsletter] Error:', error)
     return NextResponse.json(
-      { error: 'Failed to join waitlist' },
-      { status: 500 }
-    )
-  }
-}
-
-/**
- * GET /api/waitlist
- * Get waitlist stats (admin only)
- */
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const userType = searchParams.get('userType')
-
-    const where = userType ? { userType } : { userType: 'creator' }
-
-    const [total, recent] = await Promise.all([
-      prisma.waitlistEntry.count({ where }),
-      prisma.waitlistEntry.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          userType: true,
-          platform: true,
-          niche: true,
-          audienceSize: true,
-          status: true,
-          createdAt: true,
-        },
-      }),
-    ])
-
-    return NextResponse.json({
-      stats: { total },
-      recent,
-    })
-  } catch (error) {
-    console.error('[Waitlist] Stats error:', error)
-    return NextResponse.json(
-      { error: 'Failed to get waitlist stats' },
+      { error: 'Failed to subscribe' },
       { status: 500 }
     )
   }
