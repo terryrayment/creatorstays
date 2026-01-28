@@ -151,19 +151,46 @@ export async function POST(request: NextRequest) {
         to: normalizedEmail,
         subject: 'Welcome to CreatorStays! 🏠',
         html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #000;">Welcome to CreatorStays, ${fullName}!</h1>
-            <p>Your host account has been created. Click the button below to sign in and complete your setup:</p>
-            <div style="margin: 30px 0;">
-              <a href="${magicLink}" style="background: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block;">
-                Complete Your Setup →
-              </a>
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #000; padding: 0;">
+            <!-- Header with yellow accent -->
+            <div style="background: #FFD84A; padding: 24px 32px; border-bottom: 3px solid #000;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #000; background: #000; display: flex; align-items: center; justify-content: center;">
+                  <span style="color: #fff; font-weight: bold; font-size: 14px;">CS</span>
+                </div>
+                <span style="font-size: 18px; font-weight: 900; color: #000; letter-spacing: -0.5px;">CREATORSTAYS</span>
+              </div>
             </div>
-            <p style="color: #666; font-size: 14px;">This link expires in 24 hours.</p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-            <p style="color: #666; font-size: 12px;">
-              If you didn't create this account, you can safely ignore this email.
-            </p>
+            
+            <!-- Main content -->
+            <div style="background: #fff; padding: 40px 32px; border-left: 3px solid #000; border-right: 3px solid #000;">
+              <h1 style="color: #000; font-size: 28px; font-weight: 900; margin: 0 0 16px 0; letter-spacing: -0.5px;">
+                Welcome to CreatorStays, ${fullName}!
+              </h1>
+              <p style="color: #000; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                Your host account has been created. Click the button below to sign in and complete your setup:
+              </p>
+              
+              <div style="margin: 32px 0;">
+                <a href="${magicLink}" style="background: #000; color: #fff; padding: 16px 32px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 14px; display: inline-block; border: 3px solid #000;">
+                  Complete Your Setup →
+                </a>
+              </div>
+              
+              <p style="color: #666; font-size: 14px; margin: 24px 0 0 0;">
+                This link expires in 24 hours.
+              </p>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background: #000; padding: 24px 32px; border-top: 3px solid #FFD84A;">
+              <p style="color: #999; font-size: 12px; margin: 0; line-height: 1.5;">
+                If you didn't create this account, you can safely ignore this email.
+              </p>
+              <p style="color: #666; font-size: 11px; margin: 16px 0 0 0;">
+                © ${new Date().getFullYear()} CreatorStays. All rights reserved.
+              </p>
+            </div>
           </div>
         `,
       })

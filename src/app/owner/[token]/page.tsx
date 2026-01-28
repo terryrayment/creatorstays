@@ -277,18 +277,18 @@ export default function OwnerPortalPage() {
 
 function StatusBadge({ status }: { status: string }) {
   const config: Record<string, { bg: string; text: string; label: string }> = {
-    pending: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Pending" },
-    active: { bg: "bg-blue-100", text: "text-blue-800", label: "Active" },
-    "content-submitted": { bg: "bg-purple-100", text: "text-purple-800", label: "Content Submitted" },
-    approved: { bg: "bg-green-100", text: "text-green-800", label: "Approved" },
-    completed: { bg: "bg-green-100", text: "text-green-800", label: "Completed" },
-    cancelled: { bg: "bg-gray-100", text: "text-gray-800", label: "Cancelled" },
+    pending: { bg: "bg-[#FFD84A]", text: "text-black", label: "Pending" },
+    active: { bg: "bg-[#4AA3FF]", text: "text-black", label: "Active" },
+    "content-submitted": { bg: "bg-[#FF7A00]", text: "text-black", label: "Content Submitted" },
+    approved: { bg: "bg-[#28D17C]", text: "text-black", label: "Approved" },
+    completed: { bg: "bg-[#28D17C]", text: "text-black", label: "Completed" },
+    cancelled: { bg: "bg-gray-300", text: "text-black", label: "Cancelled" },
   }
   
-  const { bg, text, label } = config[status] || { bg: "bg-gray-100", text: "text-gray-800", label: status }
+  const { bg, text, label } = config[status] || { bg: "bg-gray-300", text: "text-black", label: status }
   
   return (
-    <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${bg} ${text}`}>
+    <span className={`rounded-full border-2 border-black px-2 py-1 text-[10px] font-bold uppercase ${bg} ${text}`}>
       {label}
     </span>
   )

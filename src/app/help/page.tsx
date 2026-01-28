@@ -654,12 +654,14 @@ export default function HelpPage() {
         <div className="mt-6">
           <div className="block-hover overflow-hidden rounded-2xl border-[3px] border-black">
             <video 
-              src="/images/help-support.mp4" 
+              src="/videos/help-support.mp4" 
               autoPlay 
               loop 
               muted 
               playsInline
+              controls
               className="w-full h-auto"
+              style={{ maxHeight: '400px', objectFit: 'cover' }}
             />
           </div>
         </div>

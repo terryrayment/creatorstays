@@ -249,14 +249,14 @@ export default function TeamManagementPage() {
           {teamMembers.map(member => (
             <div key={member.id} className="flex items-center justify-between rounded-xl border-2 border-black bg-white p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-gradient-to-br from-blue-100 to-purple-100 text-sm font-bold text-blue-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-[#4AA3FF] text-sm font-bold text-black">
                   {member.name[0].toUpperCase()}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-bold text-black">{member.name}</p>
                     {member.status === "pending" && (
-                      <span className="rounded-full border border-black/20 bg-yellow-100 px-2 py-0.5 text-[10px] font-medium text-yellow-700">
+                      <span className="rounded-full border-2 border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">
                         Pending
                       </span>
                     )}

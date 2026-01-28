@@ -1458,73 +1458,7 @@ export default function HostPropertiesPage() {
 
   return (
     <div className="dashboard min-h-screen bg-[#FAFAFA] flex flex-col">
-      {/* Header */}
-      <div className="bg-white">
-        <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
-            <Link href="/dashboard/host" className="text-sm font-bold text-black hover:opacity-70">Host Dashboard</Link>
-            {isAgency && (
-              <span className="rounded-full border-2 border-black bg-[#28D17C] px-2.5 py-0.5 text-[10px] font-bold text-black">AGENCY</span>
-            )}
-          </div>
-          <Link 
-            href="/" 
-            className="text-xs font-bold text-black hover:opacity-70"
-          >
-            ← Back to site
-          </Link>
-        </div>
-      </div>
-      
-      {/* Navigation Strip */}
-      <div className="border-b-2 border-black bg-[#FFD84A]">
-        <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:px-6">
-          <div className="flex flex-wrap gap-2">
-            <Link 
-              href="/dashboard/host/properties"
-              className="rounded-full border-2 border-black bg-black px-3 py-1 text-[10px] font-bold text-white"
-            >
-              My Properties
-            </Link>
-            <Link 
-              href="/beta/dashboard/collaborations"
-              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-            >
-              Collaborations
-              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
-            </Link>
-            <Link 
-              href="/dashboard/host/analytics"
-              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-            >
-              Analytics
-              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
-            </Link>
-            <Link 
-              href="/dashboard/host/search-creators"
-              className="rounded-full border-2 border-black bg-white/60 px-3 py-1 text-[10px] font-bold text-black/60 transition-transform hover:-translate-y-0.5"
-            >
-              Find Creators
-              <span className="ml-1 text-[8px] uppercase opacity-60">(Preview)</span>
-            </Link>
-            <Link 
-              href="/dashboard/host/settings"
-              className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-            >
-              Settings
-            </Link>
-            {isAgency && (
-              <Link 
-                href="/dashboard/host/team"
-                className="rounded-full border-2 border-black bg-white px-3 py-1 text-[10px] font-bold text-black transition-transform hover:-translate-y-0.5"
-              >
-                Manage Team
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Header and navigation now handled by layout - DashboardHeader component */}
       
       {/* Main Content */}
       <div className="flex-1 py-6">

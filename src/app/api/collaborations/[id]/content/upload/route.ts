@@ -76,9 +76,9 @@ export async function POST(
         subject: `Content Ready for Review - ${collaboration.property.title}`,
         html: `
           <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #D7B6FF; padding: 24px; border-radius: 12px; border: 2px solid #000;">
-              <h1 style="margin: 0 0 8px 0; font-size: 24px;">📦 Content Ready for Review</h1>
-              <p style="margin: 0; color: #333;">
+            <div style="background: #FF7A00; padding: 24px; border-radius: 12px; border: 2px solid #000;">
+              <h1 style="margin: 0 0 8px 0; font-size: 24px; color: #000;">📦 Content Ready for Review</h1>
+              <p style="margin: 0; color: #000;">
                 ${collaboration.creator.displayName} has uploaded content for your approval.
               </p>
             </div>

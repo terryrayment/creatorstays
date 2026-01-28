@@ -145,11 +145,11 @@ function ImageSection() {
   return (
     <section className="bg-black px-3 py-2 lg:px-4">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-2 md:grid-cols-2">
+        <div className="grid gap-2 md:grid-cols-2 lg:items-stretch">
           {/* Video block - Creator Support */}
-          <div className="block-hover relative overflow-hidden rounded-2xl border-[3px] border-black bg-[#F5F5F0] aspect-[16/9]">
+          <div className="block-hover relative overflow-hidden rounded-2xl border-[3px] border-black bg-[#F5F5F0]" style={{ minHeight: '400px' }}>
             <video
-              src="/images/creator-support.mp4"
+              src="/videos/help-support.mp4"
               autoPlay
               loop
               muted
@@ -157,15 +157,12 @@ function ImageSection() {
               className="h-full w-full object-cover transition-transform duration-200 hover:scale-[1.03]"
             />
           </div>
-          {/* Video block - Map Cluster */}
-          <div className="block-hover relative overflow-hidden rounded-2xl border-[3px] border-black bg-[#F5F5F0] aspect-[16/9]">
-            <video
-              src="/images/map-cluster.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="h-full w-full object-cover transition-transform duration-200 hover:scale-[1.03]"
+          {/* Image block - Phone Tripod */}
+          <div className="block-hover relative overflow-hidden rounded-2xl border-[3px] border-black bg-[#E8E8E8]" style={{ minHeight: '400px' }}>
+            <img
+              src="/images/phone-tripod.png"
+              alt="Phone on tripod for content creation"
+              className="h-full w-full object-contain p-8 transition-transform duration-200 hover:scale-[1.03]"
             />
           </div>
         </div>
