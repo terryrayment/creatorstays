@@ -157,19 +157,19 @@ export async function POST(request: NextRequest) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; background-color: #000000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #000000;">
+<body style="margin: 0; padding: 0; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #ffffff;">
     <tr>
       <td align="center" style="padding: 24px 16px;">
-        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; background-color: #000000; border-radius: 16px; overflow: hidden;">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; background-color: #ffffff;">
           
           <!-- Logo Row -->
           <tr>
-            <td align="center" style="padding: 32px 24px 24px 24px; background-color: #000000;">
+            <td align="center" style="padding: 32px 24px 24px 24px;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ffffff; text-align: center; vertical-align: middle;">
-                    <span style="color: #ffffff; font-weight: 700; font-size: 12px; letter-spacing: -0.5px;">CS</span>
+                  <td style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #000000; text-align: center; vertical-align: middle;">
+                    <span style="color: #000000; font-weight: 700; font-size: 12px; letter-spacing: -0.5px;">CS</span>
                   </td>
                 </tr>
               </table>
@@ -183,21 +183,21 @@ export async function POST(request: NextRequest) {
                 <tr>
                   <td style="padding: 32px 24px;">
                     <!-- Welcome Text -->
-                    <h1 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #000000;">
+                    <p style="margin: 0 0 8px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #000000;">
                       Welcome to CreatorStays
-                    </h1>
-                    <p style="margin: 0 0 24px 0; font-size: 28px; font-weight: 900; line-height: 1.1; letter-spacing: -1px; color: #000000;">
+                    </p>
+                    <p style="margin: 0 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 900; line-height: 1.1; letter-spacing: -1px; color: #000000;">
                       ${fullName}
                     </p>
-                    <p style="margin: 0 0 28px 0; font-size: 15px; line-height: 1.5; color: #000000;">
+                    <p style="margin: 0 0 28px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; color: #000000;">
                       Your host account is ready. Complete your setup to start connecting with creators.
                     </p>
                     
-                    <!-- CTA Button -->
+                    <!-- CTA Button - GREEN -->
                     <table role="presentation" cellpadding="0" cellspacing="0">
                       <tr>
-                        <td style="background-color: #000000; border-radius: 50px;">
-                          <a href="${magicLink}" style="display: inline-block; padding: 14px 28px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #ffffff; text-decoration: none;">
+                        <td style="background-color: #28D17C; border-radius: 50px; border: 2px solid #000000;">
+                          <a href="${magicLink}" style="display: inline-block; padding: 14px 28px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #000000; text-decoration: none;">
                             Complete Setup →
                           </a>
                         </td>
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
                     </table>
                     
                     <!-- Expiry Note -->
-                    <p style="margin: 24px 0 0 0; font-size: 12px; color: #000000; opacity: 0.6;">
+                    <p style="margin: 24px 0 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #000000; opacity: 0.6;">
                       Link expires in 24 hours
                     </p>
                   </td>
@@ -217,10 +217,10 @@ export async function POST(request: NextRequest) {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding: 16px 24px 32px 24px;">
-              <p style="margin: 0 0 8px 0; font-size: 11px; color: #666666;">
+              <p style="margin: 0 0 8px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; color: #999999;">
                 Didn't create this account? Ignore this email.
               </p>
-              <p style="margin: 0; font-size: 10px; color: #444444;">
+              <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 10px; color: #999999;">
                 © ${new Date().getFullYear()} CreatorStays
               </p>
             </td>
