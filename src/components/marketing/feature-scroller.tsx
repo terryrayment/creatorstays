@@ -95,14 +95,14 @@ export function FeatureScroller() {
   }, [])
 
   return (
-    <section className="bg-black py-6 overflow-hidden">
+    <section className="bg-black py-2 overflow-hidden">
       {/* Scroll container with extra padding for hover scale */}
       <div
         ref={scrollRef}
-        className="scrollbar-hide flex gap-2 overflow-x-hidden px-4"
+        className="scrollbar-hide flex gap-2 overflow-x-hidden px-3 lg:px-4"
         style={{ 
-          paddingTop: "20px",
-          paddingBottom: "20px",
+          paddingTop: "12px",
+          paddingBottom: "12px",
         }}
       >
         {tripleSteps.map((step, index) => (

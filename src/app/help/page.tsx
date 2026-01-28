@@ -659,7 +659,6 @@ export default function HelpPage() {
               loop 
               muted 
               playsInline
-              controls
               className="w-full h-auto"
               style={{ maxHeight: '400px', objectFit: 'cover' }}
             />

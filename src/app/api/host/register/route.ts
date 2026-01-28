@@ -151,47 +151,87 @@ export async function POST(request: NextRequest) {
         to: normalizedEmail,
         subject: 'Welcome to CreatorStays! 🏠',
         html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #000; padding: 0;">
-            <!-- Header with yellow accent -->
-            <div style="background: #FFD84A; padding: 24px 32px; border-bottom: 3px solid #000;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #000; background: #000; display: flex; align-items: center; justify-content: center;">
-                  <span style="color: #fff; font-weight: bold; font-size: 14px;">CS</span>
-                </div>
-                <span style="font-size: 18px; font-weight: 900; color: #000; letter-spacing: -0.5px;">CREATORSTAYS</span>
-              </div>
-            </div>
-            
-            <!-- Main content -->
-            <div style="background: #fff; padding: 40px 32px; border-left: 3px solid #000; border-right: 3px solid #000;">
-              <h1 style="color: #000; font-size: 28px; font-weight: 900; margin: 0 0 16px 0; letter-spacing: -0.5px;">
-                Welcome to CreatorStays, ${fullName}!
-              </h1>
-              <p style="color: #000; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-                Your host account has been created. Click the button below to sign in and complete your setup:
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #000000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #000000;">
+    <tr>
+      <td align="center" style="padding: 24px 16px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; background-color: #000000; border-radius: 16px; overflow: hidden;">
+          
+          <!-- Logo Row -->
+          <tr>
+            <td align="center" style="padding: 32px 24px 24px 24px; background-color: #000000;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ffffff; text-align: center; vertical-align: middle;">
+                    <span style="color: #ffffff; font-weight: 700; font-size: 12px; letter-spacing: -0.5px;">CS</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Main Content Card -->
+          <tr>
+            <td style="padding: 0 16px 16px 16px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #FFD84A; border-radius: 12px; border: 3px solid #000000;">
+                <tr>
+                  <td style="padding: 32px 24px;">
+                    <!-- Welcome Text -->
+                    <h1 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #000000;">
+                      Welcome to CreatorStays
+                    </h1>
+                    <p style="margin: 0 0 24px 0; font-size: 28px; font-weight: 900; line-height: 1.1; letter-spacing: -1px; color: #000000;">
+                      ${fullName}
+                    </p>
+                    <p style="margin: 0 0 28px 0; font-size: 15px; line-height: 1.5; color: #000000;">
+                      Your host account is ready. Complete your setup to start connecting with creators.
+                    </p>
+                    
+                    <!-- CTA Button -->
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="background-color: #000000; border-radius: 50px;">
+                          <a href="${magicLink}" style="display: inline-block; padding: 14px 28px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #ffffff; text-decoration: none;">
+                            Complete Setup →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- Expiry Note -->
+                    <p style="margin: 24px 0 0 0; font-size: 12px; color: #000000; opacity: 0.6;">
+                      Link expires in 24 hours
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding: 16px 24px 32px 24px;">
+              <p style="margin: 0 0 8px 0; font-size: 11px; color: #666666;">
+                Didn't create this account? Ignore this email.
               </p>
-              
-              <div style="margin: 32px 0;">
-                <a href="${magicLink}" style="background: #000; color: #fff; padding: 16px 32px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 14px; display: inline-block; border: 3px solid #000;">
-                  Complete Your Setup →
-                </a>
-              </div>
-              
-              <p style="color: #666; font-size: 14px; margin: 24px 0 0 0;">
-                This link expires in 24 hours.
+              <p style="margin: 0; font-size: 10px; color: #444444;">
+                © ${new Date().getFullYear()} CreatorStays
               </p>
-            </div>
-            
-            <!-- Footer -->
-            <div style="background: #000; padding: 24px 32px; border-top: 3px solid #FFD84A;">
-              <p style="color: #999; font-size: 12px; margin: 0; line-height: 1.5;">
-                If you didn't create this account, you can safely ignore this email.
-              </p>
-              <p style="color: #666; font-size: 11px; margin: 16px 0 0 0;">
-                © ${new Date().getFullYear()} CreatorStays. All rights reserved.
-              </p>
-            </div>
-          </div>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
         `,
       })
       emailSent = emailResult.success

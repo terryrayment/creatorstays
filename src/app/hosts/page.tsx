@@ -146,14 +146,11 @@ function ImageSection() {
     <section className="bg-black px-3 py-2 lg:px-4">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-2 md:grid-cols-2 lg:items-stretch">
-          {/* Video block - Creator Support */}
-          <div className="block-hover relative overflow-hidden rounded-2xl border-[3px] border-black bg-[#F5F5F0]" style={{ minHeight: '400px' }}>
-            <video
-              src="/videos/help-support.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
+          {/* Image block - House with WiFi */}
+          <div className="block-hover relative overflow-hidden rounded-2xl border-[3px] border-black bg-[#E8CFC0]" style={{ minHeight: '400px' }}>
+            <img
+              src="/images/house-wifi.png"
+              alt="Modern house with wifi connectivity"
               className="h-full w-full object-cover transition-transform duration-200 hover:scale-[1.03]"
             />
           </div>
