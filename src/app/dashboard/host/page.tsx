@@ -589,12 +589,12 @@ export default function HostDashboardPage() {
         </div>
       )}
       
-      {/* Header is now handled by layout */}
+      {/* Header is now handled by layout - removed redundant BetaHeader and NextStepStrip */}
       <ActionRequiredBanner />
       {showOnboardingBanner && (
         <OnboardingBanner onDismiss={() => setShowOnboardingBanner(false)} />
       )}
-      <NextStepStrip isAgency={isAgency} />
+      {/* NextStepStrip removed - navigation is in the black dashboard header */}
       <StatsSection />
       <SetupChecklist />
       <ReferralSection />

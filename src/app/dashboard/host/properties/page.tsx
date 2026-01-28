@@ -543,7 +543,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               )}
               
               {/* Action Buttons */}
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <button 
                   onClick={() => setEditMode('details')}
                   className="rounded-full border-2 border-black bg-black px-4 py-1.5 text-xs font-bold text-white hover:bg-black/80"
@@ -562,6 +562,15 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 >
                   Calendar
                 </button>
+                {/* Delete Draft button - only for draft properties */}
+                {form.isDraft && onDelete && (
+                  <button 
+                    onClick={onDelete}
+                    className="rounded-full border-2 border-red-400 bg-white px-4 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50"
+                  >
+                    Delete draft
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -1660,9 +1669,14 @@ export default function HostPropertiesPage() {
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl border-[3px] border-black bg-white p-6">
-            <h3 className="text-xl font-black text-black">Delete Property?</h3>
+            <h3 className="text-xl font-black text-black">
+              {editing?.isDraft ? 'Delete Draft?' : 'Delete Property?'}
+            </h3>
             <p className="mt-2 text-sm text-black/70">
-              This will permanently remove this property and any associated data. This action cannot be undone.
+              {editing?.isDraft 
+                ? 'This will permanently remove this draft property. This action cannot be undone.'
+                : 'This will permanently remove this property and any associated data including collaborations. This action cannot be undone.'
+              }
             </p>
             <div className="mt-6 flex gap-3">
               <button

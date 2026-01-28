@@ -438,6 +438,11 @@ model Property {
   // Status
   isActive        Boolean  @default(true)
   isDraft         Boolean  @default(true)
+  // TODO: Consider implementing TTL cleanup for stale drafts
+  // Draft properties that remain incomplete for 30+ days could be:
+  // - Auto-deleted by a cron job
+  // - Marked for cleanup and surfaced in admin dashboard
+  // This prevents accumulation of abandoned draft properties.
   
   // Boosted listing (paid promotion)
   isBoosted       Boolean   @default(false)
