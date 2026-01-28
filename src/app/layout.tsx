@@ -6,6 +6,7 @@ import { Navbar } from "@/components/navigation/navbar"
 import { Footer } from "@/components/navigation/footer"
 import { MainContent } from "@/components/navigation/main-content"
 import { AuthProvider } from "@/components/providers/auth-provider"
+import { Analytics } from "@vercel/analytics/next"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -206,6 +207,7 @@ export default function RootLayout({
           <MainContent>{children}</MainContent>
           <Footer />
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   )
