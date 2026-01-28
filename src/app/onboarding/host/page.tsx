@@ -505,7 +505,7 @@ export default function HostOnboardingPage() {
       if (status === "loading") return
       
       if (status === "unauthenticated") {
-        router.push("/login?callbackUrl=/onboarding/host")
+        router.replace("/login?callbackUrl=/onboarding/host")
         return
       }
       
@@ -513,10 +513,27 @@ export default function HostOnboardingPage() {
         const res = await fetch("/api/host/profile")
         if (res.ok) {
           const profile = await res.json()
-          if (profile.onboardingComplete) {
-            router.push("/beta/dashboard/host")
+          
+          // Only redirect to dashboard if BOTH conditions are met
+          // This must match the condition in /beta/dashboard/host/page.tsx
+          if (profile.onboardingComplete && profile.membershipPaid) {
+            if (process.env.NODE_ENV !== 'production') {
+              console.log('[HostOnboarding] Already complete, redirecting to dashboard', {
+                onboardingComplete: profile.onboardingComplete,
+                membershipPaid: profile.membershipPaid,
+              })
+            }
+            router.replace("/beta/dashboard/host")
             return
           }
+          
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('[HostOnboarding] Profile found, continuing onboarding', {
+              onboardingComplete: profile.onboardingComplete,
+              membershipPaid: profile.membershipPaid,
+            })
+          }
+          
           setData(prev => ({
             ...prev,
             displayName: profile.displayName || session?.user?.name || "",

@@ -359,20 +359,52 @@ export default function HostDashboardPage() {
   const [showAgencyWelcome, setShowAgencyWelcome] = useState(false)
   const [isAgency, setIsAgency] = useState(false)
   const [showBetaWelcome, setShowBetaWelcome] = useState(false)
+  const [hasRedirected, setHasRedirected] = useState(false) // Prevent double redirects
 
   useEffect(() => {
     async function checkProfile() {
-      if (status !== "authenticated") return
+      // Don't run while session is loading
+      if (status === "loading") return
       
+      // Don't run if we've already redirected
+      if (hasRedirected) return
+      
+      // If not authenticated, redirect to login
+      if (status === "unauthenticated") {
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('[HostDashboard] Not authenticated, redirecting to login')
+        }
+        setHasRedirected(true)
+        router.replace("/login?callbackUrl=/beta/dashboard/host")
+        return
+      }
+      
+      // status === "authenticated" at this point
       try {
         const res = await fetch("/api/host/profile")
+        
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('[HostDashboard] Profile fetch status:', res.status)
+        }
+        
         if (res.status === 404) {
           // No profile, redirect to onboarding
-          router.push("/onboarding/host")
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('[HostDashboard] No profile found, redirecting to onboarding')
+          }
+          setHasRedirected(true)
+          router.replace("/onboarding/host")
           return
         }
         if (res.ok) {
           const profile = await res.json()
+          
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('[HostDashboard] Profile loaded:', {
+              onboardingComplete: profile.onboardingComplete,
+              membershipPaid: profile.membershipPaid,
+            })
+          }
           
           // Check if agency from profile (database is source of truth)
           // Also check localStorage for testing
@@ -386,8 +418,18 @@ export default function HostDashboardPage() {
           }
           
           // Check if onboarding is complete AND membership is paid
+          // Only redirect if BOTH are false or onboarding is incomplete
+          // If they paid but didn't finish onboarding, send to onboarding
+          // If they finished onboarding but didn't pay, also send to onboarding (payment step)
           if (!profile.onboardingComplete || !profile.membershipPaid) {
-            router.push("/onboarding/host")
+            if (process.env.NODE_ENV !== 'production') {
+              console.log('[HostDashboard] Onboarding incomplete, redirecting', {
+                onboardingComplete: profile.onboardingComplete,
+                membershipPaid: profile.membershipPaid,
+              })
+            }
+            setHasRedirected(true)
+            router.replace("/onboarding/host")
             return
           }
           
@@ -398,7 +440,8 @@ export default function HostDashboardPage() {
           
           // If just completed payment onboarding and haven't seen the guide, redirect to welcome
           if (justCompletedOnboarding && !hasSeenWelcomeGuide) {
-            router.push("/beta/dashboard/host/welcome")
+            setHasRedirected(true)
+            router.replace("/beta/dashboard/host/welcome")
             return
           }
           

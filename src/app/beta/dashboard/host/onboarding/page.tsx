@@ -251,10 +251,17 @@ export default function HostOnboardingPage() {
         const res = await fetch("/api/host/profile")
         if (res.ok) {
           const profile = await res.json()
-          if (profile.onboardingComplete) {
-            router.push("/beta/dashboard/host")
+          
+          // Only redirect to dashboard if BOTH conditions are met
+          // This must match the condition in /beta/dashboard/host/page.tsx
+          if (profile.onboardingComplete && profile.membershipPaid) {
+            if (process.env.NODE_ENV !== 'production') {
+              console.log('[BetaHostOnboarding] Already complete, redirecting to dashboard')
+            }
+            router.replace("/beta/dashboard/host")
             return
           }
+          
           // Pre-fill with existing data
           setData(prev => ({
             ...prev,
@@ -285,7 +292,7 @@ export default function HostOnboardingPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login")
+      router.replace("/login")
     }
   }, [status, router])
 

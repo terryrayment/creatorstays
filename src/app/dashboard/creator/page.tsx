@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { CreatorDashboardProfile } from "@/components/creators/creator-dashboard-profile"
 import { ActionRequiredBanner } from "@/components/dashboard/action-required-banner"
@@ -52,19 +52,85 @@ function NoAccessMessage() {
   )
 }
 
-export default function CreatorDashboardPage() {
+// Error messages for OAuth errors
+const ERROR_MESSAGES: Record<string, { title: string; message: string }> = {
+  'not_configured': {
+    title: 'Not Configured',
+    message: "This connection isn't set up yet. We're finishing the integration. Try again soon.",
+  },
+  'access_denied': {
+    title: 'Access Denied',
+    message: 'You declined the connection request. You can try again anytime.',
+  },
+  'oauth_failed': {
+    title: 'Connection Failed',
+    message: 'We couldn\'t connect your account. Please try again later.',
+  },
+}
+
+function OAuthErrorBanner({ error, platform, onDismiss }: { error: string; platform: 'instagram' | 'tiktok'; onDismiss: () => void }) {
+  const errorInfo = ERROR_MESSAGES[error] || {
+    title: 'Connection Error',
+    message: 'Something went wrong. Please try again.',
+  }
+  
+  const platformName = platform === 'instagram' ? 'Instagram' : 'TikTok'
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 pt-4">
+      <div className="rounded-xl border-[3px] border-black bg-white p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100">
+            <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-black">{platformName}: {errorInfo.title}</p>
+            <p className="mt-0.5 text-xs text-black/70">{errorInfo.message}</p>
+          </div>
+          <button onClick={onDismiss} className="shrink-0 rounded-lg p-1 text-black/40 hover:text-black">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DashboardContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [hasAccess, setHasAccess] = useState(false)
   const [showWelcome, setShowWelcome] = useState(false)
+  const [oauthError, setOauthError] = useState<{ platform: 'instagram' | 'tiktok'; error: string } | null>(null)
+
+  useEffect(() => {
+    const igError = searchParams.get('ig_error')
+    const ttError = searchParams.get('tt_error')
+    const genericError = searchParams.get('error')
+
+    if (igError) {
+      setOauthError({ platform: 'instagram', error: igError })
+    } else if (ttError) {
+      setOauthError({ platform: 'tiktok', error: ttError })
+    } else if (genericError) {
+      setOauthError({ platform: 'instagram', error: genericError })
+    }
+
+    if (igError || ttError || genericError) {
+      window.history.replaceState({}, '', '/dashboard/creator')
+    }
+  }, [searchParams])
 
   useEffect(() => {
     async function checkProfile() {
-      // Wait for session to load
       if (status === "loading") return
       
-      // Not authenticated - show no access message
       if (status === "unauthenticated") {
         setLoading(false)
         setHasAccess(false)
@@ -74,7 +140,6 @@ export default function CreatorDashboardPage() {
       try {
         const res = await fetch("/api/creator/profile")
         if (res.status === 404) {
-          // No creator profile - they need an invite
           setHasAccess(false)
           setLoading(false)
           return
@@ -82,18 +147,15 @@ export default function CreatorDashboardPage() {
         if (res.ok) {
           const profile = await res.json()
           
-          // Check if onboarding is complete
           if (!profile.onboardingComplete) {
             router.push("/onboarding/creator")
             return
           }
           
-          // Has valid profile - grant access
           setHasAccess(true)
           
-          // Check for welcome param
-          const params = new URLSearchParams(window.location.search)
-          if (params.get("welcome") === "true") {
+          const welcome = searchParams.get("welcome")
+          if (welcome === "true") {
             setShowWelcome(true)
             window.history.replaceState({}, "", "/dashboard/creator")
           }
@@ -108,21 +170,26 @@ export default function CreatorDashboardPage() {
     }
     
     checkProfile()
-  }, [status, router])
+  }, [status, router, searchParams])
 
-  // Loading state
   if (status === "loading" || loading) {
     return <DashboardLoading />
   }
   
-  // No access - show message with waitlist link
   if (!hasAccess) {
     return <NoAccessMessage />
   }
 
   return (
     <div className="dashboard">
-      {/* Welcome Modal - Beta appropriate copy */}
+      {oauthError && (
+        <OAuthErrorBanner
+          error={oauthError.error}
+          platform={oauthError.platform}
+          onDismiss={() => setOauthError(null)}
+        />
+      )}
+
       {showWelcome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
@@ -151,9 +218,15 @@ export default function CreatorDashboardPage() {
       )}
       
       <ActionRequiredBanner />
-      <Suspense fallback={<DashboardLoading />}>
-        <CreatorDashboardProfile />
-      </Suspense>
+      <CreatorDashboardProfile />
     </div>
+  )
+}
+
+export default function CreatorDashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
   )
 }

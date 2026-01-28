@@ -638,7 +638,12 @@ export function CreatorDashboardProfile() {
 
   // Handle Instagram OAuth connect
   const handleInstagramOAuth = () => {
-    window.location.href = '/api/instagram/auth'
+    window.location.href = '/api/oauth/instagram/start'
+  }
+
+  // Handle TikTok OAuth connect
+  const handleTikTokOAuth = () => {
+    window.location.href = '/api/oauth/tiktok/start'
   }
 
   // Handle Instagram disconnect

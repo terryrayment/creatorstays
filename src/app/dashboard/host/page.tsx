@@ -359,16 +359,30 @@ export default function HostDashboardPage() {
   const [showAgencyWelcome, setShowAgencyWelcome] = useState(false)
   const [isAgency, setIsAgency] = useState(false)
   const [showBetaWelcome, setShowBetaWelcome] = useState(false)
+  const [hasRedirected, setHasRedirected] = useState(false) // Prevent double redirects
 
   useEffect(() => {
     async function checkProfile() {
-      if (status !== "authenticated") return
+      // Don't run while session is loading
+      if (status === "loading") return
       
+      // Don't run if we've already redirected
+      if (hasRedirected) return
+      
+      // If not authenticated, redirect to login
+      if (status === "unauthenticated") {
+        setHasRedirected(true)
+        router.replace("/login?callbackUrl=/dashboard/host")
+        return
+      }
+      
+      // status === "authenticated" at this point
       try {
         const res = await fetch("/api/host/profile")
         if (res.status === 404) {
           // No profile, redirect to onboarding
-          router.push("/onboarding/host")
+          setHasRedirected(true)
+          router.replace("/onboarding/host")
           return
         }
         if (res.ok) {
@@ -387,7 +401,8 @@ export default function HostDashboardPage() {
           
           // Check if onboarding is complete AND membership is paid
           if (!profile.onboardingComplete || !profile.membershipPaid) {
-            router.push("/onboarding/host")
+            setHasRedirected(true)
+            router.replace("/onboarding/host")
             return
           }
           
@@ -398,7 +413,8 @@ export default function HostDashboardPage() {
           
           // If just completed payment onboarding and haven't seen the guide, redirect to welcome
           if (justCompletedOnboarding && !hasSeenWelcomeGuide) {
-            router.push("/dashboard/host/welcome")
+            setHasRedirected(true)
+            router.replace("/dashboard/host/welcome")
             return
           }
           
