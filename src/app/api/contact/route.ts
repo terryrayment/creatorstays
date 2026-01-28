@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     // Log: Support form submitted
     console.log('[Analytics] support_form_submitted', {
-      submissionId: submission.id,
+      submissionId: contact.id,
       timestamp: new Date().toISOString()
     })
 
