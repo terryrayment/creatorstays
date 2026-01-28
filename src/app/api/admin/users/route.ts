@@ -108,9 +108,11 @@ export async function DELETE(request: NextRequest) {
       })
 
       // 13. Delete verification tokens for this user's email
-      await prisma.verificationToken.deleteMany({
-        where: { identifier: hostProfile.contactEmail }
-      })
+      if (hostProfile.contactEmail) {
+        await prisma.verificationToken.deleteMany({
+          where: { identifier: hostProfile.contactEmail }
+        })
+      }
 
       // 14. Delete the user
       await prisma.user.delete({
