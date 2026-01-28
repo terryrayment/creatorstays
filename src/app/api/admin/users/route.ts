@@ -5,6 +5,103 @@ import { prisma } from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 
 /**
+ * PATCH /api/admin/users
+ * Admin safety valves: disable user, unpublish property, invalidate magic links
+ * Requires admin auth
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const cookieStore = await cookies()
+    const adminAuth = cookieStore.get('admin_auth')?.value
+    
+    if (adminAuth !== process.env.ADMIN_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { action, userId, propertyId, email } = await request.json()
+    
+    console.log(`[Admin Safety Valve] Action: ${action}`, { userId, propertyId, email })
+
+    switch (action) {
+      case 'disable_user': {
+        // Disable a user by deleting all their sessions (logs them out)
+        // and setting a flag to prevent new logins
+        if (!userId) {
+          return NextResponse.json({ error: 'userId required' }, { status: 400 })
+        }
+        
+        // Delete all sessions for this user
+        const deletedSessions = await prisma.session.deleteMany({
+          where: { userId }
+        })
+        
+        // Delete all verification tokens to prevent magic link login
+        const user = await prisma.user.findUnique({ where: { id: userId } })
+        if (user?.email) {
+          await prisma.verificationToken.deleteMany({
+            where: { identifier: user.email }
+          })
+        }
+        
+        console.log(`[Admin] Disabled user ${userId}: deleted ${deletedSessions.count} sessions`)
+        
+        return NextResponse.json({ 
+          success: true, 
+          message: `User ${userId} disabled - ${deletedSessions.count} sessions invalidated`
+        })
+      }
+      
+      case 'unpublish_property': {
+        // Set property to draft (unpublish)
+        if (!propertyId) {
+          return NextResponse.json({ error: 'propertyId required' }, { status: 400 })
+        }
+        
+        const property = await prisma.property.update({
+          where: { id: propertyId },
+          data: { isDraft: true, isActive: false }
+        })
+        
+        console.log(`[Admin] Unpublished property ${propertyId}: ${property.title}`)
+        
+        return NextResponse.json({ 
+          success: true, 
+          message: `Property "${property.title}" unpublished`
+        })
+      }
+      
+      case 'invalidate_magic_links': {
+        // Delete all verification tokens for an email
+        if (!email) {
+          return NextResponse.json({ error: 'email required' }, { status: 400 })
+        }
+        
+        const deleted = await prisma.verificationToken.deleteMany({
+          where: { identifier: email.toLowerCase() }
+        })
+        
+        console.log(`[Admin] Invalidated magic links for ${email}: deleted ${deleted.count} tokens`)
+        
+        return NextResponse.json({ 
+          success: true, 
+          message: `Invalidated ${deleted.count} magic link(s) for ${email}`
+        })
+      }
+      
+      default:
+        return NextResponse.json({ error: 'Invalid action. Use: disable_user, unpublish_property, invalidate_magic_links' }, { status: 400 })
+    }
+
+  } catch (error) {
+    console.error('[Admin Safety Valve] Error:', error)
+    return NextResponse.json({ 
+      error: 'Operation failed', 
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    }, { status: 500 })
+  }
+}
+
+/**
  * DELETE /api/admin/users
  * Hard delete a user and all associated data
  * Requires admin auth

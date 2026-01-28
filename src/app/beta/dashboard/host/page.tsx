@@ -445,6 +445,11 @@ export default function HostDashboardPage() {
         console.error("Failed to check profile:", e)
       }
       setLoading(false)
+      
+      // Log: Dashboard loaded
+      console.log('[Analytics] dashboard_loaded', {
+        timestamp: new Date().toISOString()
+      })
     }
     
     checkProfile()

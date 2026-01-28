@@ -805,7 +805,7 @@ export default function HelpPage() {
                   CONTACT US
                 </h3>
                 <p className="mt-1 text-[13px] font-medium text-black/60">
-                  We typically respond within 24 hours.
+                  We usually respond within 24 hours during beta.
                 </p>
 
                 {contactStatus === "error" && (

@@ -124,6 +124,12 @@ export async function POST(request: NextRequest) {
       console.log('[Contact] No RESEND_API_KEY - message stored in DB only')
     }
 
+    // Log: Support form submitted
+    console.log('[Analytics] support_form_submitted', {
+      submissionId: submission.id,
+      timestamp: new Date().toISOString()
+    })
+
     return NextResponse.json({
       success: true,
       message: 'Your message has been sent. We\'ll get back to you within 24 hours.',

@@ -211,6 +211,15 @@ export async function POST(request: NextRequest) {
       })
       
       console.log('[Properties API] After update - isDraft:', property.isDraft, 'title:', property.title)
+      
+      // Log: Property published (if was draft and now published)
+      if (existing.isDraft && !property.isDraft) {
+        console.log('[Analytics] property_published', {
+          propertyId: property.id,
+          hostId: hostProfile.id,
+          timestamp: new Date().toISOString()
+        })
+      }
     } else {
       // Create new - need full data with defaults
       console.log('[Properties API] Creating new property')
@@ -241,6 +250,23 @@ export async function POST(request: NextRequest) {
         data: createData,
       })
       console.log('[Properties API] Created property:', property.id, 'isDraft:', property.isDraft)
+      
+      // Log: Property created
+      console.log('[Analytics] property_created', {
+        propertyId: property.id,
+        hostId: hostProfile.id,
+        isDraft: property.isDraft,
+        timestamp: new Date().toISOString()
+      })
+      
+      // Log: Property published (if not draft)
+      if (!property.isDraft) {
+        console.log('[Analytics] property_published', {
+          propertyId: property.id,
+          hostId: hostProfile.id,
+          timestamp: new Date().toISOString()
+        })
+      }
     }
 
     return NextResponse.json({ property })

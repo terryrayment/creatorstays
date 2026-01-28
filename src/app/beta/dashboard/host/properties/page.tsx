@@ -1679,6 +1679,7 @@ export default function HostPropertiesPage() {
   const [editing, setEditing] = useState<EditingProperty | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [justPublished, setJustPublished] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [editorStep, setEditorStep] = useState(1)
@@ -1786,6 +1787,11 @@ export default function HostPropertiesPage() {
   const handleSave = async (data: EditingProperty) => {
     setIsSaving(true)
     setSaveSuccess(false)
+    setJustPublished(false)
+    
+    // Check if this is a publish action (was draft, now not draft)
+    const wasPublish = editing?.isDraft && !data.isDraft
+    
     try {
       const res = await fetch('/api/properties', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
       if (res.ok) { 
@@ -1794,7 +1800,15 @@ export default function HostPropertiesPage() {
         setSelectedId(property.id)
         setEditing(property)
         setSaveSuccess(true)
-        setTimeout(() => setSaveSuccess(false), 2000)
+        if (wasPublish) {
+          setJustPublished(true)
+          // Log publish event
+          console.log('[Analytics] Property published:', { propertyId: property.id, title: property.title })
+        }
+        setTimeout(() => {
+          setSaveSuccess(false)
+          setJustPublished(false)
+        }, 8000) // Longer timeout for publish confirmation
       }
     } catch (e) { /* error handled silently */ }
     finally { setIsSaving(false) }
@@ -1856,9 +1870,34 @@ export default function HostPropertiesPage() {
       <div className="flex-1 py-6">
         <Container>
           {/* Success Toast */}
-          {saveSuccess && (
+          {saveSuccess && !justPublished && (
             <div className="mb-4 rounded-lg border-2 border-black bg-[#28D17C] px-4 py-2 text-sm font-bold text-black">
               ✓ Property saved!
+            </div>
+          )}
+          
+          {/* Post-Publish Confirmation */}
+          {justPublished && (
+            <div className="mb-4 rounded-xl border-2 border-black bg-[#28D17C] p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-black bg-white">
+                  <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-bold text-black">Your property is live in the CreatorStays beta!</p>
+                  <p className="mt-1 text-sm text-black/80">Next step: invite a creator or sit tight while we onboard creators to match with you.</p>
+                </div>
+                <button 
+                  onClick={() => setJustPublished(false)}
+                  className="ml-auto shrink-0 text-black/60 hover:text-black"
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
           )}
           

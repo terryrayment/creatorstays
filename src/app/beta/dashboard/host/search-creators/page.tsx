@@ -765,8 +765,8 @@ export default function SearchCreatorsPage() {
               <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#4AA3FF] text-white font-bold text-sm">2</div>
                 <div>
-                  <p className="font-bold text-black">Real creators coming soon</p>
-                  <p className="text-sm text-black/70">We're actively onboarding creators. Once matched with your property's location and vibe, they'll appear here.</p>
+                  <p className="font-bold text-black">Creator matching opens in waves</p>
+                  <p className="text-sm text-black/70">Hosts who complete their setup are first in line. We'll notify you when creators matching your property are available.</p>
                 </div>
               </div>
 

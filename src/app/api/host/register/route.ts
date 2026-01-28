@@ -34,6 +34,13 @@ export async function POST(request: NextRequest) {
       listingPropertyType,
     } = body
 
+    // Log: Signup started
+    console.log('[Analytics] host_signup_started', { 
+      email: email?.substring(0, 3) + '***', // Partial for privacy
+      hasListingUrl: !!listingUrl,
+      timestamp: new Date().toISOString()
+    })
+
     // Validate required fields
     if (!email || !fullName) {
       return NextResponse.json(
@@ -235,7 +242,13 @@ export async function POST(request: NextRequest) {
         `,
       })
       emailSent = emailResult.success
-      if (!emailResult.success) {
+      if (emailResult.success) {
+        // Log: Magic link email sent
+        console.log('[Analytics] magic_link_sent', { 
+          userId: result.user.id,
+          timestamp: new Date().toISOString()
+        })
+      } else {
         console.error('[Host Register] Email send failed:', emailResult.error)
       }
     } catch (emailError) {

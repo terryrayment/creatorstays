@@ -168,6 +168,11 @@ export function DashboardFooter() {
           <span>·</span>
           <span>Not affiliated with Airbnb, Inc.</span>
         </div>
+        
+        {/* Trust Statement */}
+        <p className="mt-3 text-center text-[10px] text-white/40">
+          Your data is private. We never post, message creators, or list your property without your approval.
+        </p>
       </div>
     </footer>
   )

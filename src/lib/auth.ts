@@ -172,6 +172,15 @@ export const authOptions: NextAuthOptions = {
         isNewUser,
       })
       
+      // Log: Magic link clicked (email provider = magic link)
+      if (account?.provider === 'email') {
+        console.log('[Analytics] magic_link_clicked', {
+          userId: user.id,
+          isNewUser,
+          timestamp: new Date().toISOString()
+        })
+      }
+      
       // Track last login time (non-blocking, fails silently if column doesn't exist yet)
       if (user.id) {
         prisma.user.update({

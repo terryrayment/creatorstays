@@ -99,17 +99,17 @@ export default function BetaAnalyticsPage() {
           </div>
 
           {/* Demo Banner */}
-          <div className="rounded-xl border-2 border-black bg-[#4AA3FF] p-4">
+          <div className="rounded-xl border-2 border-dashed border-black bg-[#FFD84A] p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-black bg-white">
                 <svg className="h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="font-bold text-black">This is preview data</p>
-                <p className="text-sm text-black/80 mt-0.5">
-                  These metrics show example performance. Your real analytics will appear once you start working with creators.
+                <p className="font-bold text-black">Demo data — real analytics appear after collaborations begin</p>
+                <p className="text-sm text-black/70 mt-0.5">
+                  The numbers below are examples showing what your dashboard will look like once you have active creator collaborations.
                 </p>
               </div>
             </div>

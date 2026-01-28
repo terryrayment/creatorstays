@@ -599,7 +599,7 @@ export default function BetaCollaborationsPage() {
         </div>
 
         {/* Demo Banner */}
-        <div className="mb-6 rounded-xl border-2 border-black bg-[#4AA3FF] p-4">
+        <div className="mb-6 rounded-xl border-2 border-dashed border-black bg-[#FFD84A] p-4">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-black bg-white">
               <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -607,14 +607,13 @@ export default function BetaCollaborationsPage() {
               </svg>
             </div>
             <div className="flex-1">
-              <p className="font-bold text-black">This is a demo preview</p>
+              <p className="font-bold text-black">Demo data — real collaborations appear when you work with creators</p>
               <p className="text-sm text-black/70 mt-1">
-                Explore how collaborations work with sample data. When real creators join the platform, 
-                your actual collaborations will appear here.
+                Creator matching opens in waves. Hosts who complete their setup are first in line.
               </p>
               <button
                 onClick={() => setShowHowItWorks(true)}
-                className="mt-3 rounded-full border-2 border-black bg-white px-4 py-1.5 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
+                className="mt-3 rounded-full border-2 border-black bg-black px-4 py-1.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5"
               >
                 How It Works →
               </button>
@@ -650,23 +649,16 @@ export default function BetaCollaborationsPage() {
         </div>
 
         {/* Coming Soon Note */}
-        <div className="mt-8 rounded-xl border-2 border-dashed border-black/20 bg-white p-6 text-center">
+        <div className="mt-8 rounded-xl border-2 border-dashed border-black/30 bg-white p-6 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A]">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <p className="mt-3 font-bold text-black">Real creators coming soon!</p>
+          <p className="mt-3 font-bold text-black">Creator matching opens in waves</p>
           <p className="text-sm text-black/60 mt-1">
-            We're onboarding creators now. Get your properties and preferences set up 
-            so you're ready when matching begins.
+            Hosts who complete their setup are first in line. Make sure your properties are ready.
           </p>
-          <Link
-            href="/beta/dashboard/host/properties"
-            className="mt-4 inline-block rounded-full border-2 border-black bg-[#FFD84A] px-6 py-2 text-xs font-bold text-black transition-transform hover:-translate-y-0.5"
-          >
-            Set Up Properties →
-          </Link>
         </div>
       </div>
 
