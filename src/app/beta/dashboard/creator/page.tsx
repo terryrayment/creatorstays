@@ -284,13 +284,15 @@ function DashboardContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
-            <h2 className="font-heading text-2xl tracking-tight text-black">Your profile is ready</h2>
+            <h2 className="font-heading text-2xl tracking-tight text-black">You're approved for beta!</h2>
             <p className="mt-2 text-sm text-black/70">
-              You're set up for the CreatorStays beta. When hosts invite you to collaborate, you'll see offers here.
+              Your profile is visible to beta hosts. When they want to collaborate, you'll receive offers here.
             </p>
-            <p className="mt-3 text-xs text-black/50">
-              Creator discovery is rolling out in phases during beta.
-            </p>
+            <div className="mt-4 rounded-lg border border-black/10 bg-black/5 p-3">
+              <p className="text-xs text-black/60">
+                <strong>What's next:</strong> Hosts can browse your profile and send collaboration offers. You'll be notified by email when you receive one.
+              </p>
+            </div>
             <div className="mt-6">
               <button
                 onClick={() => setShowWelcome(false)}

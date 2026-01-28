@@ -431,7 +431,13 @@ export default function CreatorOnboardingPage() {
 
             <div className="space-y-6">
               <div className="rounded-xl border-2 border-black bg-white p-4">
-                <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-black">Social Platforms</label>
+                <div className="mb-3 flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-black">Social Platforms</label>
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">Self-reported</span>
+                </div>
+                <p className="mb-4 text-xs text-black/60">
+                  Enter your handles and approximate follower counts. You can verify with OAuth later for a "Verified" badge.
+                </p>
                 
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
@@ -614,8 +620,8 @@ export default function CreatorOnboardingPage() {
           <div>
             <div className="mb-8 text-center">
               <StepIcon icon="check" />
-              <h1 className="font-heading text-3xl tracking-tight text-black">You're almost done!</h1>
-              <p className="mt-2 text-sm text-black/60">Review your profile and complete setup</p>
+              <h1 className="font-heading text-3xl tracking-tight text-black">You're approved for beta!</h1>
+              <p className="mt-2 text-sm text-black/60">Review your profile before completing setup</p>
             </div>
 
             <div className="space-y-6">
@@ -646,17 +652,17 @@ export default function CreatorOnboardingPage() {
                   <div className="flex flex-wrap gap-2">
                     {data.instagramHandle && (
                       <span className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-1 text-xs font-bold text-white">
-                        @{data.instagramHandle} • {formatFollowers(data.instagramFollowers)}
+                        @{data.instagramHandle} • {formatFollowers(data.instagramFollowers)} <span className="opacity-70">(self-reported)</span>
                       </span>
                     )}
                     {data.tiktokHandle && (
                       <span className="rounded-full bg-black px-3 py-1 text-xs font-bold text-white">
-                        @{data.tiktokHandle} • {formatFollowers(data.tiktokFollowers)}
+                        @{data.tiktokHandle} • {formatFollowers(data.tiktokFollowers)} <span className="opacity-70">(self-reported)</span>
                       </span>
                     )}
                     {data.youtubeHandle && (
                       <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white">
-                        {data.youtubeHandle} • {formatFollowers(data.youtubeSubscribers)}
+                        {data.youtubeHandle} • {formatFollowers(data.youtubeSubscribers)} <span className="opacity-70">(self-reported)</span>
                       </span>
                     )}
                   </div>
@@ -683,13 +689,20 @@ export default function CreatorOnboardingPage() {
                 </div>
               </div>
 
-              <div className="rounded-xl border-2 border-dashed border-black/20 bg-black/5 p-4 text-center">
-                <p className="text-xs text-black/60">
-                  Hosts will see this info when they send you collaboration offers.
-                </p>
-                <p className="mt-1 text-[10px] text-black/40">
-                  Creator discovery is rolling out in phases during beta.
-                </p>
+              <div className="rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#28D17C]">
+                    <svg className="h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-black">Visible to beta hosts</p>
+                    <p className="mt-0.5 text-xs text-black/70">
+                      Beta hosts can view your profile and send collaboration offers. You'll be notified by email.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
