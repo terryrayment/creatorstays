@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #ffffff; font-family: Arial, Helvetica, sans-serif;">
   <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #ffffff;">
     <tr>
       <td align="center" style="padding: 24px 16px;">
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #000000; text-align: center; vertical-align: middle;">
-                    <span style="color: #000000; font-weight: 700; font-size: 12px; letter-spacing: -0.5px;">CS</span>
+                    <span style="color: #000000; font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: 12px;">CS</span>
                   </td>
                 </tr>
               </table>
@@ -183,13 +183,13 @@ export async function POST(request: NextRequest) {
                 <tr>
                   <td style="padding: 32px 24px;">
                     <!-- Welcome Text -->
-                    <p style="margin: 0 0 8px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #000000;">
+                    <p style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #000000;">
                       Welcome to CreatorStays
                     </p>
-                    <p style="margin: 0 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 900; line-height: 1.1; letter-spacing: -1px; color: #000000;">
+                    <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 26px; font-weight: bold; line-height: 1.1; color: #000000;">
                       ${fullName}
                     </p>
-                    <p style="margin: 0 0 28px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; color: #000000;">
+                    <p style="margin: 0 0 28px 0; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.5; color: #000000;">
                       Your host account is ready. Complete your setup to start connecting with creators.
                     </p>
                     
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
                     <table role="presentation" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="background-color: #28D17C; border-radius: 50px; border: 2px solid #000000;">
-                          <a href="${magicLink}" style="display: inline-block; padding: 14px 28px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #000000; text-decoration: none;">
+                          <a href="${magicLink}" style="display: inline-block; padding: 14px 28px; font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #000000; text-decoration: none;">
                             Complete Setup →
                           </a>
                         </td>
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
                     </table>
                     
                     <!-- Expiry Note -->
-                    <p style="margin: 24px 0 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #000000; opacity: 0.6;">
+                    <p style="margin: 24px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #666666;">
                       Link expires in 24 hours
                     </p>
                   </td>
@@ -217,10 +217,10 @@ export async function POST(request: NextRequest) {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding: 16px 24px 32px 24px;">
-              <p style="margin: 0 0 8px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; color: #999999;">
+              <p style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #999999;">
                 Didn't create this account? Ignore this email.
               </p>
-              <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 10px; color: #999999;">
+              <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #999999;">
                 © ${new Date().getFullYear()} CreatorStays
               </p>
             </td>
@@ -245,27 +245,88 @@ export async function POST(request: NextRequest) {
 
     // 6. Send admin notification email for new signup
     const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'hello@creatorstays.com'
+    const signupTime = new Date().toLocaleString('en-US', { 
+      timeZone: 'America/Los_Angeles',
+      weekday: 'short',
+      month: 'short', 
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })
     try {
       await sendEmail({
         to: ADMIN_EMAIL,
-        subject: `🎉 New Host Signup: ${fullName}`,
+        subject: `🏠 New Host: ${fullName}`,
         html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #28D17C; padding: 16px 24px; border-radius: 8px 8px 0 0;">
-              <h2 style="color: #000; margin: 0; font-size: 18px;">🎉 New Host Signup!</h2>
-            </div>
-            <div style="background: #fff; padding: 24px; border: 2px solid #000; border-top: none; border-radius: 0 0 8px 8px;">
-              <p style="margin: 0 0 16px 0;"><strong>Name:</strong> ${fullName}</p>
-              <p style="margin: 0 0 16px 0;"><strong>Email:</strong> ${normalizedEmail}</p>
-              <p style="margin: 0 0 16px 0;"><strong>Phone:</strong> ${phone || 'Not provided'}</p>
-              <p style="margin: 0 0 16px 0;"><strong>Company:</strong> ${companyName || 'Not provided'}</p>
-              <p style="margin: 0 0 16px 0;"><strong>Location:</strong> ${cityRegion || 'Not provided'}</p>
-              ${listingUrl ? `<p style="margin: 0 0 16px 0;"><strong>Listing:</strong> <a href="${listingUrl}">${listingUrl}</a></p>` : ''}
-              <p style="margin: 16px 0 0 0; color: #666; font-size: 12px;">
-                Signed up: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT
-              </p>
-            </div>
-          </div>
+<!DOCTYPE html>
+<html>
+<body style="margin: 0; padding: 20px; background: #f5f5f5; font-family: Arial, sans-serif;">
+  <table cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; margin: 0 auto;">
+    <tr>
+      <td style="background: #28D17C; padding: 16px 20px; border-radius: 8px 8px 0 0; border: 2px solid #000; border-bottom: none;">
+        <span style="font-size: 16px; font-weight: bold; color: #000;">🏠 New Host Signup</span>
+      </td>
+    </tr>
+    <tr>
+      <td style="background: #fff; padding: 20px; border: 2px solid #000; border-top: none; border-radius: 0 0 8px 8px;">
+        <table cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
+              <span style="color: #666; font-size: 12px;">NAME</span><br>
+              <span style="font-size: 14px; font-weight: bold; color: #000;">${fullName}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
+              <span style="color: #666; font-size: 12px;">EMAIL</span><br>
+              <span style="font-size: 14px; color: #000;">${normalizedEmail}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
+              <span style="color: #666; font-size: 12px;">PHONE</span><br>
+              <span style="font-size: 14px; color: #000;">${phone || '—'}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
+              <span style="color: #666; font-size: 12px;">LOCATION</span><br>
+              <span style="font-size: 14px; color: #000;">${cityRegion || '—'}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
+              <span style="color: #666; font-size: 12px;">COMPANY</span><br>
+              <span style="font-size: 14px; color: #000;">${companyName || '—'}</span>
+            </td>
+          </tr>
+          ${listingUrl ? `
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
+              <span style="color: #666; font-size: 12px;">AIRBNB LISTING</span><br>
+              <a href="${listingUrl}" style="font-size: 14px; color: #4AA3FF;">${listingUrl.length > 50 ? listingUrl.substring(0, 50) + '...' : listingUrl}</a>
+            </td>
+          </tr>
+          ` : ''}
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
+              <span style="color: #666; font-size: 12px;">MEMBERSHIP</span><br>
+              <span style="font-size: 14px; color: #000;">Free (Beta)</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0;">
+              <span style="color: #666; font-size: 12px;">SIGNED UP</span><br>
+              <span style="font-size: 14px; color: #000;">${signupTime} PT</span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
         `,
       })
       console.log('[Host Register] Admin notification sent to', ADMIN_EMAIL)
