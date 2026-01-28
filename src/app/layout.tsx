@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { DM_Sans, Bebas_Neue } from "next/font/google"
 import Script from "next/script"
+import { Analytics } from "@vercel/analytics/react"
 import "./globals.css"
 import { Navbar } from "@/components/navigation/navbar"
 import { Footer } from "@/components/navigation/footer"
@@ -206,6 +207,7 @@ export default function RootLayout({
           <MainContent>{children}</MainContent>
           <Footer />
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   )
