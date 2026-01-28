@@ -1,9 +1,18 @@
 "use client"
 
-import AdminGate from '@/components/admin-gate';
 import { DashboardHeader } from '@/components/navigation/dashboard-header';
 import { usePathname } from 'next/navigation';
 
+/**
+ * Beta Dashboard Layout
+ * 
+ * IMPORTANT: Do NOT add AdminGate (dev passcode) here.
+ * Dashboard pages handle their own auth via useSession.
+ * AdminGate is only for dev-only routes like /prototype, /internal.
+ * 
+ * Protected routes: /beta/dashboard, /dashboard, /onboarding, /admin/login
+ * should NEVER require dev passcode for authenticated users.
+ */
 export default function BetaDashboardLayout({
   children,
 }: {
@@ -15,11 +24,9 @@ export default function BetaDashboardLayout({
   const variant = pathname?.includes('/creator') ? 'creator' : 'host';
   
   return (
-    <AdminGate>
-      <div className="min-h-screen bg-black">
-        <DashboardHeader variant={variant} />
-        <main>{children}</main>
-      </div>
-    </AdminGate>
+    <div className="min-h-screen bg-black">
+      <DashboardHeader variant={variant} />
+      <main>{children}</main>
+    </div>
   );
 }

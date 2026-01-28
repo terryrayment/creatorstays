@@ -2,6 +2,24 @@
 
 import { useState, useEffect, useRef } from 'react';
 
+/**
+ * AdminGate - Developer Access passcode gate
+ * 
+ * IMPORTANT REGRESSION GUARD:
+ * This component should ONLY be used for dev-only/prototype routes.
+ * 
+ * DO NOT use AdminGate on these routes (they need real auth, not dev passcode):
+ * - /dashboard/*
+ * - /beta/dashboard/*
+ * - /onboarding/*
+ * - /admin/login
+ * - /hosts (signup flow)
+ * - /waitlist
+ * 
+ * Authenticated users must access dashboards without passcode.
+ * Use useSession() or getServerSession() for real authentication.
+ */
+
 const ADMIN_PASSCODE = '0606';
 const STORAGE_KEY = 'cs_admin_access';
 
