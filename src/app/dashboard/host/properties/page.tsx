@@ -125,11 +125,11 @@ function PropertyListItem({ property, isSelected, onSelect }: { property: Proper
           <p className="text-[11px] text-black/60">{property.cityRegion || 'No location'}</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             {property.isBoosted && (
-              <span className="rounded-full border border-[#28D17C] bg-[#28D17C]/20 px-1.5 py-0.5 text-[9px] font-bold text-black">Boosted</span>
+              <span className="rounded-full border-2 border-[#28D17C] bg-[#28D17C] px-1.5 py-0.5 text-[9px] font-bold text-black">Boosted</span>
             )}
-            <span className={`rounded-full border border-black px-1.5 py-0.5 text-[9px] font-bold ${property.isDraft ? 'bg-amber-100 text-black' : 'bg-emerald-100 text-black'}`}>{property.isDraft ? 'Draft' : 'Published'}</span>
+            <span className={`rounded-full border-2 border-black px-1.5 py-0.5 text-[9px] font-bold ${property.isDraft ? 'bg-[#FFD84A] text-black' : 'bg-[#28D17C] text-black'}`}>{property.isDraft ? 'Draft' : 'Published'}</span>
             {hasCalendar && (
-              <span className="flex items-center gap-1 rounded-full border border-[#4AA3FF] bg-[#4AA3FF]/10 px-1.5 py-0.5 text-[9px] font-medium text-black">
+              <span className="flex items-center gap-1 rounded-full border-2 border-[#4AA3FF] bg-[#4AA3FF] px-1.5 py-0.5 text-[9px] font-medium text-white">
                 <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                 </svg>
@@ -522,7 +522,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                   <h2 className="text-xl font-bold text-black">{form.title || 'Untitled Property'}</h2>
                   <p className="text-sm text-black/60">{form.cityRegion || 'No location set'}</p>
                 </div>
-                <span className={`rounded-full border-2 border-black px-3 py-1 text-xs font-bold ${form.isDraft ? 'bg-amber-100' : 'bg-emerald-100'}`}>
+                <span className={`rounded-full border-2 border-black px-3 py-1 text-xs font-bold ${form.isDraft ? 'bg-[#FFD84A]' : 'bg-[#28D17C]'}`}>
                   {form.isDraft ? 'Draft' : 'Published'}
                 </span>
               </div>
@@ -569,7 +569,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
         
         {/* Setup Progress Card */}
         {checklistComplete < checklist.length && (
-          <div className="rounded-xl border-2 border-black bg-[#FFD84A]/20 p-4">
+          <div className="rounded-xl border-2 border-black bg-[#FFD84A] p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-black">Setup Progress</h3>
@@ -579,7 +579,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                 <span className="text-2xl font-bold text-black">{Math.round((checklistComplete / checklist.length) * 100)}%</span>
               </div>
             </div>
-            <div className="mt-3 h-2 rounded-full bg-black/10">
+            <div className="mt-3 h-2 rounded-full bg-white border-2 border-black">
               <div 
                 className="h-full rounded-full bg-[#28D17C] transition-all" 
                 style={{ width: `${(checklistComplete / checklist.length) * 100}%` }}
@@ -622,7 +622,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               <span className="text-[10px] text-black/50">Vibe Tags</span>
               <div className="mt-1 flex flex-wrap gap-1">
                 {form.vibeTags.map(t => (
-                  <span key={t} className="rounded-full border border-[#FFD84A] bg-[#FFD84A]/20 px-2 py-0.5 text-[10px] font-medium">{t}</span>
+                  <span key={t} className="rounded-full border-2 border-[#FFD84A] bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">{t}</span>
                 ))}
               </div>
             </div>
@@ -890,7 +890,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
             <Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => setStep(1)}>← Back</Button>
             <div className="flex gap-2">
               <Button 
-                className="flex items-center gap-1.5 border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 text-[#4AA3FF] hover:bg-[#4AA3FF]/20" 
+                className="flex items-center gap-1.5 border-2 border-[#4AA3FF] bg-[#4AA3FF] text-white hover:bg-[#4AA3FF]/90" 
                 onClick={() => setShowPreviewModal(true)}
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -989,7 +989,7 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
               </div>
               <div className="flex gap-2">
                 <Button 
-                  className="flex items-center gap-1.5 border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 text-[#4AA3FF] hover:bg-[#4AA3FF]/20" 
+                  className="flex items-center gap-1.5 border-2 border-[#4AA3FF] bg-[#4AA3FF] text-white hover:bg-[#4AA3FF]/90" 
                   onClick={() => setShowPreviewModal(true)}
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -999,10 +999,10 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
                   Preview
                 </Button>
                 <Button className="border-2 border-black bg-white text-black hover:bg-black/5" onClick={() => handleSave(true)} disabled={isSaving}>Save Draft</Button>
-                <Button className={`border-2 border-black bg-black text-white hover:bg-black/90 transition-all duration-300 ${saveSuccess ? 'animate-pulse !bg-emerald-500' : ''}`} onClick={() => handleSave(false)} disabled={isSaving || !canPublish}>{isSaving ? 'Saving...' : saveSuccess ? '✓ Published!' : 'Publish Property'}</Button>
+                <Button className={`border-2 border-black bg-black text-white hover:bg-black/90 transition-all duration-300 ${saveSuccess ? 'animate-pulse !bg-[#28D17C]' : ''}`} onClick={() => handleSave(false)} disabled={isSaving || !canPublish}>{isSaving ? 'Saving...' : saveSuccess ? '✓ Published!' : 'Publish Property'}</Button>
               </div>
             </div>
-            {!canPublish && <p className="mt-3 text-right text-[11px] text-amber-600">Complete at least 7 checklist items to publish</p>}
+            {!canPublish && <p className="mt-3 text-right text-[11px] text-black/60">Complete at least 7 checklist items to publish</p>}
           </div>
           
           {/* Creator Preview Modal */}

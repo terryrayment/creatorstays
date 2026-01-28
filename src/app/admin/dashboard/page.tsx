@@ -763,17 +763,17 @@ export default function AdminDashboardPage() {
                     {selectedConversation.messages.map(msg => (
                       <div
                         key={msg.id}
-                        className={`rounded-lg p-3 ${
-                          msg.senderType === "host" ? "bg-[#FFD84A]/20" : "bg-[#4AA3FF]/20"
+                        className={`rounded-lg border-2 p-3 ${
+                          msg.senderType === "host" ? "border-[#FFD84A] bg-[#FFD84A]" : "border-[#4AA3FF] bg-[#4AA3FF]"
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-black">
+                          <span className={`text-xs font-bold ${msg.senderType === "host" ? "text-black" : "text-white"}`}>
                             {msg.senderType === "host" ? "Host" : "Creator"}
                           </span>
-                          <span className="text-[10px] text-black/40">{formatDate(msg.sentAt)}</span>
+                          <span className={`text-[10px] ${msg.senderType === "host" ? "text-black/60" : "text-white/60"}`}>{formatDate(msg.sentAt)}</span>
                         </div>
-                        <p className="mt-1 text-sm text-black">{msg.body}</p>
+                        <p className={`mt-1 text-sm ${msg.senderType === "host" ? "text-black" : "text-white"}`}>{msg.body}</p>
                       </div>
                     ))}
                   </div>
