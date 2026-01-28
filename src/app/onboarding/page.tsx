@@ -63,14 +63,17 @@ function OnboardingContent() {
         
         if (res.ok) {
           // Profile created, redirect to host onboarding to add property
-          router.push("/beta/dashboard/host/onboarding")
+          // IMPORTANT: Use /onboarding/host (not /beta/dashboard/host/onboarding) 
+          // to match where dashboard redirects incomplete hosts
+          router.push("/onboarding/host")
         } else {
-          // Fallback to settings page
-          router.push("/beta/dashboard/host/settings?setup=true")
+          // Fallback - still go to onboarding
+          router.push("/onboarding/host")
         }
       } catch (error) {
         console.error("Failed to create host profile:", error)
-        router.push("/beta/dashboard/host/settings?setup=true")
+        // Still redirect to onboarding - they can try again
+        router.push("/onboarding/host")
       }
     } else {
       // Check if user has a beta invite stored
