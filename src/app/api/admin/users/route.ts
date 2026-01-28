@@ -107,6 +107,11 @@ export async function DELETE(request: NextRequest) {
         where: { userId: authUserId }
       })
 
+      // 13. Delete verification tokens for this user's email
+      await prisma.verificationToken.deleteMany({
+        where: { identifier: hostProfile.contactEmail }
+      })
+
       // 14. Delete the user
       await prisma.user.delete({
         where: { id: authUserId }
@@ -192,6 +197,13 @@ export async function DELETE(request: NextRequest) {
       await prisma.account.deleteMany({
         where: { userId: authUserId }
       })
+
+      // 12. Delete verification tokens for this user's email
+      if (creatorProfile.user.email) {
+        await prisma.verificationToken.deleteMany({
+          where: { identifier: creatorProfile.user.email }
+        })
+      }
 
       // 14. Delete the user
       await prisma.user.delete({

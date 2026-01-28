@@ -481,7 +481,7 @@ export default function AdminDashboardPage() {
               <span className="text-xs text-black/60">{stats.recentCreators.length} creators</span>
             </div>
             {deleteResult && (
-              <div className={`mb-4 rounded-lg px-3 py-2 text-sm font-medium ${deleteResult.success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+              <div className={`mb-4 rounded-lg px-3 py-2 text-sm font-medium ${deleteResult.success ? 'bg-[#28D17C] text-black' : 'bg-[#FF4D4D] text-black'}`}>
                 {deleteResult.message}
               </div>
             )}
@@ -524,7 +524,7 @@ export default function AdminDashboardPage() {
               <span className="text-xs text-black/60">{stats.recentHosts.length} hosts</span>
             </div>
             {deleteResult && (
-              <div className={`mb-4 rounded-lg px-3 py-2 text-sm font-medium ${deleteResult.success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+              <div className={`mb-4 rounded-lg px-3 py-2 text-sm font-medium ${deleteResult.success ? 'bg-[#28D17C] text-black' : 'bg-[#FF4D4D] text-black'}`}>
                 {deleteResult.message}
               </div>
             )}
