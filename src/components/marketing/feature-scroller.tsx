@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect } from "react"
 import Image from "next/image"
 
 // Process steps with expanded host-focused copy
@@ -56,7 +56,6 @@ export function FeatureScroller() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number>()
   const scrollPosition = useRef(0)
-  const [isPaused, setIsPaused] = useState(false)
   
   // Triple the cards for seamless infinite scroll
   const tripleSteps = [...steps, ...steps, ...steps]
@@ -72,8 +71,9 @@ export function FeatureScroller() {
     container.scrollLeft = scrollPosition.current
 
     const animate = () => {
-      if (container && !isPaused) {
-        scrollPosition.current += 0.25 // Speed: 50% slower (was 0.5)
+      if (container) {
+        // 15% slower: 0.25 * 0.85 ≈ 0.2125
+        scrollPosition.current += 0.2125
         
         // Reset to middle set when reaching end
         if (scrollPosition.current >= TOTAL_WIDTH * 2) {
@@ -92,7 +92,7 @@ export function FeatureScroller() {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [isPaused])
+  }, [])
 
   return (
     <section className="bg-black py-6 overflow-hidden">
@@ -104,8 +104,6 @@ export function FeatureScroller() {
           paddingTop: "20px",
           paddingBottom: "20px",
         }}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
       >
         {tripleSteps.map((step, index) => (
           <div

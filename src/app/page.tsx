@@ -112,8 +112,8 @@ function HeroSection() {
           >
             <div>
               <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] sm:text-[2.5rem]" style={{ fontWeight: 900 }}>
-                <span className="block text-black">EVERY NIGHT</span>
-                <span className="block text-black" style={{ fontWeight: 400 }}>SHOULD WORK FOR YOU</span>
+                <span className="block text-black">EVERY NIGHT SHOULD</span>
+                <span className="block text-black" style={{ fontWeight: 400 }}>WORK FOR YOU</span>
               </h2>
               <p className="mt-2 text-[12px] font-medium text-black">
                 When your stay isn't booked, it should be marketing. When it is booked, it should justify a premium.
@@ -154,7 +154,7 @@ function HeroSection() {
             </div>
 
             <p className="mt-2 text-[9px] font-bold text-black">
-              No subscriptions. No guesswork. Just posts and clicks.
+              Just posts, clicks, and clear ROI.
             </p>
           </div>
         </div>

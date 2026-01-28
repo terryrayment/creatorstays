@@ -548,8 +548,9 @@ export default function HelpPage() {
   const [openTopic, setOpenTopic] = useState<string | null>("01")
   const [openFaqs, setOpenFaqs] = useState<Record<string, number | null>>({})
   const [showContactModal, setShowContactModal] = useState(false)
-  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" })
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "", website: "" })
   const [contactStatus, setContactStatus] = useState<"idle" | "sending" | "sent" | "error">("idle")
+  const [contactError, setContactError] = useState("")
   // Filter topics based on search
   const filteredTopics = helpTopics.filter(topic => 
     topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -575,18 +576,32 @@ export default function HelpPage() {
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setContactStatus("sending")
+    setContactError("")
     
-    // Create mailto link with form data
-    const subject = encodeURIComponent(`Help Request from ${contactForm.name}`)
-    const body = encodeURIComponent(`Name: ${contactForm.name}\nEmail: ${contactForm.email}\n\nMessage:\n${contactForm.message}`)
-    window.location.href = `mailto:hello@creatorstays.com?subject=${subject}&body=${body}`
-    
-    setContactStatus("sent")
-    setTimeout(() => {
-      setShowContactModal(false)
-      setContactStatus("idle")
-      setContactForm({ name: "", email: "", message: "" })
-    }, 2000)
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactForm),
+      })
+      
+      const data = await res.json()
+      
+      if (res.ok) {
+        setContactStatus("sent")
+        setTimeout(() => {
+          setShowContactModal(false)
+          setContactStatus("idle")
+          setContactForm({ name: "", email: "", message: "", website: "" })
+        }, 2500)
+      } else {
+        setContactStatus("error")
+        setContactError(data.error || "Something went wrong. Please try again.")
+      }
+    } catch {
+      setContactStatus("error")
+      setContactError("Network error. Please check your connection.")
+    }
   }
 
   return (
@@ -792,7 +807,24 @@ export default function HelpPage() {
                   We typically respond within 24 hours.
                 </p>
 
+                {contactStatus === "error" && (
+                  <div className="mt-4 rounded-lg border-2 border-black bg-[#FF4D4D] p-3">
+                    <p className="text-[12px] font-bold text-black">{contactError}</p>
+                  </div>
+                )}
+
                 <form onSubmit={handleContactSubmit} className="mt-5 space-y-4">
+                  {/* Honeypot field - hidden from users */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={contactForm.website}
+                    onChange={(e) => setContactForm({ ...contactForm, website: e.target.value })}
+                    style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+
                   <div>
                     <label className="mb-1.5 block text-[11px] font-black uppercase tracking-wider text-black">
                       Your Name
@@ -840,7 +872,7 @@ export default function HelpPage() {
                     disabled={contactStatus === "sending"}
                     className="w-full rounded-full border-[3px] border-black bg-black py-3 text-[11px] font-black uppercase tracking-wider text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-50"
                   >
-                    {contactStatus === "sending" ? "Opening email..." : "Send Message"}
+                    {contactStatus === "sending" ? "Sending..." : "Send Message"}
                   </button>
                 </form>
               </>

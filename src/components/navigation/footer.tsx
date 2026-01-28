@@ -31,7 +31,10 @@ export function Footer() {
         }),
       })
       
-      if (res.ok) {
+      const data = await res.json()
+      
+      // Treat 409 (already exists) as success
+      if (res.ok || (res.status === 409 && data.alreadyExists)) {
         setStatus("success")
         setEmail("")
       } else {
@@ -78,7 +81,9 @@ export function Footer() {
             </form>
           </div>
           {status === "error" && (
-            <p className="mt-2 text-xs font-bold text-red-600">Something went wrong. Try again!</p>
+            <div className="mt-2 rounded-lg border-2 border-black bg-[#FF4D4D] px-3 py-1.5">
+              <p className="text-xs font-bold text-black">Something went wrong. Try again!</p>
+            </div>
           )}
         </div>
 

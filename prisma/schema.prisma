@@ -1038,3 +1038,21 @@ model PropertyOwner {
   @@index([accessToken])
   @@map("property_owners")
 }
+
+// ============================================================================
+// CONTACT MESSAGES
+// ============================================================================
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String   @db.Text
+  ip        String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([createdAt])
+  @@map("contact_messages")
+}
