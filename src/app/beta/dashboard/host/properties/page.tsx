@@ -186,7 +186,13 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const [togglingDays, setTogglingDays] = useState<Set<string>>(new Set())
 
   useEffect(() => { setIsMounted(true) }, [])
-  useEffect(() => { setForm(property); setStep(1); setLastSavedPhotos(property.photos || []) }, [property])
+  useEffect(() => { 
+    setForm(property)
+    setLastSavedPhotos(property.photos || [])
+    // NEW properties start at step 1 (Import wizard)
+    // EXISTING properties start at step 2 (Management view - skip Import)
+    setStep(property.isNew ? 1 : 2)
+  }, [property])
   useEffect(() => { 
     onStepChange?.(step)
     // Scroll to top when step changes
@@ -723,25 +729,47 @@ function PropertyEditor({ property, onSave, onDelete, isSaving, saveSuccess, onS
   const checklist = getChecklist(form)
   const checklistComplete = checklist.filter(c => c.done).length
   const canPublish = checklistComplete >= 7
+  
+  // For existing properties, hide Import tab and relabel
+  const isExistingProperty = !property.isNew && form.id
 
   return (
     <div className="rounded-xl border border-black/5 bg-white/60 p-5">
       {toast && <div className="mb-4 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">{toast}</div>}
 
       <div className="mb-5 flex gap-1 rounded-lg bg-black/[0.03] p-1">
-        {[1, 2, 3].map(s => {
-          const isDisabled = s > 1 && !form.heroImageUrl && !form.title
-          return (
+        {isExistingProperty ? (
+          // Existing property: 2 tabs only (Details, Calendar & Brief)
+          <>
             <button 
-              key={s} 
-              onClick={() => !isDisabled && setStep(s as 1 | 2 | 3)} 
-              disabled={isDisabled}
-              className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${step === s ? 'bg-white text-black shadow-sm' : isDisabled ? 'text-black/30 cursor-not-allowed' : 'text-black/60 hover:text-black'}`}
+              onClick={() => setStep(2)} 
+              className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${step === 2 ? 'bg-white text-black shadow-sm' : 'text-black/60 hover:text-black'}`}
             >
-              {s === 1 ? '1. Import' : s === 2 ? '2. Confirm' : '3. Brief'}
+              Details
             </button>
-          )
-        })}
+            <button 
+              onClick={() => setStep(3)} 
+              className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${step === 3 ? 'bg-white text-black shadow-sm' : 'text-black/60 hover:text-black'}`}
+            >
+              Calendar & Brief
+            </button>
+          </>
+        ) : (
+          // New property: 3 step wizard
+          [1, 2, 3].map(s => {
+            const isDisabled = s > 1 && !form.heroImageUrl && !form.title
+            return (
+              <button 
+                key={s} 
+                onClick={() => !isDisabled && setStep(s as 1 | 2 | 3)} 
+                disabled={isDisabled}
+                className={`flex-1 rounded-md py-2 text-xs font-medium transition-all ${step === s ? 'bg-white text-black shadow-sm' : isDisabled ? 'text-black/30 cursor-not-allowed' : 'text-black/60 hover:text-black'}`}
+              >
+                {s === 1 ? '1. Import' : s === 2 ? '2. Details' : '3. Calendar'}
+              </button>
+            )
+          })
+        )}
       </div>
 
       {step === 1 && (
