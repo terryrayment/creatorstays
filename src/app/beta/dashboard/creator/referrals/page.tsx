@@ -105,17 +105,17 @@ export default function CreatorReferralPage() {
             <p className="text-3xl font-bold text-black">{stats?.totalReferrals || 0}</p>
             <p className="text-xs text-black/60">Total Referrals</p>
           </div>
-          <div className="rounded-xl border-2 border-black bg-[#28D17C]/20 p-4">
+          <div className="rounded-xl border-2 border-black bg-[#28D17C] p-4">
             <p className="text-3xl font-bold text-black">{stats?.qualifiedReferrals || 0}</p>
-            <p className="text-xs text-black/60">Qualified</p>
+            <p className="text-xs text-black">Qualified</p>
           </div>
-          <div className="rounded-xl border-2 border-black bg-[#FFD84A]/20 p-4">
+          <div className="rounded-xl border-2 border-black bg-[#FFD84A] p-4">
             <p className="text-3xl font-bold text-black">{stats?.pendingReferrals || 0}</p>
-            <p className="text-xs text-black/60">Pending</p>
+            <p className="text-xs text-black">Pending</p>
           </div>
           <div className="rounded-xl border-2 border-black bg-[#FF7A00] p-4">
             <p className="text-3xl font-bold text-black">${((stats?.totalEarnings || 0) / 100).toFixed(0)}</p>
-            <p className="text-xs text-black/60">Total Earned</p>
+            <p className="text-xs text-black">Total Earned</p>
           </div>
         </div>
 
@@ -134,7 +134,7 @@ export default function CreatorReferralPage() {
                   type="text"
                   value={stats?.referralLink || ""}
                   readOnly
-                  className="flex-1 rounded-lg border-2 border-black bg-black/5 px-4 py-2.5 text-sm font-mono text-black"
+                  className="flex-1 rounded-lg border-2 border-black bg-white px-4 py-2.5 text-sm font-mono text-black"
                 />
                 <button
                   onClick={copyLink}
@@ -151,7 +151,7 @@ export default function CreatorReferralPage() {
                 Or share your code
               </label>
               <div className="flex gap-2">
-                <div className="flex-1 rounded-lg border-2 border-black bg-[#FFD84A]/20 px-4 py-2.5 text-center font-mono text-xl font-bold text-black">
+                <div className="flex-1 rounded-lg border-2 border-black bg-[#FFD84A] px-4 py-2.5 text-center font-mono text-xl font-bold text-black">
                   {stats?.referralCode || "---"}
                 </div>
                 <button
@@ -229,10 +229,10 @@ export default function CreatorReferralPage() {
                     )}
                   </div>
                   <div className="text-right">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-bold ${
+                    <span className={`inline-block rounded-full border-2 border-black px-2 py-0.5 text-xs font-bold ${
                       ref.status === 'qualified' || ref.status === 'paid'
-                        ? 'bg-[#28D17C]/20 text-[#28D17C]'
-                        : 'bg-[#FFD84A]/20 text-black'
+                        ? 'bg-[#28D17C] text-black'
+                        : 'bg-[#FFD84A] text-black'
                     }`}>
                       {ref.status === 'qualified' ? 'Qualified' : ref.status === 'paid' ? 'Paid' : 'Pending'}
                     </span>
@@ -248,15 +248,15 @@ export default function CreatorReferralPage() {
 
         {/* Pending Earnings */}
         {stats && stats.pendingEarnings > 0 && (
-          <div className="mt-6 rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4">
+          <div className="mt-6 rounded-xl border-2 border-[#28D17C] bg-[#28D17C] p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-bold text-black">Pending Earnings</p>
-                <p className="text-xs text-black/60">Ready for payout</p>
+                <p className="text-xs text-black">Ready for payout</p>
               </div>
               <p className="text-2xl font-bold text-black">${(stats.pendingEarnings / 100).toFixed(0)}</p>
             </div>
-            <p className="mt-2 text-xs text-black/50">
+            <p className="mt-2 text-xs text-black">
               Payouts are processed monthly. Set up Stripe Connect in your settings to receive payments.
             </p>
           </div>

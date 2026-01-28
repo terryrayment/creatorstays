@@ -277,7 +277,7 @@ function ReferralSection() {
 
         {/* Expanded content */}
         {expanded && (
-          <div className="px-4 pb-4 pt-0 border-t border-black">
+          <div className="px-4 pb-4 pt-0 border-t-2 border-black">
             <div className="grid gap-4 sm:grid-cols-2 mt-4">
               {/* Share Link */}
               <div>
@@ -296,7 +296,7 @@ function ReferralSection() {
                     className={`h-10 rounded-lg border-2 border-black px-4 text-xs font-bold transition-all ${
                       copied 
                         ? 'bg-[#28D17C] text-black' 
-                        : 'bg-black text-white hover:bg-black/80'
+                        : 'bg-black text-white hover:bg-gray-800'
                     }`}
                   >
                     {copied ? '✓ Copied!' : 'Copy'}
@@ -315,15 +315,15 @@ function ReferralSection() {
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder="friend@email.com"
-                    className="flex-1 h-10 rounded-lg border-2 border-black bg-white px-3 text-xs font-medium text-black placeholder:text-black/40"
+                    className="flex-1 h-10 rounded-lg border-2 border-black bg-white px-3 text-xs font-medium text-black placeholder:text-black/50"
                   />
                   <button
                     onClick={sendInvite}
                     disabled={sending || !inviteEmail}
-                    className={`h-10 rounded-lg border-2 border-black px-4 text-xs font-bold transition-all disabled:opacity-50 ${
+                    className={`h-10 rounded-lg border-2 border-black px-4 text-xs font-bold transition-all disabled:opacity-60 ${
                       sent 
                         ? 'bg-[#28D17C] text-black' 
-                        : 'bg-[#FFD84A] text-black hover:bg-[#FFD84A]/80'
+                        : 'bg-[#FFD84A] text-black hover:bg-[#FFD84A]'
                     }`}
                   >
                     {sending ? '...' : sent ? '✓ Sent!' : 'Invite'}
@@ -333,7 +333,7 @@ function ReferralSection() {
             </div>
 
             {/* Incentive info */}
-            <div className="mt-3 flex items-center gap-2 rounded-lg border-2 border-black bg-white p-2">
+            <div className="mt-3 flex items-center gap-2 rounded-lg border-2 border-black bg-[#FFD84A] p-2">
               <svg className="h-4 w-4 text-black shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
               </svg>
@@ -474,31 +474,31 @@ export default function HostDashboardPage() {
             </div>
 
             {/* What's working now */}
-            <div className="rounded-xl border-2 border-[#28D17C] bg-[#28D17C]/10 p-4 mb-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#28D17C] mb-2">✓ What you can do now</p>
+            <div className="rounded-xl border-2 border-[#28D17C] bg-[#28D17C] p-4 mb-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-black mb-2">✓ What you can do now</p>
               <ul className="space-y-1.5 text-sm text-black">
                 <li className="flex items-start gap-2">
-                  <span className="text-[#28D17C] mt-0.5">•</span>
+                  <span className="text-black mt-0.5">•</span>
                   <span>Add your properties with photos & details</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#28D17C] mt-0.5">•</span>
+                  <span className="text-black mt-0.5">•</span>
                   <span>Set up your host profile & preferences</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#28D17C] mt-0.5">•</span>
+                  <span className="text-black mt-0.5">•</span>
                   <span>Define what kind of creators you want to work with</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#28D17C] mt-0.5">•</span>
+                  <span className="text-black mt-0.5">•</span>
                   <span>Preview how the platform works</span>
                 </li>
               </ul>
             </div>
 
             {/* What's coming */}
-            <div className="rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-4 mb-4">
-              <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#4AA3FF] mb-2">
+            <div className="rounded-xl border-2 border-[#4AA3FF] bg-[#4AA3FF] p-4 mb-4">
+              <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-black mb-2">
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                 </svg>
@@ -506,15 +506,15 @@ export default function HostDashboardPage() {
               </p>
               <ul className="space-y-1.5 text-sm text-black">
                 <li className="flex items-start gap-2">
-                  <span className="text-[#4AA3FF] mt-0.5">•</span>
+                  <span className="text-black mt-0.5">•</span>
                   <span>Real creator profiles you can browse & contact</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#4AA3FF] mt-0.5">•</span>
+                  <span className="text-black mt-0.5">•</span>
                   <span>Smart matching based on your property & preferences</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#4AA3FF] mt-0.5">•</span>
+                  <span className="text-black mt-0.5">•</span>
                   <span>Secure payments & agreements</span>
                 </li>
               </ul>
