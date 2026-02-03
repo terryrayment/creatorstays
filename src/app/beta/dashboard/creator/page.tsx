@@ -12,7 +12,7 @@ function DashboardLoading() {
     <div className="dashboard min-h-screen bg-[hsl(210,20%,98%)] flex items-center justify-center">
       <div className="text-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto" />
-        <p className="mt-2 text-sm text-black/60">Loading dashboard...</p>
+        <p className="mt-2 text-sm text-black">Loading dashboard...</p>
       </div>
     </div>
   )
@@ -29,7 +29,7 @@ function NoAccessMessage() {
             </svg>
           </div>
           <h2 className="font-heading text-xl font-black text-black">Creator Access Required</h2>
-          <p className="mt-2 text-sm text-black/70">
+          <p className="mt-2 text-sm text-black">
             CreatorStays is currently in private beta. You need an invite to access the creator dashboard.
           </p>
           <div className="mt-6 space-y-3">
@@ -41,7 +41,7 @@ function NoAccessMessage() {
             </Link>
             <Link
               href="/"
-              className="block text-sm font-medium text-black/60 hover:text-black"
+              className="block text-sm font-medium text-black hover:text-black"
             >
               ← Back to Home
             </Link>
@@ -110,11 +110,11 @@ function OAuthErrorBanner({ error, platform, onDismiss }: { error: string; platf
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold text-black">{platformName}: {errorInfo.title}</p>
-            <p className="mt-0.5 text-xs text-black/70">{errorInfo.message}</p>
+            <p className="mt-0.5 text-xs text-black">{errorInfo.message}</p>
           </div>
           <button
             onClick={onDismiss}
-            className="shrink-0 rounded-lg p-1 text-black/40 hover:bg-black/5 hover:text-black"
+            className="shrink-0 rounded-lg p-1 text-black hover:bg-white hover:text-black"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -140,11 +140,11 @@ function SuccessBanner({ platform, onDismiss }: { platform: 'instagram' | 'tikto
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold text-black">{platformName} Connected</p>
-            <p className="text-xs text-black/70">Your account is now linked and verified.</p>
+            <p className="text-xs text-black">Your account is now linked and verified.</p>
           </div>
           <button
             onClick={onDismiss}
-            className="shrink-0 rounded-lg p-1 text-black/40 hover:bg-black/10 hover:text-black"
+            className="shrink-0 rounded-lg p-1 text-black hover:bg-black hover:text-black"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -277,7 +277,7 @@ function DashboardContent() {
 
       {/* Welcome Modal - Beta appropriate copy */}
       {showWelcome && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white0 p-4">
           <div className="w-full max-w-md rounded-2xl border-4 border-black bg-white p-8 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-black bg-[#28D17C]">
               <svg className="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -285,11 +285,11 @@ function DashboardContent() {
               </svg>
             </div>
             <h2 className="font-heading text-2xl tracking-tight text-black">You're approved for beta!</h2>
-            <p className="mt-2 text-sm text-black/70">
+            <p className="mt-2 text-sm text-black">
               Your profile is visible to beta hosts. When they want to collaborate, you'll receive offers here.
             </p>
-            <div className="mt-4 rounded-lg border border-black/10 bg-black/5 p-3">
-              <p className="text-xs text-black/60">
+            <div className="mt-4 rounded-lg border border-black bg-white p-3">
+              <p className="text-xs text-black">
                 <strong>What's next:</strong> Hosts can browse your profile and send collaboration offers. You'll be notified by email when you receive one.
               </p>
             </div>

@@ -61,17 +61,17 @@ function ProgressBar({ step, totalSteps }: { step: number; totalSteps: number })
         {stepNames.map((name, i) => (
           <div key={name} className="flex flex-col items-center">
             <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold ${
-              i + 1 <= step ? 'border-black bg-black text-white' : 'border-black/30 text-black/30'
+              i + 1 <= step ? 'border-black bg-black text-white' : 'border-black text-black'
             }`}>
               {i + 1}
             </div>
             <span className={`mt-1 hidden text-[10px] font-bold uppercase tracking-wider sm:block ${
-              i + 1 <= step ? 'text-black' : 'text-black/30'
+              i + 1 <= step ? 'text-black' : 'text-black'
             }`}>{name}</span>
           </div>
         ))}
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-black/10">
+      <div className="h-1.5 overflow-hidden rounded-full bg-white border border-black">
         <div className="h-full rounded-full bg-[#FF7A00] transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
     </div>
@@ -311,7 +311,7 @@ export default function CreatorOnboardingPage() {
     )
   }
 
-  const inputClass = "w-full rounded-lg border-2 border-black px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black"
+  const inputClass = "w-full rounded-lg border-2 border-black px-4 py-3 text-sm text-black placeholder:text-black focus:outline-none focus:ring-2 focus:ring-black"
 
   return (
     <div className="min-h-screen bg-[#FFFDF7]">
@@ -342,17 +342,17 @@ export default function CreatorOnboardingPage() {
             <div className="mb-8 text-center">
               <StepIcon icon="user" />
               <h1 className="font-heading text-3xl tracking-tight text-black">Let's build your profile</h1>
-              <p className="mt-2 text-sm text-black/60">This info helps hosts understand who you are</p>
+              <p className="mt-2 text-sm text-black">This info helps hosts understand who you are</p>
             </div>
 
             <div className="space-y-6">
               <div className="flex justify-center">
                 <div className="relative">
-                  <div className="h-24 w-24 overflow-hidden rounded-full border-[3px] border-black bg-black/10">
+                  <div className="h-24 w-24 overflow-hidden rounded-full border-[3px] border-black bg-white border border-black">
                     {data.avatarUrl ? (
                       <img src={data.avatarUrl} alt="" className="h-full w-full object-cover" />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-black/30">
+                      <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-black">
                         {data.displayName?.charAt(0) || '?'}
                       </div>
                     )}
@@ -374,7 +374,7 @@ export default function CreatorOnboardingPage() {
               <div>
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Handle</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-black/40">@</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-black">@</span>
                   <input
                     type="text"
                     value={data.handle}
@@ -388,7 +388,7 @@ export default function CreatorOnboardingPage() {
                   />
                   {data.handle.length >= 3 && (
                     <span className={`absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold ${
-                      checkingHandle ? 'text-black/40' : handleAvailable ? 'text-green-600' : 'text-red-500'
+                      checkingHandle ? 'text-black' : handleAvailable ? 'text-green-600' : 'text-red-500'
                     }`}>
                       {checkingHandle ? '...' : handleAvailable ? 'Available' : 'Taken'}
                     </span>
@@ -426,7 +426,7 @@ export default function CreatorOnboardingPage() {
             <div className="mb-8 text-center">
               <StepIcon icon="share" />
               <h1 className="font-heading text-3xl tracking-tight text-black">Your platforms & niche</h1>
-              <p className="mt-2 text-sm text-black/60">Connect your socials and define your content focus</p>
+              <p className="mt-2 text-sm text-black">Connect your socials and define your content focus</p>
             </div>
 
             <div className="space-y-6">
@@ -435,7 +435,7 @@ export default function CreatorOnboardingPage() {
                   <label className="text-xs font-bold uppercase tracking-wider text-black">Social Platforms</label>
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">Self-reported</span>
                 </div>
-                <p className="mb-4 text-xs text-black/60">
+                <p className="mb-4 text-xs text-black">
                   Enter your handles and approximate follower counts. You can verify with OAuth later for a "Verified" badge.
                 </p>
                 
@@ -518,7 +518,7 @@ export default function CreatorOnboardingPage() {
                         }
                       }}
                       className={`rounded-full border-2 border-black px-4 py-2 text-xs font-bold transition-all ${
-                        data.niches.includes(niche.value) ? "bg-[#FF7A00]" : "bg-white hover:bg-black/5"
+                        data.niches.includes(niche.value) ? "bg-[#FF7A00]" : "bg-white hover:bg-white"
                       }`}
                     >
                       {niche.label}
@@ -536,7 +536,7 @@ export default function CreatorOnboardingPage() {
             <div className="mb-8 text-center">
               <StepIcon icon="package" />
               <h1 className="font-heading text-3xl tracking-tight text-black">What can you deliver?</h1>
-              <p className="mt-2 text-sm text-black/60">Set your rates and content offerings</p>
+              <p className="mt-2 text-sm text-black">Set your rates and content offerings</p>
             </div>
 
             <div className="space-y-6">
@@ -556,7 +556,7 @@ export default function CreatorOnboardingPage() {
                         }
                       }}
                       className={`rounded-full border-2 border-black px-4 py-2 text-xs font-bold transition-all ${
-                        data.deliverables.includes(item.value) ? "bg-[#28D17C]" : "bg-white hover:bg-black/5"
+                        data.deliverables.includes(item.value) ? "bg-[#28D17C]" : "bg-white hover:bg-white"
                       }`}
                     >
                       {item.label}
@@ -569,7 +569,7 @@ export default function CreatorOnboardingPage() {
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Minimum Flat Fee</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-black/40">$</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-black">$</span>
                     <input
                       type="text"
                       value={data.minimumFlatFee}
@@ -598,9 +598,9 @@ export default function CreatorOnboardingPage() {
                 <label className="flex cursor-pointer items-center justify-between">
                   <div>
                     <p className="text-sm font-bold text-black">Open to Post-for-Stay</p>
-                    <p className="text-xs text-black/60">Accept free stays in exchange for content</p>
+                    <p className="text-xs text-black">Accept free stays in exchange for content</p>
                   </div>
-                  <div className={`relative h-6 w-11 rounded-full transition-colors ${data.openToGiftedStays ? 'bg-[#28D17C]' : 'bg-black/20'}`}>
+                  <div className={`relative h-6 w-11 rounded-full transition-colors ${data.openToGiftedStays ? 'bg-[#28D17C]' : 'bg-black'}`}>
                     <input
                       type="checkbox"
                       checked={data.openToGiftedStays}
@@ -621,7 +621,7 @@ export default function CreatorOnboardingPage() {
             <div className="mb-8 text-center">
               <StepIcon icon="check" />
               <h1 className="font-heading text-3xl tracking-tight text-black">You're approved for beta!</h1>
-              <p className="mt-2 text-sm text-black/60">Review your profile before completing setup</p>
+              <p className="mt-2 text-sm text-black">Review your profile before completing setup</p>
             </div>
 
             <div className="space-y-6">
@@ -640,14 +640,14 @@ export default function CreatorOnboardingPage() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-black">{data.displayName}</h3>
-                      <p className="text-sm font-medium text-black/70">@{data.handle}</p>
-                      {data.location && <p className="text-xs text-black/60">{data.location}</p>}
+                      <p className="text-sm font-medium text-black">@{data.handle}</p>
+                      {data.location && <p className="text-xs text-black">{data.location}</p>}
                     </div>
                   </div>
                 </div>
                 
                 <div className="p-4 space-y-4">
-                  {data.bio && <p className="text-sm text-black/70">{data.bio}</p>}
+                  {data.bio && <p className="text-sm text-black">{data.bio}</p>}
                   
                   <div className="flex flex-wrap gap-2">
                     {data.instagramHandle && (
@@ -675,9 +675,9 @@ export default function CreatorOnboardingPage() {
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-black/10 pt-4">
+                  <div className="flex items-center justify-between border-t border-black pt-4">
                     <div>
-                      <p className="text-xs text-black/50">Starting at</p>
+                      <p className="text-xs text-black">Starting at</p>
                       <p className="text-lg font-bold text-black">${data.minimumFlatFee || '0'}</p>
                     </div>
                     {data.openToGiftedStays && (
@@ -698,7 +698,7 @@ export default function CreatorOnboardingPage() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-black">Visible to beta hosts</p>
-                    <p className="mt-0.5 text-xs text-black/70">
+                    <p className="mt-0.5 text-xs text-black">
                       Beta hosts can view your profile and send collaboration offers. You'll be notified by email.
                     </p>
                   </div>
@@ -724,7 +724,7 @@ export default function CreatorOnboardingPage() {
             <button
               onClick={handleLaunch}
               disabled={saving}
-              className="rounded-full border-2 border-black bg-[#28D17C] px-8 py-2.5 text-xs font-bold uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+              className="rounded-full border-2 border-black bg-[#28D17C] px-8 py-2.5 text-xs font-bold uppercase tracking-wider text-black transition-transform hover:-translate-y-0.5 disabled:bg-gray-400 disabled:border-gray-400 disabled:cursor-not-allowed"
             >
               {saving ? "Saving..." : "Complete Setup"}
             </button>

@@ -51,7 +51,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
-      <div className="rounded-lg border border-black/10 bg-white px-4 py-3 shadow-lg">
+      <div className="rounded-lg border border-black bg-white px-4 py-3 shadow-lg">
         <div className="flex items-center gap-2">
           <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -66,7 +66,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 // Modal wrapper component
 function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white0 backdrop-blur-sm">
       <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         {children}
       </div>
@@ -87,7 +87,7 @@ function CompletenessBar({ percent }: { percent: number }) {
         <span className="text-black">Profile complete</span>
         <span className="font-semibold text-black">{percent}%</span>
       </div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/10 border border-black">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-black border border-black">
         <div 
           className="h-full rounded-full bg-black"
           style={{ width: `${percent}%` }}
@@ -109,7 +109,7 @@ function CopyLinkButton({ handle, onCopy }: { handle: string; onCopy: () => void
   return (
     <button 
       onClick={copy}
-      className="flex w-full items-center gap-2 rounded-lg border-2 border-black bg-white px-3 py-2 text-left transition-colors hover:bg-black/5"
+      className="flex w-full items-center gap-2 rounded-lg border-2 border-black bg-white px-3 py-2 text-left transition-colors hover:bg-white"
     >
       <svg className="h-3.5 w-3.5 shrink-0 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
@@ -170,13 +170,13 @@ function CampaignTimeline() {
       <PanelHeader 
         title="Campaign timeline" 
         actions={
-          <div className="flex rounded-full border border-black/10 bg-black/[0.02] p-0.5">
+          <div className="flex rounded-full border border-black bg-white p-0.5">
             <button
               onClick={() => setTimeRange('14')}
               className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
                 timeRange === '14' 
                   ? 'bg-white text-black shadow-sm' 
-                  : 'text-black/60 hover:text-black'
+                  : 'text-black hover:text-black'
               }`}
             >
               Last 14 days
@@ -186,7 +186,7 @@ function CampaignTimeline() {
               className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
                 timeRange === '30' 
                   ? 'bg-white text-black shadow-sm' 
-                  : 'text-black/60 hover:text-black'
+                  : 'text-black hover:text-black'
               }`}
             >
               Last 30 days
@@ -210,21 +210,21 @@ function CampaignTimeline() {
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium leading-tight">{campaign.property}</p>
-                  <p className="text-[10px] text-black/60">{campaign.host} · /{campaign.linkLabel}</p>
-                  <p className="text-[10px] text-black/60/60">{campaign.dateRange}</p>
+                  <p className="text-[10px] text-black">{campaign.host} · /{campaign.linkLabel}</p>
+                  <p className="text-[10px] text-black">{campaign.dateRange}</p>
                 </div>
                 <div className="flex gap-4 text-right">
                   <div>
                     <p className="text-sm font-semibold">{campaign.totalClicks}</p>
-                    <p className="text-[9px] text-black/60">clicks</p>
+                    <p className="text-[9px] text-black">clicks</p>
                   </div>
                   <div>
                     <p className="text-sm font-semibold">{campaign.uniqueClicks}</p>
-                    <p className="text-[9px] text-black/60">unique</p>
+                    <p className="text-[9px] text-black">unique</p>
                   </div>
                   <div>
                     <p className="text-sm font-semibold">{campaign.revisitRate}%</p>
-                    <p className="text-[9px] text-black/60">revisit</p>
+                    <p className="text-[9px] text-black">revisit</p>
                   </div>
                 </div>
               </div>
@@ -237,7 +237,7 @@ function CampaignTimeline() {
                         ? 'bg-primary' 
                         : hoveredId === campaign.id 
                           ? 'bg-primary/40' 
-                          : 'bg-black/10'
+                          : 'bg-black'
                     }`}
                     style={{ 
                       height: `${Math.max(level * 10, 4)}%`,
@@ -246,7 +246,7 @@ function CampaignTimeline() {
                   />
                 ))}
               </div>
-              <div className="mt-1 flex justify-between text-[8px] text-black/60/40">
+              <div className="mt-1 flex justify-between text-[8px] text-black">
                 <span>Start</span>
                 <span>Post ↑</span>
                 <span>End</span>
@@ -286,12 +286,12 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
       />
       <PanelContent className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg bg-white/60 p-2.5">
-            <p className="text-[10px] text-black/60">Net Paid Out</p>
+          <div className="rounded-lg bg-white p-2.5">
+            <p className="text-[10px] text-black">Net Paid Out</p>
             <p className="text-base font-semibold text-emerald-600">${mockTaxData.netPaidOut.toFixed(2)}</p>
           </div>
-          <div className="rounded-lg bg-white/60 p-2.5">
-            <p className="text-[10px] text-black/60">Pending</p>
+          <div className="rounded-lg bg-white p-2.5">
+            <p className="text-[10px] text-black">Pending</p>
             <p className="text-base font-semibold text-amber-600">${mockTaxData.pendingBalance.toFixed(2)}</p>
           </div>
         </div>
@@ -304,27 +304,27 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
         </button>
         
         {showBreakdown && (
-          <div className="rounded-lg bg-black/[0.02] p-2.5 text-xs space-y-1">
+          <div className="rounded-lg bg-white p-2.5 text-xs space-y-1">
             <div className="flex justify-between">
-              <span className="text-black/60">Gross earnings</span>
+              <span className="text-black">Gross earnings</span>
               <span>${mockTaxData.ytdGross.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-black/60">Platform fees (15%)</span>
+              <span className="text-black">Platform fees (15%)</span>
               <span>-${mockTaxData.platformFees.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between border-t border-black/5 pt-1">
+            <div className="flex justify-between border-t border-black pt-1">
               <span className="font-medium">Net</span>
               <span className="font-medium">${mockTaxData.netPaidOut.toFixed(2)}</span>
             </div>
           </div>
         )}
 
-        <div className="rounded-lg border border-dashed border-black/10 bg-white/40 p-3">
+        <div className="rounded-lg border border-dashed border-black bg-white p-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium">Payout account</p>
-              <p className="text-[10px] text-black/60">
+              <p className="text-[10px] text-black">
                 {mockTaxData.stripeConnected ? 'Bank account connected' : 'Payouts are deposited to your bank account.'}
               </p>
             </div>
@@ -337,10 +337,10 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
               {mockTaxData.stripeConnected ? 'Manage' : 'Connect bank'}
             </Button>
           </div>
-          <p className="mt-2 text-[9px] text-black/60/60">Bank connection powered by Stripe</p>
+          <p className="mt-2 text-[9px] text-black">Bank connection powered by Stripe</p>
         </div>
 
-        <div className="text-[10px] text-black/60 leading-relaxed">
+        <div className="text-[10px] text-black leading-relaxed">
           <p>Tax forms are issued automatically for eligible US creators.</p>
           <button 
             onClick={() => onComingSoon('Tax documentation')}
@@ -351,7 +351,7 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
         </div>
 
         <div className="space-y-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-black/60">Setup checklist</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-black">Setup checklist</p>
           {[
             { key: 'legalName', label: 'Add legal name', done: mockTaxData.checklist.legalName },
             { key: 'address', label: 'Add address', done: mockTaxData.checklist.address },
@@ -361,12 +361,12 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
             <button 
               key={item.key} 
               onClick={() => !item.done && onComingSoon(item.label)}
-              className="flex w-full items-center gap-2 text-xs hover:bg-black/[0.02] rounded p-1 -ml-1"
+              className="flex w-full items-center gap-2 text-xs hover:bg-white rounded p-1 -ml-1"
             >
               <div className={`flex h-4 w-4 items-center justify-center rounded-full ${
                 item.done 
                   ? 'bg-emerald-500 text-white' 
-                  : 'border border-black/20 bg-white'
+                  : 'border border-black bg-white'
               }`}>
                 {item.done && (
                   <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
@@ -374,7 +374,7 @@ function EarningsPanel({ onComingSoon }: { onComingSoon: (feature: string) => vo
                   </svg>
                 )}
               </div>
-              <span className={item.done ? 'text-black/60 line-through' : ''}>{item.label}</span>
+              <span className={item.done ? 'text-black line-through' : ''}>{item.label}</span>
             </button>
           ))}
         </div>
@@ -797,7 +797,7 @@ export function CreatorDashboardProfile() {
               <span className="text-xl">📋</span>
               <div>
                 <p className="text-sm font-bold text-black">Complete your profile to receive collaboration offers</p>
-                <p className="text-xs text-black/70">Your profile is {profileComplete}% complete</p>
+                <p className="text-xs text-black">Your profile is {profileComplete}% complete</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -809,7 +809,7 @@ export function CreatorDashboardProfile() {
               </Link>
               <button
                 onClick={() => setShowOnboardingBanner(false)}
-                className="p-1 text-black/60 hover:text-black"
+                className="p-1 text-black hover:text-black"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -830,13 +830,13 @@ export function CreatorDashboardProfile() {
               </svg>
               <div>
                 <p className="text-sm font-bold text-black">Set up payments to accept paid offers</p>
-                <p className="text-xs text-black/70">Connect your bank account via Stripe to receive payments from hosts</p>
+                <p className="text-xs text-black">Connect your bank account via Stripe to receive payments from hosts</p>
               </div>
             </div>
             <button
               onClick={handleStripeConnect}
               disabled={stripeConnecting}
-              className="rounded-full border-2 border-black bg-black px-4 py-1.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+              className="rounded-full border-2 border-black bg-black px-4 py-1.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 disabled:bg-gray-400 disabled:border-gray-400 disabled:cursor-not-allowed"
             >
               {stripeConnecting ? 'Connecting...' : 'Connect Stripe →'}
             </button>
@@ -855,17 +855,17 @@ export function CreatorDashboardProfile() {
           <h3 className="text-lg font-semibold">Edit About</h3>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="text-xs font-medium text-black/60">Bio</label>
+              <label className="text-xs font-medium text-black">Bio</label>
               <textarea
                 value={editBio}
                 onChange={(e) => setEditBio(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-black/10 p-3 text-sm"
+                className="mt-1 w-full rounded-lg border border-black p-3 text-sm"
                 rows={3}
                 placeholder="Tell hosts about your content style..."
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-black/60">Niches</label>
+              <label className="text-xs font-medium text-black">Niches</label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {AVAILABLE_NICHES.map(niche => (
                   <button
@@ -874,7 +874,7 @@ export function CreatorDashboardProfile() {
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       editNiches.includes(niche)
                         ? 'bg-primary text-white'
-                        : 'border border-black/10 bg-white hover:bg-black/5'
+                        : 'border border-black bg-white hover:bg-white'
                     }`}
                   >
                     {niche}
@@ -896,7 +896,7 @@ export function CreatorDashboardProfile() {
           <h3 className="text-lg font-semibold">Edit Rates</h3>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="text-xs font-medium text-black/60">Base rate per post ($)</label>
+              <label className="text-xs font-medium text-black">Base rate per post ($)</label>
               <Input
                 type="number"
                 value={editMinFlat}
@@ -906,7 +906,7 @@ export function CreatorDashboardProfile() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-black/60">Traffic bonus (%)</label>
+              <label className="text-xs font-medium text-black">Traffic bonus (%)</label>
               <Input
                 type="number"
                 value={editMinPercent}
@@ -914,14 +914,14 @@ export function CreatorDashboardProfile() {
                 placeholder="e.g. 10"
                 className="mt-1"
               />
-              <p className="mt-1 text-[10px] text-black/60">Optional bonus based on tracked link traffic</p>
+              <p className="mt-1 text-[10px] text-black">Optional bonus based on tracked link traffic</p>
             </div>
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Open to post-for-stay</label>
               <button
                 onClick={() => setEditPostForStay(!editPostForStay)}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  editPostForStay ? 'bg-primary' : 'bg-black/20'
+                  editPostForStay ? 'bg-primary' : 'bg-black'
                 }`}
               >
                 <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
@@ -941,7 +941,7 @@ export function CreatorDashboardProfile() {
       {editDeliverablesOpen && (
         <Modal onClose={() => setEditDeliverablesOpen(false)}>
           <h3 className="text-lg font-semibold">Edit Deliverables</h3>
-          <p className="mt-1 text-sm text-black/60">Select the content types you offer.</p>
+          <p className="mt-1 text-sm text-black">Select the content types you offer.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {AVAILABLE_DELIVERABLES.map(d => (
               <button
@@ -950,7 +950,7 @@ export function CreatorDashboardProfile() {
                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   editDeliverables.includes(d)
                     ? 'bg-primary text-white'
-                    : 'border border-black/10 bg-white hover:bg-black/5'
+                    : 'border border-black bg-white hover:bg-white'
                 }`}
               >
                 {d}
@@ -970,7 +970,7 @@ export function CreatorDashboardProfile() {
           <h3 className="text-lg font-semibold">Edit Profile</h3>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="text-xs font-medium text-black/60">Display Name</label>
+              <label className="text-xs font-medium text-black">Display Name</label>
               <Input
                 value={editDisplayName}
                 onChange={(e) => setEditDisplayName(e.target.value)}
@@ -978,9 +978,9 @@ export function CreatorDashboardProfile() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-black/60">Handle</label>
+              <label className="text-xs font-medium text-black">Handle</label>
               <div className="mt-1 flex items-center gap-1">
-                <span className="text-sm text-black/60">@</span>
+                <span className="text-sm text-black">@</span>
                 <Input
                   value={editHandle}
                   onChange={(e) => setEditHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
@@ -999,7 +999,7 @@ export function CreatorDashboardProfile() {
       {comingSoonModal && (
         <Modal onClose={() => setComingSoonModal(null)}>
           <h3 className="text-lg font-semibold">Coming Soon</h3>
-          <p className="mt-2 text-sm text-black/60">
+          <p className="mt-2 text-sm text-black">
             {comingSoonModal} is not available yet. We're working on it!
           </p>
           <div className="mt-6">
@@ -1042,7 +1042,7 @@ export function CreatorDashboardProfile() {
 
       {/* Connect Platform Modal */}
       {connectingPlatform && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white0 backdrop-blur-sm">
           <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
             <h3 className="text-lg font-semibold">
               {connectedPlatforms[connectingPlatform] ? 'Manage' : 'Connect'} {connectingPlatform === 'instagram' ? 'Instagram' : connectingPlatform === 'tiktok' ? 'TikTok' : 'YouTube'}
@@ -1086,7 +1086,7 @@ export function CreatorDashboardProfile() {
               </>
             ) : (
               <>
-                <p className="mt-2 text-sm text-black/60">
+                <p className="mt-2 text-sm text-black">
                   Enter your {connectingPlatform} profile URL to connect.
                 </p>
                 <Input
@@ -1131,7 +1131,7 @@ export function CreatorDashboardProfile() {
           <div className="flex items-center gap-2">
             <Link 
               href="/dashboard/messages"
-              className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-medium text-black hover:bg-black/5"
+              className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-medium text-black hover:bg-white"
             >
               Messages
             </Link>
@@ -1158,7 +1158,7 @@ export function CreatorDashboardProfile() {
             <Panel variant="elevated" className="overflow-hidden">
               <div className="flex flex-col md:flex-row">
                 {/* Left: Avatar + actions */}
-                <div className="border-b border-black/10 bg-white p-5 md:w-56 md:border-b-0 md:border-r">
+                <div className="border-b border-black bg-white p-5 md:w-56 md:border-b-0 md:border-r">
                   <div className="flex items-center gap-3 md:flex-col md:items-start md:gap-0">
                     <div className="relative">
                       <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 md:h-20 md:w-20" />
@@ -1182,7 +1182,7 @@ export function CreatorDashboardProfile() {
                   </div>
 
                   {/* Status indicators */}
-                  <div className="mt-4 flex flex-col gap-2 border-t border-black/10 pt-4">
+                  <div className="mt-4 flex flex-col gap-2 border-t border-black pt-4">
                     <div className="flex items-center gap-2 text-xs text-black">
                       <StatusDot active color="bg-amber-500" />
                       <span>Beta access</span>
@@ -1198,12 +1198,12 @@ export function CreatorDashboardProfile() {
                   </div>
 
                   <div className="mt-4 space-y-2">
-                    <Button size="sm" className="w-full text-xs border-2 border-black bg-black text-white hover:bg-black/90" onClick={() => {
+                    <Button size="sm" className="w-full text-xs border-2 border-black bg-black text-white hover:bg-black" onClick={() => {
                       setEditDisplayName(profile.displayName)
                       setEditHandle(profile.handle)
                       setEditProfileOpen(true)
                     }}>Edit Profile</Button>
-                    <Button size="sm" variant="outline" className="w-full text-xs border-2 border-black text-black hover:bg-black/5" asChild>
+                    <Button size="sm" variant="outline" className="w-full text-xs border-2 border-black text-black hover:bg-white" asChild>
                       <Link href={`/creators/${profile.handle}`}>View Profile</Link>
                     </Button>
                   </div>
@@ -1216,7 +1216,7 @@ export function CreatorDashboardProfile() {
                       {/* Bio */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black/60">About</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black">About</span>
                           <button 
                             onClick={() => {
                               setEditBio(profile.bio)
@@ -1228,7 +1228,7 @@ export function CreatorDashboardProfile() {
                             Edit
                           </button>
                         </div>
-                        <p className="text-xs text-black/60 leading-relaxed">{profile.bio}</p>
+                        <p className="text-xs text-black leading-relaxed">{profile.bio}</p>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {profile.niches.map(n => (
                             <span key={n} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">{n}</span>
@@ -1239,7 +1239,7 @@ export function CreatorDashboardProfile() {
                       {/* Platforms */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black/60">Platforms</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black">Platforms</span>
                         </div>
                         <div className="space-y-2 text-xs">
                           {(["instagram", "tiktok", "youtube"] as Platform[]).map(p => {
@@ -1271,19 +1271,19 @@ export function CreatorDashboardProfile() {
                             }
                             
                             return (
-                              <div key={p} className="rounded-lg bg-black/[0.02] p-2">
+                              <div key={p} className="rounded-lg bg-white p-2">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-1.5">
                                     {isConnected && (
                                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                                     )}
-                                    <span className={isConnected ? "font-medium" : "text-black/60"}>{label}</span>
+                                    <span className={isConnected ? "font-medium" : "text-black"}>{label}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     {isConnected && (
                                       <button 
                                         onClick={() => handleSyncPlatform(p)}
-                                        className="text-[9px] text-black/60 hover:text-primary"
+                                        className="text-[9px] text-black hover:text-primary"
                                       >
                                         Sync
                                       </button>
@@ -1322,10 +1322,10 @@ export function CreatorDashboardProfile() {
                                   </div>
                                 </div>
                                 <div className="mt-1 flex items-center justify-between text-[10px]">
-                                  <span className={isConnected ? "font-medium" : "text-black/60/50"}>
+                                  <span className={isConnected ? "font-medium" : "text-black"}>
                                     {followerCount ? formatCount(followerCount) : "—"} {countLabel}
                                   </span>
-                                  <span className="text-black/60/50">
+                                  <span className="text-black">
                                     {isConnected && lastSynced ? `Synced ${formatSyncTime(lastSynced)}` : isConnected ? "Not synced" : "Not connected"}
                                   </span>
                                 </div>
@@ -1338,7 +1338,7 @@ export function CreatorDashboardProfile() {
                       {/* Deal prefs */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black/60">Rates</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black">Rates</span>
                           <button 
                             onClick={() => {
                               setEditMinFlat(profile.dealPrefs.minFlat?.toString() || '')
@@ -1353,15 +1353,15 @@ export function CreatorDashboardProfile() {
                         </div>
                         <div className="space-y-1 text-xs">
                           <div className="flex justify-between">
-                            <span className="text-black/60">Base rate</span>
+                            <span className="text-black">Base rate</span>
                             <span>{profile.dealPrefs.minFlat ? `$${profile.dealPrefs.minFlat}` : '—'}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-black/60">Traffic bonus</span>
+                            <span className="text-black">Traffic bonus</span>
                             <span>{profile.dealPrefs.minPercent ? `${profile.dealPrefs.minPercent}%` : '—'}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-black/60">Post-for-stay</span>
+                            <span className="text-black">Post-for-stay</span>
                             <span>{profile.dealPrefs.postForStay ? 'Open' : 'Closed'}</span>
                           </div>
                         </div>
@@ -1370,7 +1370,7 @@ export function CreatorDashboardProfile() {
                       {/* Deliverables */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black/60">Deliverables</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-black">Deliverables</span>
                           <button 
                             onClick={() => {
                               setEditDeliverables(profile.deliverables)
@@ -1383,7 +1383,7 @@ export function CreatorDashboardProfile() {
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {profile.deliverables.map(d => (
-                            <span key={d} className="rounded-full border border-black/10 bg-white px-2 py-0.5 text-[10px]">{d}</span>
+                            <span key={d} className="rounded-full border border-black bg-white px-2 py-0.5 text-[10px]">{d}</span>
                           ))}
                         </div>
                       </div>
@@ -1396,13 +1396,13 @@ export function CreatorDashboardProfile() {
             {/* Empty state for metrics - shown when no real data */}
             <Panel variant="elevated" className="p-6">
               <div className="text-center">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/10 bg-black/5">
-                  <svg className="h-6 w-6 text-black/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-white">
+                  <svg className="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                   </svg>
                 </div>
                 <p className="text-sm font-medium text-black">No analytics yet</p>
-                <p className="mt-1 text-xs text-black/60">
+                <p className="mt-1 text-xs text-black">
                   Your click tracking and performance data will appear here once you complete a collaboration.
                 </p>
               </div>
@@ -1413,13 +1413,13 @@ export function CreatorDashboardProfile() {
               <PanelHeader title="Active Collaborations" />
               <PanelContent className="py-8">
                 <div className="text-center">
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/10 bg-black/5">
-                    <svg className="h-6 w-6 text-black/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-white">
+                    <svg className="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                     </svg>
                   </div>
                   <p className="text-sm font-medium text-black">No active collaborations</p>
-                  <p className="mt-1 text-xs text-black/60">
+                  <p className="mt-1 text-xs text-black">
                     When you accept an offer from a host, your collaboration will appear here.
                   </p>
                 </div>
@@ -1438,8 +1438,8 @@ export function CreatorDashboardProfile() {
                 <PanelHeader title="Earnings" />
                 <PanelContent>
                   <div className="text-center py-4">
-                    <p className="text-xs text-black/60">No earnings yet</p>
-                    <p className="mt-1 text-[10px] text-black/40">Complete a paid collaboration to see earnings</p>
+                    <p className="text-xs text-black">No earnings yet</p>
+                    <p className="mt-1 text-[10px] text-black">Complete a paid collaboration to see earnings</p>
                   </div>
                 </PanelContent>
               </Panel>
@@ -1448,16 +1448,16 @@ export function CreatorDashboardProfile() {
                 <PanelHeader title="Get Paid" />
                 <PanelContent>
                   <div className="text-center">
-                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full border-2 border-black/10 bg-black/5">
-                      <svg className="h-5 w-5 text-black/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-white">
+                      <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                       </svg>
                     </div>
-                    <p className="text-xs text-black/60">Set up payouts to receive payments</p>
+                    <p className="text-xs text-black">Set up payouts to receive payments</p>
                     <button
                       onClick={handleStripeConnect}
                       disabled={stripeConnecting}
-                      className="mt-3 w-full rounded-full border-2 border-black bg-black px-4 py-2 text-xs font-bold text-white hover:bg-black/90 disabled:opacity-50"
+                      className="mt-3 w-full rounded-full border-2 border-black bg-black px-4 py-2 text-xs font-bold text-white hover:bg-black disabled:bg-gray-400 disabled:border-gray-400 disabled:cursor-not-allowed"
                     >
                       {stripeConnecting ? 'Connecting...' : 'Connect Stripe'}
                     </button>
@@ -1475,7 +1475,7 @@ export function CreatorDashboardProfile() {
                   </svg>
                   <div>
                     <p className="text-xs font-medium text-black">Messaging during beta</p>
-                    <p className="mt-1 text-[10px] text-black/60">
+                    <p className="mt-1 text-[10px] text-black">
                       Hosts can message you directly. To message hosts first, connect Instagram or TikTok to verify 50k+ followers.
                     </p>
                     {!Object.keys(connectedPlatforms).length && (
@@ -1496,13 +1496,13 @@ export function CreatorDashboardProfile() {
               <PanelHeader title="Incoming Offers" />
               <PanelContent>
                 <div className="text-center py-4">
-                  <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full border-2 border-black/10 bg-black/5">
-                    <svg className="h-5 w-5 text-black/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full border-2 border-black bg-white">
+                    <svg className="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                     </svg>
                   </div>
-                  <p className="text-xs text-black/60">No offers yet</p>
-                  <p className="mt-1 text-[10px] text-black/40">Hosts will send offers here</p>
+                  <p className="text-xs text-black">No offers yet</p>
+                  <p className="mt-1 text-[10px] text-black">Hosts will send offers here</p>
                 </div>
               </PanelContent>
             </Panel>
@@ -1510,21 +1510,21 @@ export function CreatorDashboardProfile() {
             {/* Quick links */}
             <Panel>
               <PanelContent className="space-y-1.5 py-3">
-                <Link href="/beta/dashboard/creator/offers" className="flex items-center justify-between rounded-lg bg-black/[0.02] px-3 py-2 text-xs transition-colors hover:bg-black/[0.04]">
+                <Link href="/beta/dashboard/creator/offers" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs transition-colors hover:bg-white">
                   View all offers
-                  <svg className="h-3.5 w-3.5 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-3.5 w-3.5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </Link>
-                <Link href="/beta/dashboard/creator/settings" className="flex items-center justify-between rounded-lg bg-black/[0.02] px-3 py-2 text-xs transition-colors hover:bg-black/[0.04]">
+                <Link href="/beta/dashboard/creator/settings" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs transition-colors hover:bg-white">
                   Profile settings
-                  <svg className="h-3.5 w-3.5 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-3.5 w-3.5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </Link>
-                <Link href="/how-to/creators" className="flex items-center justify-between rounded-lg bg-black/[0.02] px-3 py-2 text-xs transition-colors hover:bg-black/[0.04]">
+                <Link href="/how-to/creators" className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs transition-colors hover:bg-white">
                   How it works
-                  <svg className="h-3.5 w-3.5 text-black/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-3.5 w-3.5 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </Link>

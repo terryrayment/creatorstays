@@ -154,7 +154,7 @@ function OnboardingContent() {
     )
   }
 
-  const inputClass = "h-11 w-full rounded-lg border-[2px] border-black bg-white px-4 text-[13px] font-medium text-black placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-black/20"
+  const inputClass = "h-11 w-full rounded-lg border-[2px] border-black bg-white px-4 text-[13px] font-medium text-black placeholder:text-black focus:outline-none focus:ring-2 focus:ring-black"
 
   // Show creator profile form for beta users
   if (showCreatorForm) {
@@ -195,17 +195,17 @@ function OnboardingContent() {
                     className={inputClass}
                   />
                 </div>
-                <p className="mt-1 text-[9px] text-black/50">Letters, numbers, underscores only</p>
+                <p className="mt-1 text-[9px] text-black">Letters, numbers, underscores only</p>
               </div>
 
-              <div className="border-t-2 border-black/10 pt-3">
+              <div className="border-t-2 border-black pt-3">
                 <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-black">
                   Social Platforms (at least one) *
                 </p>
                 
                 <div className="space-y-2">
                   <div>
-                    <label className="mb-1 block text-[9px] font-medium text-black/60">Instagram</label>
+                    <label className="mb-1 block text-[9px] font-medium text-black">Instagram</label>
                     <input
                       placeholder="@yourinstagram"
                       value={creatorForm.instagramHandle}
@@ -214,7 +214,7 @@ function OnboardingContent() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[9px] font-medium text-black/60">TikTok</label>
+                    <label className="mb-1 block text-[9px] font-medium text-black">TikTok</label>
                     <input
                       placeholder="@yourtiktok"
                       value={creatorForm.tiktokHandle}
@@ -243,7 +243,7 @@ function OnboardingContent() {
 
           <button
             onClick={() => setShowCreatorForm(false)}
-            className="mt-4 block w-full text-center text-[10px] font-medium text-white/60 hover:text-white"
+            className="mt-4 block w-full text-center text-[10px] font-medium text-white hover:text-white"
           >
             ← Back to role selection
           </button>
