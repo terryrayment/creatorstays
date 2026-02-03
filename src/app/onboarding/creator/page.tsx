@@ -140,6 +140,48 @@ export default function CreatorOnboardingPage() {
     setError("")
   }
 
+  // Handle OAuth callback and refresh profile data
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const igConnected = params.get('ig_connected')
+    const igError = params.get('ig_error')
+    
+    if (igConnected === 'true') {
+      // Instagram was just connected - refresh profile data
+      fetch("/api/creator/profile")
+        .then(res => res.json())
+        .then(profile => {
+          if (profile.instagramHandle && profile.instagramFollowers) {
+            setData(prev => ({
+              ...prev,
+              instagramHandle: profile.instagramHandle,
+              instagramFollowers: profile.instagramFollowers.toString(),
+              avatarUrl: profile.avatarUrl || prev.avatarUrl,
+            }))
+            // Go to step 2 if we were on step 2
+            setStep(2)
+          }
+        })
+        .catch(console.error)
+      
+      // Clean URL
+      window.history.replaceState({}, '', '/onboarding/creator')
+    }
+    
+    if (igError) {
+      // Show appropriate error message
+      const errorMessages: Record<string, string> = {
+        'no_pages': 'No Facebook Pages found. Create a Facebook Page and link your Instagram Business account to it.',
+        'no_instagram_business': 'No Instagram Business account found. Switch your Instagram to a Business or Creator account and link it to a Facebook Page.',
+        'access_denied': 'You denied access. Please try again and accept the permissions.',
+        'token_exchange_failed': 'Connection failed. Please try again.',
+        'callback_failed': 'Something went wrong. Please try again.',
+      }
+      setError(errorMessages[igError] || 'Failed to connect Instagram. Please try again.')
+      window.history.replaceState({}, '', '/onboarding/creator')
+    }
+  }, [])
+
   useEffect(() => {
     async function init() {
       if (status === "loading") return
@@ -230,9 +272,9 @@ export default function CreatorOnboardingPage() {
     }
     
     if (step === 2) {
-      const hasAtLeastOnePlatform = data.instagramHandle || data.tiktokHandle || data.youtubeHandle
-      if (!hasAtLeastOnePlatform) {
-        setError("Please add at least one social platform")
+      // Instagram connection is REQUIRED - no manual entry allowed
+      if (!data.instagramHandle || !data.instagramFollowers) {
+        setError("Please connect your Instagram account to continue")
         return false
       }
       if (!data.niches.length) {
@@ -420,88 +462,87 @@ export default function CreatorOnboardingPage() {
           </div>
         )}
 
-        {/* STEP 2: Platforms & Niche */}
+        {/* STEP 2: Connect Instagram - Verified Only */}
         {step === 2 && (
           <div>
             <div className="mb-8 text-center">
               <StepIcon icon="share" />
-              <h1 className="font-heading text-3xl tracking-tight text-black">Your platforms & niche</h1>
-              <p className="mt-2 text-sm text-black">Connect your socials and define your content focus</p>
+              <h1 className="font-heading text-3xl tracking-tight text-black">Connect your Instagram</h1>
+              <p className="mt-2 text-sm text-black">Verify your presence with one click. No manual entry.</p>
             </div>
 
             <div className="space-y-6">
-              <div className="rounded-xl border-2 border-black bg-white p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wider text-black">Social Platforms</label>
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">Self-reported</span>
-                </div>
-                <p className="mb-4 text-xs text-black">
-                  Enter your handles and approximate follower counts. You can verify with OAuth later for a "Verified" badge.
-                </p>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-black bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400">
-                      <span className="text-sm font-bold text-white">IG</span>
+              {/* Instagram Connection - Required */}
+              <div className="rounded-xl border-2 border-black bg-white overflow-hidden">
+                {data.instagramHandle && data.instagramFollowers ? (
+                  // Connected State
+                  <div className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-black bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400">
+                        <svg className="h-7 w-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-lg font-bold text-black">@{data.instagramHandle}</p>
+                          <span className="flex items-center gap-1 rounded-full bg-[#28D17C] px-2 py-0.5 text-[10px] font-bold text-black">
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                            Verified
+                          </span>
+                        </div>
+                        <p className="text-2xl font-black text-black">{parseInt(data.instagramFollowers).toLocaleString()} followers</p>
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      value={data.instagramHandle}
-                      onChange={e => updateField("instagramHandle", e.target.value.replace('@', ''))}
-                      placeholder="username"
-                      className="flex-1 rounded-lg border-2 border-black px-3 py-2 text-sm"
-                    />
-                    <input
-                      type="text"
-                      value={data.instagramFollowers}
-                      onChange={e => updateField("instagramFollowers", e.target.value)}
-                      placeholder="followers"
-                      className="w-24 rounded-lg border-2 border-black px-3 py-2 text-sm"
-                    />
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-black bg-black">
-                      <span className="text-sm font-bold text-white">TT</span>
+                ) : (
+                  // Not Connected State
+                  <div className="p-6">
+                    <div className="text-center">
+                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-black bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400">
+                        <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z"/>
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-bold text-black">Connect Instagram</h3>
+                      <p className="mt-1 text-sm text-black">
+                        Your follower count is pulled directly from Instagram. Zero manual entry.
+                      </p>
+                      
+                      <button
+                        onClick={() => window.location.href = '/api/oauth/instagram/start'}
+                        className="mt-4 inline-flex items-center gap-2 rounded-full border-2 border-black bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 px-6 py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+                      >
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z"/>
+                        </svg>
+                        Connect with Instagram
+                      </button>
                     </div>
-                    <input
-                      type="text"
-                      value={data.tiktokHandle}
-                      onChange={e => updateField("tiktokHandle", e.target.value.replace('@', ''))}
-                      placeholder="username"
-                      className="flex-1 rounded-lg border-2 border-black px-3 py-2 text-sm"
-                    />
-                    <input
-                      type="text"
-                      value={data.tiktokFollowers}
-                      onChange={e => updateField("tiktokFollowers", e.target.value)}
-                      placeholder="followers"
-                      className="w-24 rounded-lg border-2 border-black px-3 py-2 text-sm"
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-black bg-red-600">
-                      <span className="text-sm font-bold text-white">YT</span>
+                    
+                    <div className="mt-6 rounded-lg border border-black bg-white p-3">
+                      <p className="text-xs font-bold text-black">Requirements:</p>
+                      <ul className="mt-2 space-y-1 text-xs text-black">
+                        <li className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 rounded-full bg-black" />
+                          Instagram Business or Creator account
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 rounded-full bg-black" />
+                          Linked to a Facebook Page
+                        </li>
+                      </ul>
+                      <p className="mt-3 text-[10px] text-black">
+                        Personal accounts cannot be verified. <a href="https://help.instagram.com/502981923235522" target="_blank" rel="noopener" className="underline">How to switch to a Business account →</a>
+                      </p>
                     </div>
-                    <input
-                      type="text"
-                      value={data.youtubeHandle}
-                      onChange={e => updateField("youtubeHandle", e.target.value.replace('@', ''))}
-                      placeholder="channel"
-                      className="flex-1 rounded-lg border-2 border-black px-3 py-2 text-sm"
-                    />
-                    <input
-                      type="text"
-                      value={data.youtubeSubscribers}
-                      onChange={e => updateField("youtubeSubscribers", e.target.value)}
-                      placeholder="subs"
-                      className="w-24 rounded-lg border-2 border-black px-3 py-2 text-sm"
-                    />
                   </div>
-                </div>
+                )}
               </div>
 
+              {/* Niche Selection */}
               <div>
                 <label className="mb-3 block text-sm font-bold text-black">What's your niche?</label>
                 <div className="flex flex-wrap gap-2">
