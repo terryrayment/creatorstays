@@ -241,8 +241,42 @@ export async function POST(request: NextRequest) {
       // Create new conversation if doesn't exist
       if (!conversation) {
         // This is a NEW conversation
-        // If creator is initiating, check the monthly outreach limit
+        // BETA RESTRICTION: Creators cannot initiate conversations
+        // They can only reply to hosts who message them first
+        // This will be relaxed once OAuth follower verification is complete
         if (!isHost) {
+          // Check if creator has verified 50k+ followers via OAuth
+          const creatorWithFollowers = await prisma.creatorProfile.findUnique({
+            where: { id: creatorProfileId },
+            select: {
+              instagramFollowers: true,
+              tiktokFollowers: true,
+              instagramConnected: true,
+              tiktokConnected: true,
+            },
+          })
+
+          // Use verified OAuth follower count only
+          const verifiedFollowers = Math.max(
+            creatorWithFollowers?.instagramConnected ? (creatorWithFollowers.instagramFollowers || 0) : 0,
+            creatorWithFollowers?.tiktokConnected ? (creatorWithFollowers.tiktokFollowers || 0) : 0
+          )
+
+          // Require 50k verified followers to initiate
+          const MIN_FOLLOWERS_TO_INITIATE = 50000
+
+          if (verifiedFollowers < MIN_FOLLOWERS_TO_INITIATE) {
+            return NextResponse.json({
+              error: 'Cannot initiate conversations',
+              code: 'MESSAGING_RESTRICTED',
+              message: "During beta, only creators with 50,000+ verified followers can message hosts first. Connect your Instagram or TikTok to verify your follower count. Hosts can still message you directly.",
+              requiredFollowers: MIN_FOLLOWERS_TO_INITIATE,
+              currentVerifiedFollowers: verifiedFollowers,
+              hasConnectedAccounts: creatorWithFollowers?.instagramConnected || creatorWithFollowers?.tiktokConnected,
+            }, { status: 403 })
+          }
+
+          // If they have 50k+ verified, also check monthly limit
           const outreachCount = await getCreatorOutreachCountThisMonth(creatorProfileId)
           
           if (outreachCount >= CREATOR_MONTHLY_OUTREACH_LIMIT) {
