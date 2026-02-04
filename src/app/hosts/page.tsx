@@ -22,7 +22,7 @@ function HeroSection() {
             </h1>
             
             <p className="mt-3 max-w-md text-[13px] font-medium leading-snug text-black">
-              A massive untapped opportunity. Be among the first hosts to leverage creator marketing for your vacation rental. Pay per post, track every click, own the content forever.
+              Creators post about your property. You pay per post, track every click, and own the content. That's it.
             </p>
             
             <div className="mt-5 flex flex-wrap gap-2">
@@ -55,16 +55,16 @@ function HeroSection() {
               </div>
               
               <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] sm:text-[2.5rem]" style={{ fontWeight: 900 }}>
-                <span className="block text-black">FIRST MOVER</span>
-                <span className="block text-black" style={{ fontWeight: 400 }}>ADVANTAGE</span>
+                <span className="block text-black">WHAT YOU</span>
+                <span className="block text-black" style={{ fontWeight: 400 }}>GET</span>
               </h2>
             </div>
 
             <div className="mt-3 space-y-0 border-t-2 border-black">
               {[
-                { label: "Untapped market", desc: "No competition yet" },
-                { label: "Track traffic", desc: "Real analytics" },
-                { label: "Own the content", desc: "Forever yours" },
+                { label: "Real content", desc: "Photos & videos" },
+                { label: "Real traffic", desc: "Tracked clicks" },
+                { label: "Full rights", desc: "Use anywhere" },
               ].map((item, i) => (
                 <div
                   key={i}
@@ -174,8 +174,8 @@ function ImageSection() {
 function BenefitsSection() {
   const benefits = [
     {
-      title: "REAL TRAFFIC YOU TRACK",
-      desc: "See every click, every visitor. Know exactly which creators drive results. No guessing.",
+      title: "TRACKED CLICKS",
+      desc: "Every creator gets a unique link. You see exactly what's working.",
       color: "#4AA3FF",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
@@ -184,8 +184,8 @@ function BenefitsSection() {
       ),
     },
     {
-      title: "PHOTOS & CONTENT YOU OWN",
-      desc: "Professional photos and videos of your property. Option to offer a free stay in exchange for content (post-for-stay). Use content anywhere, forever.",
+      title: "CONTENT YOU OWN",
+      desc: "Photos and videos of your property. Use them on your listing, ads, anywhere. They're yours.",
       color: "#FFD84A",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
@@ -195,8 +195,8 @@ function BenefitsSection() {
       ),
     },
     {
-      title: "TARGETED REACH",
-      desc: "Creators bring their engaged audience directly to your listing. Travel, lifestyle, adventure niches.",
+      title: "RIGHT AUDIENCE",
+      desc: "Travel creators with engaged followers. Their audience is already looking for places to stay.",
       color: "#28D17C",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
@@ -207,8 +207,8 @@ function BenefitsSection() {
       ),
     },
     {
-      title: "INSTANT PAYOUTS & TAX DOCS",
-      desc: "Pay creators via Stripe. We handle 1099s automatically. No paperwork for you.",
+      title: "EASY PAYOUTS",
+      desc: "Pay through the platform. We handle the 1099s.",
       color: "#FF6B6B",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">

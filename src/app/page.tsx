@@ -82,7 +82,7 @@ function HeroSection() {
             
             {/* Subhead - pure black */}
             <p className="mt-3 max-w-sm text-[13px] font-medium leading-snug text-black">
-              Real creators. Real content. Real traffic to your listing. We connect vacation rental hosts with creators who actually know what they're doing.
+              Creators post about your property. You get content, clicks, and bookings. Simple.
             </p>
             
             {/* CTAs */}
@@ -112,11 +112,11 @@ function HeroSection() {
           >
             <div>
               <h2 className="font-heading text-[2rem] leading-[0.85] tracking-[-0.02em] sm:text-[2.5rem]" style={{ fontWeight: 900 }}>
-                <span className="block text-black">EVERY NIGHT SHOULD</span>
-                <span className="block text-black" style={{ fontWeight: 400 }}>WORK FOR YOU</span>
+                <span className="block text-black">CONTENT</span>
+                <span className="block text-black" style={{ fontWeight: 400 }}>THAT BOOKS</span>
               </h2>
               <p className="mt-2 text-[12px] font-medium text-black">
-                When your stay isn't booked, it should be marketing. When it is booked, it should justify a premium.
+                Professional photos and videos from people who know how to make places look good.
               </p>
             </div>
 
@@ -154,7 +154,7 @@ function HeroSection() {
             </div>
 
             <p className="mt-2 text-[9px] font-bold text-black">
-              Just posts, clicks, and clear ROI.
+              Pay per post. Track every click.
             </p>
           </div>
         </div>
@@ -228,7 +228,7 @@ function CTASection() {
               <span className="block text-black" style={{ fontWeight: 400 }}>PROPERTY</span>
             </h3>
             <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
-              You have a great place. Let creators show people why.
+              Add your property. Hire creators. Get content.
             </p>
             <Link
               href="/hosts"
@@ -267,7 +267,7 @@ function CTASection() {
               <span className="block text-black" style={{ fontWeight: 400 }}>TO POST</span>
             </h3>
             <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
-              You make content. Hosts pay you. Sometimes there's a free stay involved.
+              Get paid per post. Free stays available.
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               <Link

@@ -147,7 +147,7 @@ export default function WaitlistPage() {
             </h1>
             
             <p className="mt-4 max-w-md text-[14px] font-medium leading-snug text-black">
-              The first creator marketplace for short-term rentals. A huge opportunity to get paid creating content for vacation properties. Join the waitlist for early access.
+              Get paid to create content for vacation rentals. Free stays available. We're onboarding creators now.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -202,7 +202,7 @@ export default function WaitlistPage() {
                 Join <span className="text-[#4AA3FF]">200+</span> creators on the waitlist
               </p>
               <p className="mt-2 text-[10px] text-black/60">
-                We review applications and onboard in batches. Priority goes to travel, lifestyle, and hospitality niches.
+                Travel, lifestyle, and hospitality creators get priority.
               </p>
             </div>
           </div>

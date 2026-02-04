@@ -72,7 +72,7 @@ export default function HowItWorksPage() {
             <span className="block text-black" style={{ fontWeight: 400 }}>WORKS</span>
           </h1>
           <p className="mt-4 max-w-lg text-[15px] font-medium leading-snug text-black">
-            A huge opportunity for both hosts and creators. Pay creators per post, add traffic bonuses when links perform. We handle payouts and paperwork.
+            Pay creators per post. Add traffic bonuses if you want. We handle the payouts.
           </p>
         </div>
 
@@ -81,13 +81,13 @@ export default function HowItWorksPage() {
           <div className="block-hover rounded-xl border-[3px] border-black bg-white p-4">
             <p className="text-[10px] font-black uppercase tracking-wider text-black">Base Pay</p>
             <p className="mt-1 text-[13px] font-medium text-black">
-              Pay a flat rate per deliverable set (posts, reels, stories). Simple, predictable pricing.
+              Flat rate per post. You know what you're paying upfront.
             </p>
           </div>
           <div className="block-hover rounded-xl border-[3px] border-black bg-[#28D17C] p-4">
             <p className="text-[10px] font-black uppercase tracking-wider text-black">Traffic Bonus (Optional)</p>
             <p className="mt-1 text-[13px] font-medium text-black">
-              Add bonuses when links hit click thresholds. You approve payouts after reviewing analytics.
+              Pay extra when links perform. You approve it after seeing the numbers.
             </p>
           </div>
         </div>

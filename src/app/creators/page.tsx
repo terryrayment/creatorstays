@@ -68,8 +68,8 @@ function HeroSection() {
             
             <p className="mt-3 max-w-md text-[13px] font-medium leading-snug text-black">
               {isLoggedIn 
-                ? "You're signed in! Head to your dashboard to manage your profile and view offers."
-                : "Creator access is currently invite-only. Join the waitlist for early access."
+                ? "You're signed in. Head to your dashboard to manage offers."
+                : "Creator access is invite-only. Join the waitlist."
               }
             </p>
             
@@ -127,7 +127,7 @@ function HeroSection() {
                 <span className="block text-black" style={{ fontWeight: 400 }}>EARN</span>
               </h2>
               <p className="mt-2 text-[12px] font-medium text-black">
-                Guaranteed pay per post. Optional traffic bonuses.
+                Flat rate per post. Traffic bonuses optional.
               </p>
             </div>
 
@@ -162,31 +162,31 @@ function ProcessSection() {
     {
       num: "01",
       title: "JOIN THE WAITLIST",
-      desc: "Sign up with your email. We review applications and onboard creators in batches.",
+      desc: "Sign up. We'll reach out when there's a spot.",
       color: "#FFD84A",
     },
     {
       num: "02",
       title: "SET YOUR RATE",
-      desc: "Set your base rate per post. Define deliverables: reels, posts, stories, videos.",
+      desc: "Pick your price per post. List what you deliver.",
       color: "#4AA3FF",
     },
     {
       num: "03",
       title: "CONNECT PLATFORMS",
-      desc: "Link Instagram, TikTok, or YouTube. We display your follower counts to hosts.",
+      desc: "Link your accounts. Hosts see your follower counts.",
       color: "#28D17C",
     },
     {
       num: "04",
-      title: "APPROVE HOST REQUESTS",
-      desc: "Hosts send you offers. Review the property, terms, and dates. Accept, counter, or decline.",
+      title: "REVIEW OFFERS",
+      desc: "Hosts send offers. You decide which ones to take.",
       color: "#FF6B6B",
     },
     {
       num: "05",
       title: "POST & GET PAID",
-      desc: "Share your tracked link. Get paid per post. Earn traffic bonuses based on link performance.",
+      desc: "Post with your tracked link. Get paid.",
       color: "#A855F7",
     },
   ]
@@ -250,7 +250,7 @@ function ControlSection() {
   const controls = [
     {
       title: "YOUR RATE",
-      desc: "Set your base rate per post. Add optional traffic bonus tiers. Change anytime.",
+      desc: "Set your price. Change it whenever.",
       color: "#FFD84A",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
@@ -259,8 +259,8 @@ function ControlSection() {
       ),
     },
     {
-      title: "WHO YOU WORK WITH",
-      desc: "Review every host request. See the property, location, and offer details. Accept, counter, or decline.",
+      title: "YOUR CLIENTS",
+      desc: "You pick which hosts to work with. See the property before you commit.",
       color: "#4AA3FF",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
@@ -271,7 +271,7 @@ function ControlSection() {
     },
     {
       title: "YOUR ANALYTICS",
-      desc: "Track every click on your link. See traffic sources and performance. Links track traffic, not bookings.",
+      desc: "See every click on your link. Know what's working.",
       color: "#28D17C",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
@@ -329,7 +329,7 @@ function CTASection() {
               <span className="block text-black" style={{ fontWeight: 400 }}>WAITLIST</span>
             </h3>
             <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
-              We onboard creators in batches. Get early access and priority placement.
+              We're onboarding creators now. Get on the list.
             </p>
             <Link
               href="/waitlist"
@@ -352,7 +352,7 @@ function CTASection() {
               <span className="block text-black" style={{ fontWeight: 400 }}>ANSWERS</span>
             </h3>
             <p className="mt-2 max-w-xs text-[12px] font-medium text-black">
-              Check our creator guide or browse the help center.
+              Check the guide or hit up support.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link

@@ -28,7 +28,7 @@ export default function PricingPage() {
           <div className="space-y-6">
             <div>
               <h1 className="font-heading text-[2.5rem] font-black tracking-tight text-black">PRICING</h1>
-              <p className="mt-2 text-[15px] font-medium text-black">Simple, transparent pricing for hosts and creators.</p>
+              <p className="mt-2 text-[15px] font-medium text-black">What it costs. No surprises.</p>
             </div>
 
             {/* Host fees */}

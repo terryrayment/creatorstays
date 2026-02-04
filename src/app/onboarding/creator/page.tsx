@@ -272,11 +272,8 @@ export default function CreatorOnboardingPage() {
     }
     
     if (step === 2) {
-      // Instagram connection is REQUIRED - no manual entry allowed
-      if (!data.instagramHandle || !data.instagramFollowers) {
-        setError("Please connect your Instagram account to continue")
-        return false
-      }
+      // Instagram connection is optional until Meta app is approved
+      // At minimum, require niche selection
       if (!data.niches.length) {
         setError("Please select at least one niche")
         return false
@@ -537,6 +534,27 @@ export default function CreatorOnboardingPage() {
                       <p className="mt-3 text-[10px] text-black">
                         Personal accounts cannot be verified. <a href="https://help.instagram.com/502981923235522" target="_blank" rel="noopener" className="underline">How to switch to a Business account →</a>
                       </p>
+                    </div>
+
+                    {/* Manual entry fallback */}
+                    <div className="mt-4 border-t border-black pt-4">
+                      <p className="text-xs font-bold text-black mb-3">Or enter manually (unverified):</p>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input
+                          type="text"
+                          value={data.instagramHandle}
+                          onChange={e => updateField("instagramHandle", e.target.value.replace(/^@/, ""))}
+                          placeholder="@username"
+                          className={inputClass}
+                        />
+                        <input
+                          type="text"
+                          value={data.instagramFollowers}
+                          onChange={e => updateField("instagramFollowers", e.target.value.replace(/[^0-9,]/g, ''))}
+                          placeholder="Follower count"
+                          className={inputClass}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
