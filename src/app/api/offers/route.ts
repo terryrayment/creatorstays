@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { sendEmail, newOfferEmail, offerSentConfirmationEmail } from '@/lib/email'
+import { canAccessMarketplace, getMarketplaceBlockedMessage } from '@/lib/feature-flags'
 
 export const dynamic = 'force-dynamic'
 
@@ -153,6 +154,17 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // ========================================================================
+    // BETA GATE: Block offer creation during split beta
+    // ========================================================================
+    if (!canAccessMarketplace(session.user.email)) {
+      return NextResponse.json({
+        error: getMarketplaceBlockedMessage('Sending offers to creators'),
+        code: 'BETA_MARKETPLACE_BLOCKED',
+      }, { status: 403 })
+    }
+    // ========================================================================
 
     const hostProfile = await prisma.hostProfile.findUnique({
       where: { userId: session.user.id },

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { isLaunchMode } from '@/lib/feature-flags'
 
 export const dynamic = 'force-dynamic'
 
@@ -92,127 +93,150 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
 
-    // Build where clause
-    const where: any = {
-      isActive: true,
-    }
-
-    // Text search
-    if (query) {
-      where.OR = [
-        { displayName: { contains: query, mode: 'insensitive' } },
-        { handle: { contains: query, mode: 'insensitive' } },
-        { bio: { contains: query, mode: 'insensitive' } },
-      ]
-    }
-
-    // Niche filter
-    if (niche && niche !== 'All Niches') {
-      where.niches = { has: niche }
-    }
-
-    // Location filter
-    if (location && location !== 'All Locations') {
-      where.location = { contains: location, mode: 'insensitive' }
-    }
-
-    // Platform filter
-    if (platform && platform !== 'All Platforms') {
-      if (platform === 'Instagram') {
-        where.instagramHandle = { not: null }
-      } else if (platform === 'TikTok') {
-        where.tiktokHandle = { not: null }
-      } else if (platform === 'YouTube') {
-        where.youtubeHandle = { not: null }
+    // ========================================================================
+    // BETA MODE: Return mock data only
+    // LAUNCH MODE: Return real creators from database
+    // ========================================================================
+    if (isLaunchMode()) {
+      // LAUNCH MODE: Query real creator profiles
+      const where: any = {
+        isActive: true,
+        isPublic: true, // Only show creators who have opted into discovery
+        onboardingComplete: true,
       }
+
+      // Text search
+      if (query) {
+        where.OR = [
+          { displayName: { contains: query, mode: 'insensitive' } },
+          { handle: { contains: query, mode: 'insensitive' } },
+          { bio: { contains: query, mode: 'insensitive' } },
+        ]
+      }
+
+      // Niche filter
+      if (niche && niche !== 'All Niches') {
+        where.niches = { has: niche }
+      }
+
+      // Location filter
+      if (location && location !== 'All Locations') {
+        where.location = { contains: location, mode: 'insensitive' }
+      }
+
+      // Platform filter
+      if (platform && platform !== 'All Platforms') {
+        if (platform === 'Instagram') {
+          where.instagramConnected = true
+        } else if (platform === 'TikTok') {
+          where.tiktokConnected = true
+        } else if (platform === 'YouTube') {
+          where.youtubeHandle = { not: null }
+        }
+      }
+
+      // Follower count filter
+      if (minFollowers > 0) {
+        where.totalFollowers = { ...where.totalFollowers, gte: minFollowers }
+      }
+      if (maxFollowers > 0) {
+        where.totalFollowers = { ...where.totalFollowers, lte: maxFollowers }
+      }
+
+      // Gifted stays filter
+      if (openToGiftedStays) {
+        where.openToGiftedStays = true
+      }
+
+      // Build orderBy
+      let orderBy: any = { totalFollowers: 'desc' }
+      switch (sortBy) {
+        case 'followers_high':
+          orderBy = { totalFollowers: 'desc' }
+          break
+        case 'followers_low':
+          orderBy = { totalFollowers: 'asc' }
+          break
+        case 'engagement_high':
+          orderBy = { engagementRate: 'desc' }
+          break
+        case 'newest':
+          orderBy = { createdAt: 'desc' }
+          break
+      }
+
+      // Get total count
+      const total = await prisma.creatorProfile.count({ where })
+
+      // Get creators
+      const creators = await prisma.creatorProfile.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          id: true,
+          handle: true,
+          displayName: true,
+          bio: true,
+          location: true,
+          avatarUrl: true,
+          niches: true,
+          instagramHandle: true,
+          instagramConnected: true,
+          instagramFollowers: true,
+          tiktokHandle: true,
+          tiktokConnected: true,
+          tiktokFollowers: true,
+          youtubeHandle: true,
+          youtubeSubscribers: true,
+          totalFollowers: true,
+          engagementRate: true,
+          minimumFlatFee: true,
+          openToGiftedStays: true,
+          deliverables: true,
+          isVerified: true,
+        },
+      })
+
+      // Format response
+      const formattedCreators = creators.map(c => ({
+        id: c.id,
+        handle: c.handle,
+        displayName: c.displayName,
+        bio: c.bio,
+        location: c.location,
+        avatarUrl: c.avatarUrl,
+        niches: c.niches,
+        platforms: [
+          c.instagramConnected ? 'Instagram' : null,
+          c.tiktokConnected ? 'TikTok' : null,
+          c.youtubeHandle ? 'YouTube' : null,
+        ].filter(Boolean),
+        totalFollowers: c.totalFollowers,
+        engagementRate: c.engagementRate,
+        minimumRate: c.minimumFlatFee,
+        openToGiftedStays: c.openToGiftedStays,
+        deliverables: c.deliverables,
+        isVerified: c.isVerified,
+        isMock: false,
+      }))
+
+      return NextResponse.json({
+        creators: formattedCreators,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+        isMockData: false,
+      })
     }
 
-    // Follower count filter
-    if (minFollowers > 0) {
-      where.totalFollowers = { ...where.totalFollowers, gte: minFollowers }
-    }
-    if (maxFollowers > 0) {
-      where.totalFollowers = { ...where.totalFollowers, lte: maxFollowers }
-    }
-
-    // Gifted stays filter
-    if (openToGiftedStays) {
-      where.openToGiftedStays = true
-    }
-
-    // Build orderBy
-    let orderBy: any = { createdAt: 'desc' }
-    switch (sortBy) {
-      case 'followers_high':
-        orderBy = { totalFollowers: 'desc' }
-        break
-      case 'followers_low':
-        orderBy = { totalFollowers: 'asc' }
-        break
-      case 'engagement_high':
-        orderBy = { engagementRate: 'desc' }
-        break
-      case 'engagement_low':
-        orderBy = { engagementRate: 'asc' }
-        break
-      case 'newest':
-        orderBy = { createdAt: 'desc' }
-        break
-    }
-
-    // Get total count
-    const total = await prisma.creatorProfile.count({ where })
-
-    // Get creators
-    const creators = await prisma.creatorProfile.findMany({
-      where,
-      orderBy,
-      skip: (page - 1) * limit,
-      take: limit,
-      select: {
-        id: true,
-        handle: true,
-        displayName: true,
-        bio: true,
-        location: true,
-        avatarUrl: true,
-        niches: true,
-        instagramHandle: true,
-        tiktokHandle: true,
-        youtubeHandle: true,
-        totalFollowers: true,
-        engagementRate: true,
-        minimumFlatFee: true,
-        openToGiftedStays: true,
-        deliverables: true,
-        isVerified: true,
-      },
-    })
-
-    // Format response
-    const formattedCreators = creators.map(c => ({
-      id: c.id,
-      handle: c.handle,
-      displayName: c.displayName,
-      bio: c.bio,
-      location: c.location,
-      avatarUrl: c.avatarUrl,
-      niches: c.niches,
-      platforms: [
-        c.instagramHandle ? 'Instagram' : null,
-        c.tiktokHandle ? 'TikTok' : null,
-        c.youtubeHandle ? 'YouTube' : null,
-      ].filter(Boolean),
-      totalFollowers: c.totalFollowers,
-      engagementRate: c.engagementRate,
-      minimumRate: c.minimumFlatFee,
-      openToGiftedStays: c.openToGiftedStays,
-      deliverables: c.deliverables,
-      isVerified: c.isVerified,
-      isMock: false,
-    }))
-    
-    // Always include mock data for beta - filter mock creators
+    // ========================================================================
+    // BETA MODE: Return mock creators only (no real user data)
+    // ========================================================================
     let filteredMocks = [...MOCK_CREATORS]
     
     if (query) {
@@ -244,20 +268,32 @@ export async function GET(request: NextRequest) {
       filteredMocks = filteredMocks.filter(c => c.totalFollowers <= maxFollowers)
     }
     
-    // For beta/demo: ONLY show mock creators, not real users from database
-    // This ensures user privacy and keeps the demo experience consistent
-    // Real creator matching will be enabled when the platform launches fully
-    const allCreators = [...filteredMocks]
+    // Sort mock data
+    switch (sortBy) {
+      case 'followers_high':
+        filteredMocks.sort((a, b) => b.totalFollowers - a.totalFollowers)
+        break
+      case 'followers_low':
+        filteredMocks.sort((a, b) => a.totalFollowers - b.totalFollowers)
+        break
+      case 'engagement_high':
+        filteredMocks.sort((a, b) => b.engagementRate - a.engagementRate)
+        break
+    }
+
+    // Paginate
+    const startIndex = (page - 1) * limit
+    const paginatedMocks = filteredMocks.slice(startIndex, startIndex + limit)
 
     return NextResponse.json({
-      creators: allCreators,
+      creators: paginatedMocks,
       pagination: {
         page,
         limit,
-        total: allCreators.length,
-        pages: Math.ceil(allCreators.length / limit),
+        total: filteredMocks.length,
+        pages: Math.ceil(filteredMocks.length / limit),
       },
-      isMockData: true, // Always true for beta since we only show mock data
+      isMockData: true,
     })
   } catch (error) {
     console.error('[Creators Search API] Error:', error)

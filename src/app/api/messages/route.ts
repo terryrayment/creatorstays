@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { canAccessMarketplace, getMarketplaceBlockedMessage } from '@/lib/feature-flags'
 
 export const dynamic = 'force-dynamic'
 
@@ -205,6 +206,17 @@ export async function POST(request: NextRequest) {
       if (!recipientId) {
         return NextResponse.json({ error: 'Recipient ID required for new conversation' }, { status: 400 })
       }
+
+      // ========================================================================
+      // BETA GATE: Block NEW cross-side conversations during split beta
+      // ========================================================================
+      if (!canAccessMarketplace(session.user.email)) {
+        return NextResponse.json({
+          error: getMarketplaceBlockedMessage('Starting new conversations'),
+          code: 'BETA_MARKETPLACE_BLOCKED',
+        }, { status: 403 })
+      }
+      // ========================================================================
 
       // Determine host and creator IDs
       let hostProfileId: string
