@@ -24,7 +24,7 @@ export default function BetaDashboardLayout({
   const variant = pathname?.includes('/creator') ? 'creator' : 'host';
   
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <DashboardHeader variant={variant} />
       <main>{children}</main>
     </div>

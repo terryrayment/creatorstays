@@ -67,11 +67,11 @@ function StatCard({
     <div className={`rounded-xl border-2 border-black ${bgColors[color]} p-4 transition-transform ${href ? "hover:-translate-y-1 cursor-pointer" : ""}`}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">{label}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-black">{label}</p>
           <p className="mt-1 text-2xl font-black text-black">{value}</p>
-          {subValue && <p className="mt-0.5 text-xs text-black/60">{subValue}</p>}
+          {subValue && <p className="mt-0.5 text-xs text-black">{subValue}</p>}
         </div>
-        {icon && <div className="text-black/40">{icon}</div>}
+        {icon && <div className="text-black">{icon}</div>}
       </div>
     </div>
   )
@@ -110,7 +110,7 @@ export function HostDashboardStats() {
     return (
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-24 animate-pulse rounded-xl border-2 border-black/20 bg-black/5" />
+          <div key={i} className="h-24 animate-pulse rounded-xl border-2 border-black bg-white" />
         ))}
       </div>
     )
@@ -172,7 +172,7 @@ export function HostDashboardStats() {
         />
       </div>
 
-      {/* Quick Stats Bar - redesigned */}
+      {/* Quick Stats Bar */}
       <div className="grid grid-cols-3 gap-3">
         <div className="flex items-center gap-3 rounded-xl border-2 border-black bg-white px-4 py-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-[#FFD84A]">
@@ -182,7 +182,7 @@ export function HostDashboardStats() {
           </div>
           <div>
             <p className="text-lg font-black text-black">{stats.propertiesCount}</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Properties</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black">Properties</p>
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-xl border-2 border-black bg-[#28D17C] px-4 py-3">
@@ -193,18 +193,18 @@ export function HostDashboardStats() {
           </div>
           <div>
             <p className="text-lg font-black text-black">{stats.offersAccepted}</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Accepted</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black">Accepted</p>
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-xl border-2 border-black bg-white px-4 py-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-red-100">
-            <svg className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-red-500">
+            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
           <div>
             <p className="text-lg font-black text-black">{stats.offersDeclined}</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-black/60">Declined</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-black">Declined</p>
           </div>
         </div>
       </div>
@@ -240,7 +240,7 @@ export function CreatorDashboardStats() {
     return (
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-24 animate-pulse rounded-xl border-2 border-black/20 bg-black/5" />
+          <div key={i} className="h-24 animate-pulse rounded-xl border-2 border-black bg-white" />
         ))}
       </div>
     )
@@ -304,13 +304,13 @@ export function CreatorDashboardStats() {
       </div>
 
       {/* Quick Stats Bar */}
-      <div className="flex items-center justify-between rounded-lg border border-black/10 bg-black/5 px-4 py-2 text-xs">
-        <span className="text-black/60">
+      <div className="flex items-center justify-between rounded-xl border-2 border-black bg-white px-4 py-3 text-xs">
+        <span className="text-black">
           <span className="font-bold text-[#28D17C]">{stats.offersAccepted}</span> offers accepted
         </span>
-        <span className="text-black/30">|</span>
-        <span className="text-black/60">
-          <span className="font-bold text-black">{stats.totalCollabs}</span> total collaborations
+        <span className="text-black font-bold">|</span>
+        <span className="text-black">
+          <span className="font-bold">{stats.totalCollabs}</span> total collaborations
         </span>
       </div>
     </div>

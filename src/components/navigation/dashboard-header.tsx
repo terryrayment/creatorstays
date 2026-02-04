@@ -69,7 +69,7 @@ export function DashboardHeader({ variant = "host" }: DashboardHeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b-2 border-black bg-black">
-      <nav className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 lg:px-6">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-6">
         {/* Left - Logo */}
         <div className="flex items-center gap-3">
           <Link 
@@ -85,7 +85,7 @@ export function DashboardHeader({ variant = "host" }: DashboardHeaderProps) {
           </span>
           
           {isBeta && (
-            <span className="rounded border border-white/30 px-1.5 py-0.5 text-[9px] font-bold text-white/60">
+            <span className="rounded border-2 border-white px-1.5 py-0.5 text-[9px] font-bold text-white">
               BETA
             </span>
           )}
@@ -93,17 +93,17 @@ export function DashboardHeader({ variant = "host" }: DashboardHeaderProps) {
 
         {/* Center - Nav Pills */}
         {navItems.length > 0 && (
-          <div className="hidden items-center gap-1 md:flex">
+          <div className="hidden items-center gap-1.5 md:flex">
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`rounded-full border-2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
+                  className={`rounded-full border-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all ${
                     isActive 
                       ? 'border-white bg-white text-black' 
-                      : 'border-white/30 text-white/70 hover:border-white hover:text-white'
+                      : 'border-white text-white hover:bg-white hover:text-black'
                   }`}
                 >
                   {item.label}
@@ -118,7 +118,7 @@ export function DashboardHeader({ variant = "host" }: DashboardHeaderProps) {
           {/* Back to site */}
           <Link
             href="/"
-            className="hidden sm:flex items-center gap-1 rounded-full border-2 border-white/30 px-3 py-1 text-[10px] font-bold text-white/70 transition-all hover:border-white hover:text-white"
+            className="hidden sm:flex items-center gap-1 rounded-full border-2 border-white px-3 py-1.5 text-[10px] font-bold text-white transition-all hover:bg-white hover:text-black"
           >
             ← Site
           </Link>
@@ -127,7 +127,7 @@ export function DashboardHeader({ variant = "host" }: DashboardHeaderProps) {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/50 bg-gray-500 text-sm font-bold text-white transition-all hover:border-white"
+              className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-white text-sm font-bold text-black transition-all hover:bg-black hover:text-white"
             >
               {session?.user?.image ? (
                 <img src={session.user.image} alt="" className="h-full w-full rounded-full object-cover" />
@@ -139,11 +139,11 @@ export function DashboardHeader({ variant = "host" }: DashboardHeaderProps) {
             {/* Dropdown menu */}
             {showDropdown && (
               <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border-2 border-black bg-white py-2 shadow-xl">
-                <div className="px-4 py-2 border-b border-black/10">
+                <div className="px-4 py-2 border-b-2 border-black">
                   <p className="text-sm font-bold text-black truncate">
                     {session?.user?.name || 'User'}
                   </p>
-                  <p className="text-[10px] text-black/50 truncate">
+                  <p className="text-[10px] text-black truncate">
                     {session?.user?.email}
                   </p>
                 </div>
@@ -151,15 +151,15 @@ export function DashboardHeader({ variant = "host" }: DashboardHeaderProps) {
                 <Link
                   href={`${basePath}/${variant}/settings`}
                   onClick={() => setShowDropdown(false)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black hover:bg-black/5"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-black hover:bg-black hover:text-white"
                 >
                   Settings
                 </Link>
                 
-                <div className="border-t border-black/10 mt-1 pt-1">
+                <div className="border-t-2 border-black mt-1 pt-1">
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-black/5"
+                    className="w-full px-4 py-2 text-left text-sm font-bold text-red-600 hover:bg-red-600 hover:text-white"
                   >
                     Log Out
                   </button>

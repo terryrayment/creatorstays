@@ -61,7 +61,7 @@ function PrepItem({
           <p className="text-sm font-bold text-black">
             {title}
             {priority && !done && (
-              <span className="ml-2 rounded-full border border-black bg-white px-2 py-0.5 text-[9px] font-bold uppercase">
+              <span className="ml-2 rounded-full border-2 border-black bg-white px-2 py-0.5 text-[9px] font-bold uppercase">
                 Next Step
               </span>
             )}
@@ -112,13 +112,13 @@ function ComingSoonItem({ iconType, title, description }: { iconType: string; ti
   }
 
   return (
-    <div className="flex items-start gap-3 rounded-lg bg-[#FAFAFA] p-3">
-      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-black/20 text-black/60">
+    <div className="flex items-start gap-3 rounded-lg border-2 border-black bg-white p-3">
+      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-black text-black">
         {icons[iconType] || icons.search}
       </div>
       <div>
         <p className="text-xs font-bold text-black">{title}</p>
-        <p className="text-[10px] text-black/60">{description}</p>
+        <p className="text-[10px] text-black">{description}</p>
       </div>
     </div>
   )
@@ -252,7 +252,7 @@ export function BetaHostDashboard() {
           <h1 className="text-xl font-bold text-black">
             Welcome{session?.user?.name ? `, ${session.user.name.split(' ')[0]}` : ''}
           </h1>
-          <span className="rounded-full border border-[#4AA3FF] bg-[#4AA3FF]/10 px-2 py-0.5 text-[10px] font-bold text-[#4AA3FF]">
+          <span className="rounded-full border-2 border-[#4AA3FF] bg-[#4AA3FF] px-2 py-0.5 text-[10px] font-bold text-black">
             Beta Host
           </span>
         </div>
@@ -329,7 +329,7 @@ export function BetaHostDashboard() {
 
             {/* Auto-notify callout for incomplete users too */}
             {completedCount < totalSteps && completedCount > 0 && (
-              <div className="mt-4 rounded-lg border border-black/10 bg-[#4AA3FF]/5 p-3 flex items-start gap-2">
+              <div className="mt-4 rounded-lg border-2 border-[#4AA3FF] bg-[#4AA3FF]/10 p-3 flex items-start gap-2">
                 <svg className="h-4 w-4 mt-0.5 shrink-0 text-[#4AA3FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
@@ -459,8 +459,8 @@ export function BetaHostDashboard() {
           </Section>
 
           {/* Contact */}
-          <div className="rounded-xl border-2 border-dashed border-black/20 bg-[#FAFAFA] p-4 text-center">
-            <p className="text-xs text-black/60">Questions about the beta?</p>
+          <div className="rounded-xl border-2 border-black bg-white p-4 text-center">
+            <p className="text-xs text-black">Questions about the beta?</p>
             <a 
               href="mailto:hello@creatorstays.com" 
               className="mt-1 inline-block text-sm font-bold text-black hover:underline"

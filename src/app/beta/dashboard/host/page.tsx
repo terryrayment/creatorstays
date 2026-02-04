@@ -98,7 +98,7 @@ function BetaHeader({ isAgency }: { isAgency?: boolean }) {
     <div className="bg-white">
       <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-3">
-          <span className="rounded border border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
+          <span className="rounded border-2 border-black bg-[#FFD84A] px-2 py-0.5 text-[10px] font-bold text-black">BETA</span>
           <span className="text-sm font-bold text-black">Host Dashboard</span>
           {isAgency && (
             <span className="rounded-full border-2 border-black bg-[#28D17C] px-2.5 py-0.5 text-[10px] font-bold text-black">AGENCY</span>
@@ -324,7 +324,7 @@ function ReferralSection() {
                       sent 
                         ? 'border-black bg-[#28D17C] text-black' 
                         : !inviteEmail
-                          ? 'border-black/40 bg-black/20 text-black cursor-not-allowed'
+                          ? 'border-black bg-white text-black cursor-not-allowed'
                           : 'border-black bg-black text-white hover:bg-gray-800'
                     }`}
                   >
@@ -500,14 +500,14 @@ export default function HostDashboardPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="dashboard min-h-screen bg-[#FAFAFA] flex items-center justify-center">
-        <p className="text-sm text-black/60">Loading...</p>
+      <div className="dashboard min-h-screen bg-white flex items-center justify-center">
+        <p className="text-sm text-black">Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="dashboard min-h-screen bg-[#FAFAFA]">
+    <div className="dashboard min-h-screen bg-white">
       {/* Beta Welcome Modal */}
       {showWelcome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
@@ -571,7 +571,7 @@ export default function HostDashboardPage() {
             </div>
 
             {/* What we need */}
-            <div className="rounded-xl border-2 border-black bg-[#FAFAFA] p-4 mb-6">
+            <div className="rounded-xl border-2 border-black bg-white p-4 mb-6">
               <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-black/50 mb-2">
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
@@ -612,7 +612,7 @@ export default function HostDashboardPage() {
             <p className="mt-2 text-sm text-black/60">
               Your upgrade is complete. You now have access to unlimited properties, team management, and more.
             </p>
-            <div className="mt-4 rounded-xl border-2 border-black bg-[#FAFAFA] p-4 text-left">
+            <div className="mt-4 rounded-xl border-2 border-black bg-white p-4 text-left">
               <p className="text-xs font-bold uppercase tracking-wider text-black/50 mb-2">What's new:</p>
               <ul className="space-y-1 text-sm text-black">
                 <li>✓ Unlimited properties</li>
