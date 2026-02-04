@@ -10,6 +10,7 @@
  */
 
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 // Validation constants
 export const OFFER_RULES = {
@@ -163,7 +164,7 @@ export async function recordOfferStatusChange(
     throw new Error(`Offer not found: ${offerId}`)
   }
   
-  const history = (offer.statusHistory as StatusChange[]) || []
+  const history = (offer.statusHistory as unknown as StatusChange[]) || []
   
   const change: StatusChange = {
     fromStatus,
@@ -178,7 +179,7 @@ export async function recordOfferStatusChange(
   await prisma.offer.update({
     where: { id: offerId },
     data: { 
-      statusHistory: history,
+      statusHistory: history as unknown as Prisma.InputJsonValue,
       status: toStatus,
     },
   })
