@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { isLaunchMode } from '@/lib/feature-flags'
+import { TrustTier } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -149,31 +150,48 @@ export async function GET(request: NextRequest) {
       }
 
       // Build orderBy
-      let orderBy: any = { totalFollowers: 'desc' }
+      // Trust tier ordering: PROVEN > VERIFIED > NEW
+      // We use a combination of trust tier + secondary sort
+      let orderBy: any[] = []
+      
+      // Always add trust tier as primary sort (PROVEN first, then VERIFIED, then NEW)
+      // Prisma sorts enums alphabetically, but we want: PROVEN > VERIFIED > NEW
+      // Since Prisma doesn't support custom enum ordering directly,
+      // we'll handle this with a raw query or post-sort
+      // For now, we'll use the standard Prisma approach and note the limitation
+      
       switch (sortBy) {
         case 'followers_high':
-          orderBy = { totalFollowers: 'desc' }
+          orderBy = [{ totalFollowers: 'desc' }]
           break
         case 'followers_low':
-          orderBy = { totalFollowers: 'asc' }
+          orderBy = [{ totalFollowers: 'asc' }]
           break
         case 'engagement_high':
-          orderBy = { engagementRate: 'desc' }
+          orderBy = [{ engagementRate: 'desc' }]
           break
         case 'newest':
-          orderBy = { createdAt: 'desc' }
+          orderBy = [{ createdAt: 'desc' }]
           break
+        case 'trust':
+          // Trust-first sorting - will be handled in post-processing
+          orderBy = [{ totalFollowers: 'desc' }]
+          break
+        default:
+          // Default: relevance = trust tier weighted, then followers
+          orderBy = [{ totalFollowers: 'desc' }]
       }
 
       // Get total count
       const total = await prisma.creatorProfile.count({ where })
 
-      // Get creators
-      const creators = await prisma.creatorProfile.findMany({
+      // Get creators (fetch more than needed for trust-based reordering)
+      const fetchLimit = sortBy === 'trust' || sortBy === 'relevance' ? limit * 3 : limit
+      let creators = await prisma.creatorProfile.findMany({
         where,
         orderBy,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: sortBy === 'trust' || sortBy === 'relevance' ? 0 : (page - 1) * limit,
+        take: sortBy === 'trust' || sortBy === 'relevance' ? Math.min(fetchLimit, total) : limit,
         select: {
           id: true,
           handle: true,
@@ -196,8 +214,33 @@ export async function GET(request: NextRequest) {
           openToGiftedStays: true,
           deliverables: true,
           isVerified: true,
+          trustTier: true,
+          readinessState: true,
         },
       })
+
+      // Apply trust tier sorting for 'trust' and 'relevance' sort modes
+      // PROVEN > VERIFIED > NEW
+      if (sortBy === 'trust' || sortBy === 'relevance' || !sortBy) {
+        const tierOrder: Record<TrustTier, number> = {
+          [TrustTier.PROVEN]: 0,
+          [TrustTier.VERIFIED]: 1,
+          [TrustTier.NEW]: 2,
+        }
+        
+        creators = creators.sort((a, b) => {
+          // Primary sort by trust tier
+          const tierDiff = tierOrder[a.trustTier] - tierOrder[b.trustTier]
+          if (tierDiff !== 0) return tierDiff
+          
+          // Secondary sort by followers (desc)
+          return (b.totalFollowers || 0) - (a.totalFollowers || 0)
+        })
+        
+        // Apply pagination after sorting
+        const startIndex = (page - 1) * limit
+        creators = creators.slice(startIndex, startIndex + limit)
+      }
 
       // Format response
       const formattedCreators = creators.map(c => ({
@@ -219,6 +262,8 @@ export async function GET(request: NextRequest) {
         openToGiftedStays: c.openToGiftedStays,
         deliverables: c.deliverables,
         isVerified: c.isVerified,
+        trustTier: c.trustTier,
+        readinessState: c.readinessState,
         isMock: false,
       }))
 

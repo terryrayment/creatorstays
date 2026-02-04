@@ -4,6 +4,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { nanoid } from 'nanoid'
 import { sendEmail, counterAcceptedEmail, counterDeclinedEmail } from '@/lib/email'
+import { recordOfferStatusChange } from '@/lib/offer-validation'
+import { logOfferEvent, AUDIT_ACTIONS } from '@/lib/audit'
+import { logOfferResponded } from '@/lib/analytics'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,14 +66,45 @@ export async function POST(
     }
 
     if (action === 'decline') {
-      // Simply update status to declined
+      // Record status change with history
+      try {
+        await recordOfferStatusChange(
+          params.id,
+          'countered',
+          'declined',
+          'host',
+          'Host declined the counter offer'
+        )
+      } catch (statusError) {
+        console.error('[Counter Decline] Failed to record status change:', statusError)
+        // Fall back to simple update
+        await prisma.offer.update({
+          where: { id: params.id },
+          data: {
+            status: 'declined',
+            respondedAt: new Date(),
+          },
+        })
+      }
+
+      // Update respondedAt separately
       await prisma.offer.update({
         where: { id: params.id },
-        data: {
-          status: 'declined',
-          respondedAt: new Date(),
-        },
-      })
+        data: { respondedAt: new Date() },
+      }).catch(() => {})
+
+      // Log audit event
+      try {
+        await logOfferEvent(
+          AUDIT_ACTIONS.OFFER_STATUS_CHANGED,
+          params.id,
+          'user',
+          hostProfile.id,
+          { fromStatus: 'countered', toStatus: 'declined', actor: 'host' }
+        )
+      } catch (auditError) {
+        console.error('[Counter Decline] Failed to log audit event:', auditError)
+      }
 
       // Send email to creator
       const creatorEmail = offer.creatorProfile.user?.email
@@ -110,12 +144,24 @@ export async function POST(
         }, { status: 400 })
       }
 
+      // Record status change with history
+      try {
+        await recordOfferStatusChange(
+          params.id,
+          'countered',
+          'pending',
+          'host',
+          `Host re-countered: ${(reCounterCashCents / 100).toFixed(2)}${reCounterMessage ? ` - ${reCounterMessage}` : ''}`
+        )
+      } catch (statusError) {
+        console.error('[Re-Counter] Failed to record status change:', statusError)
+      }
+
       // Update offer: reset status to pending, store host's re-counter
       // We reuse counterCashCents field but flip the negotiation back to creator
       await prisma.offer.update({
         where: { id: params.id },
         data: {
-          status: 'pending', // Back to pending for creator to respond
           cashCents: reCounterCashCents, // Update the main offer amount
           counterCashCents: null, // Clear creator's counter
           counterMessage: null,
@@ -126,6 +172,25 @@ export async function POST(
           lastCounterBy: 'host',
         },
       })
+
+      // Log audit event
+      try {
+        await logOfferEvent(
+          AUDIT_ACTIONS.OFFER_STATUS_CHANGED,
+          params.id,
+          'user',
+          hostProfile.id,
+          { 
+            fromStatus: 'countered', 
+            toStatus: 'pending',
+            reCounterCashCents,
+            negotiationRound: newRound,
+            actor: 'host',
+          }
+        )
+      } catch (auditError) {
+        console.error('[Re-Counter] Failed to log audit event:', auditError)
+      }
 
       // Send email to creator about re-counter
       const creatorEmail = offer.creatorProfile.user?.email
@@ -171,10 +236,28 @@ export async function POST(
     // Update offer with the counter amount as the new amount
     const acceptedAmount = offer.counterCashCents || offer.cashCents
 
+    // Record status change with history
+    try {
+      await recordOfferStatusChange(
+        params.id,
+        'countered',
+        'accepted',
+        'host',
+        `Host accepted counter offer: ${(acceptedAmount / 100).toFixed(2)}`
+      )
+    } catch (statusError) {
+      console.error('[Counter Accept] Failed to record status change:', statusError)
+      // Fall back to simple update
+      await prisma.offer.update({
+        where: { id: params.id },
+        data: { status: 'accepted' },
+      })
+    }
+
+    // Update offer details
     await prisma.offer.update({
       where: { id: params.id },
       data: {
-        status: 'accepted',
         cashCents: acceptedAmount, // Update to accepted counter amount
         respondedAt: new Date(),
       },
@@ -260,6 +343,32 @@ By signing below, both parties agree to these terms.
         stayNights: offer.stayNights,
       },
     })
+
+    // Log audit event
+    try {
+      await logOfferEvent(
+        AUDIT_ACTIONS.OFFER_STATUS_CHANGED,
+        params.id,
+        'user',
+        hostProfile.id,
+        { 
+          fromStatus: 'countered', 
+          toStatus: 'accepted',
+          acceptedAmount,
+          collaborationId: collaboration.id,
+          actor: 'host',
+        }
+      )
+    } catch (auditError) {
+      console.error('[Counter Accept] Failed to log audit event:', auditError)
+    }
+
+    // Log analytics event
+    try {
+      await logOfferResponded(offer.creatorProfileId, params.id, 'accepted', hostProfile.id)
+    } catch (analyticsError) {
+      console.error('[Counter Accept] Failed to log analytics event:', analyticsError)
+    }
 
     // Send email notification to creator
     const creatorEmail = offer.creatorProfile.user?.email

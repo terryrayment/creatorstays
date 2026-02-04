@@ -12,6 +12,7 @@
  */
 
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export type ActorType = 'user' | 'admin' | 'system' | 'cron'
 
@@ -39,7 +40,7 @@ export async function logAuditEvent(entry: AuditLogEntry): Promise<string> {
       actorEmail: entry.actorEmail,
       targetType: entry.targetType,
       targetId: entry.targetId,
-      metadata: entry.metadata || {},
+      metadata: (entry.metadata || {}) as Prisma.InputJsonValue,
       ipAddress: entry.ipAddress,
       userAgent: entry.userAgent,
     },

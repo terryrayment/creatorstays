@@ -4,6 +4,10 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { sendEmail, offerAcceptedEmail, offerCounteredEmail, offerDeclinedEmail } from '@/lib/email'
 import { nanoid } from 'nanoid'
+import { recordOfferStatusChange } from '@/lib/offer-validation'
+import { logOfferEvent, AUDIT_ACTIONS } from '@/lib/audit'
+import { logOfferResponded } from '@/lib/analytics'
+import { markFirstOfferResponded } from '@/lib/trust'
 
 export const dynamic = 'force-dynamic'
 
@@ -128,20 +132,66 @@ export async function PATCH(
       return NextResponse.json({ error: 'This offer is not for you' }, { status: 403 })
     }
 
-    // Verify offer is still pending
-    if (offer.status !== 'pending') {
+    // Verify offer is actionable (pending or countered)
+    if (!['pending', 'countered'].includes(offer.status)) {
       return NextResponse.json({ error: 'This offer has already been responded to' }, { status: 400 })
     }
 
     // Handle DECLINE
     if (action === 'decline') {
+      // Record status change with history
+      try {
+        await recordOfferStatusChange(
+          params.id,
+          'pending',
+          'declined',
+          'creator',
+          'Creator declined the offer'
+        )
+      } catch (statusError) {
+        console.error('[Offer Decline] Failed to record status change:', statusError)
+        // Fall back to simple update
+        await prisma.offer.update({
+          where: { id: params.id },
+          data: {
+            status: 'declined',
+            respondedAt: new Date(),
+          },
+        })
+      }
+
+      // Update respondedAt separately if recordOfferStatusChange succeeded
       await prisma.offer.update({
         where: { id: params.id },
-        data: {
-          status: 'declined',
-          respondedAt: new Date(),
-        },
-      })
+        data: { respondedAt: new Date() },
+      }).catch(() => {}) // Ignore if already updated
+
+      // Log audit event
+      try {
+        await logOfferEvent(
+          AUDIT_ACTIONS.OFFER_STATUS_CHANGED,
+          params.id,
+          'user',
+          creatorProfile.id,
+          { fromStatus: 'pending', toStatus: 'declined' }
+        )
+      } catch (auditError) {
+        console.error('[Offer Decline] Failed to log audit event:', auditError)
+      }
+
+      // Log analytics event
+      try {
+        await logOfferResponded(creatorProfile.id, params.id, 'declined', offer.hostProfileId)
+      } catch (analyticsError) {
+        console.error('[Offer Decline] Failed to log analytics event:', analyticsError)
+      }
+
+      // Mark first offer responded for lifecycle tracking
+      try {
+        await markFirstOfferResponded(creatorProfile.id)
+      } catch (lifecycleError) {
+        console.error('[Offer Decline] Failed to mark first offer responded:', lifecycleError)
+      }
 
       // Send email to host
       const hostEmail = offer.hostProfile.user?.email || offer.hostProfile.contactEmail
@@ -181,10 +231,23 @@ export async function PATCH(
         }, { status: 400 })
       }
 
+      // Record status change with history
+      try {
+        await recordOfferStatusChange(
+          params.id,
+          offer.status,
+          'countered',
+          'creator',
+          `Counter offer: ${(counterCashCents / 100).toFixed(2)}${counterMessage ? ` - ${counterMessage}` : ''}`
+        )
+      } catch (statusError) {
+        console.error('[Offer Counter] Failed to record status change:', statusError)
+      }
+
+      // Update the offer with counter details
       await prisma.offer.update({
         where: { id: params.id },
         data: {
-          status: 'countered',
           counterCashCents,
           counterMessage,
           respondedAt: new Date(),
@@ -192,6 +255,38 @@ export async function PATCH(
           lastCounterBy: 'creator',
         },
       })
+
+      // Log audit event
+      try {
+        await logOfferEvent(
+          AUDIT_ACTIONS.OFFER_STATUS_CHANGED,
+          params.id,
+          'user',
+          creatorProfile.id,
+          { 
+            fromStatus: offer.status, 
+            toStatus: 'countered',
+            counterCashCents,
+            negotiationRound: newRound,
+          }
+        )
+      } catch (auditError) {
+        console.error('[Offer Counter] Failed to log audit event:', auditError)
+      }
+
+      // Log analytics event
+      try {
+        await logOfferResponded(creatorProfile.id, params.id, 'countered', offer.hostProfileId)
+      } catch (analyticsError) {
+        console.error('[Offer Counter] Failed to log analytics event:', analyticsError)
+      }
+
+      // Mark first offer responded for lifecycle tracking
+      try {
+        await markFirstOfferResponded(creatorProfile.id)
+      } catch (lifecycleError) {
+        console.error('[Offer Counter] Failed to mark first offer responded:', lifecycleError)
+      }
 
       // Send email to host about counter offer
       const hostEmail = offer.hostProfile.user?.email || offer.hostProfile.contactEmail
@@ -308,14 +403,60 @@ export async function PATCH(
         },
       })
 
-      // Update offer status
+      // Record status change with history
+      try {
+        await recordOfferStatusChange(
+          params.id,
+          offer.status,
+          'accepted',
+          'creator',
+          'Creator accepted the offer'
+        )
+      } catch (statusError) {
+        console.error('[Offer Accept] Failed to record status change:', statusError)
+        // Fall back to simple update
+        await prisma.offer.update({
+          where: { id: params.id },
+          data: { status: 'accepted' },
+        })
+      }
+
+      // Update respondedAt separately
       await prisma.offer.update({
         where: { id: params.id },
-        data: {
-          status: 'accepted',
-          respondedAt: new Date(),
-        },
-      })
+        data: { respondedAt: new Date() },
+      }).catch(() => {})
+
+      // Log audit event
+      try {
+        await logOfferEvent(
+          AUDIT_ACTIONS.OFFER_STATUS_CHANGED,
+          params.id,
+          'user',
+          creatorProfile.id,
+          { 
+            fromStatus: offer.status, 
+            toStatus: 'accepted',
+            collaborationId: collaboration.id,
+          }
+        )
+      } catch (auditError) {
+        console.error('[Offer Accept] Failed to log audit event:', auditError)
+      }
+
+      // Log analytics event
+      try {
+        await logOfferResponded(creatorProfile.id, params.id, 'accepted', offer.hostProfileId)
+      } catch (analyticsError) {
+        console.error('[Offer Accept] Failed to log analytics event:', analyticsError)
+      }
+
+      // Mark first offer responded for lifecycle tracking
+      try {
+        await markFirstOfferResponded(creatorProfile.id)
+      } catch (lifecycleError) {
+        console.error('[Offer Accept] Failed to mark first offer responded:', lifecycleError)
+      }
 
       // Send email to host
       const hostEmail = offer.hostProfile.user?.email || offer.hostProfile.contactEmail

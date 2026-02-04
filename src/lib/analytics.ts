@@ -13,6 +13,7 @@
  */
 
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export type AnalyticsActorType = 'creator' | 'host' | 'visitor' | 'system'
 
@@ -34,7 +35,7 @@ export async function logAnalyticsEvent(event: AnalyticsEventData): Promise<void
         actorType: event.actorType,
         actorId: event.actorId,
         eventType: event.eventType,
-        eventData: event.eventData || {},
+        eventData: (event.eventData || {}) as Prisma.InputJsonValue,
         sessionId: event.sessionId,
       },
     })

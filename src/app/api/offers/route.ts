@@ -4,6 +4,10 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { sendEmail, newOfferEmail, offerSentConfirmationEmail } from '@/lib/email'
 import { canAccessMarketplace, getMarketplaceBlockedMessage } from '@/lib/feature-flags'
+import { prepareOfferForCreation, validateOfferTerms, recordOfferStatusChange } from '@/lib/offer-validation'
+import { logOfferEvent, AUDIT_ACTIONS } from '@/lib/audit'
+import { logOfferSent } from '@/lib/analytics'
+import { markFirstOfferReceived } from '@/lib/trust'
 
 export const dynamic = 'force-dynamic'
 
@@ -220,7 +224,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No property found. Please add a property first.' }, { status: 400 })
     }
 
-    // Create the offer
+    // Prepare and validate offer terms
+    const offerTerms = {
+      offerType: offerType || 'flat',
+      cashCents: cashCents || 0,
+      stayNights: stayNights || null,
+      deliverables: deliverables || [],
+      requirements: message || null,
+      trafficBonusEnabled: trafficBonusEnabled || false,
+      trafficBonusThreshold: trafficBonusThreshold || null,
+      trafficBonusCents: trafficBonusCents || null,
+    }
+
+    // Validate offer terms against platform rules
+    const validation = validateOfferTerms(offerTerms)
+    if (!validation.isValid) {
+      return NextResponse.json({ 
+        error: 'Invalid offer terms', 
+        details: validation.errors 
+      }, { status: 400 })
+    }
+
+    // Prepare offer data with snapshot and computed fields
+    const offerPrep = prepareOfferForCreation(offerTerms)
+
+    // Create the offer with audit snapshot
     const offer = await prisma.offer.create({
       data: {
         hostProfileId: hostProfile.id,
@@ -235,9 +263,54 @@ export async function POST(request: NextRequest) {
         deliverables: deliverables || [],
         requirements: message || null,
         status: 'pending',
-        expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
+        expiresAt: offerPrep.data.expiresAt,
+        // Infrastructure fields
+        originalTermsSnapshot: offerPrep.data.originalTermsSnapshot,
+        totalValueCents: offerPrep.data.totalValueCents,
+        statusHistory: [{
+          fromStatus: 'draft',
+          toStatus: 'pending',
+          changedBy: 'host',
+          changedAt: new Date().toISOString(),
+        }],
       },
     })
+
+    // Log audit event for offer creation
+    try {
+      await logOfferEvent(
+        AUDIT_ACTIONS.OFFER_CREATED,
+        offer.id,
+        'user',
+        hostProfile.id,
+        {
+          creatorProfileId,
+          totalValueCents: offerPrep.data.totalValueCents,
+          offerType: offerType || 'flat',
+        }
+      )
+    } catch (auditError) {
+      console.error('[Offers API] Failed to log audit event:', auditError)
+    }
+
+    // Log analytics event
+    try {
+      await logOfferSent(
+        hostProfile.id,
+        offer.id,
+        creatorProfileId,
+        offerPrep.data.totalValueCents
+      )
+    } catch (analyticsError) {
+      console.error('[Offers API] Failed to log analytics event:', analyticsError)
+    }
+
+    // Mark first offer received for creator lifecycle tracking
+    try {
+      await markFirstOfferReceived(creatorProfileId)
+    } catch (lifecycleError) {
+      console.error('[Offers API] Failed to mark first offer received:', lifecycleError)
+    }
 
     // Send email notification to creator
     if (creatorProfile.user.email) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { updateCreatorReadiness } from '@/lib/readiness'
 
 export const dynamic = 'force-dynamic'
 
@@ -228,6 +229,16 @@ export async function PUT(request: NextRequest) {
         onboardingComplete: onboardingComplete || false,
       },
     })
+
+    // Recompute readiness state on every profile save
+    // This also updates trust tier since they share dependencies
+    try {
+      const readiness = await updateCreatorReadiness(profile.id)
+      console.log(`[Creator Profile API] Readiness updated: ${readiness.state}, blockers: ${readiness.blockers.length}`)
+    } catch (readinessError) {
+      // Don't fail the profile update if readiness computation fails
+      console.error('[Creator Profile API] Failed to update readiness:', readinessError)
+    }
 
     return NextResponse.json(profile)
   } catch (error) {
