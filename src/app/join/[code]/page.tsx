@@ -129,10 +129,13 @@ export default function JoinBetaPage() {
 
           <Link
             href={`/creators/signup?invite=${code}`}
-            className="block w-full rounded-full border-[3px] border-black bg-black py-3 text-center text-sm font-bold text-white transition-transform hover:-translate-y-1"
+            className="block w-full rounded-full border-[3px] border-black bg-white py-3 text-center text-sm font-bold text-black transition-transform hover:-translate-y-1"
           >
             Sign up with Email
           </Link>
+          <p className="mt-2 text-center text-[10px] text-black/40">
+            We'll send a magic link to verify your email
+          </p>
 
           <p className="mt-4 text-center text-[10px] text-black/50">
             By signing up, you agree to our{" "}
