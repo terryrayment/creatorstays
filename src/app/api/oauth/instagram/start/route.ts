@@ -8,19 +8,17 @@ export const dynamic = 'force-dynamic'
 /**
  * GET /api/oauth/instagram/start
  * 
- * Initiates Instagram Graph API OAuth flow via Facebook Login.
- * This is the ONLY way to get verified follower counts.
+ * Initiates Instagram Business Login OAuth flow.
+ * This is the new (2024+) Instagram API that directly authenticates
+ * Instagram Business/Creator accounts and provides follower counts.
  * 
  * Requirements for creators:
  * - Instagram Business or Creator account (NOT personal)
- * - Instagram account linked to a Facebook Page
- * 
- * Personal accounts will be rejected at callback with upgrade instructions.
  * 
  * Required env vars:
- * - META_APP_ID (Facebook App ID)
- * - META_APP_SECRET (Facebook App Secret)
- * - META_REDIRECT_URI (e.g., https://creatorstays.com/api/oauth/instagram/callback)
+ * - INSTAGRAM_APP_ID
+ * - INSTAGRAM_APP_SECRET  
+ * - INSTAGRAM_REDIRECT_URI
  */
 export async function GET(request: NextRequest) {
   try {
@@ -40,11 +38,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Check env vars
-    const appId = process.env.META_APP_ID
-    const redirectUri = process.env.META_REDIRECT_URI
+    const appId = process.env.INSTAGRAM_APP_ID
+    const redirectUri = process.env.INSTAGRAM_REDIRECT_URI
 
     if (!appId || !redirectUri) {
-      console.error('[Instagram OAuth] Missing env vars: META_APP_ID or META_REDIRECT_URI')
+      console.error('[Instagram OAuth] Missing env vars: INSTAGRAM_APP_ID or INSTAGRAM_REDIRECT_URI')
       return NextResponse.redirect(new URL('/beta/dashboard/creator?ig_error=not_configured', request.url))
     }
 
@@ -56,7 +54,7 @@ export async function GET(request: NextRequest) {
     })).toString('base64url')
 
     // Store state in cookie
-    const response = NextResponse.redirect(buildFacebookAuthUrl(appId, redirectUri, state))
+    const response = NextResponse.redirect(buildInstagramAuthUrl(appId, redirectUri, state))
     response.cookies.set('ig_oauth_state', state, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -73,31 +71,25 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * Build Facebook OAuth URL with Instagram permissions
+ * Build Instagram Business Login OAuth URL
  * 
- * This uses Facebook Login to request Instagram Graph API access.
- * Scopes requested:
- * - instagram_basic: Read profile info, username
- * - instagram_manage_insights: Read follower count and analytics
- * - pages_show_list: List Facebook Pages (required to find linked IG accounts)
- * - pages_read_engagement: Read Page engagement data
+ * Scopes:
+ * - instagram_business_basic: Profile info, username, follower count
+ * - instagram_business_manage_insights: Detailed analytics
  */
-function buildFacebookAuthUrl(appId: string, redirectUri: string, state: string): string {
+function buildInstagramAuthUrl(appId: string, redirectUri: string, state: string): string {
   const scopes = [
-    'instagram_basic',           // Basic profile access
-    'instagram_manage_insights', // Follower count, demographics
-    'pages_show_list',           // List FB Pages to find linked IG
-    'pages_read_engagement',     // Page engagement metrics
-    'business_management',       // Access business assets
+    'instagram_business_basic',           // Username, profile pic, follower count
+    'instagram_business_manage_insights', // Analytics and insights
   ].join(',')
 
   const params = new URLSearchParams({
     client_id: appId,
     redirect_uri: redirectUri,
-    scope: scopes,
     response_type: 'code',
+    scope: scopes,
     state,
   })
 
-  return `https://www.facebook.com/v18.0/dialog/oauth?${params.toString()}`
+  return `https://www.instagram.com/oauth/authorize?${params.toString()}`
 }

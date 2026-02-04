@@ -96,8 +96,8 @@ export async function POST(request: NextRequest) {
     const accessToken = creatorProfile.instagramAccessToken
 
     const igResponse = await fetch(
-      `https://graph.facebook.com/v18.0/${igAccountId}?` +
-      `fields=id,username,name,profile_picture_url,followers_count,follows_count,media_count,biography&` +
+      `https://graph.instagram.com/v21.0/me?` +
+      `fields=user_id,username,name,profile_picture_url,followers_count,follows_count,media_count&` +
       `access_token=${accessToken}`
     )
 

@@ -3,50 +3,19 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-// Types for Instagram Graph API responses
-interface FacebookPage {
-  id: string
-  name: string
-  access_token: string
-  instagram_business_account?: {
-    id: string
-  }
-}
-
-interface InstagramAccount {
-  id: string
-  username: string
-  name?: string
-  profile_picture_url?: string
-  followers_count: number
-  follows_count?: number
-  media_count?: number
-  account_type?: string
-  biography?: string
-  website?: string
-  is_verified?: boolean
-  pageId: string
-  pageAccessToken: string
-}
-
 /**
  * GET /api/oauth/instagram/callback
  * 
- * Handles Facebook OAuth callback and discovers Instagram Business/Creator accounts.
+ * Handles Instagram Business Login OAuth callback.
  * 
  * Flow:
- * 1. Exchange code for Facebook access token
- * 2. Get long-lived token (60 days)
- * 3. List user's Facebook Pages
- * 4. For each Page, check for linked Instagram Business account
- * 5. Fetch follower count and profile data for each IG account
- * 6. Select the account with highest follower count
- * 7. Store verified data - NO manual entry allowed
+ * 1. Exchange code for access token
+ * 2. Fetch user profile with follower count
+ * 3. Store verified data - NO manual entry allowed
  * 
  * Rejection cases:
- * - No Facebook Pages found → instructions to create one
- * - No Instagram accounts linked → instructions to link
  * - Personal Instagram account → instructions to upgrade to Business/Creator
+ * - Token exchange fails → retry prompt
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -60,7 +29,7 @@ export async function GET(request: NextRequest) {
 
   // Handle user denial
   if (error) {
-    console.log('[Instagram OAuth] User denied:', { error, errorDescription })
+    console.log('[Instagram OAuth] User denied or error:', { error, errorDescription })
     return NextResponse.redirect(`${dashboardUrl}?ig_error=access_denied`)
   }
 
@@ -92,9 +61,9 @@ export async function GET(request: NextRequest) {
   }
 
   // Check env vars
-  const appId = process.env.META_APP_ID
-  const appSecret = process.env.META_APP_SECRET
-  const redirectUri = process.env.META_REDIRECT_URI
+  const appId = process.env.INSTAGRAM_APP_ID
+  const appSecret = process.env.INSTAGRAM_APP_SECRET
+  const redirectUri = process.env.INSTAGRAM_REDIRECT_URI
 
   if (!appId || !appSecret || !redirectUri) {
     console.error('[Instagram OAuth] Missing env vars')
@@ -102,15 +71,21 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Step 1: Exchange code for short-lived access token
+    // Step 1: Exchange code for access token
     console.log('[Instagram OAuth] Exchanging code for token...')
-    const tokenResponse = await fetch(
-      `https://graph.facebook.com/v18.0/oauth/access_token?` +
-      `client_id=${appId}&` +
-      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-      `client_secret=${appSecret}&` +
-      `code=${code}`
-    )
+    const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: appId,
+        client_secret: appSecret,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUri,
+        code,
+      }),
+    })
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text()
@@ -119,21 +94,20 @@ export async function GET(request: NextRequest) {
     }
 
     const tokenData = await tokenResponse.json()
-    const shortLivedToken = tokenData.access_token
+    const { access_token: shortLivedToken, user_id: igUserId } = tokenData
 
-    if (!shortLivedToken) {
-      console.error('[Instagram OAuth] No access token in response')
-      return NextResponse.redirect(`${dashboardUrl}?ig_error=no_token`)
+    if (!shortLivedToken || !igUserId) {
+      console.error('[Instagram OAuth] Invalid token response:', tokenData)
+      return NextResponse.redirect(`${dashboardUrl}?ig_error=invalid_token_response`)
     }
 
     // Step 2: Exchange for long-lived token (60 days)
     console.log('[Instagram OAuth] Getting long-lived token...')
     const longLivedResponse = await fetch(
-      `https://graph.facebook.com/v18.0/oauth/access_token?` +
-      `grant_type=fb_exchange_token&` +
-      `client_id=${appId}&` +
+      `https://graph.instagram.com/access_token?` +
+      `grant_type=ig_exchange_token&` +
       `client_secret=${appSecret}&` +
-      `fb_exchange_token=${shortLivedToken}`
+      `access_token=${shortLivedToken}`
     )
 
     let accessToken = shortLivedToken
@@ -147,126 +121,75 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Step 3: Get Facebook Pages with Instagram accounts
-    console.log('[Instagram OAuth] Fetching Facebook Pages...')
-    const pagesResponse = await fetch(
-      `https://graph.facebook.com/v18.0/me/accounts?` +
-      `fields=id,name,access_token,instagram_business_account&` +
+    // Step 3: Fetch user profile with follower count
+    console.log('[Instagram OAuth] Fetching profile...')
+    const profileResponse = await fetch(
+      `https://graph.instagram.com/v21.0/me?` +
+      `fields=user_id,username,name,account_type,profile_picture_url,followers_count,follows_count,media_count&` +
       `access_token=${accessToken}`
     )
 
-    if (!pagesResponse.ok) {
-      const errorText = await pagesResponse.text()
-      console.error('[Instagram OAuth] Pages fetch failed:', errorText)
-      return NextResponse.redirect(`${dashboardUrl}?ig_error=pages_fetch_failed`)
+    if (!profileResponse.ok) {
+      const errorText = await profileResponse.text()
+      console.error('[Instagram OAuth] Profile fetch failed:', errorText)
+      return NextResponse.redirect(`${dashboardUrl}?ig_error=profile_fetch_failed`)
     }
 
-    const pagesData = await pagesResponse.json()
-    const pages: FacebookPage[] = pagesData.data || []
+    const profileData = await profileResponse.json()
+    
+    console.log('[Instagram OAuth] Profile data:', profileData)
 
-    if (pages.length === 0) {
-      // No Facebook Pages - creator needs to create one
-      console.log('[Instagram OAuth] No Facebook Pages found')
-      return NextResponse.redirect(`${dashboardUrl}?ig_error=no_pages`)
+    // Check if this is a business/creator account
+    if (profileData.account_type === 'PERSONAL') {
+      console.log('[Instagram OAuth] Personal account rejected')
+      return NextResponse.redirect(`${dashboardUrl}?ig_error=personal_account`)
     }
 
-    // Step 4: Find all Instagram Business accounts linked to Pages
-    const instagramAccounts: InstagramAccount[] = []
+    const username = profileData.username
+    const followersCount = profileData.followers_count || 0
+    const profilePictureUrl = profileData.profile_picture_url
 
-    for (const page of pages) {
-      if (!page.instagram_business_account?.id) {
-        continue // This Page has no linked Instagram
-      }
-
-      const igAccountId = page.instagram_business_account.id
-      const pageAccessToken = page.access_token
-
-      // Fetch Instagram account details with follower count
-      console.log(`[Instagram OAuth] Fetching IG account ${igAccountId}...`)
-      const igResponse = await fetch(
-        `https://graph.facebook.com/v18.0/${igAccountId}?` +
-        `fields=id,username,name,profile_picture_url,followers_count,follows_count,media_count,biography,website&` +
-        `access_token=${pageAccessToken}`
-      )
-
-      if (igResponse.ok) {
-        const igData = await igResponse.json()
-        instagramAccounts.push({
-          ...igData,
-          pageId: page.id,
-          pageAccessToken: pageAccessToken,
-        })
-      }
-    }
-
-    if (instagramAccounts.length === 0) {
-      // Found Pages but no Instagram Business accounts linked
-      console.log('[Instagram OAuth] No Instagram Business accounts found')
-      return NextResponse.redirect(`${dashboardUrl}?ig_error=no_instagram_business`)
-    }
-
-    // Step 5: Select the account with highest follower count
-    const primaryAccount = instagramAccounts.reduce((best, current) => {
-      return (current.followers_count || 0) > (best.followers_count || 0) ? current : best
-    }, instagramAccounts[0])
-
-    console.log('[Instagram OAuth] Selected primary account:', {
-      username: primaryAccount.username,
-      followers: primaryAccount.followers_count,
-      accountsFound: instagramAccounts.length,
-    })
-
-    // Step 6: Get current profile to check onboarding status
+    // Step 4: Check onboarding status
     const currentProfile = await prisma.creatorProfile.findUnique({
       where: { id: creatorId },
       select: { onboardingComplete: true },
     })
 
-    // Step 7: Update creator profile with VERIFIED data only
+    // Step 5: Update creator profile with VERIFIED data only
     await prisma.creatorProfile.update({
       where: { id: creatorId },
       data: {
         // Core Instagram connection - all system-sourced, never editable
         instagramConnected: true,
-        instagramAccountId: primaryAccount.id,
-        instagramHandle: primaryAccount.username,
-        instagramFollowers: primaryAccount.followers_count,
-        instagramAccessToken: primaryAccount.pageAccessToken, // Page token for future API calls
+        instagramAccountId: igUserId,
+        instagramHandle: username,
+        instagramFollowers: followersCount,
+        instagramAccessToken: accessToken,
         instagramLastSyncAt: new Date(),
         instagramTokenExpiresAt: tokenExpiresAt,
         
-        // Update avatar if creator hasn't set one
-        avatarUrl: primaryAccount.profile_picture_url || undefined,
+        // Update avatar if available
+        avatarUrl: profilePictureUrl || undefined,
         
         // Mark as verified since data is system-sourced
         isVerified: true,
         
-        // Update total followers (will be max of all connected platforms)
-        totalFollowers: primaryAccount.followers_count,
+        // Update total followers
+        totalFollowers: followersCount,
       },
     })
 
-    // Store additional IG accounts for potential future switching
-    // (in a separate table or JSON field if needed)
-    if (instagramAccounts.length > 1) {
-      console.log('[Instagram OAuth] Multiple accounts available:', 
-        instagramAccounts.map(a => ({ username: a.username, followers: a.followers_count }))
-      )
-    }
-
     console.log('[Instagram OAuth] Successfully connected:', {
       creatorId,
-      igAccountId: primaryAccount.id,
-      username: primaryAccount.username,
-      followers: primaryAccount.followers_count,
+      igUserId,
+      username,
+      followers: followersCount,
     })
 
     // Clear state cookie and redirect appropriately
-    // If onboarding not complete, go back to onboarding
-    // Otherwise go to dashboard
     const redirectUrl = currentProfile?.onboardingComplete
-      ? `${dashboardUrl}?ig_connected=true&followers=${primaryAccount.followers_count}`
-      : `${baseUrl}/onboarding/creator?ig_connected=true&followers=${primaryAccount.followers_count}`
+      ? `${dashboardUrl}?ig_connected=true&followers=${followersCount}`
+      : `${baseUrl}/onboarding/creator?ig_connected=true&followers=${followersCount}`
     
     const response = NextResponse.redirect(redirectUrl)
     response.cookies.delete('ig_oauth_state')
