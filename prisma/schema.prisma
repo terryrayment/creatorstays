@@ -76,6 +76,20 @@ model VerificationToken {
 // CREATOR
 // ============================================================================
 
+// Trust tier enum for creator credibility
+enum TrustTier {
+  NEW       // Just joined, no signals
+  VERIFIED  // OAuth complete + profile complete
+  PROVEN    // At least one completed collaboration
+}
+
+// Readiness state for creator lifecycle
+enum ReadinessState {
+  INCOMPLETE    // Missing critical fields
+  PENDING_OAUTH // Profile done, OAuth not complete
+  READY         // Fully set up, can receive offers
+}
+
 model CreatorProfile {
   id          String   @id @default(cuid())
   userId      String   @unique
@@ -147,6 +161,30 @@ model CreatorProfile {
   isActive          Boolean  @default(true)
   isPublic          Boolean  @default(false)  // Whether profile appears in public discovery (beta: always false)
   profileComplete   Int      @default(0) // Percentage 0-100
+  
+  // ============================================================================
+  // INFRASTRUCTURE: Trust & Readiness (Phase 1)
+  // ============================================================================
+  
+  // Trust tier - computed based on verification state and collaboration history
+  trustTier             TrustTier       @default(NEW)
+  
+  // Readiness state - computed based on profile completeness
+  readinessState        ReadinessState  @default(INCOMPLETE)
+  
+  // Blockers - JSON array of strings describing what's missing
+  // e.g., ["instagram_not_connected", "deliverables_not_set", "minimum_rate_not_set"]
+  readinessBlockers     Json            @default("[]")
+  
+  // Computed profile completeness (0.0 to 1.0)
+  profileCompleteness   Float           @default(0)
+  
+  // Lifecycle tracking - first events
+  firstOfferReceivedAt    DateTime?
+  firstOfferRespondedAt   DateTime?
+  firstCollabCompletedAt  DateTime?
+  
+  // ============================================================================
   
   // Beta access - tracks how creator was onboarded
   isBeta            Boolean  @default(false)    // True if signed up via invite
@@ -735,7 +773,7 @@ model Offer {
   deliverables    String[] // ["2 Reels", "5 Stories", "1 Feed Post"]
   
   // Status
-  status          String   @default("pending") // "pending", "accepted", "declined", "countered", "expired"
+  status          String   @default("pending") // "pending", "accepted", "declined", "countered", "expired", "withdrawn"
   
   // Counter offer fields
   counterCashCents  Int?
@@ -744,6 +782,26 @@ model Offer {
   // Negotiation tracking
   negotiationRound  Int      @default(1) // Tracks back-and-forth: 1=initial, 2=first counter, 3=re-counter, etc.
   lastCounterBy     String?  // "host" or "creator" - who made the last counter
+
+  // ============================================================================
+  // INFRASTRUCTURE: Offer Audit Trail (Phase 1)
+  // ============================================================================
+  
+  // Frozen snapshot of offer terms at time of send (immutable)
+  // Stored as JSON: { offerType, cashCents, stayNights, deliverables, requirements, ... }
+  originalTermsSnapshot   Json?
+  
+  // Status change history - array of { fromStatus, toStatus, changedBy, changedAt, reason? }
+  statusHistory           Json      @default("[]")
+  
+  // Computed total value in cents (cash + estimated stay value)
+  totalValueCents         Int?
+  
+  // Validation state
+  isValid                 Boolean   @default(true)
+  validationErrors        Json      @default("[]")  // Array of error strings
+  
+  // ============================================================================
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -1080,4 +1138,65 @@ model ContactMessage {
   @@index([email])
   @@index([createdAt])
   @@map("contact_messages")
+}
+
+// ============================================================================
+// INFRASTRUCTURE: Audit & Analytics (Phase 1)
+// ============================================================================
+
+// Audit log for all sensitive actions (admin actions, status changes, etc.)
+model AuditLog {
+  id          String   @id @default(cuid())
+  
+  // What action was performed
+  action      String   // e.g., "offer.status_changed", "admin.impersonate", "user.suspended"
+  
+  // Who performed the action
+  actorType   String   // "user", "admin", "system", "cron"
+  actorId     String   // User ID or "system"
+  actorEmail  String?  // Cached for readability in admin views
+  
+  // What was affected
+  targetType  String   // e.g., "Offer", "CreatorProfile", "Collaboration"
+  targetId    String   // ID of the affected record
+  
+  // Additional context
+  metadata    Json     @default("{}")  // Flexible JSON for action-specific data
+  
+  // Request context (for user actions)
+  ipAddress   String?
+  userAgent   String?
+  
+  // Timestamp
+  createdAt   DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// Analytics events for tracking user behavior and funnel metrics
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  
+  // Who triggered the event
+  actorType   String   // "creator", "host", "visitor", "system"
+  actorId     String   // Profile ID or session ID for visitors
+  
+  // Event details
+  eventType   String   // e.g., "offer_sent", "offer_responded", "profile_viewed", "collab_completed"
+  eventData   Json     @default("{}")  // Event-specific payload
+  
+  // Session context (optional)
+  sessionId   String?
+  
+  // Timestamp
+  createdAt   DateTime @default(now())
+
+  @@index([actorType, actorId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([createdAt])
+  @@map("analytics_events")
 }
