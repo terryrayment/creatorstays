@@ -96,19 +96,25 @@ export async function GET(request: NextRequest) {
 
   try {
     // Step 1: Exchange code for access token
-    console.log('[Instagram OAuth] Exchanging code for token...')
+    const tokenParams = {
+      client_id: appId,
+      client_secret: appSecret,
+      grant_type: 'authorization_code',
+      redirect_uri: redirectUri,
+      code,
+    }
+    console.log('[Instagram OAuth] Exchanging code for token with params:', {
+      client_id: appId,
+      redirect_uri: redirectUri,
+      code_length: code.length,
+      code_preview: code.substring(0, 20) + '...',
+    })
     const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        client_id: appId,
-        client_secret: appSecret,
-        grant_type: 'authorization_code',
-        redirect_uri: redirectUri,
-        code,
-      }),
+      body: new URLSearchParams(tokenParams),
     })
 
     if (!tokenResponse.ok) {
