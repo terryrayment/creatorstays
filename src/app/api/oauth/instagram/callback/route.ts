@@ -20,7 +20,10 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
-  const state = searchParams.get('state')
+  // Instagram's link shim (l.instagram.com) can append #_ and tracking params to the state
+  // Clean it by stripping everything after the base64url characters
+  const rawState = searchParams.get('state')
+  const state = rawState?.replace(/[^a-zA-Z0-9_-]/g, '') || null
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
 
@@ -40,7 +43,8 @@ export async function GET(request: NextRequest) {
   }
 
   // Validate state (CSRF protection)
-  const storedState = request.cookies.get('ig_oauth_state')?.value
+  const rawStoredState = request.cookies.get('ig_oauth_state')?.value
+  const storedState = rawStoredState?.replace(/[^a-zA-Z0-9_-]/g, '') || undefined
   console.log('[Instagram OAuth] State check:', { 
     hasState: !!state, 
     hasStoredState: !!storedState, 
