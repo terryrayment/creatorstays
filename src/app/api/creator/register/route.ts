@@ -210,8 +210,7 @@ export async function POST(request: NextRequest) {
         handle: result.creatorProfile.handle,
         displayName: result.creatorProfile.displayName,
       },
-      // Include sign-in URL for dev testing
-      ...(process.env.NODE_ENV === 'development' ? { signInUrl } : {}),
+
     })
 
   } catch (error) {
