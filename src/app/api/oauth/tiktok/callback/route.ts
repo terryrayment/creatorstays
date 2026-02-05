@@ -6,8 +6,13 @@ export const dynamic = 'force-dynamic'
 /**
  * GET /api/oauth/tiktok/callback
  * 
- * Handles TikTok OAuth callback after user authorization.
- * Exchanges code for access token, fetches user profile + stats, stores data.
+ * Handles TikTok OAuth callback.
+ * https://developers.tiktok.com/doc/login-kit-web/
+ * 
+ * Flow:
+ * 1. Exchange code for access token (with PKCE code verifier)
+ * 2. Fetch user profile with follower count
+ * 3. Store verified data on CreatorProfile
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -19,9 +24,9 @@ export async function GET(request: NextRequest) {
   const baseUrl = process.env.NEXTAUTH_URL || 'https://creatorstays.com'
   const dashboardUrl = `${baseUrl}/beta/dashboard/creator`
 
-  // Handle user denial or errors
+  // Handle user denial
   if (error) {
-    console.log('[TikTok OAuth] Error:', { error, errorDescription })
+    console.log('[TikTok OAuth] User denied or error:', { error, errorDescription })
     return NextResponse.redirect(`${dashboardUrl}?tt_error=access_denied`)
   }
 
@@ -33,16 +38,16 @@ export async function GET(request: NextRequest) {
 
   // Validate state (CSRF protection)
   const storedState = request.cookies.get('tt_oauth_state')?.value
-  const codeVerifier = request.cookies.get('tt_code_verifier')?.value
-
   if (!state || !storedState || state !== storedState) {
     console.error('[TikTok OAuth] State mismatch')
     return NextResponse.redirect(`${dashboardUrl}?tt_error=invalid_state`)
   }
 
+  // Get code verifier for PKCE
+  const codeVerifier = request.cookies.get('tt_code_verifier')?.value
   if (!codeVerifier) {
     console.error('[TikTok OAuth] Missing code verifier')
-    return NextResponse.redirect(`${dashboardUrl}?tt_error=invalid_state`)
+    return NextResponse.redirect(`${dashboardUrl}?tt_error=missing_verifier`)
   }
 
   // Decode state to get creator ID
@@ -51,7 +56,6 @@ export async function GET(request: NextRequest) {
     const stateData = JSON.parse(Buffer.from(state, 'base64url').toString())
     creatorId = stateData.creatorId
     
-    // Check state isn't too old (10 min max)
     if (Date.now() - stateData.timestamp > 600000) {
       return NextResponse.redirect(`${dashboardUrl}?tt_error=expired_state`)
     }
@@ -71,10 +75,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Exchange code for access token
+    // Step 1: Exchange code for access token
+    console.log('[TikTok OAuth] Exchanging code for token...')
     const tokenResponse = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
       body: new URLSearchParams({
         client_key: clientKey,
         client_secret: clientSecret,
@@ -93,29 +100,20 @@ export async function GET(request: NextRequest) {
 
     const tokenData = await tokenResponse.json()
     
-    if (tokenData.error) {
+    if (tokenData.error || !tokenData.access_token) {
       console.error('[TikTok OAuth] Token error:', tokenData)
       return NextResponse.redirect(`${dashboardUrl}?tt_error=token_error`)
     }
 
-    const {
-      access_token: accessToken,
-      refresh_token: refreshToken,
-      open_id: openId,
-      expires_in: expiresIn,
-      scope,
-    } = tokenData
+    const { access_token: accessToken, open_id: openId, expires_in: expiresIn, refresh_token: refreshToken } = tokenData
 
-    if (!accessToken || !openId) {
-      console.error('[TikTok OAuth] Invalid token response:', tokenData)
-      return NextResponse.redirect(`${dashboardUrl}?tt_error=invalid_token_response`)
-    }
-
+    // Calculate token expiry
     const tokenExpiresAt = expiresIn ? new Date(Date.now() + expiresIn * 1000) : null
 
-    // Fetch user info (basic profile)
-    const userInfoResponse = await fetch(
-      'https://open.tiktokapis.com/v2/user/info/?fields=open_id,union_id,avatar_url,display_name,username',
+    // Step 2: Fetch user profile with follower count
+    console.log('[TikTok OAuth] Fetching profile...')
+    const profileResponse = await fetch(
+      'https://open.tiktokapis.com/v2/user/info/?fields=open_id,union_id,avatar_url,display_name,username,follower_count,following_count,likes_count,video_count', 
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -123,50 +121,56 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    let username = null
-    let displayName = null
-    let followerCount: number | null = null
-
-    if (userInfoResponse.ok) {
-      const userInfo = await userInfoResponse.json()
-      if (userInfo.data?.user) {
-        username = userInfo.data.user.username
-        displayName = userInfo.data.user.display_name
-      }
+    if (!profileResponse.ok) {
+      const errorText = await profileResponse.text()
+      console.error('[TikTok OAuth] Profile fetch failed:', errorText)
+      return NextResponse.redirect(`${dashboardUrl}?tt_error=profile_fetch_failed`)
     }
 
-    // Fetch follower count if scope allows
-    // Note: user.info.stats scope is required
-    if (scope?.includes('user.info.stats')) {
-      const statsResponse = await fetch(
-        'https://open.tiktokapis.com/v2/user/info/?fields=follower_count,following_count,likes_count,video_count',
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-          },
-        }
-      )
+    const profileResponse2 = await profileResponse.json()
+    const profileData = profileResponse2.data?.user
 
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json()
-        if (statsData.data?.user?.follower_count !== undefined) {
-          followerCount = statsData.data.user.follower_count
-        }
-      }
+    if (!profileData) {
+      console.error('[TikTok OAuth] No user data in response:', profileResponse2)
+      return NextResponse.redirect(`${dashboardUrl}?tt_error=no_profile_data`)
     }
 
-    // Update creator profile
+    console.log('[TikTok OAuth] Profile data:', profileData)
+
+    const username = profileData.username || profileData.display_name
+    const followersCount = profileData.follower_count || 0
+    const avatarUrl = profileData.avatar_url
+
+    // Step 3: Check onboarding status
+    const currentProfile = await prisma.creatorProfile.findUnique({
+      where: { id: creatorId },
+      select: { 
+        onboardingComplete: true,
+        instagramFollowers: true,
+      },
+    })
+
+    // Step 4: Update creator profile with verified TikTok data
+    const totalFollowers = (currentProfile?.instagramFollowers || 0) + followersCount
+
     await prisma.creatorProfile.update({
       where: { id: creatorId },
       data: {
+        // TikTok connection data
         tiktokConnected: true,
         tiktokOpenId: openId,
-        tiktokAccessToken: accessToken, // In production, encrypt this
-        tiktokRefreshToken: refreshToken,
-        tiktokHandle: username || displayName,
-        tiktokFollowers: followerCount,
+        tiktokHandle: username,
+        tiktokFollowers: followersCount,
+        tiktokAccessToken: accessToken,
+        tiktokRefreshToken: refreshToken || null,
         tiktokLastSyncAt: new Date(),
         tiktokTokenExpiresAt: tokenExpiresAt,
+        
+        // Update avatar if no existing one
+        ...(!currentProfile?.instagramFollowers && avatarUrl ? { avatarUrl } : {}),
+        
+        // Update total followers (combined platforms)
+        totalFollowers,
       },
     })
 
@@ -174,12 +178,15 @@ export async function GET(request: NextRequest) {
       creatorId,
       openId,
       username,
-      followerCount,
-      scope,
+      followers: followersCount,
     })
 
-    // Clear state cookies
-    const response = NextResponse.redirect(`${dashboardUrl}?tt_connected=true`)
+    // Clear cookies and redirect
+    const redirectUrl = currentProfile?.onboardingComplete
+      ? `${dashboardUrl}?tt_connected=true&followers=${followersCount}`
+      : `${baseUrl}/onboarding/creator?tt_connected=true&followers=${followersCount}`
+    
+    const response = NextResponse.redirect(redirectUrl)
     response.cookies.delete('tt_oauth_state')
     response.cookies.delete('tt_code_verifier')
     

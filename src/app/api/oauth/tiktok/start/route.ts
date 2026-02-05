@@ -8,12 +8,13 @@ export const dynamic = 'force-dynamic'
 /**
  * GET /api/oauth/tiktok/start
  * 
- * Initiates TikTok OAuth flow via TikTok Login Kit.
+ * Initiates TikTok OAuth flow using Login Kit (Web).
+ * https://developers.tiktok.com/doc/login-kit-web/
  * 
  * Required env vars:
  * - TIKTOK_CLIENT_KEY
  * - TIKTOK_CLIENT_SECRET
- * - TIKTOK_REDIRECT_URI (e.g., https://creatorstays.com/api/oauth/tiktok/callback)
+ * - TIKTOK_REDIRECT_URI
  */
 export async function GET(request: NextRequest) {
   try {
@@ -41,22 +42,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/beta/dashboard/creator?tt_error=not_configured', request.url))
     }
 
-    // Generate state for CSRF protection
+    // Generate state for CSRF protection (encode creator ID + nonce)
     const state = Buffer.from(JSON.stringify({
       creatorId: creatorProfile.id,
       timestamp: Date.now(),
       nonce: Math.random().toString(36).substring(7),
     })).toString('base64url')
 
-    // Generate code verifier and challenge for PKCE
+    // Generate code verifier for PKCE (TikTok requires PKCE)
     const codeVerifier = generateCodeVerifier()
     const codeChallenge = await generateCodeChallenge(codeVerifier)
 
-    // Build authorization URL
-    const authUrl = buildTikTokAuthUrl(clientKey, redirectUri, state, codeChallenge)
-
     // Store state and code verifier in cookies
-    const response = NextResponse.redirect(authUrl)
+    const response = NextResponse.redirect(buildTikTokAuthUrl(clientKey, redirectUri, state, codeChallenge))
     
     response.cookies.set('tt_oauth_state', state, {
       httpOnly: true,
@@ -65,12 +63,12 @@ export async function GET(request: NextRequest) {
       maxAge: 600, // 10 minutes
       path: '/',
     })
-    
+
     response.cookies.set('tt_code_verifier', codeVerifier, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 600,
+      maxAge: 600, // 10 minutes
       path: '/',
     })
 
@@ -82,20 +80,21 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * Build TikTok authorization URL
- * Using TikTok Login Kit v2
+ * Build TikTok OAuth URL
+ * https://developers.tiktok.com/doc/login-kit-web/
+ * 
+ * Scopes:
+ * - user.info.basic: Display name, avatar, username
+ * - user.info.stats: Follower count, following count, likes
  */
-function buildTikTokAuthUrl(
-  clientKey: string,
-  redirectUri: string,
-  state: string,
-  codeChallenge: string
-): string {
+function buildTikTokAuthUrl(clientKey: string, redirectUri: string, state: string, codeChallenge: string): string {
+  const scopes = 'user.info.basic,user.info.stats'
+
   const params = new URLSearchParams({
     client_key: clientKey,
     redirect_uri: redirectUri,
-    scope: 'user.info.basic,user.info.stats', // stats scope needed for follower count
     response_type: 'code',
+    scope: scopes,
     state,
     code_challenge: codeChallenge,
     code_challenge_method: 'S256',
@@ -108,24 +107,17 @@ function buildTikTokAuthUrl(
  * Generate a random code verifier for PKCE
  */
 function generateCodeVerifier(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
-  let verifier = ''
-  for (let i = 0; i < 64; i++) {
-    verifier += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return verifier
+  const array = new Uint8Array(32)
+  crypto.getRandomValues(array)
+  return Buffer.from(array).toString('base64url')
 }
 
 /**
- * Generate code challenge from verifier using SHA-256
+ * Generate code challenge from verifier (SHA-256)
  */
 async function generateCodeChallenge(verifier: string): Promise<string> {
   const encoder = new TextEncoder()
   const data = encoder.encode(verifier)
-  const hash = await crypto.subtle.digest('SHA-256', data)
-  
-  // Base64url encode the hash
-  const hashArray = Array.from(new Uint8Array(hash))
-  const base64 = btoa(String.fromCharCode(...hashArray))
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  const digest = await crypto.subtle.digest('SHA-256', data)
+  return Buffer.from(digest).toString('base64url')
 }

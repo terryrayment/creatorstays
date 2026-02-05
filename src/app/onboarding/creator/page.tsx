@@ -145,22 +145,23 @@ export default function CreatorOnboardingPage() {
     const params = new URLSearchParams(window.location.search)
     const igConnected = params.get('ig_connected')
     const igError = params.get('ig_error')
+    const ttConnected = params.get('tt_connected')
+    const ttError = params.get('tt_error')
     
-    if (igConnected === 'true') {
-      // Instagram was just connected - refresh profile data
+    if (igConnected === 'true' || ttConnected === 'true') {
+      // Platform was just connected - refresh profile data
       fetch("/api/creator/profile")
         .then(res => res.json())
         .then(profile => {
-          if (profile.instagramHandle && profile.instagramFollowers) {
-            setData(prev => ({
-              ...prev,
-              instagramHandle: profile.instagramHandle,
-              instagramFollowers: profile.instagramFollowers.toString(),
-              avatarUrl: profile.avatarUrl || prev.avatarUrl,
-            }))
-            // Go to step 2 if we were on step 2
-            setStep(2)
-          }
+          setData(prev => ({
+            ...prev,
+            instagramHandle: profile.instagramHandle || prev.instagramHandle,
+            instagramFollowers: profile.instagramFollowers?.toString() || prev.instagramFollowers,
+            tiktokHandle: profile.tiktokHandle || prev.tiktokHandle,
+            tiktokFollowers: profile.tiktokFollowers?.toString() || prev.tiktokFollowers,
+            avatarUrl: profile.avatarUrl || prev.avatarUrl,
+          }))
+          setStep(2)
         })
         .catch(console.error)
       
@@ -169,15 +170,25 @@ export default function CreatorOnboardingPage() {
     }
     
     if (igError) {
-      // Show appropriate error message
       const errorMessages: Record<string, string> = {
         'no_pages': 'No Facebook Pages found. Create a Facebook Page and link your Instagram Business account to it.',
         'no_instagram_business': 'No Instagram Business account found. Switch your Instagram to a Business or Creator account and link it to a Facebook Page.',
         'access_denied': 'You denied access. Please try again and accept the permissions.',
         'token_exchange_failed': 'Connection failed. Please try again.',
         'callback_failed': 'Something went wrong. Please try again.',
+        'personal_account': 'Personal Instagram accounts cannot be verified. Switch to a Business or Creator account.',
       }
       setError(errorMessages[igError] || 'Failed to connect Instagram. Please try again.')
+      window.history.replaceState({}, '', '/onboarding/creator')
+    }
+
+    if (ttError) {
+      const errorMessages: Record<string, string> = {
+        'access_denied': 'You denied access. Please try again and accept the permissions.',
+        'token_exchange_failed': 'Connection failed. Please try again.',
+        'callback_failed': 'Something went wrong. Please try again.',
+      }
+      setError(errorMessages[ttError] || 'Failed to connect TikTok. Please try again.')
       window.history.replaceState({}, '', '/onboarding/creator')
     }
   }, [])
@@ -464,8 +475,8 @@ export default function CreatorOnboardingPage() {
           <div>
             <div className="mb-8 text-center">
               <StepIcon icon="share" />
-              <h1 className="font-heading text-3xl tracking-tight text-black">Connect your Instagram</h1>
-              <p className="mt-2 text-sm text-black">Verify your presence with one click. No manual entry.</p>
+              <h1 className="font-heading text-3xl tracking-tight text-black">Connect your platforms</h1>
+              <p className="mt-2 text-sm text-black">Verify your presence with one click. Manual entry available as fallback.</p>
             </div>
 
             <div className="space-y-6">
@@ -551,6 +562,80 @@ export default function CreatorOnboardingPage() {
                           type="text"
                           value={data.instagramFollowers}
                           onChange={e => updateField("instagramFollowers", e.target.value.replace(/[^0-9,]/g, ''))}
+                          placeholder="Follower count"
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* TikTok Connection */}
+              <div className="rounded-xl border-2 border-black bg-white overflow-hidden">
+                {data.tiktokHandle && data.tiktokFollowers ? (
+                  // Connected State
+                  <div className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-black bg-black">
+                        <svg className="h-7 w-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.4a6.27 6.27 0 00-.79-.05A6.34 6.34 0 003.15 15.3a6.34 6.34 0 0010.86 4.43 6.3 6.3 0 001.86-4.48V8.73a8.18 8.18 0 004.72 1.5v-3.4a4.85 4.85 0 01-1-.14z"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-lg font-bold text-black">@{data.tiktokHandle}</p>
+                          <span className="flex items-center gap-1 rounded-full bg-[#28D17C] px-2 py-0.5 text-[10px] font-bold text-black">
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                            Verified
+                          </span>
+                        </div>
+                        <p className="text-2xl font-black text-black">{parseInt(data.tiktokFollowers).toLocaleString()} followers</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Not Connected State
+                  <div className="p-6">
+                    <div className="text-center">
+                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-black bg-black">
+                        <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.4a6.27 6.27 0 00-.79-.05A6.34 6.34 0 003.15 15.3a6.34 6.34 0 0010.86 4.43 6.3 6.3 0 001.86-4.48V8.73a8.18 8.18 0 004.72 1.5v-3.4a4.85 4.85 0 01-1-.14z"/>
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-bold text-black">Connect TikTok</h3>
+                      <p className="mt-1 text-sm text-black">
+                        Verify your TikTok follower count with one click.
+                      </p>
+                      
+                      <button
+                        onClick={() => window.location.href = '/api/oauth/tiktok/start'}
+                        className="mt-4 inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-6 py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+                      >
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.4a6.27 6.27 0 00-.79-.05A6.34 6.34 0 003.15 15.3a6.34 6.34 0 0010.86 4.43 6.3 6.3 0 001.86-4.48V8.73a8.18 8.18 0 004.72 1.5v-3.4a4.85 4.85 0 01-1-.14z"/>
+                        </svg>
+                        Connect with TikTok
+                      </button>
+                    </div>
+
+                    {/* Manual entry fallback */}
+                    <div className="mt-4 border-t border-black pt-4">
+                      <p className="text-xs font-bold text-black mb-3">Or enter manually (unverified):</p>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input
+                          type="text"
+                          value={data.tiktokHandle}
+                          onChange={e => updateField("tiktokHandle", e.target.value.replace(/^@/, ""))}
+                          placeholder="@username"
+                          className={inputClass}
+                        />
+                        <input
+                          type="text"
+                          value={data.tiktokFollowers}
+                          onChange={e => updateField("tiktokFollowers", e.target.value.replace(/[^0-9,]/g, ''))}
                           placeholder="Follower count"
                           className={inputClass}
                         />
