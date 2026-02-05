@@ -186,16 +186,8 @@ export default function CreatorSignupClient() {
               We sent a sign-in link to <strong>{submittedEmail}</strong>
             </p>
             <p className="mt-2 text-[11px] text-black/70">
-              Click the link in the email to access your creator dashboard. The link expires in 24 hours.
+              Click the link in your email to access your dashboard. One click, you're in. The link expires in 24 hours.
             </p>
-            <div className="mt-5 space-y-2">
-              <Link 
-                href="/login/creator"
-                className="inline-flex h-10 items-center gap-2 rounded-full border-[2px] border-black bg-white px-5 text-[10px] font-black uppercase tracking-wider text-black transition-transform duration-200 hover:-translate-y-0.5"
-              >
-                Sign in with different email
-              </Link>
-            </div>
             <p className="mt-4 text-[10px] text-black/60">
               Didn't receive the email? Check your spam folder or{" "}
               <button onClick={() => setSubmitted(false)} className="underline font-bold">

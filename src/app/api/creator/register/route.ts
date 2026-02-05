@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendEmail } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -171,49 +170,30 @@ export async function POST(request: NextRequest) {
       return { user, creatorProfile }
     })
 
-    // 4. Send welcome email with sign-in link
-    // Note: We'll redirect them to login where they can request a proper NextAuth magic link
+    // 4. Trigger NextAuth magic link directly - ONE email, ONE click to sign in
     const baseUrl = process.env.NEXTAUTH_URL || 'https://creatorstays.com'
     
-    // Instead of creating our own token, we'll send them to the login page
-    // where they can request a proper NextAuth magic link
-    const signInUrl = `${baseUrl}/login/creator?email=${encodeURIComponent(normalizedEmail)}&welcome=true`
-
     try {
-      await sendEmail({
-        to: normalizedEmail,
-        subject: 'Welcome to CreatorStays! 🎬',
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #000;">Welcome to CreatorStays, ${displayName}!</h1>
-            <p>Your creator profile has been created. You're now part of our beta community!</p>
-            <p>Your profile: <strong>@${normalizedHandle}</strong></p>
-            <p>Click the button below to sign in:</p>
-            <div style="margin: 30px 0;">
-              <a href="${signInUrl}" style="background: #000; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block;">
-                Sign In to Your Dashboard →
-              </a>
-            </div>
-            <p style="color: #666; font-size: 14px;">
-              You'll receive a magic link to your email to complete sign in.
-            </p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-            <p style="color: #666; font-size: 14px;">
-              <strong>What's next?</strong><br/>
-              • Complete your profile to get discovered by hosts<br/>
-              • Connect your social accounts<br/>
-              • Set your rates and deliverables<br/>
-              • Start receiving collaboration offers!
-            </p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-            <p style="color: #666; font-size: 12px;">
-              If you didn't create this account, you can safely ignore this email.
-            </p>
-          </div>
-        `,
+      // Use NextAuth's built-in email provider to send a magic link
+      // This creates a proper verification token and sends a sign-in email
+      const csrfRes = await fetch(`${baseUrl}/api/auth/csrf`)
+      const { csrfToken } = await csrfRes.json()
+      
+      const signInRes = await fetch(`${baseUrl}/api/auth/signin/email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          email: normalizedEmail,
+          csrfToken,
+          callbackUrl: `${baseUrl}/onboarding/creator`,
+        }),
       })
+      
+      if (!signInRes.ok) {
+        console.error('[Creator Register] Failed to trigger magic link:', await signInRes.text())
+      }
     } catch (emailError) {
-      console.error('[Creator Register] Failed to send welcome email:', emailError)
+      console.error('[Creator Register] Failed to send magic link:', emailError)
       // Don't fail the registration if email fails
     }
 
