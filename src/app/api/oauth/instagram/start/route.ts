@@ -57,10 +57,11 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(buildInstagramAuthUrl(appId, redirectUri, state))
     response.cookies.set('ig_oauth_state', state, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'lax',
       maxAge: 600, // 10 minutes
       path: '/',
+      domain: '.creatorstays.com',
     })
 
     return response

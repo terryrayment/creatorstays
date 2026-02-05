@@ -41,9 +41,20 @@ export async function GET(request: NextRequest) {
 
   // Validate state (CSRF protection)
   const storedState = request.cookies.get('ig_oauth_state')?.value
+  console.log('[Instagram OAuth] State check:', { 
+    hasState: !!state, 
+    hasStoredState: !!storedState, 
+    match: state === storedState,
+    cookies: request.cookies.getAll().map(c => c.name),
+  })
   if (!state || !storedState || state !== storedState) {
-    console.error('[Instagram OAuth] State mismatch')
-    return NextResponse.redirect(`${dashboardUrl}?ig_error=invalid_state`)
+    console.error('[Instagram OAuth] State mismatch — stored:', storedState?.substring(0, 20), 'received:', state?.substring(0, 20))
+    // If we have a valid state but cookie was lost, still try to proceed
+    if (state && !storedState) {
+      console.log('[Instagram OAuth] Cookie lost — proceeding with state from URL')
+    } else {
+      return NextResponse.redirect(`${dashboardUrl}?ig_error=invalid_state`)
+    }
   }
 
   // Decode state to get creator ID

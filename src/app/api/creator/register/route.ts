@@ -170,36 +170,10 @@ export async function POST(request: NextRequest) {
       return { user, creatorProfile }
     })
 
-    // 4. Trigger NextAuth magic link directly - ONE email, ONE click to sign in
-    const baseUrl = process.env.NEXTAUTH_URL || 'https://creatorstays.com'
-    
-    try {
-      // Use NextAuth's built-in email provider to send a magic link
-      // This creates a proper verification token and sends a sign-in email
-      const csrfRes = await fetch(`${baseUrl}/api/auth/csrf`)
-      const { csrfToken } = await csrfRes.json()
-      
-      const signInRes = await fetch(`${baseUrl}/api/auth/signin/email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          email: normalizedEmail,
-          csrfToken,
-          callbackUrl: `${baseUrl}/onboarding/creator`,
-        }),
-      })
-      
-      if (!signInRes.ok) {
-        console.error('[Creator Register] Failed to trigger magic link:', await signInRes.text())
-      }
-    } catch (emailError) {
-      console.error('[Creator Register] Failed to send magic link:', emailError)
-      // Don't fail the registration if email fails
-    }
-
     return NextResponse.json({
       success: true,
       message: 'Account created! Check your email to sign in.',
+      sendMagicLink: true,
       user: {
         id: result.user.id,
         email: result.user.email,

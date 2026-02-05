@@ -120,7 +120,17 @@ export default function CreatorSignupClient() {
         return
       }
 
-      // Success - show confirmation
+      // Account created — now trigger magic link from the client
+      // This uses NextAuth's email provider which works reliably client-side
+      if (data.sendMagicLink) {
+        await signIn("email", {
+          email: form.email,
+          redirect: false,
+          callbackUrl: "/onboarding/creator",
+        })
+      }
+
+      // Show confirmation
       setSubmittedEmail(form.email)
       setSubmitted(true)
 
