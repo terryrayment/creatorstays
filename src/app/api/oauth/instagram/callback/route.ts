@@ -19,9 +19,10 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const code = searchParams.get('code')
-  // Instagram's link shim (l.instagram.com) can append #_ and tracking params to the state
-  // Clean it by stripping everything after the base64url characters
+  // Instagram's link shim (l.instagram.com) can append #_ and tracking params
+  // Clean by stripping everything after valid characters
+  const rawCode = searchParams.get('code')
+  const code = rawCode?.split('#')[0] || null  // Remove anything after # 
   const rawState = searchParams.get('state')
   const state = rawState?.replace(/[^a-zA-Z0-9_-]/g, '') || null
   const error = searchParams.get('error')
@@ -29,6 +30,14 @@ export async function GET(request: NextRequest) {
 
   const baseUrl = process.env.NEXTAUTH_URL || 'https://creatorstays.com'
   const dashboardUrl = `${baseUrl}/beta/dashboard/creator`
+
+  console.log('[Instagram OAuth] Callback received:', {
+    rawCode: rawCode?.substring(0, 30) + '...',
+    code: code?.substring(0, 30) + '...',
+    rawState: rawState?.substring(0, 30) + '...',
+    state: state?.substring(0, 30) + '...',
+    redirectUri: process.env.INSTAGRAM_REDIRECT_URI,
+  })
 
   // Handle user denial
   if (error) {
