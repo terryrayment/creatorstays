@@ -266,26 +266,31 @@ export default function CreatorOnboardingPage() {
     setCheckingHandle(false)
   }
 
+  const showError = (message: string) => {
+    setError(message)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const validateStep = (): boolean => {
     if (step === 1) {
       if (!data.displayName.trim()) {
-        setError("Please enter your display name")
+        showError("Please enter your display name")
         return false
       }
       if (!data.handle.trim() || data.handle.length < 3) {
-        setError("Please enter a handle (at least 3 characters)")
+        showError("Please enter a handle (at least 3 characters)")
         return false
       }
       if (handleAvailable === false) {
-        setError("This handle is already taken")
+        showError("This handle is already taken")
         return false
       }
       if (!data.bio.trim()) {
-        setError("Please write a short bio")
+        showError("Please write a short bio")
         return false
       }
       if (!data.location.trim()) {
-        setError("Please enter your location")
+        showError("Please enter your location")
         return false
       }
     }
@@ -294,14 +299,14 @@ export default function CreatorOnboardingPage() {
       // Instagram connection is optional until Meta app is approved
       // At minimum, require niche selection
       if (!data.niches.length) {
-        setError("Please select at least one niche")
+        showError("Please select at least one niche")
         return false
       }
     }
     
     if (step === 3) {
       if (!data.deliverables.length) {
-        setError("Please select at least one deliverable")
+        showError("Please select at least one deliverable")
         return false
       }
     }
