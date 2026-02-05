@@ -280,6 +280,14 @@ export default function CreatorOnboardingPage() {
         setError("This handle is already taken")
         return false
       }
+      if (!data.bio.trim()) {
+        setError("Please write a short bio")
+        return false
+      }
+      if (!data.location.trim()) {
+        setError("Please enter your location")
+        return false
+      }
     }
     
     if (step === 2) {
@@ -411,7 +419,7 @@ export default function CreatorOnboardingPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Display Name</label>
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Display Name <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={data.displayName}
@@ -422,7 +430,7 @@ export default function CreatorOnboardingPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Handle</label>
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Handle <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-black">@</span>
                   <input
@@ -447,7 +455,7 @@ export default function CreatorOnboardingPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Bio</label>
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Bio <span className="text-red-500">*</span></label>
                 <textarea
                   value={data.bio}
                   onChange={e => updateField("bio", e.target.value)}
@@ -458,7 +466,7 @@ export default function CreatorOnboardingPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Location</label>
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-black">Location <span className="text-red-500">*</span></label>
                 <LocationAutocomplete
                   value={data.location}
                   onChange={(val) => updateField("location", val)}
