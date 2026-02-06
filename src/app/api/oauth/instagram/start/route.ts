@@ -39,10 +39,11 @@ export async function GET(request: NextRequest) {
 
     // Check env vars
     const appId = process.env.INSTAGRAM_APP_ID
-    const redirectUri = process.env.INSTAGRAM_REDIRECT_URI
+    // HARDCODE redirect URI to prevent any env var mismatch issues
+    const redirectUri = 'https://www.creatorstays.com/api/oauth/instagram/callback'
 
-    if (!appId || !redirectUri) {
-      console.error('[Instagram OAuth] Missing env vars: INSTAGRAM_APP_ID or INSTAGRAM_REDIRECT_URI')
+    if (!appId) {
+      console.error('[Instagram OAuth] Missing env var: INSTAGRAM_APP_ID')
       return NextResponse.redirect(new URL('/beta/dashboard/creator?ig_error=not_configured', request.url))
     }
 
@@ -53,8 +54,15 @@ export async function GET(request: NextRequest) {
       nonce: Math.random().toString(36).substring(7),
     })).toString('base64url')
 
+    const authUrl = buildInstagramAuthUrl(appId, redirectUri, state)
+    console.log('[Instagram OAuth] Starting flow with:', {
+      appId,
+      redirectUri,
+      authUrl: authUrl.substring(0, 150) + '...',
+    })
+
     // Store state in cookie
-    const response = NextResponse.redirect(buildInstagramAuthUrl(appId, redirectUri, state))
+    const response = NextResponse.redirect(authUrl)
     response.cookies.set('ig_oauth_state', state, {
       httpOnly: true,
       secure: true,

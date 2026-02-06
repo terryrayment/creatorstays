@@ -87,9 +87,10 @@ export async function GET(request: NextRequest) {
   // Check env vars
   const appId = process.env.INSTAGRAM_APP_ID
   const appSecret = process.env.INSTAGRAM_APP_SECRET
-  const redirectUri = process.env.INSTAGRAM_REDIRECT_URI
+  // HARDCODE redirect URI to prevent any env var mismatch issues
+  const redirectUri = 'https://www.creatorstays.com/api/oauth/instagram/callback'
 
-  if (!appId || !appSecret || !redirectUri) {
+  if (!appId || !appSecret) {
     console.error('[Instagram OAuth] Missing env vars')
     return NextResponse.redirect(`${dashboardUrl}?ig_error=not_configured`)
   }
